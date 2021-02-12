@@ -20,7 +20,7 @@ jobs:
         poetry install
     - name: pytest
       run: |
-        pytest \
+        poetry run pytest \
             --cov-report="html:htmlcov-${{ matrix.os }}-${{ matrix.python-version }}/" \
             --html="report-${{ matrix.os }}-${{ matrix.python-version }}.html" \
             --self-contained-html
