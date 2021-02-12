@@ -28,7 +28,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}
-        path:
-        - test-report-${{ matrix.os }}-${{ matrix.python-version }}.html
-        - coverage-report-${{ matrix.os }}-${{ matrix.python-version }}/*
+        path: |
+          test-report-${{ matrix.os }}-${{ matrix.python-version }}.html
+          coverage-report-${{ matrix.os }}-${{ matrix.python-version }}/*
       if: ${{ always() }}
