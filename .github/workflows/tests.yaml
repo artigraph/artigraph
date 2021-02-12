@@ -21,14 +21,14 @@ jobs:
     - name: pytest
       run: |
         poetry run pytest \
-            --cov-report="html:htmlcov-${{ matrix.os }}-${{ matrix.python-version }}/" \
-            --html="report-${{ matrix.os }}-${{ matrix.python-version }}.html" \
+            --cov-report="html:coverage-report-${{ matrix.os }}-${{ matrix.python-version }}/" \
+            --html="test-report-${{ matrix.os }}-${{ matrix.python-version }}.html" \
             --self-contained-html
     - name: Upload test and coverage results
       uses: actions/upload-artifact@v2
       with:
         name: pytest-results-${{ matrix.os }}-${{ matrix.python-version }}
         path: |
-          test-report-${{ matrix.os }}-${{ matrix.python-version }}.html
           coverage-report-${{ matrix.os }}-${{ matrix.python-version }}/*
+          test-report-${{ matrix.os }}-${{ matrix.python-version }}.html
       if: ${{ always() }}
