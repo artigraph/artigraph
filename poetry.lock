@@ -360,6 +360,18 @@ flake8 = ">=3.5"
 pytest = ">=3.5"
 
 [[package]]
+name = "pytest-html"
+version = "3.1.1"
+description = "pytest plugin for generating HTML reports"
+category = "dev"
+optional = false
+python-versions = ">=3.6"
+
+[package.dependencies]
+pytest = ">=5.0,<6.0.0 || >6.0.0"
+pytest-metadata = "*"
+
+[[package]]
 name = "pytest-isort"
 version = "1.3.0"
 description = "py.test plugin to check import ordering using isort"
@@ -372,6 +384,17 @@ isort = ">=4.0"
 
 [package.extras]
 tests = ["mock"]
+
+[[package]]
+name = "pytest-metadata"
+version = "1.11.0"
+description = "pytest plugin for test session metadata"
+category = "dev"
+optional = false
+python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*, !=3.4.*, !=3.5.*"
+
+[package.dependencies]
+pytest = ">=2.9.0"
 
 [[package]]
 name = "pytest-mypy"
@@ -510,7 +533,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "41ec39f21faf5858ef5575d7447de642d7b9e877c13be3108280c2306c435204"
+content-hash = "43c9ec1f841401b20e2acf3719080a403741570186c4fc568f871668f82e5d9a"
 
 [metadata.files]
 appdirs = [
@@ -710,9 +733,17 @@ pytest-flake8 = [
     {file = "pytest-flake8-1.0.7.tar.gz", hash = "sha256:f0259761a903563f33d6f099914afef339c085085e643bee8343eb323b32dd6b"},
     {file = "pytest_flake8-1.0.7-py2.py3-none-any.whl", hash = "sha256:c28cf23e7d359753c896745fd4ba859495d02e16c84bac36caa8b1eec58f5bc1"},
 ]
+pytest-html = [
+    {file = "pytest-html-3.1.1.tar.gz", hash = "sha256:3ee1cf319c913d19fe53aeb0bc400e7b0bc2dbeb477553733db1dad12eb75ee3"},
+    {file = "pytest_html-3.1.1-py3-none-any.whl", hash = "sha256:b7f82f123936a3f4d2950bc993c2c1ca09ce262c9ae12f9ac763a2401380b455"},
+]
 pytest-isort = [
     {file = "pytest-isort-1.3.0.tar.gz", hash = "sha256:46a12331a701e2f21d48548b2828c8b0a7956dbf1cd5347163f537deb24332dd"},
     {file = "pytest_isort-1.3.0-py3-none-any.whl", hash = "sha256:074255ad393088a2daee6ca7f2305b7b86358ff632f62302896d8d4b2b339107"},
+]
+pytest-metadata = [
+    {file = "pytest-metadata-1.11.0.tar.gz", hash = "sha256:71b506d49d34e539cc3cfdb7ce2c5f072bea5c953320002c95968e0238f8ecf1"},
+    {file = "pytest_metadata-1.11.0-py2.py3-none-any.whl", hash = "sha256:576055b8336dd4a9006dd2a47615f76f2f8c30ab12b1b1c039d99e834583523f"},
 ]
 pytest-mypy = [
     {file = "pytest-mypy-0.8.0.tar.gz", hash = "sha256:63d418a4fea7d598ac40b659723c00804d16a251d90a5cfbca213eeba5aaf01c"},
