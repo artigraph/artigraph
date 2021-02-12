@@ -46,7 +46,7 @@ pytest-sugar = "0.9.4"
 
 
 [tool.pytest.ini_options]
-addopts = "--black --flake8 --isort --mypy"
+addopts = "--black --cov=arti --cov-fail-under=100 --flake8 --isort --mypy"
 filterwarnings = ["error",]
 testpaths = [
     "src/",
