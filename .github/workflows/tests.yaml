@@ -20,10 +20,7 @@ jobs:
         poetry install
     - name: pytest
       run: |
-        poetry run pytest \
-            --cov-report="html:coverage-report-${{ matrix.os }}-${{ matrix.python-version }}/" \
-            --html="test-report-${{ matrix.os }}-${{ matrix.python-version }}.html" \
-            --self-contained-html
+        poetry run pytest --cov-report="html:coverage-report-${{ matrix.os }}-${{ matrix.python-version }}/" --html="test-report-${{ matrix.os }}-${{ matrix.python-version }}.html" --self-contained-html
     - name: Upload test and coverage results
       uses: actions/upload-artifact@v2
       with:
