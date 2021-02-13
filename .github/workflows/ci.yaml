@@ -38,7 +38,7 @@ jobs:
         poetry run pytest --cov-report="xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml"
     - uses: codecov/codecov-action@v1
       env:
-        CODECOV_TOKEN: ${{ secrets.SuperSecret }}
+        CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
         env_vars: OS,PYTHON_VERSION
         fail_ci_if_error: true
