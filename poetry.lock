@@ -433,7 +433,6 @@ description = "Advanced Python dictionaries with dot notation access"
 category = "main"
 optional = false
 python-versions = ">=3.6"
-develop = false
 
 [package.extras]
 pyyaml = ["pyyaml"]
@@ -441,12 +440,6 @@ all = ["ruamel.yaml", "toml", "msgpack"]
 msgpack = ["msgpack"]
 "ruamel.yaml" = ["ruamel.yaml"]
 toml = ["toml"]
-
-[package.source]
-type = "git"
-url = "https://github.com/cdgriffith/Box"
-reference = "6714ab656033282b10e67409367ca0abf6b897d4"
-resolved_reference = "6714ab656033282b10e67409367ca0abf6b897d4"
 
 [[package]]
 name = "pyyaml"
@@ -533,7 +526,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "43c9ec1f841401b20e2acf3719080a403741570186c4fc568f871668f82e5d9a"
+content-hash = "2e5f142f15d31810d9dda855d544750924126a99920683cedcac8dffbcd42b09"
 
 [metadata.files]
 appdirs = [
@@ -752,7 +745,10 @@ pytest-mypy = [
 pytest-sugar = [
     {file = "pytest-sugar-0.9.4.tar.gz", hash = "sha256:b1b2186b0a72aada6859bea2a5764145e3aaa2c1cfbb23c3a19b5f7b697563d3"},
 ]
-python-box = []
+python-box = [
+    {file = "python-box-5.3.0.tar.gz", hash = "sha256:4ed4ef5d34de505a65c01e3f1911de8cdb29484fcae0c035141dce535c6c194a"},
+    {file = "python_box-5.3.0-py3-none-any.whl", hash = "sha256:f2a531f9f5bbef078c175fad6abb31e9b59d40d121ea79993197e6bb221c6be6"},
+]
 pyyaml = [
     {file = "PyYAML-5.4.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:3b2b1824fe7112845700f815ff6a489360226a5609b96ec2190a45e62a9fc922"},
     {file = "PyYAML-5.4.1-cp27-cp27m-win32.whl", hash = "sha256:129def1b7c1bf22faffd67b8f3724645203b79d8f4cc81f674654d9902cb4393"},
