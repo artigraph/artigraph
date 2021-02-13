@@ -1,0 +1,20 @@
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.4.0
+    hooks:
+      - id: check-merge-conflict
+      - id: debug-statements
+      - id: end-of-file-fixer
+      - id: no-commit-to-branch
+        args: [--branch, golden]
+      - id: pretty-format-json
+        args: [--autofix]
+      - id: trailing-whitespace
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: /usr/bin/env pytest # If tests become too slow, mark slow ones and omit
+        language: script
+        pass_filenames: false
+        types: [python]
