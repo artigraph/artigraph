@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from collections.abc import Iterable
+from itertools import chain
 from typing import TYPE_CHECKING, Any, Optional
 
 from arti.formats.core import Format
@@ -52,6 +54,7 @@ class BaseArtifact:
         super().__init_subclass__()
 
     def __init__(self) -> None:
+        # TODO: Allow storage/format override and re-validate them.
         self.producer: Optional[Producer] = None
         self.consumers: set[Producer] = set()
         super().__init__()
@@ -70,8 +73,8 @@ class Artifact(BaseArtifact, Pointer):
         over time).
     """
 
-    annotations: Optional[tuple[Annotation, ...]] = ()
-    statistics: Optional[tuple[Statistic, ...]] = ()
+    annotations: tuple[Annotation, ...] = ()
+    statistics: tuple[Statistic, ...] = ()
 
     # Artifacts are collections by default (think database tables, etc), but may be overridden.
     is_scalar = False
@@ -103,3 +106,11 @@ class Artifact(BaseArtifact, Pointer):
         # TODO: Leverage a TypeSystem("python") to cast to per-type Artifact classes with "backend
         # native" storage.
         raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
+
+    def __init__(
+        self, *, annotations: Iterable[Annotation] = (), statistics: Iterable[Statistic] = (),
+    ) -> None:
+        # Add the instance metadata to the class default.
+        self.annotations = tuple(chain(self.annotations, annotations))
+        self.statistics = tuple(chain(self.statistics, statistics))
+        super().__init__()
