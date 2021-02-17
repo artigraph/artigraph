@@ -1,9 +1,17 @@
 from arti.artifacts.core import Artifact
+from arti.formats.core import Format
 from arti.producers.core import Producer
+from arti.types.core import Int32, Struct, TypeSystem
+
+dummy_type_system = TypeSystem("dummy")
+
+
+class TestFormat(Format):
+    type_system = dummy_type_system
 
 
 class A1(Artifact):
-    pass
+    schema = Struct({"x": Int32()})
 
 
 class A2(Artifact):
