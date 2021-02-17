@@ -115,6 +115,12 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             def build(self, input_artifact: A1) -> None:  # type: ignore
                 pass
 
+    with pytest.raises(ValueError, match="return value must be an Artifact"):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            def build(self, input_artifact: A1) -> None:
+                pass
+
     with pytest.raises(ValueError, match="A return value must be set"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
