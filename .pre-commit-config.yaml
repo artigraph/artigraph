@@ -14,7 +14,9 @@ repos:
     hooks:
       - id: pytest
         name: pytest
-        entry: /usr/bin/env pytest # If tests become too slow, mark slow ones and omit
+        # If tests become too slow, mark slow ones and omit. We'll add a little coverage buffer for working commits,
+        # though CI/PRs will still enforce 100%.
+        entry: /usr/bin/env pytest --cov-fail-under=90
         language: script
         pass_filenames: false
         types: [python]
