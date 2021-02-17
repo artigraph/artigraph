@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import pickle
+from copy import copy, deepcopy
 from typing import Optional, no_type_check
 
 import pytest
@@ -52,6 +54,22 @@ def test_Pointer() -> None:
     # Ensure __wrapped__ can Coord.cast other values
     coord.__wrapped__ = (15, 15)  # Uses Coord.cast
     check_proxy(coord, (15, 15))
+
+
+def test_TypedProxy_magics() -> None:
+    coord = BaseCoord(x=5, y=5)
+    proxy = BaseCoordProxy(coord)
+    copy_proxy, deep_proxy, pickle_proxy = (
+        copy(proxy),
+        deepcopy(proxy),
+        pickle.loads(pickle.dumps(proxy)),
+    )
+    for proxy2 in (copy_proxy, deep_proxy, pickle_proxy):
+        assert id(proxy) != id(proxy2)
+        assert id(proxy.__wrapped__) != id(proxy2.__wrapped__)
+        assert proxy.x == proxy2.x
+        assert proxy.y == proxy2.y
+    assert repr(proxy) == f"BaseCoordProxy({coord})"
 
 
 def test_Pointer_no_cast() -> None:
