@@ -86,7 +86,7 @@ class Artifact(BaseArtifact, Pointer):
             return value
         if isinstance(value, Producer):
             n_outputs = len(value.output_artifacts)
-            if n_outputs == 0:
+            if n_outputs == 0:  # pragma: no cover
                 # NOTE: These shouldn't exist yet, but might be useful for "side effect only" sorts
                 # of things - we might return a randomized checkpoint artifact instead of error
                 # here. Or, the Producer might want to determine how to handle it (run once vs run

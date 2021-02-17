@@ -33,7 +33,7 @@ def test_Producer_mutations() -> None:
 
 
 @no_type_check
-def test_Producer_bad_signature() -> None:
+def test_Producer_bad_signature() -> None:  # noqa: C901
     # pylint: disable=function-redefined
 
     with pytest.raises(ValueError, match="Producers must implement"):
@@ -75,6 +75,12 @@ def test_Producer_bad_signature() -> None:
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             def build(self, **kwargs: A1):
+                pass
+
+    with pytest.raises(ValueError, match="return value must be an Artifact"):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            def build(self, input_artifact: A1) -> None:
                 pass
 
     with pytest.raises(ValueError, match="A return value must be set"):
