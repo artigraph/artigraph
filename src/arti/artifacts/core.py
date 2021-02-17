@@ -103,11 +103,3 @@ class Artifact(BaseArtifact, Pointer):
         # TODO: Leverage a TypeSystem("python") to cast to per-type Artifact classes with "backend
         # native" storage.
         raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
-
-    def with_annotations(self, *args: Annotation) -> Artifact:
-        self.annotations = (self.annotations or ()) + args
-        return self
-
-    def with_statistics(self, *args: Statistic) -> Artifact:
-        self.statistics = (self.statistics or ()) + args
-        return self
