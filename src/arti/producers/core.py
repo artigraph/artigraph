@@ -24,10 +24,14 @@ class Producer:
     build: Callable[..., Any]
     map: Callable[..., Any]
 
-    def build(self, **kwargs: Artifact) -> tuple[Artifact, ...]:  # type: ignore # pylint: disable=function-redefined,no-self-use
-        raise NotImplementedError("Producer subclasses must implement the `.build()` method.")
+    # pylint: disable=function-redefined,no-self-use
+    def build(self, **kwargs: Artifact) -> tuple[Artifact, ...]:  # type: ignore # pragma: no cover
+        raise NotImplementedError(
+            f"{type(self).__name__} - Producers must implement the `build` method."
+        )
 
-    def map(self, **kwargs: Artifact) -> Any:  # type: ignore # pylint: disable=function-redefined,no-self-use
+    # pylint: disable=function-redefined,no-self-use
+    def map(self, **kwargs: Artifact) -> Any:  # type: ignore
         """ Map dependencies between input and output Artifact partitions.
 
             If there are multiple output Artifacts, they must have equivalent
@@ -110,9 +114,11 @@ class Producer:
             )
         if not map_is_overridden:
             pass  # TODO: Error if the output is partitioned
-        # TODO: Verify map output hint matches TBD spec
+        pass  # TODO: Verify map output hint matches TBD spec
 
     def __init__(self, **kwargs: Artifact) -> None:
+        if type(self) is Producer:
+            raise ValueError("Producer cannot be instantiated directly!")
         (self.input_artifacts,) = self._validate_build_args(**kwargs)
         self.output_artifacts = tuple(artifact() for artifact in self.signature.return_annotation)
         super().__init__()

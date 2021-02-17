@@ -1,17 +1,34 @@
+from arti.annotations.core import Annotation
 from arti.artifacts.core import Artifact
 from arti.formats.core import Format
 from arti.producers.core import Producer
+from arti.statistics.core import Statistic
+from arti.storage.core import Storage
 from arti.types.core import Int32, Struct, TypeSystem
 
 dummy_type_system = TypeSystem("dummy")
 
 
-class TestFormat(Format):
+class DummyAnnotation(Annotation):
+    pass
+
+
+class DummyFormat(Format):
     type_system = dummy_type_system
+
+
+class DummyStatistic(Statistic):
+    pass
+
+
+class DummyStorage(Storage):
+    pass
 
 
 class A1(Artifact):
     schema = Struct({"x": Int32()})
+    format = DummyFormat()
+    storage = DummyStorage()
 
 
 class A2(Artifact):

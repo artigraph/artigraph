@@ -8,5 +8,6 @@ class Annotation(BaseArtifact):
     """
 
     # TODO: Set format/storage to some "system default" that can be used across backends.
+    # TODO: Have __init__ accept something matching the defined schema by default?
 
     is_scalar = True

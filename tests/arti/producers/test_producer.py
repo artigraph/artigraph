@@ -1,13 +1,16 @@
-from typing import no_type_check
+from typing import Any, no_type_check
 
 import pytest
 
 from arti.producers.core import Producer
-from tests.arti.dummies import A1, A2, A3
+from tests.arti.dummies import A1, A2, A3, P1
 
 
 class DummyProducer(Producer):
     def build(self, input_artifact: A1) -> tuple[A2, A3]:
+        pass
+
+    def map(self, input_artifact: A1) -> Any:
         pass
 
 
@@ -15,17 +18,32 @@ def test_Producer() -> None:
     # Imitate a ref to avoid "use outside graph" error
     input_artifact = A1()
     producer = DummyProducer(input_artifact=input_artifact)
-    assert producer._input_artifacts["input_artifact"] is input_artifact
+    assert producer.input_artifacts["input_artifact"] is input_artifact
+    assert producer.input_artifacts["input_artifact"] is input_artifact
     assert len(list(producer)) == 2
     expected_output_classes = [A2, A3]
     for i, output in enumerate(producer):
         assert isinstance(output, expected_output_classes[i])
 
 
+@pytest.mark.xfail(raises=ValueError)
+def test_Producer_map_defaults() -> None:
+    p1 = P1(input_artifact=A1())
+    # We can make .map defaulting a bit smarter by inspecting how the input artifacts are
+    # partitioned (or not).
+    p1.map()  # ValueError
+
+
 def test_Producer_mutations() -> None:
     input_artifact = A1()
     producer = DummyProducer(input_artifact=input_artifact)
     assert producer in input_artifact.consumers
+
+    input2_artifact = A1()
+    producer.input_artifacts = {"input_artifact": input2_artifact}
+    assert producer not in input_artifact.consumers
+    assert producer in input2_artifact.consumers
+
     o1, o2 = A2(), A3()
     producer.to(o1, o2)
     assert o1.producer is producer
@@ -101,8 +119,19 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             def build(self, input_artifact: A1) -> tuple[A2, str]:
                 pass
 
+    with pytest.raises(ValueError, match="The parameters to `map` .* must match `build`"):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            def build(self, input_artifact: A1) -> A2:
+                pass
+
+            def map(self, input_artifact: A2) -> Any:
+                pass
+
 
 def test_Producer_bad_kwargs() -> None:
+    with pytest.raises(ValueError, match="Producer cannot be instantiated directly!"):
+        Producer()
     with pytest.raises(ValueError, match="Unknown argument"):
         DummyProducer(junk=5)  # type: ignore
     with pytest.raises(ValueError, match="Missing argument"):

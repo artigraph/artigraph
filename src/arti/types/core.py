@@ -8,6 +8,10 @@ class Type:
     """
 
     def __init__(self, *, desc: Optional[str] = None) -> None:
+        if type(self) is Type:
+            raise ValueError(
+                "Type cannot be instantiated directly, please use the appropriate subclass!"
+            )
         self.desc = desc
 
 
