@@ -49,7 +49,7 @@ black = "19.10b0" # 20.8b1 has some instability/requires 2 passes
 coverage = {version = "^5.4", extras = ["toml"]} # pyproject.toml support
 flake8 = "3.8.4"
 isort = "5.7.0"
-mypy = "0.800"
+mypy = "0.812"
 pre-commit = "2.10.1"
 pylint = "^2.6.0"
 pytest = "6.2.2"
