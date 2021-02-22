@@ -10,8 +10,8 @@ def test_Type() -> None:
     class MyType(Type):
         pass
 
-    my_type = MyType(desc="Hi")
-    assert my_type.desc == "Hi"
+    my_type = MyType(description="Hi")
+    assert my_type.description == "Hi"
 
 
 def test_Struct() -> None:

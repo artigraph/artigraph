@@ -7,21 +7,21 @@ class Type:
     """ Type represents a data type.
     """
 
-    def __init__(self, *, desc: Optional[str] = None) -> None:
+    def __init__(self, *, description: Optional[str] = None) -> None:
         if type(self) is Type:
             raise ValueError(
                 "Type cannot be instantiated directly, please use the appropriate subclass!"
             )
-        self.desc = desc
+        self.description = description
 
 
 # TODO: Expand the core types (and/or describe how to customize).
 
 
 class Struct(Type):
-    def __init__(self, fields: dict[str, Type], *, desc: Optional[str] = None) -> None:
+    def __init__(self, fields: dict[str, Type], *, description: Optional[str] = None) -> None:
         self.fields = fields
-        super().__init__(desc=desc)
+        super().__init__(description=description)
 
 
 class Null(Type):
@@ -76,10 +76,10 @@ class Timestamp(Type):
         self,
         precision: Union[Literal["second"], Literal["millisecond"]],
         *,
-        desc: Optional[str] = None,
+        description: Optional[str] = None,
     ) -> None:
         self.precision = precision
-        super().__init__(desc=desc)
+        super().__init__(description=description)
 
 
 # TODO: Fiddle - code runs, but mypy doesn't like `TypeSystem(...).Adapter`:
