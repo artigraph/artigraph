@@ -37,8 +37,9 @@ K = TypeVar("K", bound=str)
 V = TypeVar("V")
 
 
-def register(registry: dict[K, V], key: K, value: V) -> None:
+def register(registry: dict[K, V], key: K, value: V) -> V:
     if key in registry:
         existing = registry[key]
         raise ValueError(f"{key} is already registered with: {existing}!")
     registry[key] = value
+    return value

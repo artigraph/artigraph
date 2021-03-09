@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from typing import Literal, Optional, Union
+from typing import Any, ClassVar, Literal, Optional, Union
+
+from arti.internal.utils import class_name, register
 
 
 class Type:
@@ -82,79 +84,34 @@ class Timestamp(Type):
         super().__init__(description=description)
 
 
-# TODO: Fiddle - code runs, but mypy doesn't like `TypeSystem(...).Adapter`:
-#     python = TypeSystem("python")
-#
-#
-#     class Int64(python.Adapter):  # Name 'python.Adapter' is not defined
-#         system = python
-#         internal = core.Int64
-#         external = int
-#
-# class _TypeAdapter:
-#     """ _TypeAdapter maps between Artigraph types and a foreign type system.
-#     """
-#
-#     external: ClassVar[Optional[Any]] = None  # If available, the external type.
-#     internal: ClassVar[type[Type]]  # Mark which Artigraph Type this maps to.
-#     priority: ClassVar[int] = 0  # Set the priority of this mapping. Higher is better.
-#
-#     key: ClassVar[str] = class_name()
-#
-#     def to_external(self, type_: Type) -> Any:
-#         raise NotImplementedError()
-#
-#     def to_internal(self, type_: Any) -> Type:
-#         raise NotImplementedError()
-#
-#     # Internal machinery - the TypeSystem will register when initialized.
-#
-#     system: ClassVar[TypeSystem]
-#     __skip_subclass_registration__ = True
-#
-#     @classmethod
-#     def __init_subclass__(cls, **kwargs) -> None:
-#         if cls.__skip_subclass_registration__:
-#             cls.__skip_subclass_registration__ = False
-#         else:
-#             register(cls.system.adapter_by_key, cls.key, cls)
-#         super().__init_subclass__()
-#
-#
-# class TypeSystem:
-#     def __init__(self, key: str) -> None:
-#         self.key = key
-#         self.adapter_by_key: dict[str, type[_TypeAdapter]] = {}
-#         self._Adapter: type[_TypeAdapter] = type(
-#             f"{key.title()}Adapter", (_TypeAdapter,), {"system": self},
-#         )
-#         super().__init__()
-#
-#     @property
-#     def Adaptor(self) -> _TypeAdapter:  # type: ignore
-#         return cast(_TypeAdapter, self._Adapter)
-#
-#     @property
-#     def sorted_adapters(self) -> Iterator[type[_TypeAdapter]]:
-#         return reversed(sorted(self.adapter_by_key.values(), key=attrgetter("priority")))
-#
-#     @property
-#     def adapter_by_internal_priority(self) -> Iterator[tuple[str, Iterator[type[_TypeAdapter]]]]:
-#         return groupby(self.sorted_adapters, key=attrgetter("internal"))
-#
-#     @property
-#     def adapter_by_external_priority(self) -> Iterator[tuple[str, Iterator[type[_TypeAdapter]]]]:
-#         return groupby(self.sorted_adapters, key=attrgetter("external"))
-#
-#     # TODO: Implement using registered types+priority (sort by priority, take first isinstance).
-#
-#     def from_core(self, type_: Type) -> Any:
-#         ...
-#
-#     def to_core(self, type_: Any) -> Type:
-#         ...
+class TypeAdapter:
+    """ TypeAdapter maps between Artigraph types and a foreign type system.
+    """
+
+    external: ClassVar[Optional[Any]] = None  # If available, the external type.
+    internal: ClassVar[type[Type]]  # Mark which Artigraph Type this maps to.
+    priority: ClassVar[int] = 0  # Set the priority of this mapping. Higher is better.
+
+    key: ClassVar[str] = class_name()
+
+    def to_external(self, type_: Type) -> Any:
+        raise NotImplementedError()
+
+    def to_internal(self, type_: Any) -> Type:
+        raise NotImplementedError()
 
 
 class TypeSystem:
     def __init__(self, key: str) -> None:
         self.key = key
+        self.adapter_by_key: dict[str, type[TypeAdapter]] = {}
+        super().__init__()
+
+    def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
+        return register(self.adapter_by_key, adapter.key, adapter)
+
+    def from_core(self, type_: Type) -> Any:
+        raise NotImplementedError()
+
+    def to_core(self, type_: Any) -> Type:
+        raise NotImplementedError()

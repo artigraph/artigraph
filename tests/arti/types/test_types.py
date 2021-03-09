@@ -1,6 +1,6 @@
 import pytest
 
-from arti.types.core import Int32, Struct, Timestamp, Type, TypeSystem
+from arti.types.core import Int32, Struct, Timestamp, Type, TypeAdapter, TypeSystem
 
 
 def test_Type() -> None:
@@ -25,4 +25,12 @@ def test_Timestamp() -> None:
 
 
 def test_TypeSystem() -> None:
-    assert TypeSystem("tests").key == "tests"
+    python = TypeSystem("python")
+    assert python.key == "python"
+
+    @python.register_adapter
+    class PyInt32(TypeAdapter):
+        external = int
+        internal = Int32
+
+    assert PyInt32.key == "PyInt32"
