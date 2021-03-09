@@ -81,8 +81,17 @@ class Artifact(BaseArtifact, Pointer):
 
     @classmethod
     def cast(cls, value: Any) -> Artifact:
-        """ Attempt to convert any value to an appropriate Artifact instance.
+        """ Attempt to convert an arbitrary value to an appropriate Artifact instance.
+
+            `Artifact.cast` is used to convert values assigned to an `Artifact.box` (such as
+            `Graph.artifacts`) into an Artifact. When called with:
+            - an Artifact instance, it is returned
+            - a Producer instance with a single output Artifact, the output Artifact is returned
+            - a Producer instance with a multiple output Artifacts, an error is raised
+            - other types, an error is raised
         """
+        # TODO: Leverage a TypeSystem("python") to cast to Artifact classes with "backend native"
+        # storage to support builtin assignment and custom type registration.
         from arti.producers.core import Producer
 
         if isinstance(value, Artifact):
@@ -90,12 +99,7 @@ class Artifact(BaseArtifact, Pointer):
         if isinstance(value, Producer):
             n_outputs = len(value.output_artifacts)
             if n_outputs == 0:  # pragma: no cover
-                # NOTE: These shouldn't exist yet, but might be useful for "side effect only" sorts
-                # of things - we might return a randomized checkpoint artifact instead of error
-                # here. Or, the Producer might want to determine how to handle it (run once vs run
-                # many) and return an appropriate Artifact. Either way, the Producer must be
-                # assigned to the Graph rather than simply initialized (though we could check the
-                # graph for artifacts with downstream producers that are terminal).
+                # TODO: "side effect" Producers: https://github.com/replicahq/artigraph/issues/11
                 raise ValueError(f"{type(value).__name__} doesn't produce any Artifacts!")
             if n_outputs > 1:
                 raise ValueError(
@@ -103,8 +107,6 @@ class Artifact(BaseArtifact, Pointer):
                 )
             return value.output_artifacts[0]
 
-        # TODO: Leverage a TypeSystem("python") to cast to per-type Artifact classes with "backend
-        # native" storage.
         raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
 
     def __init__(

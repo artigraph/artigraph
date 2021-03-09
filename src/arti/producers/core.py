@@ -86,9 +86,7 @@ class Producer:
         # Validate the return definition
         return_annotation = cls.signature.return_annotation
         if return_annotation is cls.signature.empty:
-            # NOTE: Should we support Producers without outputs? Would they just run
-            # every build and be "side effect only"? Perhaps we could add an implicit
-            # checkpoint for run-once semantics.
+            # TODO: "side effect" Producers: https://github.com/replicahq/artigraph/issues/11
             raise ValueError(
                 f"{cls.__name__} - A return value must be set with the output Artifact(s)."
             )
