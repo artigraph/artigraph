@@ -10,9 +10,11 @@ target-version = ['py38']
 
 [tool.coverage.report]
 exclude_lines = [
-    "pragma: no cover",
-    "if TYPE_CHECKING:",
     "@overload",
+    "if TYPE_CHECKING:",
+    "pragma: no cover",
+    "raise NotImplemented",
+    "raise NotImplementedError",
 ]
 fail_under = 100
 skip_covered = true
