@@ -12,6 +12,19 @@ repos:
       - id: trailing-whitespace
   - repo: local
     hooks:
+      # Use local isort/black to match pyproject.toml version
+      - id: isort
+        name: isort
+        entry: /usr/bin/env isort
+        language: script
+        pass_filenames: true
+        types: [python]
+      - id: black
+        name: black
+        entry: /usr/bin/env black
+        language: script
+        pass_filenames: true
+        types: [python]
       - id: pytest
         name: pytest
         # If tests become too slow, mark slow ones and omit. We'll add a little coverage buffer for working commits,
