@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 
-import shutil
 from pathlib import Path
 
 import typer
-from sh import ErrorReturnCode_128, direnv, git
+from sh import ErrorReturnCode_128, bash, git  # pylint: disable=no-name-in-module
 
 REPO_ROOT = Path(git("rev-parse", "--show-toplevel").stdout.decode().strip())
 
@@ -15,19 +14,20 @@ app.add_typer(worktree)
 
 @worktree.command("add")
 def worktree_add(branch: str):
+    """ Add a new worktree with a separate direnv environment.
+    """
     try:
         git("show-ref", "--verify", f"refs/heads/{branch}")
     except ErrorReturnCode_128:
         typer.secho(f"Creating a new branch from origin/{branch}", fg="red")
         git.branch(branch, f"origin/{branch}")
+    branch_dir = Path(branch).absolute()
+    typer.secho(f"Creating {branch_dir}", fg="green")
     git.worktree.add(branch)
-    branch_dir = Path(branch)
     if (envrc_secrets := REPO_ROOT / ".envrc.secrets").exists():
         (branch_dir / ".envrc.secrets").symlink_to(envrc_secrets)
-    # Isolate venvs - slower but safer and prevents back and forth syncing
-    shutil.rmtree(branch_dir / ".direnv/")
-    shutil.copytree(REPO_ROOT / ".direnv", branch_dir / ".direnv/")
-    direnv.allow(branch)
+    typer.secho("Activating direnv", fg="green")
+    bash(".envrc", _cwd=branch_dir, _fg=True)
     typer.echo(f"Worktree '{branch}' created - clean up with: git worktree remove '{branch}'")
 
 
