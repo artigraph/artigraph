@@ -47,7 +47,7 @@ wrapt = "^1.12.1"
 [tool.poetry.dev-dependencies]
 black = "19.10b0" # 20.8b1 has some instability/requires 2 passes
 coverage = {version = "^5.5", extras = ["toml"]} # pyproject.toml support
-flake8 = "3.8.4"
+flake8 = "3.9.0"
 isort = "5.7.0"
 mypy = "0.812"
 pre-commit = "2.11.0"
