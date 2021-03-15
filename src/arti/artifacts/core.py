@@ -1,8 +1,11 @@
 from __future__ import annotations
 
 from collections.abc import Iterable
+from enum import Enum
 from itertools import chain
 from typing import TYPE_CHECKING, Any, Optional
+
+import farmhash
 
 from arti.formats.core import Format
 from arti.storage.core import Storage
@@ -12,6 +15,11 @@ if TYPE_CHECKING:
     from arti.annotations.core import Annotation
     from arti.producers.core import Producer
     from arti.statistics.core import Statistic
+
+
+class ArtifactType(Enum):
+    ARTIFACT = 1
+    STATISTIC = 2
 
 
 class BaseArtifact:
@@ -70,6 +78,8 @@ class Artifact(BaseArtifact):
     annotations: tuple[Annotation, ...] = ()
     statistics: tuple[Statistic, ...] = ()
 
+    partition_key: Optional[str] = ""  # fill out once Partition class created
+
     # Artifacts are collections by default (think database tables, etc), but may be overridden.
     is_scalar = False
 
@@ -108,10 +118,82 @@ class Artifact(BaseArtifact):
     def __init__(
         self,
         *,
+        key: Optional[str] = None,
+        fingerprint: Optional[str] = None,
+        schema: Optional[Type] = None,
+        format: Optional[Format] = None,
+        storage: Optional[Storage] = None,
+        path: Optional[str] = None,
         annotations: Iterable[Annotation] = (),
-        statistics: Iterable[Statistic] = (),
+        statistics: Iterable[
+            Statistic
+        ] = (),  # TODO: should statistics be automatically queried and instantiated when loading an artifact from db?
     ) -> None:
         # Add the instance metadata to the class default.
         self.annotations = tuple(chain(self.annotations, annotations))
-        self.statistics = tuple(chain(self.statistics, statistics))
         super().__init__()
+        self.key = key  # TODO: better way to set this
+        self.schema = schema
+        self.format = format
+        self.storage = storage
+        self.path = path
+        self._fingerprint = fingerprint  # TODO: should we re-calculate and verify match?
+
+    @property
+    def fingerprint(self) -> str:
+        if self._fingerprint is None:
+            self._fingerprint = self.compute_fingerprint()
+        return self._fingerprint
+
+    @fingerprint.setter
+    def fingerprint(self, x: str) -> None:
+        self._fingerprint = x
+
+    def compute_fingerprint(self) -> str:
+        # TODO
+        return ""
+
+    @property
+    def id(self) -> Any: # this should be a string but mypy can't find farmhash module
+        # TODO: can/should we cache this like the fingerprint?
+        # TODO: what to do if self.storage is null / doesn't have path?
+        
+        if not self.storage or not self.storage.path:
+            return farmhash.fingerprint64(self.fingerprint + str(self.partition_key))
+        # probably want to change this when storage/partition_key are fleshed out more
+        return farmhash.fingerprint64(
+            self.fingerprint + str(self.storage.path) + str(self.partition_key)
+        )
+
+    @classmethod
+    def from_dict(cls, artifact_dict: dict[str, Any]) -> Artifact:
+        def _instantiate_cls(klass: Any, key: str) -> Any:
+            return klass.from_dict(artifact_dict[key]) if key in artifact_dict else None
+
+        try:
+            return cls(
+                key=artifact_dict.get("key"),
+                fingerprint=artifact_dict.get("fingerprint"),
+                schema=_instantiate_cls(Type, "schema"),
+                format=_instantiate_cls(Format, "format"),
+                storage=_instantiate_cls(Storage, "storage"),
+                path=artifact_dict.get("path")
+                # TODO annotations, statistics??
+            )
+        except Exception as e:
+            raise ValueError(
+                f"Unable to instantiate an Artifact. Check the types and values of {artifact_dict}: {e}"
+            )
+
+    def to_dict(self) -> dict[str, Any]:
+        return {
+            "id": self.id,
+            "key": self.key,
+            "type": ArtifactType.ARTIFACT.value,
+            "fingerprint": str(self.fingerprint),
+            "schema": self.schema.to_dict() if self.schema else "", 
+            "format": self.format.to_dict() if self.format else "",
+            "storage": self.storage.to_dict() if self.storage else "",
+            "path": self.path,
+            "annotations": self.annotations,  # TODO: this needs to be json-ifiable
+        }
