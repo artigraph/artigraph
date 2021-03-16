@@ -1,0 +1,43 @@
+#!/usr/bin/env python3
+
+from pathlib import Path
+
+import typer
+from sh import ErrorReturnCode_128, bash, git  # pylint: disable=no-name-in-module
+
+REPO_ROOT = Path(git("rev-parse", "--show-toplevel").stdout.decode().strip())
+
+app = typer.Typer(name="dev")
+worktree = typer.Typer(name="worktree")
+app.add_typer(worktree)
+
+
+@worktree.command("add")
+def worktree_add(
+    branch: str, b: bool = typer.Option(False, "-b", help="Create a new branch from this branch")
+):
+    """ Add a new worktree with a separate direnv environment.
+    """
+    if b:
+        typer.secho(f"Creating `{branch}` branch...", fg="green")
+        git.branch(branch)
+    else:
+        try:
+            git("show-ref", "--verify", f"refs/heads/{branch}")
+        except ErrorReturnCode_128:
+            typer.secho(f"Creating `{branch}` branch from `origin/{branch}`...", fg="yellow")
+            git.branch(branch, f"origin/{branch}")
+    branch_dir = Path(branch).absolute()
+    typer.secho(f"Creating {branch_dir} worktree...", fg="green")
+    git.worktree.add(branch)
+    if (envrc_secrets := REPO_ROOT / ".envrc.secrets").exists():
+        (branch_dir / ".envrc.secrets").symlink_to(envrc_secrets)
+    typer.secho("Bootstrapping direnv...", fg="green")
+    bash(".envrc", _cwd=branch_dir, _fg=True)
+    typer.echo(
+        f"`{branch}` worktree created - when finished, clean up with: git worktree remove '{branch}'"
+    )
+
+
+if __name__ == "__main__":
+    app()
