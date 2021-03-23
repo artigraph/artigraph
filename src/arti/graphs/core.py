@@ -50,32 +50,6 @@ class Graph:
             "frozen_box": sealed,  # Unfreeze the box while building the graph
         }
         self.artifacts = Artifact.box(self.artifacts, **box_kwargs)
-        # TODO: Sketch out cross graph references and boundary/visibility semantics.
-        #
-        # if sealed:
-        #    self._artifact_index = self._compute_index(self.artifacts)
-        #    for artifact in self._artifact_index:
-        #        if artifact.graph is None or artifact.graph is self:
-        #            artifact.graph = self
-        #        elif artifact.graph is not self:
-        #            # Graphs default to public, but if any Artifacts are published, those define the
-        #            # boundary.
-        #            is_public = (
-        #                artifact.graph.public_artifacts
-        #                and artifact not in artifact.graph.public_artifacts
-        #            )
-        #            if not is_public:
-        #                raise ValueError(...)  # Error about internal artifact being referenced.
-        #            # TODO: Maybe add to a list of "read only" artifacts? Or perhaps the Executor's build
-        #            # logic just has to check that the Artifact's Graph is in one of the to-be-built
-        #            # Graphs?
-        #
-        # TODO: Do we need to ensure Producers don't get called with Artifacts directly from another
-        # graph so that we can validate publishing/visibility? ex:
-        #     with Graph("G1") as g1:
-        #         g1.artifacts.a = 5
-        #     with Graph("G2") as g2:
-        #         g2.artifacts.b = Producer(g1.artifacts.a) # We haven't check visiblity!
 
     def extend(self, name: str, *, backend: Optional[Backend] = None) -> Graph:
         """ Return an extend copy of self.

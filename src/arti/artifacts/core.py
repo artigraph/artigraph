@@ -11,7 +11,6 @@ from arti.types.core import Type
 
 if TYPE_CHECKING:
     from arti.annotations.core import Annotation
-    from arti.graphs.core import Graph
     from arti.producers.core import Producer
     from arti.statistics.core import Statistic
 
@@ -36,9 +35,6 @@ class BaseArtifact:
     schema: Optional[Type] = None
     format: Optional[Format] = None
     storage: Optional[Storage] = None
-
-    # Graph should not be set directly, but will be populated when added to one.
-    graph: Optional[Graph] = None
 
     # is_scalar denotes whether this Artifacts represents a *single* value of the specified schema
     # or a *collection*. Namely, even if the schema is a Struct(...), but there is only one, it will
