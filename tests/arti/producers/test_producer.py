@@ -35,15 +35,9 @@ def test_Producer_map_defaults() -> None:
 
 
 def test_Producer_mutations() -> None:
-    input_artifact = A1()
-    producer = DummyProducer(input_artifact=input_artifact)
-    assert producer in input_artifact.consumers
-
-    input2_artifact = A1()
-    producer.input_artifacts = {"input_artifact": input2_artifact}
-    assert producer not in input_artifact.consumers
-    assert producer in input2_artifact.consumers
-
+    producer = DummyProducer(input_artifact=A1())
+    for output in producer:
+        assert output.producer is producer
     o1, o2 = A2(), A3()
     producer.to(o1, o2)
     assert o1.producer is producer
@@ -139,6 +133,10 @@ def test_Producer_bad_kwargs() -> None:
     with pytest.raises(ValueError, match="expects an instance of"):
         DummyProducer(input_artifact=5)  # type: ignore
     producer = DummyProducer(input_artifact=A1())
+    with pytest.raises(ValueError, match="Unknown argument"):
+        producer.input_artifacts = {"hi": A1()}
+    with pytest.raises(ValueError, match="expects an instance of"):
+        producer.input_artifacts = {"input_artifact": A2()}
     with pytest.raises(ValueError, match="Expected .* arguments"):
         producer.to()
     with pytest.raises(ValueError, match="Expected the 1st argument to be"):

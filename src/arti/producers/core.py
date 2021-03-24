@@ -117,24 +117,23 @@ class Producer:
     def __init__(self, **kwargs: Artifact) -> None:
         if type(self) is Producer:
             raise ValueError("Producer cannot be instantiated directly!")
-        (self.input_artifacts,) = self._validate_build_args(**kwargs)
+        self.input_artifacts = kwargs
         self.output_artifacts = tuple(artifact() for artifact in self.signature.return_annotation)
         super().__init__()
 
-    def _validate_build_args(self, **kwargs: Artifact) -> tuple[dict[str, Artifact]]:
-        passed_params, expected_params = set(kwargs), set(self.signature.parameters)
+    def _validate_build_args(self, values: dict[str, Artifact]) -> None:
+        passed_params, expected_params = set(values), set(self.signature.parameters)
         if unknown := passed_params - expected_params:
             raise ValueError(f"{type(self).__name__} - Unknown argument(s): {unknown}")
         if missing := expected_params - passed_params:
             # TODO: Support Optional input/output artifacts?
             raise ValueError(f"{type(self).__name__} - Missing argument(s): {missing}")
-        for name, arg in kwargs.items():
+        for name, arg in values.items():
             expected_type = self.signature.parameters[name].annotation
             if not isinstance(arg, expected_type):
                 raise ValueError(
                     f"{type(self).__name__} - `{name}` expects an instance of {expected_type}, got: {arg}"
                 )
-        return ({k: v for k, v in kwargs.items() if isinstance(v, Artifact)},)
 
     @property
     def input_artifacts(self) -> dict[str, Artifact]:
@@ -142,11 +141,8 @@ class Producer:
 
     @input_artifacts.setter
     def input_artifacts(self, values: dict[str, Artifact]) -> None:
-        for artifact in getattr(self, "_input_artifacts", {}).values():
-            artifact.consumers.remove(self)
+        self._validate_build_args(values)
         self._input_artifacts = values
-        for artifact in self._input_artifacts.values():
-            artifact.consumers.add(self)
 
     @property
     def output_artifacts(self) -> tuple[Artifact, ...]:

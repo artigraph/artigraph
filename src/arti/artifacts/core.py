@@ -52,7 +52,6 @@ class BaseArtifact:
     def __init__(self) -> None:
         # TODO: Allow storage/format override and re-validate them.
         self.producer: Optional[Producer] = None
-        self.consumers: set[Producer] = set()
         super().__init__()
 
 
