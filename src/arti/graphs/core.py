@@ -11,15 +11,12 @@ ArtifactBox = TypedBox[Artifact]
 
 
 class Graph:
+    """ Graph stores a web of Artifacts connected by Producers.
+    """
+
     name: str
 
     artifacts: ArtifactBox
-
-    # Let's make Graph own the Backend, not the other way around. The Backend can be used
-    # multiple/many times, but we should be able to inspect a Graph to get fully addressable
-    # references. Then again, does that mean a Backend *can't* use Artifacts to reference things? Or
-    # just that those Artifacts must exist on a separate Graph or w/o one? Hmm, why do I want this
-    # again?
 
     def __init__(self, name: str, *, backend: Optional[Backend] = None) -> None:
         self.name = name
