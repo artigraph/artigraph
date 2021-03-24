@@ -1,4 +1,5 @@
 import pytest
+from box import BoxError  # type: ignore
 
 from arti.graphs.core import Graph
 from tests.arti.dummies import A1, P1, P2
@@ -14,13 +15,8 @@ def test_Graph() -> None:
         #
         # 1:https://mypy.readthedocs.io/en/stable/extending_mypy.html#extending-mypy-using-plugins
         graph.artifacts.c, graph.artifacts.d = P2(input_artifact=graph.artifacts.b.c)  # type: ignore
-    id_graph_a = id(graph.artifacts.a)
 
-    with pytest.raises(Exception, match="Box is frozen"):
+    with pytest.raises(BoxError, match="Box is frozen"):
         graph.artifacts.a = A1()
-
-    with graph.extend("test 2") as graph2:
-        graph2.artifacts.z = A1()
-    # TODO: Verify the Producers have TypedProxies pointing to this graph instead of the original.
-    assert set(graph2.artifacts) == set(["a", "b", "c", "d", "z"])
-    assert id_graph_a != id(graph2.artifacts.a)
+    with pytest.raises(AttributeError, match="has no attribute"):
+        graph.artifacts.z

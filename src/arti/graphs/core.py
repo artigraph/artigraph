@@ -1,21 +1,19 @@
 from __future__ import annotations
 
-from copy import deepcopy
 from types import TracebackType
 from typing import Optional
 
 from arti.artifacts.core import Artifact
 from arti.backends.core import Backend
-from arti.internal.pointers import PointerBox
+from arti.internal.utils import TypedBox
+
+ArtifactBox = TypedBox[Artifact]
 
 
 class Graph:
     name: str
 
-    # `Artifact` instances are pointers (arti.internal.pointer.Pointer), which allows us to easily
-    # update all references Producers and other objects have to them when their path in the Graph is
-    # updated (via PointerBox).
-    artifacts: PointerBox[Artifact]
+    artifacts: ArtifactBox
 
     # Let's make Graph own the Backend, not the other way around. The Backend can be used
     # multiple/many times, but we should be able to inspect a Graph to get fully addressable
@@ -26,7 +24,7 @@ class Graph:
     def __init__(self, name: str, *, backend: Optional[Backend] = None) -> None:
         self.name = name
         self.backend = backend or Backend()  # TODO: Fill in some default in-memory backend
-        self.artifacts = Artifact.box()
+        self.artifacts = ArtifactBox()
         self._sealed: bool = False
         # Seal the class and convert the Boxes
         self._toggle(sealed=True)
@@ -49,13 +47,4 @@ class Graph:
             "default_box": not sealed,
             "frozen_box": sealed,  # Unfreeze the box while building the graph
         }
-        self.artifacts = Artifact.box(self.artifacts, **box_kwargs)
-
-    def extend(self, name: str, *, backend: Optional[Backend] = None) -> Graph:
-        """ Return an extend copy of self.
-
-            If passed, `artifacts` and `resources` will be deep merged.
-        """
-        with Graph(name, backend=(backend or self.backend)) as new:
-            new.artifacts = deepcopy(self.artifacts)
-        return new
+        self.artifacts = ArtifactBox(self.artifacts, **box_kwargs)

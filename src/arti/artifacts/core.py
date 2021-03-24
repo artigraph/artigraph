@@ -5,7 +5,6 @@ from itertools import chain
 from typing import TYPE_CHECKING, Any, Optional
 
 from arti.formats.core import Format
-from arti.internal.pointers import Pointer
 from arti.storage.core import Storage
 from arti.types.core import Type
 
@@ -55,7 +54,7 @@ class BaseArtifact:
         super().__init__()
 
 
-class Artifact(BaseArtifact, Pointer):
+class Artifact(BaseArtifact):
     """ An Artifact represents a piece data.
 
         An Artifact is comprised of three key elements:

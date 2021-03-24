@@ -1,7 +1,9 @@
 from __future__ import annotations
 
-from collections.abc import Callable
-from typing import Any, TypeVar, cast
+from collections.abc import Callable, MutableMapping
+from typing import Any, ClassVar, TypeVar, Union, cast
+
+from box import Box  # type: ignore
 
 
 class ClassName:
@@ -33,13 +35,54 @@ def ordinal(n: int) -> str:
     return str(n) + suffix
 
 
-K = TypeVar("K", bound=str)
-V = TypeVar("V")
+RegisterK = TypeVar("RegisterK", bound=str)
+RegisterV = TypeVar("RegisterV")
 
 
-def register(registry: dict[K, V], key: K, value: V) -> V:
+def register(registry: dict[RegisterK, RegisterV], key: RegisterK, value: RegisterV) -> RegisterV:
     if key in registry:
         existing = registry[key]
         raise ValueError(f"{key} is already registered with: {existing}!")
     registry[key] = value
     return value
+
+
+T = TypeVar("T")
+
+
+class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):  # type: ignore
+    """ TypedBox holds a collection of typed values.
+
+        Subclasses must set the __target_type__ to a base class for the contained values.
+    """
+
+    __target_type__: ClassVar[type[T]]
+
+    @classmethod
+    def __class_getitem__(cls, target_type: type[T]) -> TypedBox[T]:
+        return cast(
+            "TypedBox[T]",
+            type(f"{target_type.__name__}Box", (cls,), {"__target_type__": target_type}),
+        )
+
+    def __cast_value(self, value: Any) -> T:
+        if isinstance(value, self.__target_type__):
+            return value
+        tgt_name = self.__target_type__.__name__
+        if hasattr(self.__target_type__, "cast"):
+            casted = cast(Any, self.__target_type__).cast(value)
+            if isinstance(casted, self.__target_type__):
+                return casted
+            raise TypeError(
+                f"Expected {tgt_name}.cast({value}) to return an instance of {tgt_name}, got: {casted}"
+            )
+        raise TypeError(f"Expected an instance of {tgt_name}, got: {value}")
+
+    # NOTE: Box uses name mangling (double __) to prevent conflicts with contained values.
+    def _Box__convert_and_store(self, item: str, value: T) -> None:
+        if isinstance(value, dict):
+            super()._Box__convert_and_store(item, value)  # pylint: disable=no-member
+        elif item in self:
+            raise ValueError(f"{item} is already set!")
+        else:
+            super()._Box__convert_and_store(item, self.__cast_value(value))
