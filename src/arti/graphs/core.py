@@ -46,7 +46,7 @@ class Graph:
     def _toggle(self, sealed: bool) -> None:
         self._sealed = sealed
         box_kwargs = {
-            "default_box": True,
+            "default_box": not sealed,
             "frozen_box": sealed,  # Unfreeze the box while building the graph
         }
         self.artifacts = Artifact.box(self.artifacts, **box_kwargs)
