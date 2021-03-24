@@ -14,7 +14,6 @@ def test_Graph() -> None:
         #
         # 1:https://mypy.readthedocs.io/en/stable/extending_mypy.html#extending-mypy-using-plugins
         graph.artifacts.c, graph.artifacts.d = P2(input_artifact=graph.artifacts.b.c)  # type: ignore
-    # TODO: Add dependency/topologically sorted graph and verify
     id_graph_a = id(graph.artifacts.a)
 
     with pytest.raises(Exception, match="Box is frozen"):

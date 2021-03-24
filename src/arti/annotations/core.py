@@ -9,7 +9,7 @@ class Annotation(BaseArtifact):
 
     # TODO: Set format/storage to some "system default" that can be used across backends.
     #
-    # TODO: Derive the schema from the `__init__` method signature - we expect users to initialize
-    # these directly.
+    # TODO: Derive the schema from the `__init__` method signature (or vice versa) - we expect users
+    # to initialize these directly.
 
     is_scalar = True

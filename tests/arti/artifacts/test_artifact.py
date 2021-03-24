@@ -16,8 +16,7 @@ def test_cast() -> None:
         Artifact.cast(P2(input_artifact=A2()))
 
 
-# TODO: Artifact casting to python objects is not implemented yet.
-@pytest.mark.xfail
+@pytest.mark.xfail  # Artifact casting to python objects is not implemented yet.
 def test_cast_todo() -> None:
     Artifact.cast(5)
     Artifact.cast("hi")

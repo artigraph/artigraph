@@ -113,7 +113,6 @@ class PointerBox(Box, MutableMapping[str, TypedProxy[PointerType]]):  # type: ig
 
     # NOTE: Box uses name mangling (double __) to prevent conflicts with contained values.
     def _Box__convert_and_store(self, item: str, value: TypedProxy[PointerType]) -> None:
-        # TODO: Might need to handle list/tuple/... here.
         if isinstance(value, dict):
             super()._Box__convert_and_store(item, value)  # pylint: disable=no-member
         elif item in self:
