@@ -19,7 +19,6 @@ def test_Producer() -> None:
     input_artifact = A1()
     producer = DummyProducer(input_artifact=input_artifact)
     assert producer.input_artifacts["input_artifact"] is input_artifact
-    assert producer.input_artifacts["input_artifact"] is input_artifact
     assert len(list(producer)) == 2
     expected_output_classes = [A2, A3]
     for i, output in enumerate(producer):
