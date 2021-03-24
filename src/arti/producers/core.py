@@ -20,7 +20,7 @@ class Producer:
     # User methods
 
     # Relax mypy "incompatible signature" warning for subclasses. Seems this must come before the
-    # actual definitions, hence the None.
+    # actual definitions.
     build: Callable[..., Any]
     map: Callable[..., Any]
 
