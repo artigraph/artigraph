@@ -15,10 +15,10 @@ if TYPE_CHECKING:
 
 
 class BaseArtifact:
-    """ A BaseArtifact represents a piece data.
+    """ A BaseArtifact is the most basic data structure describing data in the Artigraph ecosystem.
 
         A BaseArtifact is comprised of three key elements:
-        - schema: spec of the data's structure, such as `int`, "struct", etc.
+        - schema: spec of the data's structure, such as data types, nullable, etc.
         - format: the data's serialized format, such as CSV, Parquet, database native, etc.
         - storage: the data's persistent storage system, such as blob storage, database native, etc.
     """
@@ -55,10 +55,10 @@ class BaseArtifact:
 
 
 class Artifact(BaseArtifact):
-    """ An Artifact represents a piece data.
+    """ An Artifact is the base structure describing an existing or generated dataset.
 
         An Artifact is comprised of three key elements:
-        - `schema`: spec of the data's structure, such as `int`, "struct", etc.
+        - `schema`: spec of the data's structure, such as data types, nullable, etc.
         - `format`: the data's serialized format, such as CSV, Parquet, database native, etc.
         - `storage`: the data's persistent storage system, such as blob storage, database native, etc.
 

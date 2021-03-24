@@ -8,14 +8,14 @@ from arti.artifacts.core import Artifact
 from arti.internal.type_hints import signature
 from arti.internal.utils import ordinal
 
-# IDEA: Allow Producer annotations, such as "point of contact", etc.
-
 
 def _commas(vals: Iterable[Any]) -> str:
     return ", ".join([str(v) for v in vals])
 
 
 class Producer:
+    """ A Producer is a task that builds one or more Artifacts.
+    """
 
     # User methods
 
@@ -67,12 +67,6 @@ class Producer:
         for name, param in cls.signature.parameters.items():
             if param.annotation is param.empty:
                 raise ValueError(f"{cls.__name__} - `{name}` must have a type hint.")
-            # IDEA: Rather than an Artifact, we should make the Producers accept a View Annotated
-            # with the Artifact.
-            #
-            # IDEA: To improve/ease hinting for simple Producer inputs, we may want to support
-            # scalar python types (int, str, etc) in the build/map type annotations, which could be
-            # converted with Artifact.cast into some "LiteralArtifact"s.
             if not issubclass(param.annotation, Artifact):
                 raise ValueError(
                     f"{cls.__name__} - `{name}` type hint must be an Artifact subclass, got: {param}"

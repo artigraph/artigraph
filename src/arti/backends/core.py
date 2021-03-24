@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 
-class Backend:  # TODO: Better name?
+class Backend:
     """ Backend represents a storage for internal Artigraph metadata.
 
         Backend storage is an addressable location (local path, database connection, etc) that
@@ -11,5 +11,3 @@ class Backend:  # TODO: Better name?
         - Artifact and Producer Fingerprints
         - etc
     """
-
-    # IDEA: A future API layer might act as a federated Backend.
