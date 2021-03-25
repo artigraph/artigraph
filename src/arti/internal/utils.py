@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, MutableMapping
-from typing import Any, ClassVar, TypeVar, Union, cast
+from typing import Any, ClassVar, Generic, TypeVar, Union, cast
 
 from box import Box
 
@@ -17,11 +17,18 @@ class_name = cast(Callable[[], str], ClassName)
 PropReturn = TypeVar("PropReturn")
 
 
-class classproperty:
+class classproperty(Generic[PropReturn]):
+    """ Access a @classmethod like a @property.
+
+        Can be stacked above @classmethod (to satisfy pylint, mypy, etc).
+    """
+
     def __init__(self, f: Callable[..., PropReturn]) -> None:
         self.f = f
+        if isinstance(self.f, classmethod):
+            self.f = lambda type_: f.__get__(None, type_)()
 
-    def __get__(self, obj: Any, type_: type[Any]) -> PropReturn:
+    def __get__(self, obj: Any, type_: Any) -> PropReturn:
         return self.f(type_)
 
 

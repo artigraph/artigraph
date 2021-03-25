@@ -18,11 +18,18 @@ def test_class_name() -> None:
 def test_classproperty() -> None:
     class Test:
         @classproperty
-        def hi(cls) -> str:
-            return "hi"
+        def a(cls) -> str:
+            return cls.__name__  # type: ignore
 
-    assert Test.hi == "hi"
-    assert Test().hi == "hi"
+        @classproperty
+        @classmethod
+        def b(cls) -> str:
+            return cls.__name__
+
+    assert Test.a == "Test"
+    assert Test().a == "Test"
+    assert Test.b == "Test"
+    assert Test().b == "Test"
 
 
 def test_ordinal() -> None:
