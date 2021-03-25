@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Callable, MutableMapping
 from typing import Any, ClassVar, TypeVar, Union, cast
 
-from box import Box  # type: ignore
+from box import Box
 
 
 class ClassName:
@@ -50,7 +50,7 @@ def register(registry: dict[RegisterK, RegisterV], key: RegisterK, value: Regist
 T = TypeVar("T")
 
 
-class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):  # type: ignore
+class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):
     """ TypedBox holds a collection of typed values.
 
         Subclasses must set the __target_type__ to a base class for the contained values.
