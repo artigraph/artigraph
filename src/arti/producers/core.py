@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator
 from inspect import Signature
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Union
 
 from arti.artifacts.core import Artifact
 from arti.internal.type_hints import signature
@@ -111,9 +111,15 @@ class Producer:
     def __init__(self, **kwargs: Artifact) -> None:
         if type(self) is Producer:
             raise ValueError("Producer cannot be instantiated directly!")
-        self.input_artifacts = kwargs
-        self.output_artifacts = tuple(artifact() for artifact in self.signature.return_annotation)
+        self._validate_build_args(kwargs)
+        self._input_artifacts = kwargs
         super().__init__()
+
+    def __iter__(self) -> Iterator[Artifact]:
+        ret = self.out()
+        if not isinstance(ret, tuple):
+            ret = (ret,)
+        return iter(ret)
 
     def _validate_build_args(self, values: dict[str, Artifact]) -> None:
         passed_params, expected_params = set(values), set(self.signature.parameters)
@@ -129,46 +135,30 @@ class Producer:
                     f"{type(self).__name__} - `{name}` expects an instance of {expected_type}, got: {arg}"
                 )
 
-    @property
-    def input_artifacts(self) -> dict[str, Artifact]:
-        return self._input_artifacts
+    out: Callable[..., Any]
 
-    @input_artifacts.setter
-    def input_artifacts(self, values: dict[str, Artifact]) -> None:
-        self._validate_build_args(values)
-        self._input_artifacts = values
-
-    @property
-    def output_artifacts(self) -> tuple[Artifact, ...]:
-        return self._output_artifacts
-
-    @output_artifacts.setter
-    def output_artifacts(self, values: tuple[Artifact, ...]) -> None:
-        passed_n, expected_n = len(values), len(self.signature.return_annotation)
-        if passed_n != expected_n:
-            ret_str = _commas(self.signature.return_annotation)
-            raise ValueError(
-                f"{type(self).__name__}.to() - Expected {expected_n} arguments of ({ret_str}), but got: {values}"
-            )
-        for i, arg in enumerate(values):
-            expected_type = self.signature.return_annotation[i]
-            if not isinstance(arg, expected_type):
-                raise ValueError(
-                    f"{type(self).__name__}.to() - Expected the {ordinal(i+1)} argument to be {expected_type}, got {type(arg)}"
-                )
-        for artifact in getattr(self, "_output_artifacts", ()):
-            artifact.producer = None
-        self._output_artifacts = values
-        for artifact in self._output_artifacts:
-            artifact.producer = self
-
-    def to(self, *args: Artifact) -> Producer:
-        """ Configure the Artifacts this Producer should build.
+    def out(self, *outputs: Artifact) -> Union[Artifact, tuple[Artifact, ...]]:  # type: ignore
+        """ Configure the output Artifacts this Producer will build.
 
             The arguments are matched to the `Producer.build` return signature in order.
         """
-        self.output_artifacts = args
-        return self
-
-    def __iter__(self) -> Iterator[Artifact]:
-        return iter(self.output_artifacts)
+        if not outputs:
+            outputs = tuple(artifact() for artifact in self.signature.return_annotation)
+        passed_n, expected_n = len(outputs), len(self.signature.return_annotation)
+        if passed_n != expected_n:
+            ret_str = _commas(self.signature.return_annotation)
+            raise ValueError(
+                f"{type(self).__name__}.out() - Expected {expected_n} arguments of ({ret_str}), but got: {outputs}"
+            )
+        for i, artifact in enumerate(outputs):
+            expected_type = self.signature.return_annotation[i]
+            if not isinstance(artifact, expected_type):
+                raise ValueError(
+                    f"{type(self).__name__}.out() - Expected the {ordinal(i+1)} argument to be {expected_type}, got {type(artifact)}"
+                )
+            if artifact.producer is not None:
+                raise ValueError(f"{artifact} is produced by {artifact.producer}!")
+            artifact.producer = self
+        if len(outputs) == 1:
+            return outputs[0]
+        return outputs

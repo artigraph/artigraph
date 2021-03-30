@@ -91,15 +91,17 @@ class Artifact(BaseArtifact):
         if isinstance(value, Artifact):
             return value
         if isinstance(value, Producer):
-            n_outputs = len(value.output_artifacts)
+            output_artifacts = value.out()
+            if isinstance(output_artifacts, Artifact):
+                return output_artifacts
+            n_outputs = len(output_artifacts)
             if n_outputs == 0:  # pragma: no cover
                 # TODO: "side effect" Producers: https://github.com/replicahq/artigraph/issues/11
                 raise ValueError(f"{type(value).__name__} doesn't produce any Artifacts!")
-            if n_outputs > 1:
-                raise ValueError(
-                    f"{type(value).__name__} produces {len(value.output_artifacts)} Artifacts. Try assigning each to a new name in the Graph!"
-                )
-            return value.output_artifacts[0]
+            assert n_outputs > 1
+            raise ValueError(
+                f"{type(value).__name__} produces {len(output_artifacts)} Artifacts. Try assigning each to a new name in the Graph!"
+            )
 
         raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
 

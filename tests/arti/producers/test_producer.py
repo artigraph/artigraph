@@ -3,7 +3,7 @@ from typing import Any, no_type_check
 import pytest
 
 from arti.producers.core import Producer
-from tests.arti.dummies import A1, A2, A3, P1
+from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 
 
 class DummyProducer(Producer):
@@ -15,14 +15,25 @@ class DummyProducer(Producer):
 
 
 def test_Producer() -> None:
-    # Imitate a ref to avoid "use outside graph" error
     input_artifact = A1()
     producer = DummyProducer(input_artifact=input_artifact)
-    assert producer.input_artifacts["input_artifact"] is input_artifact
+    assert producer._input_artifacts["input_artifact"] is input_artifact
     assert len(list(producer)) == 2
     expected_output_classes = [A2, A3]
     for i, output in enumerate(producer):
         assert isinstance(output, expected_output_classes[i])
+
+
+def test_Producer_out() -> None:
+    a1, a2, a3, a4 = A1(), A2(), A3(), A4()
+    # single return Producer
+    assert isinstance(P1(input_artifact=a1).out(), A2)
+    assert P1(input_artifact=a1).out(a2) is a2
+    assert isinstance(list(P1(input_artifact=a1))[0], A2)
+    # multi return Producer
+    assert isinstance(P2(input_artifact=a2).out(), tuple)
+    assert P2(input_artifact=a2).out(a3, a4) == (a3, a4)
+    assert isinstance(list(P2(input_artifact=a2))[0], A3)
 
 
 @pytest.mark.xfail(raises=ValueError)
@@ -38,7 +49,7 @@ def test_Producer_mutations() -> None:
     for output in producer:
         assert output.producer is producer
     o1, o2 = A2(), A3()
-    producer.to(o1, o2)
+    producer.out(o1, o2)
     assert o1.producer is producer
     assert o2.producer is producer
 
@@ -122,7 +133,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
                 pass
 
 
-def test_Producer_bad_kwargs() -> None:
+def test_Producer_bad_init() -> None:
     with pytest.raises(ValueError, match="Producer cannot be instantiated directly!"):
         Producer()
     with pytest.raises(ValueError, match="Unknown argument"):
@@ -131,15 +142,17 @@ def test_Producer_bad_kwargs() -> None:
         DummyProducer()
     with pytest.raises(ValueError, match="expects an instance of"):
         DummyProducer(input_artifact=5)  # type: ignore
+
+
+def test_Producer_bad_out() -> None:
     producer = DummyProducer(input_artifact=A1())
-    with pytest.raises(ValueError, match="Unknown argument"):
-        producer.input_artifacts = {"hi": A1()}
-    with pytest.raises(ValueError, match="expects an instance of"):
-        producer.input_artifacts = {"input_artifact": A2()}
-    with pytest.raises(ValueError, match="Expected .* arguments"):
-        producer.to()
+    with pytest.raises(ValueError, match="Expected 2 arguments of"):
+        producer.out(1)
     with pytest.raises(ValueError, match="Expected the 1st argument to be"):
-        producer.to(1, 2)  # type: ignore
+        producer.out(1, 2)
     with pytest.raises(ValueError, match="Expected the 2nd argument to be"):
-        producer.to(A2(), A2())
-    producer.to(A2(), A3())
+        producer.out(A2(), A2())
+    output = producer.out(A2(), A3())
+    assert isinstance(output, tuple)
+    with pytest.raises(ValueError, match="is produced by"):
+        producer.out(*output)
