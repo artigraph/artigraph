@@ -154,10 +154,10 @@ class Artifact(BaseArtifact):
         return ""
 
     @property
-    def id(self) -> Any: # this should be a string but mypy can't find farmhash module
+    def id(self) -> Any:  # this should be a string but mypy can't find farmhash module
         # TODO: can/should we cache this like the fingerprint?
         # TODO: what to do if self.storage is null / doesn't have path?
-        
+
         if not self.storage or not self.storage.path:
             return farmhash.fingerprint64(self.fingerprint + str(self.partition_key))
         # probably want to change this when storage/partition_key are fleshed out more
@@ -191,9 +191,8 @@ class Artifact(BaseArtifact):
             "key": self.key,
             "type": ArtifactType.ARTIFACT.value,
             "fingerprint": str(self.fingerprint),
-            "schema": self.schema.to_dict() if self.schema else "", 
+            "schema": self.schema.to_dict() if self.schema else "",
             "format": self.format.to_dict() if self.format else "",
             "storage": self.storage.to_dict() if self.storage else "",
-            "path": self.path,
             "annotations": self.annotations,  # TODO: this needs to be json-ifiable
         }

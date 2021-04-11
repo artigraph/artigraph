@@ -1,8 +1,8 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Literal, Optional, Union, cast
+from typing import Any, ClassVar, Literal, Optional, Union
 
-from arti.internal.utils import class_name, classproperty, register
+from arti.internal.utils import all_subclasses, class_name, classproperty, register
 
 
 class Type:
@@ -19,7 +19,8 @@ class Type:
 
     @classproperty
     def type_registry(cls) -> dict[str, type[Type]]:
-        return {t.key: t for t in cls.__subclasses__()}
+        # import pdb; pdb.set_trace()
+        return {t.key: t for t in all_subclasses(cls)}
 
     @classmethod
     def from_dict(cls, type_dict: dict[str, Any]) -> Type:
@@ -40,7 +41,7 @@ class Type:
                 f'Missing a required "type" key in the Type dict. Available keys: {type_dict.keys()}'
             )
         type_ = type_dict["type"]
-        type_cls = cast(Optional[type[Type]], Type.type_registry.get(type_))
+        type_cls = Type.type_registry.get(type_)
         if type_cls is None:
             raise ValueError(f"{type_} is not an Artigraph Type.")
         try:

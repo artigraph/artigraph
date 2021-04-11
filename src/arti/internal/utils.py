@@ -183,6 +183,13 @@ def qname(val: Union[object, type]) -> str:
 T = TypeVar("T")
 
 
+# TODO: what's the type on this?
+def all_subclasses(cls: Any) -> set[Any]:
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)]
+    )
+
+
 class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):
     """TypedBox holds a collection of typed values.
 

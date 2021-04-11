@@ -1,7 +1,6 @@
 import pytest
 
-from arti.types.core import Int32, Struct, Timestamp, Type, TypeAdapter, TypeSystem
-from arti.types.core import Int32, String, Struct, Timestamp, Type, TypeSystem
+from arti.types.core import Int32, String, Struct, Timestamp, Type, TypeAdapter, TypeSystem
 
 
 def test_Type() -> None:
@@ -66,4 +65,5 @@ def test_Struct_to_from_dict() -> None:
     # check struct within a struct
     parent_struct_dict = {"type": "Struct", "params": {"fields": {"child": struct_dict}}}
     parent_struct_obj = Type.from_dict(parent_struct_dict)
+    assert isinstance(parent_struct_obj, Struct)
     assert isinstance(parent_struct_obj.fields["child"], Struct)

@@ -1,10 +1,9 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Optional
+from typing import Any
 
 from arti.artifacts.core import Artifact
-from arti.producers.core import Producer
 
 
 class BackendType(Enum):
@@ -51,7 +50,7 @@ class MemoryBackend(Backend):
         # TODO: statistic_store?
         # figure out how to handle writing artifacts with statistics:
         # should there be a separate statistic_store that gets written to
-        # alongside the artifact? 
+        # alongside the artifact?
 
     def load_artifact(self, artifact_id: str) -> Artifact:
         if artifact_id not in self.artifact_store:

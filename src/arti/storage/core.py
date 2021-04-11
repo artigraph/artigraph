@@ -24,7 +24,7 @@ class Storage:
             raise ValueError(
                 f'Missing a required "type" and/or "path" key in the Storage dict. Available keys: {storage_dict.keys()}'
             )
-        return cls(storage_dict["type"])
+        return cls(storage_dict["type"], storage_dict["path"])
 
     def to_dict(self) -> dict[str, Union[str, None]]:
         return {"type": self.type, "path": self.path}
