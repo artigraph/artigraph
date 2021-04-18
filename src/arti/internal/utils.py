@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable, MutableMapping
-from typing import Any, ClassVar, Generic, TypeVar, Union, cast
+from typing import Any, ClassVar, Generic, Optional, TypeVar, Union, cast
 
 from box import Box
 
@@ -32,6 +32,127 @@ class classproperty(Generic[PropReturn]):
         return self.f(type_)
 
 
+_int_sub = TypeVar("_int_sub", bound="_int")
+
+
+class _int(int):
+    def __repr__(self) -> str:
+        return f"{qname(self)}({int(self)})"
+
+    # Stock magics.
+    #
+    # Using "self: TypeVar" so mypy will detect the returned subclass (rather than _int).
+
+    def __add__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__add__(x))
+
+    def __and__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__and__(n))
+
+    def __ceil__(self: _int_sub) -> _int_sub:
+        return type(self)(super().__ceil__())
+
+    def __floor__(self: _int_sub) -> _int_sub:
+        return type(self)(super().__floor__())
+
+    def __floordiv__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__floordiv__(x))
+
+    def __invert__(self: _int_sub) -> _int_sub:
+        return type(self)(super().__invert__())
+
+    def __lshift__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__lshift__(n))
+
+    def __mod__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__mod__(x))
+
+    def __mul__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__mul__(x))
+
+    def __neg__(self: _int_sub) -> _int_sub:
+        return type(self)(super().__neg__())
+
+    def __or__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__or__(n))
+
+    def __pos__(self: _int_sub) -> _int_sub:
+        return type(self)(super().__pos__())
+
+    def __radd__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__radd__(x))
+
+    def __rand__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__rand__(n))
+
+    def __rfloordiv__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__rfloordiv__(x))
+
+    def __rlshift__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__rlshift__(n))
+
+    def __rmod__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__rmod__(x))
+
+    def __rmul__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__rmul__(x))
+
+    def __ror__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__ror__(n))
+
+    def __round__(self: _int_sub, ndigits: Optional[int] = 0) -> _int_sub:
+        return type(self)(super().__round__(ndigits))
+
+    def __rrshift__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__rrshift__(n))
+
+    def __rshift__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__rshift__(n))
+
+    def __rsub__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__rsub__(x))
+
+    def __rxor__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__rxor__(n))
+
+    def __sub__(self: _int_sub, x: int) -> _int_sub:
+        return type(self)(super().__sub__(x))
+
+    def __trunc__(self: _int_sub) -> _int_sub:
+        return type(self)(super().__trunc__())
+
+    def __xor__(self: _int_sub, n: int) -> _int_sub:
+        return type(self)(super().__xor__(n))
+
+
+class int64(_int):
+    _min, _max = -(2 ** 63), (2 ** 63) - 1
+
+    def __new__(cls, i: Union[int, int64, uint64]) -> int64:
+        if i > cls._max:
+            if isinstance(i, uint64):
+                i = int(i) - uint64._max - 1
+            else:
+                raise ValueError(f"{i} is too large for int64. Hint: cast to uint64 first.")
+        if i < cls._min:
+            raise ValueError(f"{i} is too small for int64.")
+        return super().__new__(cls, i)
+
+
+class uint64(_int):
+    _min, _max = 0, (2 ** 64) - 1
+
+    def __new__(cls, i: Union[int, int64, uint64]) -> uint64:
+        if i > cls._max:
+            raise ValueError(f"{i} is too large for uint64.")
+        if i < cls._min:
+            if isinstance(i, int64):
+                i = int(i) + cls._max + 1
+            else:
+                raise ValueError(f"{i} is negative. Hint: cast to int64 first.")
+        return super().__new__(cls, i)
+
+
 def ordinal(n: int) -> str:
     """ Convert an integer into its ordinal representation.
     """
@@ -52,6 +173,12 @@ def register(registry: dict[RegisterK, RegisterV], key: RegisterK, value: Regist
         raise ValueError(f"{key} is already registered with: {existing}!")
     registry[key] = value
     return value
+
+
+def qname(val: Union[object, type]) -> str:
+    if isinstance(val, type):
+        return val.__qualname__
+    return type(val).__qualname__
 
 
 T = TypeVar("T")
