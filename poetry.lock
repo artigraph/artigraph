@@ -189,6 +189,14 @@ optional = false
 python-versions = "*"
 
 [[package]]
+name = "multimethod"
+version = "1.5"
+description = "Multiple argument dispatching."
+category = "main"
+optional = false
+python-versions = ">=3.6"
+
+[[package]]
 name = "mypy"
 version = "0.910"
 description = "Optional static typing for Python"
@@ -590,7 +598,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "73819aafce2a6bf0124606440112655e58b1ae5f7baa4135e5fff00f83244132"
+content-hash = "85a9bfdf8be931c8f1548493180194fcf83e45d8cc15effb7933b10cb983bf12"
 
 [metadata.files]
 appdirs = [
@@ -736,6 +744,10 @@ lazy-object-proxy = [
 mccabe = [
     {file = "mccabe-0.6.1-py2.py3-none-any.whl", hash = "sha256:ab8a6258860da4b6677da4bd2fe5dc2c659cff31b3ee4f7f5d64e79735b80d42"},
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
+]
+multimethod = [
+    {file = "multimethod-1.5-py3-none-any.whl", hash = "sha256:889bcc8feb34181fbfa70f78e92f4c1927f0361e5decef0d2770b6ed7984c41c"},
+    {file = "multimethod-1.5.tar.gz", hash = "sha256:b9c6f85ecf187f14a3951fff319643e1fac3086d757dec64f2469e1fd136b65d"},
 ]
 mypy = [
     {file = "mypy-0.910-cp35-cp35m-macosx_10_9_x86_64.whl", hash = "sha256:a155d80ea6cee511a3694b108c4494a39f42de11ee4e61e72bc424c490e46457"},
