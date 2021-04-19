@@ -48,7 +48,7 @@ python-box = "^5.3.0"
 [tool.poetry.dev-dependencies]
 black = "19.10b0" # 20.8b1 has some instability/requires 2 passes
 coverage = {version = "^5.5", extras = ["toml"]} # pyproject.toml support
-flake8 = "3.9.0"
+flake8 = "3.9.1"
 isort = "5.8.0"
 mypy = "0.812"
 pre-commit = "2.12.1"
