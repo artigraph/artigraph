@@ -51,3 +51,8 @@ class P1(Producer):
 class P2(Producer):
     def build(self, a2: A2) -> tuple[A3, A4]:
         return A3(), A4()
+
+
+class P3(Producer):
+    def build(self, a1: A1, a2: A2) -> tuple[A3, A4]:
+        return A3(), A4()
