@@ -44,10 +44,10 @@ class A4(Artifact):
 
 
 class P1(Producer):
-    def build(self, input_artifact: A1) -> A2:
+    def build(self, a1: A1) -> A2:
         return A2()
 
 
 class P2(Producer):
-    def build(self, input_artifact: A2) -> tuple[A3, A4]:
+    def build(self, a2: A2) -> tuple[A3, A4]:
         return A3(), A4()

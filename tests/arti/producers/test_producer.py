@@ -7,17 +7,17 @@ from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 
 
 class DummyProducer(Producer):
-    def build(self, input_artifact: A1) -> tuple[A2, A3]:
+    def build(self, a1: A1) -> tuple[A2, A3]:
         pass
 
-    def map(self, input_artifact: A1) -> Any:
+    def map(self, a1: A1) -> Any:
         pass
 
 
 def test_Producer() -> None:
-    input_artifact = A1()
-    producer = DummyProducer(input_artifact=input_artifact)
-    assert producer._input_artifacts["input_artifact"] is input_artifact
+    a1 = A1()
+    producer = DummyProducer(a1=a1)
+    assert producer._input_artifacts["a1"] is a1
     assert len(list(producer)) == 2
     expected_output_classes = [A2, A3]
     for i, output in enumerate(producer):
@@ -27,27 +27,27 @@ def test_Producer() -> None:
 def test_Producer_out() -> None:
     a1, a2, a3, a4 = A1(), A2(), A3(), A4()
     # single return Producer
-    assert P1(input_artifact=a1).out(a2) is a2
-    assert isinstance(P1(input_artifact=a1).out(), A2)
-    assert isinstance(list(P1(input_artifact=a1))[0], A2)
+    assert P1(a1=a1).out(a2) is a2
+    assert isinstance(P1(a1=a1).out(), A2)
+    assert isinstance(list(P1(a1=a1))[0], A2)
     # multi return Producer
-    assert P2(input_artifact=a2).out(a3, a4) == (a3, a4)
-    assert isinstance(P2(input_artifact=a2).out()[0], A3)
-    assert isinstance(P2(input_artifact=a2).out()[1], A4)
-    assert isinstance(list(P2(input_artifact=a2))[0], A3)
-    assert isinstance(list(P2(input_artifact=a2))[1], A4)
+    assert P2(a2=a2).out(a3, a4) == (a3, a4)
+    assert isinstance(P2(a2=a2).out()[0], A3)
+    assert isinstance(P2(a2=a2).out()[1], A4)
+    assert isinstance(list(P2(a2=a2))[0], A3)
+    assert isinstance(list(P2(a2=a2))[1], A4)
 
 
 @pytest.mark.xfail(raises=ValueError)
 def test_Producer_map_defaults() -> None:
-    p1 = P1(input_artifact=A1())
+    p1 = P1(a1=A1())
     # We can make .map defaulting a bit smarter by inspecting how the input artifacts are
     # partitioned (or not).
     p1.map()  # ValueError
 
 
 def test_Producer_mutations() -> None:
-    producer = DummyProducer(input_artifact=A1())
+    producer = DummyProducer(a1=A1())
     for output in producer:
         assert output.producer is producer
     o1, o2 = A2(), A3()
@@ -142,11 +142,11 @@ def test_Producer_bad_init() -> None:
     with pytest.raises(ValueError, match="Missing argument"):
         DummyProducer()  # type: ignore
     with pytest.raises(ValueError, match="expects an instance of"):
-        DummyProducer(input_artifact=5)  # type: ignore
+        DummyProducer(a1=5)  # type: ignore
 
 
 def test_Producer_bad_out() -> None:
-    producer = DummyProducer(input_artifact=A1())
+    producer = DummyProducer(a1=A1())
     with pytest.raises(ValueError, match="Expected 2 arguments of"):
         producer.out(1)
     with pytest.raises(ValueError, match="Expected the 1st argument to be"):
