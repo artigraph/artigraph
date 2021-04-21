@@ -17,10 +17,15 @@ class Producer:
     """ A Producer is a task that builds one or more Artifacts.
     """
 
-    # User methods
+    # User fields/methods
 
-    # Relax mypy "incompatible signature" warning for subclasses. Seems this must come before the
-    # actual definitions.
+    # Relax mypy "incompatible signature" warning for subclasses - we add some stricter checking
+    # with the arti.internal.mypy_plugin. Once PEP 612[1] is available in 3.10+typing_extensions[2],
+    # we can make Producer generic with something like: Generic[ParamSpec(P), TypeVar("R")] and
+    # possibly remove the plugin.
+    #
+    # 1: https://www.python.org/dev/peps/pep-0612/
+    # 2: https://github.com/python/mypy/issues/8645
     build: Callable[..., Any]
     map: Callable[..., Any]
 
