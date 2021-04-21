@@ -10,6 +10,9 @@ from arti.internal.utils import TypedBox
 ArtifactBox = TypedBox[Artifact]
 
 
+# TODO: When building out run logic, resolve and statically set all available fingerprints.
+# Specifically, we should pin the Producer.fingerprint, which may by dynamic (eg: version is a
+# Timestamp). Unbuilt Artifact (partitions) won't be fully resolved yet.
 class Graph:
     """ Graph stores a web of Artifacts connected by Producers.
     """

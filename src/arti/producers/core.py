@@ -5,8 +5,10 @@ from inspect import Signature
 from typing import Any, ClassVar, Union
 
 from arti.artifacts.core import Artifact
+from arti.fingerprints.core import Fingerprint
 from arti.internal.type_hints import signature
-from arti.internal.utils import ordinal
+from arti.internal.utils import class_name, ordinal
+from arti.versions.core import SemVer, Version
 
 
 def _commas(vals: Iterable[Any]) -> str:
@@ -18,6 +20,9 @@ class Producer:
     """
 
     # User fields/methods
+
+    key: str = class_name()
+    version: Version = SemVer(0, 0, 1)
 
     # Relax mypy "incompatible signature" warning for subclasses - we add some stricter checking
     # with the arti.internal.mypy_plugin. Once PEP 612[1] is available in 3.10+typing_extensions[2],
@@ -139,6 +144,17 @@ class Producer:
                 raise ValueError(
                     f"{type(self).__name__} - `{name}` expects an instance of {expected_type}, got: {arg}"
                 )
+
+    @property
+    def fingerprint(self) -> Fingerprint:
+        """ Return a Fingerprint of the Producer key + version.
+
+            The input and output Artifacts are ignored as the Producer instance may be used multiple
+            times to produce different output partitions. The "entropy mixing" will be performed for
+            *each* output with the static Producer.fingerprint + that output's specific input
+            partition dependencies.
+        """
+        return Fingerprint.from_string(self.key).combine(self.version.fingerprint)
 
     out: Callable[..., Any]
 
