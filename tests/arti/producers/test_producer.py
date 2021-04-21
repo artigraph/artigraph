@@ -2,7 +2,9 @@ from typing import Any
 
 import pytest
 
+from arti.fingerprints.core import Fingerprint
 from arti.producers.core import Producer
+from arti.versions.core import String
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 
 
@@ -22,6 +24,13 @@ def test_Producer() -> None:
     expected_output_classes = [A2, A3]
     for i, output in enumerate(producer):
         assert isinstance(output, expected_output_classes[i])
+
+
+def test_Producer_fingerprint() -> None:
+    p1 = P1(a1=A1())
+    assert p1.fingerprint == Fingerprint.from_string("P1") ^ p1.version.fingerprint
+    p1.key, p1.version = "abc", String("xyz")
+    assert p1.fingerprint == Fingerprint.from_string("abc") ^ String("xyz").fingerprint
 
 
 def test_Producer_out() -> None:
