@@ -289,6 +289,14 @@ optional = false
 python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 
 [[package]]
+name = "pyfarmhash"
+version = "0.2.2"
+description = "Google FarmHash Bindings for Python"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "pyflakes"
 version = "2.3.0"
 description = "passive checker of Python programs"
@@ -530,6 +538,14 @@ dev = ["autoflake (>=1.3.1,<2.0.0)", "flake8 (>=3.8.3,<4.0.0)"]
 doc = ["mkdocs (>=1.1.2,<2.0.0)", "mkdocs-material (>=5.4.0,<6.0.0)", "markdown-include (>=0.5.1,<0.6.0)"]
 
 [[package]]
+name = "types-pyfarmhash"
+version = "0.2.0"
+description = "Typing stubs for pyfarmhash"
+category = "main"
+optional = false
+python-versions = "*"
+
+[[package]]
 name = "typing-extensions"
 version = "3.7.4.3"
 description = "Backported and Experimental Type Hints for Python 3.5+"
@@ -566,7 +582,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "a7aea2becf7d2ad3de859418bfaa80ae582f949c662780bfac98f1903ac829f9"
+content-hash = "1e19df2fa3cbf0dbacf5ef2b626ac7901b5b7974b3b6947aeeaea7a1b165d9ff"
 
 [metadata.files]
 appdirs = [
@@ -772,6 +788,9 @@ pycodestyle = [
     {file = "pycodestyle-2.7.0-py2.py3-none-any.whl", hash = "sha256:514f76d918fcc0b55c6680472f0a37970994e07bbb80725808c17089be302068"},
     {file = "pycodestyle-2.7.0.tar.gz", hash = "sha256:c389c1d06bf7904078ca03399a4816f974a1d590090fecea0c63ec26ebaf1cef"},
 ]
+pyfarmhash = [
+    {file = "pyfarmhash-0.2.2.tar.gz", hash = "sha256:6d076f744347beafd413f76c0e429b502cddd821231a6f150abdb14e35a7328c"},
+]
 pyflakes = [
     {file = "pyflakes-2.3.0-py2.py3-none-any.whl", hash = "sha256:910208209dcea632721cb58363d0f72913d9e8cf64dc6f8ae2e02a3609aba40d"},
     {file = "pyflakes-2.3.0.tar.gz", hash = "sha256:e59fd8e750e588358f1b8885e5a4751203a0516e0ee6d34811089ac294c8806f"},
@@ -934,6 +953,9 @@ typed-ast = [
 typer = [
     {file = "typer-0.3.2-py3-none-any.whl", hash = "sha256:ba58b920ce851b12a2d790143009fa00ac1d05b3ff3257061ff69dbdfc3d161b"},
     {file = "typer-0.3.2.tar.gz", hash = "sha256:5455d750122cff96745b0dec87368f56d023725a7ebc9d2e54dd23dc86816303"},
+]
+types-pyfarmhash = [
+    {file = "types_pyfarmhash-0.2.0-py2.py3-none-any.whl", hash = "sha256:bb7ce2eb808c3b201c62b2bad209c5f113801067c2609f34db31c2c95a1c6691"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.7.4.3-py2-none-any.whl", hash = "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"},
