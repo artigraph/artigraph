@@ -82,7 +82,7 @@ disable = """
 
 
 [tool.pytest.ini_options]
-addopts = "--black --cov --cov-report=term --flake8 --isort --mypy"
+addopts = "--black --cov --cov-report=term-missing --flake8 --isort --mypy"
 filterwarnings = ["error",]
 testpaths = [
     "src/",
