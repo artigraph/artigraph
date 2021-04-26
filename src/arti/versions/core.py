@@ -27,10 +27,10 @@ class GitCommit(Version):
 
 
 class SemVer(Version):
-    """ SemVer fingerprinting only considers the major component, unless it is less than 0.
+    """SemVer fingerprinting only considers the major component, unless it is less than 0.
 
-        By only considering the major version, we can add incremental bumps to a Producer without triggering
-        historical backfills. The major version MUST be incremented on schema or methodological changes.
+    By only considering the major version, we can add incremental bumps to a Producer without triggering
+    historical backfills. The major version MUST be incremented on schema or methodological changes.
     """
 
     def __init__(self, major: int, minor: int, patch: int):

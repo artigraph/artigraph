@@ -79,7 +79,8 @@ class ProducerTransformer:
     ) -> tuple[Type, list[Type]]:
         if build.type is None:  # pragma: no cover
             ctx.api.fail(
-                f"{ctx.cls.name}.build must have a return type hint", build_context,
+                f"{ctx.cls.name}.build must have a return type hint",
+                build_context,
             )
             raise ValidationError()
         assert isinstance(build.type, CallableType)
@@ -98,12 +99,14 @@ class ProducerTransformer:
                     raise ValidationError()
         elif isinstance(return_type, (AnyType, NoneType)):
             ctx.api.fail(
-                f"{ctx.cls.name}.build must have a return type hint", build_context,
+                f"{ctx.cls.name}.build must have a return type hint",
+                build_context,
             )
             raise ValidationError()
         else:
             ctx.api.fail(
-                f"{ctx.cls.name}.build must return an Artifact, not {return_type}", build_context,
+                f"{ctx.cls.name}.build must return an Artifact, not {return_type}",
+                build_context,
             )
             raise ValidationError()
         return return_type, return_items
@@ -134,7 +137,11 @@ class ProducerTransformer:
             return
 
         add_method_to_class(
-            api=ctx.api, cls=ctx.cls, name="__init__", args=build_args, return_type=NoneType(),
+            api=ctx.api,
+            cls=ctx.cls,
+            name="__init__",
+            args=build_args,
+            return_type=NoneType(),
         )
         add_method_to_class(
             api=ctx.api,

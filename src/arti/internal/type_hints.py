@@ -6,10 +6,10 @@ from typing import Any, get_args, get_origin
 
 
 def signature(fn: Callable[..., Any], *, follow_wrapped: bool = True) -> inspect.Signature:
-    """ Convenience wrapper around `inspect.signature`.
+    """Convenience wrapper around `inspect.signature`.
 
-        The returned Signature will have `cls`/`self` parameters removed and
-        `tuple[...]` converted to `tuple(...)` in the `return_annotation`.
+    The returned Signature will have `cls`/`self` parameters removed and
+    `tuple[...]` converted to `tuple(...)` in the `return_annotation`.
     """
     sig = inspect.signature(fn, follow_wrapped=follow_wrapped)
     sig = sig.replace(
