@@ -6,8 +6,7 @@ from arti.internal.utils import class_name, register
 
 
 class Type:
-    """ Type represents a data type.
-    """
+    """Type represents a data type."""
 
     def __init__(self, *, description: Optional[str] = None) -> None:
         if type(self) is Type:
@@ -71,8 +70,7 @@ class Date(Type):
 
 
 class Timestamp(Type):
-    """ UTC timestamp with configurable precision.
-    """
+    """UTC timestamp with configurable precision."""
 
     def __init__(
         self,
@@ -85,8 +83,7 @@ class Timestamp(Type):
 
 
 class TypeAdapter:
-    """ TypeAdapter maps between Artigraph types and a foreign type system.
-    """
+    """TypeAdapter maps between Artigraph types and a foreign type system."""
 
     external: ClassVar[Optional[Any]] = None  # If available, the external type.
     internal: ClassVar[type[Type]]  # Mark which Artigraph Type this maps to.

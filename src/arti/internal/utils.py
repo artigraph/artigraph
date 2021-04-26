@@ -18,9 +18,9 @@ PropReturn = TypeVar("PropReturn")
 
 
 class classproperty(Generic[PropReturn]):
-    """ Access a @classmethod like a @property.
+    """Access a @classmethod like a @property.
 
-        Can be stacked above @classmethod (to satisfy pylint, mypy, etc).
+    Can be stacked above @classmethod (to satisfy pylint, mypy, etc).
     """
 
     def __init__(self, f: Callable[..., PropReturn]) -> None:
@@ -154,8 +154,7 @@ class uint64(_int):
 
 
 def ordinal(n: int) -> str:
-    """ Convert an integer into its ordinal representation.
-    """
+    """Convert an integer into its ordinal representation."""
     n = int(n)
     suffix = ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
     if 11 <= (n % 100) <= 13:
@@ -185,9 +184,9 @@ T = TypeVar("T")
 
 
 class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):
-    """ TypedBox holds a collection of typed values.
+    """TypedBox holds a collection of typed values.
 
-        Subclasses must set the __target_type__ to a base class for the contained values.
+    Subclasses must set the __target_type__ to a base class for the contained values.
     """
 
     __target_type__: ClassVar[type[T]]

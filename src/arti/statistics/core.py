@@ -4,8 +4,7 @@ from arti.artifacts.core import BaseArtifact
 
 
 class Statistic(BaseArtifact):
-    """ A Statistic is a piece of data derived from an Artifact that can be tracked over time.
-    """
+    """A Statistic is a piece of data derived from an Artifact that can be tracked over time."""
 
     # TODO: Set format/storage to some "system default" that can be used across backends.
 

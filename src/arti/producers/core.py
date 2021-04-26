@@ -16,8 +16,7 @@ def _commas(vals: Iterable[Any]) -> str:
 
 
 class Producer:
-    """ A Producer is a task that builds one or more Artifacts.
-    """
+    """A Producer is a task that builds one or more Artifacts."""
 
     # User fields/methods
 
@@ -42,12 +41,12 @@ class Producer:
 
     # pylint: disable=function-redefined,no-self-use
     def map(self, **kwargs: Artifact) -> Any:  # type: ignore
-        """ Map dependencies between input and output Artifact partitions.
+        """Map dependencies between input and output Artifact partitions.
 
-            If there are multiple output Artifacts, they must have equivalent
-            partitioning schemes.
+        If there are multiple output Artifacts, they must have equivalent
+        partitioning schemes.
 
-            The method parameters must match the `build` method.
+        The method parameters must match the `build` method.
         """
         # TODO: if (input_is_partitioned, output_is_partitioned):
         # - (input_is,     output_is    ): Must be overridden (even w/ equivalent partitioning, we can't know if the columns actually align)
@@ -69,8 +68,7 @@ class Producer:
 
     @classmethod
     def _validate_build_sig(cls) -> None:
-        """ Validate the .build method
-        """
+        """Validate the .build method"""
         if cls.build is Producer.build:
             raise ValueError(f"{cls.__name__} - Producers must implement the `build` method.")
         # Validate the parameter definition
@@ -102,8 +100,7 @@ class Producer:
 
     @classmethod
     def _validate_map_sig(cls) -> None:
-        """ Validate partitioned Artifacts and the .map method
-        """
+        """Validate partitioned Artifacts and the .map method"""
         # TODO: Verify cls.signature output Artifacts (if multiple) have equivalent partitioning schemes
         sig = signature(cls.map)
         map_is_overridden = cls.map is not Producer.map
@@ -147,21 +144,21 @@ class Producer:
 
     @property
     def fingerprint(self) -> Fingerprint:
-        """ Return a Fingerprint of the Producer key + version.
+        """Return a Fingerprint of the Producer key + version.
 
-            The input and output Artifacts are ignored as the Producer instance may be used multiple
-            times to produce different output partitions. The "entropy mixing" will be performed for
-            *each* output with the static Producer.fingerprint + that output's specific input
-            partition dependencies.
+        The input and output Artifacts are ignored as the Producer instance may be used multiple
+        times to produce different output partitions. The "entropy mixing" will be performed for
+        *each* output with the static Producer.fingerprint + that output's specific input
+        partition dependencies.
         """
         return Fingerprint.from_string(self.key).combine(self.version.fingerprint)
 
     out: Callable[..., Any]
 
     def out(self, *outputs: Artifact) -> Union[Artifact, tuple[Artifact, ...]]:  # type: ignore
-        """ Configure the output Artifacts this Producer will build.
+        """Configure the output Artifacts this Producer will build.
 
-            The arguments are matched to the `Producer.build` return signature in order.
+        The arguments are matched to the `Producer.build` return signature in order.
         """
         if not outputs:
             outputs = tuple(artifact() for artifact in self.signature.return_annotation)

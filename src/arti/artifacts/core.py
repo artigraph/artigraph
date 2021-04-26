@@ -15,12 +15,12 @@ if TYPE_CHECKING:
 
 
 class BaseArtifact:
-    """ A BaseArtifact is the most basic data structure describing data in the Artigraph ecosystem.
+    """A BaseArtifact is the most basic data structure describing data in the Artigraph ecosystem.
 
-        A BaseArtifact is comprised of three key elements:
-        - schema: spec of the data's structure, such as data types, nullable, etc.
-        - format: the data's serialized format, such as CSV, Parquet, database native, etc.
-        - storage: the data's persistent storage system, such as blob storage, database native, etc.
+    A BaseArtifact is comprised of three key elements:
+    - schema: spec of the data's structure, such as data types, nullable, etc.
+    - format: the data's serialized format, such as CSV, Parquet, database native, etc.
+    - storage: the data's persistent storage system, such as blob storage, database native, etc.
     """
 
     # Schema *must* be set on the class and be rather static - small additions may be necessary at
@@ -55,16 +55,16 @@ class BaseArtifact:
 
 
 class Artifact(BaseArtifact):
-    """ An Artifact is the base structure describing an existing or generated dataset.
+    """An Artifact is the base structure describing an existing or generated dataset.
 
-        An Artifact is comprised of three key elements:
-        - `schema`: spec of the data's structure, such as data types, nullable, etc.
-        - `format`: the data's serialized format, such as CSV, Parquet, database native, etc.
-        - `storage`: the data's persistent storage system, such as blob storage, database native, etc.
+    An Artifact is comprised of three key elements:
+    - `schema`: spec of the data's structure, such as data types, nullable, etc.
+    - `format`: the data's serialized format, such as CSV, Parquet, database native, etc.
+    - `storage`: the data's persistent storage system, such as blob storage, database native, etc.
 
-        In addition to the core elements, an Artifact can be tagged with additional `annotations`
-        (to associate it with human knowledge) and `statistics` (to track derived characteristics
-        over time).
+    In addition to the core elements, an Artifact can be tagged with additional `annotations`
+    (to associate it with human knowledge) and `statistics` (to track derived characteristics
+    over time).
     """
 
     annotations: tuple[Annotation, ...] = ()
@@ -75,14 +75,14 @@ class Artifact(BaseArtifact):
 
     @classmethod
     def cast(cls, value: Any) -> Artifact:
-        """ Attempt to convert an arbitrary value to an appropriate Artifact instance.
+        """Attempt to convert an arbitrary value to an appropriate Artifact instance.
 
-            `Artifact.cast` is used to convert values assigned to an `Artifact.box` (such as
-            `Graph.artifacts`) into an Artifact. When called with:
-            - an Artifact instance, it is returned
-            - a Producer instance with a single output Artifact, the output Artifact is returned
-            - a Producer instance with a multiple output Artifacts, an error is raised
-            - other types, an error is raised
+        `Artifact.cast` is used to convert values assigned to an `Artifact.box` (such as
+        `Graph.artifacts`) into an Artifact. When called with:
+        - an Artifact instance, it is returned
+        - a Producer instance with a single output Artifact, the output Artifact is returned
+        - a Producer instance with a multiple output Artifacts, an error is raised
+        - other types, an error is raised
         """
         # TODO: Leverage a TypeSystem("python") to cast to Artifact classes with "backend native"
         # storage to support builtin assignment and custom type registration.
@@ -106,7 +106,10 @@ class Artifact(BaseArtifact):
         raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
 
     def __init__(
-        self, *, annotations: Iterable[Annotation] = (), statistics: Iterable[Statistic] = (),
+        self,
+        *,
+        annotations: Iterable[Annotation] = (),
+        statistics: Iterable[Statistic] = (),
     ) -> None:
         # Add the instance metadata to the class default.
         self.annotations = tuple(chain(self.annotations, annotations))

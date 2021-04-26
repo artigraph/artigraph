@@ -97,7 +97,11 @@ def test__int_repr() -> None:
 
 
 @pytest.mark.parametrize(
-    ["typ"], ((int64,), (uint64,)),
+    ["typ"],
+    (
+        (int64,),
+        (uint64,),
+    ),
 )
 def test_sizedint(typ: type[Union[int64, uint64]]) -> None:
     low, high = typ(typ._min), typ(typ._max)

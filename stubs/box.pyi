@@ -3,7 +3,6 @@
 from collections.abc import Iterator, MutableMapping
 from typing import Any, Union
 
-
 class BoxError(Exception): ...
 
 class Box(MutableMapping[str, Union[Any, MutableMapping[str, Any]]]):
