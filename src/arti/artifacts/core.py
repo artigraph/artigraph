@@ -5,9 +5,9 @@ from enum import Enum
 from itertools import chain
 from typing import TYPE_CHECKING, Any, Optional
 
-import farmhash
-
+from arti.fingerprints.core import Fingerprint
 from arti.formats.core import Format
+from arti.internal.utils import int64
 from arti.storage.core import Storage
 from arti.types.core import Type
 
@@ -119,7 +119,7 @@ class Artifact(BaseArtifact):
         self,
         *,
         key: Optional[str] = None,
-        fingerprint: Optional[str] = None,
+        fingerprint: Optional[Fingerprint] = None,
         schema: Optional[Type] = None,
         format: Optional[Format] = None,
         storage: Optional[Storage] = None,
@@ -132,38 +132,33 @@ class Artifact(BaseArtifact):
         # Add the instance metadata to the class default.
         self.annotations = tuple(chain(self.annotations, annotations))
         super().__init__()
-        self.key = key  # TODO: better way to set this
+        self.key = key
         self.schema = schema
         self.format = format
         self.storage = storage
         self.path = path
-        self._fingerprint = fingerprint  # TODO: should we re-calculate and verify match?
+        self._fingerprint = fingerprint  # should we re-calculate and verify?
 
     @property
-    def fingerprint(self) -> str:
+    def fingerprint(self) -> Fingerprint:
         if self._fingerprint is None:
             self._fingerprint = self.compute_fingerprint()
         return self._fingerprint
 
-    @fingerprint.setter
-    def fingerprint(self, x: str) -> None:
-        self._fingerprint = x
-
-    def compute_fingerprint(self) -> str:
+    def compute_fingerprint(self) -> Fingerprint:
         # TODO
-        return ""
+        return Fingerprint.from_string(self.key or "")
 
     @property
-    def id(self) -> Any:  # this should be a string but mypy can't find farmhash module
-        # TODO: can/should we cache this like the fingerprint?
+    def id(self) -> int64:
+        # should we cache this like the fingerprint?
         # TODO: what to do if self.storage is null / doesn't have path?
-
-        if not self.storage or not self.storage.path:
-            return farmhash.fingerprint64(self.fingerprint + str(self.partition_key))
-        # probably want to change this when storage/partition_key are fleshed out more
-        return farmhash.fingerprint64(
-            self.fingerprint + str(self.storage.path) + str(self.partition_key)
-        )
+        f = self.fingerprint
+        if self.storage and self.storage.path:
+            f = f.combine(Fingerprint.from_string(self.storage.path))
+        if self.partition_key:
+            f = f.combine(Fingerprint.from_string(self.partition_key))
+        return f.key or int64(0)
 
     @classmethod
     def from_dict(cls, artifact_dict: dict[str, Any]) -> Artifact:
@@ -173,7 +168,7 @@ class Artifact(BaseArtifact):
         try:
             return cls(
                 key=artifact_dict.get("key"),
-                fingerprint=artifact_dict.get("fingerprint"),
+                fingerprint=Fingerprint(artifact_dict.get("fingerprint")),
                 schema=_instantiate_cls(Type, "schema"),
                 format=_instantiate_cls(Format, "format"),
                 storage=_instantiate_cls(Storage, "storage"),
@@ -190,9 +185,9 @@ class Artifact(BaseArtifact):
             "id": self.id,
             "key": self.key,
             "type": ArtifactType.ARTIFACT.value,
-            "fingerprint": str(self.fingerprint),
-            "schema": self.schema.to_dict() if self.schema else "",
-            "format": self.format.to_dict() if self.format else "",
-            "storage": self.storage.to_dict() if self.storage else "",
-            "annotations": self.annotations,  # TODO: this needs to be json-ifiable
+            "fingerprint": self.fingerprint.key,
+            "schema": self.schema.to_dict() if self.schema else {},
+            "format": self.format.to_dict() if self.format else {},
+            "storage": self.storage.to_dict() if self.storage else {},
+            "annotations": self.annotations,
         }

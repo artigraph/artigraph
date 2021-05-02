@@ -19,7 +19,6 @@ class Type:
 
     @classproperty
     def type_registry(cls) -> dict[str, type[Type]]:
-        # import pdb; pdb.set_trace()
         return {t.key: t for t in all_subclasses(cls)}
 
     @classmethod

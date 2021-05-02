@@ -55,7 +55,7 @@ def test_class_validation() -> None:
 
 def test_instantiate() -> None:
     format = Format("csv")
-    storage = Storage("GCS")
+    storage = Storage("gcs")
     schema = Struct({"int_col": Int32(), "str_col": String()})
 
     artifact = Artifact(schema=schema, format=format, storage=storage)
@@ -68,7 +68,7 @@ def test_instantiate() -> None:
 def test_to_from_dict() -> None:
     artifact_dict = {
         "key": "test",
-        "fingerprint": "123",
+        "fingerprint": 123,
         "schema": {
             "type": "Struct",
             "params": {"fields": {"int_col": {"type": "Int32"}, "str_col": {"type": "String"}}},

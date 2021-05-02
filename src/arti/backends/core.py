@@ -4,6 +4,7 @@ from enum import Enum
 from typing import Any
 
 from arti.artifacts.core import Artifact
+from arti.internal.utils import int64
 
 
 class BackendType(Enum):
@@ -22,7 +23,7 @@ class Backend:
     - etc
     """
 
-    def load_artifact(self, artifact_id: str) -> Artifact:
+    def load_artifact(self, artifact_id: int64) -> Artifact:
         raise NotImplementedError
 
     def write_artifact(self, artifact: Artifact) -> None:
@@ -34,8 +35,7 @@ class Backend:
     # def write_producer(self, producer: Producer) -> None:
     #     raise NotImplementedError
 
-    # should graph have a "fingerprint" which is a hash of all its artifacts' fingerprints?
-    def load_graph_dict(self, graph_id: str) -> dict[str, Any]:
+    def load_graph_dict(self, graph_id: int64) -> dict[str, Any]:
         raise NotImplementedError
 
     def write_graph_from_dict(self, graph_dict: dict[str, Any]) -> None:
@@ -44,15 +44,14 @@ class Backend:
 
 class MemoryBackend(Backend):
     def __init__(self) -> None:
-        # each store has serialized objects indexted by their id
-        self.artifact_store: dict[str, dict[str, Any]] = {}
-        self.graph_store: dict[str, dict[str, Any]] = {}
-        # TODO: statistic_store?
-        # figure out how to handle writing artifacts with statistics:
+        # each store has serialized objects indexed by their id
+        self.artifact_store: dict[int64, dict[str, Any]] = {}
+        self.graph_store: dict[int64, dict[str, Any]] = {}
+        # TODO: figure out how to handle writing artifacts with statistics:
         # should there be a separate statistic_store that gets written to
         # alongside the artifact?
 
-    def load_artifact(self, artifact_id: str) -> Artifact:
+    def load_artifact(self, artifact_id: int64) -> Artifact:
         if artifact_id not in self.artifact_store:
             raise ValueError(f"No artifact with id {artifact_id} in the artifact store.")
         artifact_dict = self.artifact_store[artifact_id]
@@ -67,7 +66,7 @@ class MemoryBackend(Backend):
         if artifact_id not in self.artifact_store:
             self.artifact_store[artifact_id] = artifact.to_dict()
 
-    def load_graph_dict(self, graph_id: str) -> dict[str, Any]:
+    def load_graph_dict(self, graph_id: int64) -> dict[str, Any]:
         if graph_id not in self.graph_store:
             raise ValueError(f"No graph with id {graph_id} in the graph store.")
         return self.graph_store[graph_id]
