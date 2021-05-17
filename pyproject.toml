@@ -63,7 +63,7 @@ pytest-flake8 = "1.0.7"
 pytest-isort = "2.0.0"
 pytest-mypy = "0.8.1"
 pytest-sugar = "0.9.4"
-sh = "^1.14.1"
+sh = "^1.14.2"
 typer = "^0.3.2"
 
 
