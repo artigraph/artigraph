@@ -53,7 +53,7 @@ coverage = {version = "^5.5", extras = ["toml"]} # pyproject.toml support
 flake8 = "3.9.2"
 isort = "5.8.0"
 mypy = "0.812"
-pre-commit = "2.12.1"
+pre-commit = "2.13.0"
 pylint = "^2.8.2"
 pytest = "6.2.4"
 pytest-benchmark = "3.4.1"
