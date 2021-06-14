@@ -33,6 +33,13 @@ multi_line_output = 3
 use_parentheses = true
 
 
+[tool.mypy]
+mypy_path = "$MYPY_CONFIG_FILE_DIR/stubs"
+namespace_packages = true
+plugins = "arti.internal.mypy_plugin"
+strict = true
+
+
 [tool.poetry]
 name = "arti"
 version = "0.0.1"
