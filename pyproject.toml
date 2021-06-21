@@ -52,7 +52,7 @@ deprecation = "^2.1.0"
 pyfarmhash = "^0.2.2"
 python = "^3.9"
 python-box = "^5.3.0"
-types-pyfarmhash = "^0.2.0"
+types-pyfarmhash = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "21.4b2"

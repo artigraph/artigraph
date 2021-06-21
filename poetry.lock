@@ -531,7 +531,7 @@ doc = ["mkdocs (>=1.1.2,<2.0.0)", "mkdocs-material (>=5.4.0,<6.0.0)", "markdown-
 
 [[package]]
 name = "types-pyfarmhash"
-version = "0.2.0"
+version = "0.2.1"
 description = "Typing stubs for pyfarmhash"
 category = "main"
 optional = false
@@ -574,7 +574,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "fae18f71390466bab89b446e093697a96ff5e990647e990e77f5fe32fc5b315f"
+content-hash = "55d127d307026276449f7555da0e214ec567881609db3877f45227151edeab5a"
 
 [metadata.files]
 appdirs = [
@@ -924,7 +924,8 @@ typer = [
     {file = "typer-0.3.2.tar.gz", hash = "sha256:5455d750122cff96745b0dec87368f56d023725a7ebc9d2e54dd23dc86816303"},
 ]
 types-pyfarmhash = [
-    {file = "types_pyfarmhash-0.2.0-py2.py3-none-any.whl", hash = "sha256:bb7ce2eb808c3b201c62b2bad209c5f113801067c2609f34db31c2c95a1c6691"},
+    {file = "types-pyfarmhash-0.2.1.tar.gz", hash = "sha256:c9fe7f5bf5002d7453e72b03bd8ce0dd3d8bd70223d783abce547758cd72cb6b"},
+    {file = "types_pyfarmhash-0.2.1-py2.py3-none-any.whl", hash = "sha256:4038decaac51c36c2c8cb9b5e11b149b825a1c1897098563e7a49be034f0658c"},
 ]
 typing-extensions = [
     {file = "typing_extensions-3.7.4.3-py2-none-any.whl", hash = "sha256:dafc7639cde7f1b6e1acc0f457842a83e722ccca8eef5270af2d74792619a89f"},
