@@ -1,6 +1,6 @@
 import pytest
 
-from arti.types.core import Int32, Struct, Timestamp, Type, TypeAdapter, TypeSystem
+from arti.types.core import Int32, Int64, Struct, Timestamp, Type, TypeAdapter, TypeSystem
 
 
 def test_Type() -> None:
@@ -34,3 +34,10 @@ def test_TypeSystem() -> None:
         internal = Int32
 
     assert PyInt32.key == "PyInt32"
+
+
+def test_python_TypeSystem() -> None:
+    from arti.types.python import python
+
+    assert type(python.to_core(int())) == Int64
+    assert python.from_core(Int64()) == int

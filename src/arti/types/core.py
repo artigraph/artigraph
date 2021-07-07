@@ -1,6 +1,9 @@
 from __future__ import annotations
 
-from typing import Any, ClassVar, Literal, Optional, Union
+from collections.abc import Iterator
+from itertools import groupby
+from operator import attrgetter
+from typing import Any, ClassVar, Dict, Literal, Optional, Union
 
 from arti.internal.utils import class_name, register
 
@@ -91,10 +94,12 @@ class TypeAdapter:
 
     key: ClassVar[str] = class_name()
 
-    def to_external(self, type_: Type) -> Any:
+    @classmethod
+    def to_external(cls, type_: Type) -> Any:
         raise NotImplementedError()
 
-    def to_internal(self, type_: Any) -> Type:
+    @classmethod
+    def to_internal(cls, type_: Any) -> Type:
         raise NotImplementedError()
 
 
@@ -104,11 +109,37 @@ class TypeSystem:
         self.adapter_by_key: dict[str, type[TypeAdapter]] = {}
         super().__init__()
 
+    @property
+    def _priority_sorted_adapters(self) -> Iterator[type[TypeAdapter]]:
+        return reversed(sorted(self.adapter_by_key.values(), key=attrgetter("priority")))
+
+    @property
+    def adapter_by_internal_priority(self) -> Dict[Any, type[TypeAdapter]]:
+        return {
+            k: next(v)
+            for k, v in groupby(self._priority_sorted_adapters, key=attrgetter("internal"))
+        }
+
+    @property
+    def adapter_by_external_priority(self) -> Dict[Any, type[TypeAdapter]]:
+        return {
+            k: next(v)
+            for k, v in groupby(self._priority_sorted_adapters, key=attrgetter("external"))
+        }
+
     def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
         return register(self.adapter_by_key, adapter.key, adapter)
 
     def from_core(self, type_: Type) -> Any:
-        raise NotImplementedError()
+        try:
+            external = self.adapter_by_internal_priority[type(type_)].to_external(type_)
+        except KeyError:
+            raise NotImplementedError(f"No TypeAdapter for core type {type(type_)}.")
+        return external
 
     def to_core(self, type_: Any) -> Type:
-        raise NotImplementedError()
+        try:
+            internal = self.adapter_by_external_priority[type(type_)].to_internal(type_)
+        except KeyError:
+            raise NotImplementedError(f"No TypeAdapter for external type {type(type_)}.")
+        return internal
