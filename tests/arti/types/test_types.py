@@ -27,6 +27,10 @@ def test_Timestamp() -> None:
 def test_TypeSystem() -> None:
     python = TypeSystem("python")
     assert python.key == "python"
+    with pytest.raises(NotImplementedError):
+        python.from_core(Int32())
+    with pytest.raises(NotImplementedError):
+        python.to_core(int())
 
     @python.register_adapter
     class PyInt32(TypeAdapter):
