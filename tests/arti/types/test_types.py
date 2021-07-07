@@ -1,7 +1,7 @@
 import pytest
 from pydantic import ValidationError
 
-from arti.types.core import Int32, Struct, Timestamp, Type, TypeAdapter, TypeSystem
+from arti.types.core import Int32, Int64, Struct, Timestamp, Type, TypeAdapter, TypeSystem
 
 
 def test_Type() -> None:
@@ -28,6 +28,10 @@ def test_Timestamp() -> None:
 def test_TypeSystem() -> None:
     python = TypeSystem(key="python")
     assert python.key == "python"
+    with pytest.raises(NotImplementedError):
+        python.from_core(Int32())
+    with pytest.raises(NotImplementedError):
+        python.to_core(int)
 
     @python.register_adapter
     class PyInt32(TypeAdapter):
@@ -35,3 +39,10 @@ def test_TypeSystem() -> None:
         internal = Int32
 
     assert PyInt32.key == "PyInt32"
+
+
+def test_python_TypeSystem() -> None:
+    from arti.types.python import python
+
+    assert isinstance(python.to_core(int), Int64)
+    assert python.from_core(Int64()) is int
