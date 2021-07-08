@@ -61,10 +61,10 @@ class Producer:
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)  # type: ignore # https://github.com/python/mypy/issues/4660
         cls.signature = signature(cls.build)
         cls._validate_build_sig()
         cls._validate_map_sig()
-        super().__init_subclass__()
 
     @classmethod
     def _validate_build_sig(cls) -> None:

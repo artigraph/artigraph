@@ -42,11 +42,11 @@ class BaseArtifact:
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)  # type: ignore # https://github.com/python/mypy/issues/4660
         if cls.format is not None:
             cls.format.validate(schema=cls.schema)
         if cls.storage is not None:
             cls.storage.validate(schema=cls.schema, format=cls.format)
-        super().__init_subclass__()
 
     def __init__(self) -> None:
         # TODO: Allow storage/format override and re-validate them.
