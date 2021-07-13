@@ -1,7 +1,7 @@
 import pytest
+from pydantic import ValidationError
 
 from arti.types.core import Int32, Struct, Timestamp, Type, TypeAdapter, TypeSystem
-from pydantic import ValidationError
 
 
 def test_Type() -> None:

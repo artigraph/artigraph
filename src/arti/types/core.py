@@ -2,9 +2,10 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, Literal, Optional, Union
 
+from pydantic import PrivateAttr
+
 from arti.internal.models import Model, requires_subclass
 from arti.internal.utils import class_name, register
-from pydantic import PrivateAttr
 
 
 @requires_subclass

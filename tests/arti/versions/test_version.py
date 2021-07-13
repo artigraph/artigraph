@@ -1,9 +1,9 @@
 from datetime import datetime, timezone
 
 import pytest
+from pydantic import ValidationError
 
 from arti.versions.core import GitCommit, SemVer, String, Timestamp, Version, _Source
-from pydantic import ValidationError
 
 
 def test_GitCommit() -> None:

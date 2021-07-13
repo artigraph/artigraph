@@ -4,10 +4,11 @@ from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any, cast
 
+from pydantic import Field, validator
+
 from arti.fingerprints.core import Fingerprint
 from arti.internal.models import Model, requires_subclass
 from arti.internal.utils import qname
-from pydantic import Field, validator
 
 
 @requires_subclass
