@@ -6,7 +6,7 @@ from arti.statistics.core import Statistic
 from arti.storage.core import Storage
 from arti.types.core import Int32, Struct, TypeSystem
 
-dummy_type_system = TypeSystem("dummy")
+dummy_type_system = TypeSystem(key="dummy")
 
 
 class DummyAnnotation(Annotation):
@@ -26,7 +26,7 @@ class DummyStorage(Storage):
 
 
 class A1(Artifact):
-    schema = Struct({"x": Int32()})
+    schema = Struct(fields={"x": Int32()})
     format = DummyFormat()
     storage = DummyStorage()
 

@@ -1,25 +1,28 @@
 import inspect
-import os
 import subprocess
 from collections.abc import Callable
-from datetime import datetime
-from typing import Any, Optional, cast
+from datetime import datetime, timezone
+from typing import Any, cast
 
 from arti.fingerprints.core import Fingerprint
+from arti.internal.models import Model, requires_subclass
 from arti.internal.utils import qname
+from pydantic import Field, validator
 
 
-class Version:
+@requires_subclass
+class Version(Model):
     @property
     def fingerprint(self) -> Fingerprint:
         raise NotImplementedError(f"{qname(self)}.fingerprint is not implemented!")
 
 
 class GitCommit(Version):
-    def __init__(self, *, envvar: str = "GIT_SHA"):
-        if (sha := os.environ.get(envvar)) is None:
-            sha = subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
-        self.sha = sha
+    sha: str = Field(
+        default_factory=(
+            lambda: subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
+        )
+    )
 
     @property
     def fingerprint(self) -> Fingerprint:
@@ -33,10 +36,9 @@ class SemVer(Version):
     historical backfills. The major version MUST be incremented on schema or methodological changes.
     """
 
-    def __init__(self, major: int, minor: int, patch: int):
-        self.major = major
-        self.minor = minor
-        self.patch = patch
+    major: int
+    minor: int
+    patch: int
 
     @property
     def fingerprint(self) -> Fingerprint:
@@ -47,8 +49,7 @@ class SemVer(Version):
 
 
 class String(Version):
-    def __init__(self, value: str):
-        self.value = value
+    value: str
 
     @property
     def fingerprint(self) -> Fingerprint:
@@ -59,17 +60,21 @@ class _SourceDescriptor:  # Experimental :)
     # Using AST rather than literal source will likely be less "noisy":
     #     https://github.com/replicahq/artigraph/pull/36#issuecomment-824131156
     def __get__(self, obj: Any, type_: type) -> String:
-        return String(inspect.getsource(type_))
+        return String(value=inspect.getsource(type_))
 
 
 _Source = cast(Callable[[], String], _SourceDescriptor)
 
 
 class Timestamp(Version):
-    def __init__(self, dt: Optional[datetime] = None):
+    dt: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc))
+
+    @validator("dt", always=True)
+    @classmethod
+    def _requires_timezone(cls, dt: datetime) -> datetime:
         if dt is not None and dt.tzinfo is None:
             raise ValueError("Timestamp requires a timezone-aware datetime!")
-        self.dt = dt
+        return dt
 
     @property
     def fingerprint(self) -> Fingerprint:

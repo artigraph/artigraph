@@ -10,6 +10,17 @@ from arti.internal.type_hints import signature
 from arti.internal.utils import class_name, ordinal
 from arti.versions.core import SemVer, Version
 
+# TODO: Consider making Producer a proper pydantic Model:
+# - pydantic would be responsible for figuring out __init__ (not us)
+# - `build` and `map` signatures subsets of __init__, after unwrapping (eg: View[...])
+#   - eases separate inputs for `build` and `map` (eg: mapping only args not used in build)
+#
+# TODO: Add ProducerMetadata model:
+#     class Producer(Model):
+#         annotations: tuple[Annotation, ...]
+#         fingerprint: Fingerprint
+#         version: Version
+
 
 def _commas(vals: Iterable[Any]) -> str:
     return ", ".join([str(v) for v in vals])
@@ -21,7 +32,7 @@ class Producer:
     # User fields/methods
 
     key: str = class_name()
-    version: Version = SemVer(0, 0, 1)
+    version: Version = SemVer(major=0, minor=0, patch=1)
 
     # Relax mypy "incompatible signature" warning for subclasses - we add some stricter checking
     # with the arti.internal.mypy_plugin. Once PEP 612[1] is available in 3.10+typing_extensions[2],
@@ -116,7 +127,7 @@ class Producer:
         pass  # TODO: Verify map output hint matches TBD spec
 
     def __init__(self, **kwargs: Artifact) -> None:
-        if type(self) is Producer:
+        if type(self) is Producer:  # pylint: disable=unidiomatic-typecheck
             raise ValueError("Producer cannot be instantiated directly!")
         self._validate_build_args(kwargs)
         self._input_artifacts = kwargs
