@@ -1,7 +1,8 @@
 from typing import Any
 
-from arti.internal.utils import class_name
 from pydantic import BaseModel, Extra, root_validator
+
+from arti.internal.utils import class_name
 
 MODELS_REQUIRING_SUBCLASS = []
 
