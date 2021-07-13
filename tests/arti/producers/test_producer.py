@@ -29,8 +29,8 @@ def test_Producer() -> None:
 def test_Producer_fingerprint() -> None:
     p1 = P1(a1=A1())
     assert p1.fingerprint == Fingerprint.from_string("P1") ^ p1.version.fingerprint
-    p1.key, p1.version = "abc", String("xyz")
-    assert p1.fingerprint == Fingerprint.from_string("abc") ^ String("xyz").fingerprint
+    p1.key, p1.version = "abc", String(value="xyz")
+    assert p1.fingerprint == Fingerprint.from_string("abc") ^ String(value="xyz").fingerprint
 
 
 def test_Producer_out() -> None:
@@ -144,7 +144,8 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
 
 def test_Producer_bad_init() -> None:
-    with pytest.raises(ValueError, match="Producer cannot be instantiated directly!"):
+    # NOTE: Producers aren't currently models - so raises a ValueError rather than pydantic.ValidationError
+    with pytest.raises(ValueError, match="cannot be instantiated directly"):
         Producer()
     with pytest.raises(ValueError, match="Unknown argument"):
         DummyProducer(junk=5)  # type: ignore

@@ -1,10 +1,11 @@
 import pytest
 
 from arti.types.core import Int32, Struct, Timestamp, Type, TypeAdapter, TypeSystem
+from pydantic import ValidationError
 
 
 def test_Type() -> None:
-    with pytest.raises(ValueError, match="Type cannot be instantiated directly"):
+    with pytest.raises(ValidationError, match="cannot be instantiated directly"):
         Type()
 
     class MyType(Type):
@@ -16,16 +17,16 @@ def test_Type() -> None:
 
 def test_Struct() -> None:
     fields: dict[str, Type] = {"x": Int32()}
-    assert Struct(fields).fields == fields
+    assert Struct(fields=fields).fields == fields
 
 
 def test_Timestamp() -> None:
-    assert Timestamp("second").precision == "second"
-    assert Timestamp("millisecond").precision == "millisecond"
+    assert Timestamp(precision="second").precision == "second"
+    assert Timestamp(precision="millisecond").precision == "millisecond"
 
 
 def test_TypeSystem() -> None:
-    python = TypeSystem("python")
+    python = TypeSystem(key="python")
     assert python.key == "python"
 
     @python.register_adapter

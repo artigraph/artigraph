@@ -2,27 +2,23 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, Literal, Optional, Union
 
+from arti.internal.models import Model, requires_subclass
 from arti.internal.utils import class_name, register
+from pydantic import PrivateAttr
 
 
-class Type:
+@requires_subclass
+class Type(Model):
     """Type represents a data type."""
 
-    def __init__(self, *, description: Optional[str] = None) -> None:
-        if type(self) is Type:
-            raise ValueError(
-                "Type cannot be instantiated directly, please use the appropriate subclass!"
-            )
-        self.description = description
+    description: Optional[str]
 
 
 # TODO: Expand the core types (and/or describe how to customize).
 
 
 class Struct(Type):
-    def __init__(self, fields: dict[str, Type], *, description: Optional[str] = None) -> None:
-        self.fields = fields
-        super().__init__(description=description)
+    fields: dict[str, Type]
 
 
 class Null(Type):
@@ -72,14 +68,7 @@ class Date(Type):
 class Timestamp(Type):
     """UTC timestamp with configurable precision."""
 
-    def __init__(
-        self,
-        precision: Union[Literal["second"], Literal["millisecond"]],
-        *,
-        description: Optional[str] = None,
-    ) -> None:
-        self.precision = precision
-        super().__init__(description=description)
+    precision: Union[Literal["second"], Literal["millisecond"]]
 
 
 class TypeAdapter:
@@ -98,14 +87,13 @@ class TypeAdapter:
         raise NotImplementedError()
 
 
-class TypeSystem:
-    def __init__(self, key: str) -> None:
-        self.key = key
-        self.adapter_by_key: dict[str, type[TypeAdapter]] = {}
-        super().__init__()
+class TypeSystem(Model):
+    key: str
+
+    _adapter_by_key: dict[str, type[TypeAdapter]] = PrivateAttr(default_factory=dict)
 
     def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
-        return register(self.adapter_by_key, adapter.key, adapter)
+        return register(self._adapter_by_key, adapter.key, adapter)
 
     def from_core(self, type_: Type) -> Any:
         raise NotImplementedError()

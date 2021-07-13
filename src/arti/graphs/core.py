@@ -7,6 +7,9 @@ from arti.artifacts.core import Artifact
 from arti.backends.core import Backend
 from arti.internal.utils import TypedBox
 
+# TODO: Add GraphMetadata model
+
+
 ArtifactBox = TypedBox[Artifact]
 
 

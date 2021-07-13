@@ -4,14 +4,22 @@ from collections.abc import Iterable
 from itertools import chain
 from typing import TYPE_CHECKING, Any, Optional
 
+from arti.annotations.core import Annotation
 from arti.formats.core import Format
 from arti.storage.core import Storage
 from arti.types.core import Type
 
 if TYPE_CHECKING:
-    from arti.annotations.core import Annotation
     from arti.producers.core import Producer
     from arti.statistics.core import Statistic
+
+# TODO: Add ArtifactMetadata and/or ArtifactPartition models:
+#     class ArtifactPartition(Model):
+#         annotations: tuple[Annotation, ...]
+#         format: Format
+#         partition_key: PartitionKey
+#         schema: Type
+#         storage: Storage
 
 
 class BaseArtifact:
@@ -44,9 +52,9 @@ class BaseArtifact:
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)  # type: ignore # https://github.com/python/mypy/issues/4660
         if cls.format is not None:
-            cls.format.validate(schema=cls.schema)
+            cls.format.validate_artifact(schema=cls.schema)
         if cls.storage is not None:
-            cls.storage.validate(schema=cls.schema, format=cls.format)
+            cls.storage.validate_artifact(schema=cls.schema, format=cls.format)
 
     def __init__(self) -> None:
         # TODO: Allow storage/format override and re-validate them.

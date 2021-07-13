@@ -25,18 +25,16 @@ def test_cast_todo() -> None:
 
 def test_class_validation() -> None:
     class F1(DummyFormat):
-        def __init__(self, error: bool) -> None:
-            self.error = error
+        error: bool
 
-        def validate(self, schema: Optional[Type]) -> None:
+        def validate_artifact(self, schema: Optional[Type]) -> None:
             if self.error:
                 raise ValueError("Format - Boo!")
 
     class S1(Storage):
-        def __init__(self, error: bool) -> None:
-            self.error = error
+        error: bool
 
-        def validate(self, schema: Optional[Type], format: Optional[Format]) -> None:
+        def validate_artifact(self, schema: Optional[Type], format: Optional[Format]) -> None:
             if self.error:
                 raise ValueError("Storage - Boo!")
 
