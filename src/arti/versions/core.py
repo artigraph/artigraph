@@ -1,5 +1,6 @@
 import inspect
 import subprocess
+from abc import abstractmethod
 from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any, cast
@@ -15,6 +16,7 @@ class Version(Model):
     __abstract__ = True
 
     @property
+    @abstractmethod
     def fingerprint(self) -> Fingerprint:
         raise NotImplementedError(f"{qname(self)}.fingerprint is not implemented!")
 
