@@ -1,7 +1,6 @@
 from datetime import datetime, timezone
 
 import pytest
-from pydantic import ValidationError
 
 from arti.versions.core import GitCommit, SemVer, String, Timestamp, Version, _Source
 
@@ -64,12 +63,9 @@ def test_Timestamp() -> None:
 
 
 def test_Version() -> None:
-    with pytest.raises(ValidationError, match="cannot be instantiated directly"):
-        Version()
-
-    class V(Version):
-        pass
-
-    v = V()
-    with pytest.raises(NotImplementedError, match="fingerprint is not implemented"):
-        v.fingerprint
+    # Version sets an @abstractmethod, so ABC catches it before our Model.__abstract__ validator.
+    with pytest.raises(
+        TypeError,
+        match="Can't instantiate abstract class Version with abstract method fingerprint",
+    ):
+        Version()  # type: ignore
