@@ -3,12 +3,12 @@ from __future__ import annotations
 from typing import ClassVar, Optional
 
 from arti.formats.core import Format
-from arti.internal.models import Model, requires_subclass
+from arti.internal.models import Model
 from arti.types.core import Type, TypeSystem
 
 
-@requires_subclass
 class Storage(Model):
+    __abstract__ = True
     type_system: ClassVar[Optional[TypeSystem]]
 
     def validate_artifact(self, schema: Optional[Type], format: Optional[Format]) -> None:
