@@ -4,14 +4,14 @@ from typing import Any, ClassVar, Literal, Optional, Union
 
 from pydantic import PrivateAttr
 
-from arti.internal.models import Model, requires_subclass
+from arti.internal.models import Model
 from arti.internal.utils import class_name, register
 
 
-@requires_subclass
 class Type(Model):
     """Type represents a data type."""
 
+    __abstract__ = True
     description: Optional[str]
 
 

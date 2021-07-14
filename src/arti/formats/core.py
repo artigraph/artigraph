@@ -2,11 +2,10 @@ from __future__ import annotations
 
 from typing import ClassVar, Optional
 
-from arti.internal.models import Model, requires_subclass
+from arti.internal.models import Model
 from arti.types.core import Type, TypeSystem
 
 
-@requires_subclass
 class Format(Model):
     """Format represents file formats such as CSV, Parquet, native (eg: databases), etc.
 
@@ -14,6 +13,7 @@ class Format(Model):
     Artigraph types and any external type information.
     """
 
+    __abstract__ = True
     type_system: ClassVar[TypeSystem]
 
     def validate_artifact(self, schema: Optional[Type]) -> None:

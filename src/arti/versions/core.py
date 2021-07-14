@@ -7,12 +7,13 @@ from typing import Any, cast
 from pydantic import Field, validator
 
 from arti.fingerprints.core import Fingerprint
-from arti.internal.models import Model, requires_subclass
+from arti.internal.models import Model
 from arti.internal.utils import qname
 
 
-@requires_subclass
 class Version(Model):
+    __abstract__ = True
+
     @property
     def fingerprint(self) -> Fingerprint:
         raise NotImplementedError(f"{qname(self)}.fingerprint is not implemented!")
