@@ -30,8 +30,6 @@ def test_Fingerprint() -> None:
     assert not Fingerprint.empty().is_identity
     assert not Fingerprint.identity().is_empty
 
-    assert str(f1) == repr(f1) == "Fingerprint(key=int64(1))"
-
 
 def test_Fingerprint_math() -> None:
     f1, f2, f3, f4, f5 = [Fingerprint(key=int64(i)) for i in range(5)]
