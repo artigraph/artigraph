@@ -7,7 +7,7 @@ from typing import Optional
 import farmhash
 
 from arti.internal.models import Model
-from arti.internal.utils import int64, qname, uint64
+from arti.internal.utils import int64, uint64
 
 
 class Fingerprint(Model):
@@ -67,11 +67,6 @@ class Fingerprint(Model):
     @property
     def is_identity(self) -> bool:
         return self.key == 0
-
-    def __repr__(self) -> str:
-        return f"{qname(self)}(key={self.key})"
-
-    __str__ = __repr__
 
     def __xor__(self, other: Fingerprint) -> Fingerprint:
         if self.key is None:
