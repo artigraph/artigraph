@@ -44,5 +44,5 @@ def test_TypeSystem() -> None:
 def test_python_TypeSystem() -> None:
     from arti.types.python import python
 
-    assert type(python.to_core(int())) == Int64
-    assert python.from_core(Int64()) == int
+    assert isinstance(python.to_core(int()), Int64)
+    assert python.from_core(Int64()) is int
