@@ -114,7 +114,7 @@ class TypeSystem:
         return reversed(sorted(self.adapter_by_key.values(), key=attrgetter("priority")))
 
     @property
-    def adapter_by_internal_priority(self) -> Dict[Any, type[TypeAdapter]]:
+    def adapter_by_internal_priority(self) -> dict[Any, type[TypeAdapter]]:
         return {
             k: next(v)
             for k, v in groupby(self._priority_sorted_adapters, key=attrgetter("internal"))
