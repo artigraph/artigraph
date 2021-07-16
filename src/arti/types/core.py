@@ -3,7 +3,7 @@ from __future__ import annotations
 from collections.abc import Iterator
 from itertools import groupby
 from operator import attrgetter
-from typing import Any, ClassVar, Dict, Literal, Optional, Union
+from typing import Any, ClassVar, Literal, Optional, Union
 
 from arti.internal.utils import class_name, register
 
