@@ -100,7 +100,7 @@ class TypeSystem(Model):
 
     @property
     def _priority_sorted_adapters(self) -> Iterator[type[TypeAdapter]]:
-        return reversed(sorted(self.adapter_by_key.values(), key=attrgetter("priority")))
+        return reversed(sorted(self._adapter_by_key.values(), key=attrgetter("priority")))
 
     @property
     def adapter_by_internal_priority(self) -> dict[Any, type[TypeAdapter]]:
