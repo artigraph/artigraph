@@ -110,7 +110,7 @@ class TypeSystem(Model):
         }
 
     @property
-    def adapter_by_external_priority(self) -> Dict[Any, type[TypeAdapter]]:
+    def adapter_by_external_priority(self) -> dict[Any, type[TypeAdapter]]:
         return {
             k: next(v)
             for k, v in groupby(self._priority_sorted_adapters, key=attrgetter("external"))
