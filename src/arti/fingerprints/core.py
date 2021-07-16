@@ -6,10 +6,11 @@ from typing import Optional
 
 import farmhash
 
-from arti.internal.utils import int64, qname, uint64
+from arti.internal.models import Model
+from arti.internal.utils import int64, uint64
 
 
-class Fingerprint:
+class Fingerprint(Model):
     """Fingerprint represents a unique identity as an int64 value.
 
     Using an int(64) has a number of convenient properties:
@@ -24,8 +25,7 @@ class Fingerprint:
     - `identity()`: return the other Fingerprint
     """
 
-    def __init__(self, key: Optional[int64]):
-        self.key = key
+    key: Optional[int64]
 
     def combine(self, *others: Fingerprint) -> Fingerprint:
         return reduce(xor, others, self)
@@ -33,7 +33,7 @@ class Fingerprint:
     @classmethod
     def empty(cls) -> Fingerprint:
         """Return a Fingerprint that, when combined, will return Fingerprint.empty()"""
-        return cls(None)
+        return cls(key=None)
 
     @classmethod
     def from_int(cls, x: int, /) -> Fingerprint:
@@ -41,7 +41,7 @@ class Fingerprint:
 
     @classmethod
     def from_int64(cls, x: int64, /) -> Fingerprint:
-        return cls(x)
+        return cls(key=x)
 
     @classmethod
     def from_string(cls, x: str, /) -> Fingerprint:
@@ -58,7 +58,7 @@ class Fingerprint:
     @classmethod
     def identity(cls) -> Fingerprint:
         """Return a Fingerprint that, when combined, will return the other Fingerprint."""
-        return cls(int64(0))
+        return cls(key=int64(0))
 
     @property
     def is_empty(self) -> bool:
@@ -68,18 +68,13 @@ class Fingerprint:
     def is_identity(self) -> bool:
         return self.key == 0
 
-    def __repr__(self) -> str:
-        return f"{qname(self)}(key={self.key})"
-
-    __str__ = __repr__
-
     def __xor__(self, other: Fingerprint) -> Fingerprint:
         if self.key is None:
             return Fingerprint.empty()
         if isinstance(other, Fingerprint):
             if other.key is None:
                 return Fingerprint.empty()
-            return Fingerprint(self.key ^ other.key)
+            return Fingerprint(key=self.key ^ other.key)
         return NotImplemented
 
     def __eq__(self, other: object) -> bool:

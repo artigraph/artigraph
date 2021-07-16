@@ -1,5 +1,4 @@
 from datetime import datetime, timezone
-from unittest.mock import patch
 
 import pytest
 
@@ -7,18 +6,9 @@ from arti.versions.core import GitCommit, SemVer, String, Timestamp, Version, _S
 
 
 def test_GitCommit() -> None:
-    # Prefer env var
-    with patch.dict("os.environ", values={"GIT_SHA": "test"}):
-        ver = GitCommit()
-        assert ver.sha == "test"
-        assert ver.fingerprint == 8581389452482819506
-    # Change default env var name
-    with patch.dict("os.environ", values={"GIT_COMMIT": "test"}):
-        ver = GitCommit(envvar="GIT_COMMIT")
-        assert ver.sha == "test"
-        assert ver.fingerprint == 8581389452482819506
-    # Without env var, fall back to `git rev-parse`
-    assert len(GitCommit(envvar="non-existent").sha) == 40
+    assert GitCommit(sha="test").sha == "test"
+    assert GitCommit(sha="test").fingerprint == 8581389452482819506
+    assert len(GitCommit().sha) == 40  # Length of git sha
 
 
 @pytest.mark.parametrize(
@@ -38,7 +28,7 @@ def test_GitCommit() -> None:
     ),
 )
 def test_SemVer(major: int, minor: int, patch: int, fingerprint: int) -> None:
-    assert SemVer(major, minor, patch).fingerprint == fingerprint
+    assert SemVer(major=major, minor=minor, patch=patch).fingerprint == fingerprint
 
 
 def test__Source() -> None:
@@ -57,21 +47,25 @@ def test__Source() -> None:
 
 
 def test_String() -> None:
-    assert String("ok").fingerprint == 5227454011934222951
+    assert String(value="ok").fingerprint == 5227454011934222951
 
 
 def test_Timestamp() -> None:
     d = datetime.now(tz=timezone.utc)
-    assert Timestamp(d).fingerprint == round(d.timestamp())
+    assert Timestamp(dt=d).fingerprint == round(d.timestamp())
     # Check the default is ~now.
-    key, now = Timestamp().fingerprint.key, round(datetime.utcnow().timestamp())
+    key, now = Timestamp().fingerprint.key, round(datetime.now(tz=timezone.utc).timestamp())
     assert key is not None
     assert now - 1 <= key <= now + 1
     # Confirm naive datetime are not supported
-    with pytest.raises(ValueError):
-        Timestamp(datetime.now())
+    with pytest.raises(ValueError, match="Timestamp requires a timezone-aware datetime"):
+        Timestamp(dt=datetime.now())
 
 
 def test_Version() -> None:
-    with pytest.raises(NotImplementedError):
-        Version().fingerprint
+    # Version sets an @abstractmethod, so ABC catches it before our Model.__abstract__ validator.
+    with pytest.raises(
+        TypeError,
+        match="Can't instantiate abstract class Version with abstract method fingerprint",
+    ):
+        Version()  # type: ignore
