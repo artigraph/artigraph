@@ -4,7 +4,7 @@ from typing import Any
 
 from arti.types.core import Int64, Type, TypeAdapter, TypeSystem
 
-python = TypeSystem(key="python")
+python = TypeSystem(key="python", system_metaclass=True)
 
 
 @python.register_adapter

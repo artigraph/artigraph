@@ -95,6 +95,7 @@ class TypeAdapter:
 
 class TypeSystem(Model):
     key: str
+    system_metaclass: bool = False  # whether system types are instances of metaclass (e.g., `type`)
 
     _adapter_by_key: dict[str, type[TypeAdapter]] = PrivateAttr(default_factory=dict)
 
@@ -119,6 +120,12 @@ class TypeSystem(Model):
     def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
         return register(self._adapter_by_key, adapter.key, adapter)
 
+    def _external_type_to_adapter_key(self, type_: Any) -> Any:
+        if self.system_metaclass:
+            return type_
+        else:
+            return type(type_)
+
     def from_core(self, type_: Type) -> Any:
         try:
             external = self.adapter_by_internal_priority[type(type_)].to_external(type_)
@@ -128,7 +135,9 @@ class TypeSystem(Model):
 
     def to_core(self, type_: Any) -> Type:
         try:
-            internal = self.adapter_by_external_priority[type(type_)].to_internal(type_)
+            internal = self.adapter_by_external_priority[
+                self._external_type_to_adapter_key(type_)
+            ].to_internal(type_)
         except KeyError:
             raise NotImplementedError(f"No TypeAdapter for external type {type(type_)}.")
         return internal
