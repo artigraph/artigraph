@@ -6,7 +6,7 @@ from arti.types.core import Type
 
 
 class Partitioner:
-    schema: ClassVar[Type]
+    type: ClassVar[Type]
 
 
 _Upstream = TypeVar("_Upstream", bound=Any)

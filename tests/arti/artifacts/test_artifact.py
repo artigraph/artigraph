@@ -27,14 +27,14 @@ def test_class_validation() -> None:
     class F1(DummyFormat):
         error: bool
 
-        def validate_artifact(self, schema: Optional[Type]) -> None:
+        def validate_artifact(self, type_: Optional[Type]) -> None:
             if self.error:
                 raise ValueError("Format - Boo!")
 
     class S1(Storage):
         error: bool
 
-        def validate_artifact(self, schema: Optional[Type], format: Optional[Format]) -> None:
+        def validate_artifact(self, type_: Optional[Type], format: Optional[Format]) -> None:
             if self.error:
                 raise ValueError("Storage - Boo!")
 

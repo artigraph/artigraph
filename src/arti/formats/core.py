@@ -16,7 +16,7 @@ class Format(Model):
     _abstract_ = True
     type_system: ClassVar[TypeSystem]
 
-    def validate_artifact(self, schema: Optional[Type]) -> None:
-        # TODO: Check self.type_system supports the schema. We can likely add a TypeSystem method
+    def validate_artifact(self, type_: Optional[Type]) -> None:
+        # TODO: Check self.type_system supports the type. We can likely add a TypeSystem method
         # that will check for matching TypeAdapters.
         pass

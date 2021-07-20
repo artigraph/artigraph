@@ -17,20 +17,20 @@ class Statistic(BaseArtifact):
 #
 #
 # class Count(FieldStatistic):
-#     schema = Int64()
+#     type = Int64()
 #
 #
 # class CountDistinct(FieldStatistic):
-#     schema = Int64()
+#     type = Int64()
 #
 #
 # class MaxInt64(FieldStatistic):
-#     schema = Int64()
+#     type = Int64()
 #
 #
 # class MinInt64(FieldStatistic):
-#     schema = Int64()
+#     type = Int64()
 #
 #
 # class SumInt64(FieldStatistic):
-#     schema = Int64()
+#     type = Int64()

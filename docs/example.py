@@ -12,13 +12,13 @@ class Vendor(Annotation):
 
 
 class Traces(Artifact):
-    schema = Struct(
+    type = Struct(
         {"uid": Int64(), "lat": Int64(), "lng": Int64(), "timestamp": Timestamp("millisecond")}
     )
 
 
 class ODs(Artifact):
-    schema = Struct(
+    type = Struct(
         {
             "origin": String(),
             "destination": String(),
