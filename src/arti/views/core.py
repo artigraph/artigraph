@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Any, ClassVar, Optional
 
-from multimethod import multimethod
+from multimethod import multidispatch
 
 from arti.artifacts.core import Artifact
 from arti.formats.core import Format
@@ -18,7 +18,9 @@ class View(Model):
     """
 
     __abstract__ = True
-    type_system: ClassVar[TypeSystem] = None
+
+    type_system: ClassVar[TypeSystem]
+
     data: Optional[Any] = None
 
     # TODO write/read partitioned data, column subset
@@ -31,11 +33,11 @@ class View(Model):
         write(self, artifact.format, artifact.storage)
 
 
-@multimethod
+@multidispatch
 def read(view: View, format: Format, storage: Storage) -> View:
     ...  # pragma: no cover
 
 
-@multimethod
+@multidispatch
 def write(view: View, format: Format, storage: Storage) -> None:
     ...  # pragma: no cover
