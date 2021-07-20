@@ -13,13 +13,13 @@ class Python(View):
 
 
 @read.register
-def _(view: Python, format: Pickle, storage: LocalFile):
+def _read(view: Python, format: Pickle, storage: LocalFile):
     with open(storage.path, "rb") as file:
         view.data = pickle.load(file)
     return view
 
 
 @write.register
-def _(view: Python, format: Pickle, storage: LocalFile):
+def _write(view: Python, format: Pickle, storage: LocalFile):
     with open(storage.path, "wb") as file:
         pickle.dump(view.data, file)
