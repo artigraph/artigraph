@@ -7,7 +7,7 @@ from arti.internal.models import Model
 
 
 class Abstract(Model):
-    __abstract__: ClassVar[bool] = True
+    _abstract_: ClassVar[bool] = True
 
 
 class Concrete(Model):

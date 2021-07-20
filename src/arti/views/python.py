@@ -10,7 +10,7 @@ from arti.views.core import View
 
 
 class _PythonBuiltin(View):
-    __abstract__ = True
+    _abstract_ = True
 
     type_system: ClassVar[TypeSystem] = python
 

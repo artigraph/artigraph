@@ -13,7 +13,7 @@ class Format(Model):
     Artigraph types and any external type information.
     """
 
-    __abstract__ = True
+    _abstract_ = True
     type_system: ClassVar[TypeSystem]
 
     def validate_artifact(self, schema: Optional[Type]) -> None:

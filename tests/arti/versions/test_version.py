@@ -63,7 +63,7 @@ def test_Timestamp() -> None:
 
 
 def test_Version() -> None:
-    # Version sets an @abstractmethod, so ABC catches it before our Model.__abstract__ validator.
+    # Version sets an @abstractmethod, so ABC catches it before our Model._abstract_ validator.
     with pytest.raises(
         TypeError,
         match="Can't instantiate abstract class Version with abstract method fingerprint",

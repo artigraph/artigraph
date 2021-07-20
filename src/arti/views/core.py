@@ -13,7 +13,7 @@ class View(Model):
     Examples include pandas.DataFrame, dask.DataFrame, a BigQuery table.
     """
 
-    __abstract__ = True
+    _abstract_ = True
     _registry_: ClassVar[dict[type, type[View]]] = dict()
 
     priority: ClassVar[int] = 0  # Set priority of this view for its python_type. Higher is better.
@@ -22,5 +22,5 @@ class View(Model):
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
-        if not cls.__abstract__:
+        if not cls._abstract_:
             register(cls._registry_, cls.python_type, cls, lambda x: x.priority)
