@@ -15,7 +15,7 @@ def test_View() -> None:
 
 def test_View_registry() -> None:
     class V(View):
-        __abstract__ = True
+        _abstract_ = True
         _registry_: ClassVar[dict[type, type[View]]] = {}
 
     class Int(V):

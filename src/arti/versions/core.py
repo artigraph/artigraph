@@ -13,7 +13,7 @@ from arti.internal.utils import qname
 
 
 class Version(Model):
-    __abstract__ = True
+    _abstract_ = True
 
     @property
     @abstractmethod

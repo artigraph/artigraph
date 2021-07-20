@@ -29,7 +29,7 @@ def _gen_numeric_adapter(
     artigraph_type: type[Type], system_type: Any, precision: int
 ) -> type[TypeAdapter]:
     class Adapter(TypeAdapter):
-        key = f"{artigraph_type.__class_key__}Adapter"
+        key = f"{artigraph_type._class_key_}Adapter"
         artigraph = artigraph_type
         system = system_type
 

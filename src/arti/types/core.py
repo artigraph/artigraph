@@ -13,7 +13,7 @@ from arti.internal.utils import class_name, register
 class Type(Model):
     """Type represents a data type."""
 
-    __abstract__ = True
+    _abstract_ = True
     description: Optional[str]
 
 

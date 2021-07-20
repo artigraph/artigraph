@@ -8,7 +8,7 @@ from arti.types.core import Type
 
 
 class Storage(Model):
-    __abstract__ = True
+    _abstract_ = True
 
     def validate_artifact(self, schema: Optional[Type], format: Optional[Format]) -> None:
         # TODO: Ensure the storage supports all of the specified schema types and partitioning on
