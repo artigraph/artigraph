@@ -37,9 +37,9 @@ class View(Model):
 
 @multimethod
 def read(view: View, format: Format, storage: Storage) -> View:
-    ...
+    ...  # pragma: no cover
 
 
 @multimethod
 def write(view: View, format: Format, storage: Storage) -> None:
-    ...
+    ...  # pragma: no cover
