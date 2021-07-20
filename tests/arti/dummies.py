@@ -26,7 +26,7 @@ class DummyStorage(Storage):
 
 
 class A1(Artifact):
-    schema = Struct(fields={"x": Int32()})
+    type = Struct(fields={"x": Int32()})
     format = DummyFormat()
     storage = DummyStorage()
 

@@ -6,7 +6,7 @@ from arti.types.core import Type
 
 
 class Threshold:
-    schema: ClassVar[type[Type]]
+    type: ClassVar[type[Type]]
 
     def check(self, value: Any) -> bool:
         raise NotImplementedError()

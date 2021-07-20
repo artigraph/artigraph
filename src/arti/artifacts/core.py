@@ -13,48 +13,40 @@ if TYPE_CHECKING:
     from arti.producers.core import Producer
     from arti.statistics.core import Statistic
 
-# TODO: Add ArtifactMetadata and/or ArtifactPartition models:
-#     class ArtifactPartition(Model):
-#         annotations: tuple[Annotation, ...]
-#         format: Format
-#         partition_key: PartitionKey
-#         schema: Type
-#         storage: Storage
-
 
 class BaseArtifact:
     """A BaseArtifact is the most basic data structure describing data in the Artigraph ecosystem.
 
     A BaseArtifact is comprised of three key elements:
-    - schema: spec of the data's structure, such as data types, nullable, etc.
+    - type: spec of the data's structure, such as data types, nullable, etc.
     - format: the data's serialized format, such as CSV, Parquet, database native, etc.
     - storage: the data's persistent storage system, such as blob storage, database native, etc.
     """
 
-    # Schema *must* be set on the class and be rather static - small additions may be necessary at
+    # Type *must* be set on the class and be rather static - small additions may be necessary at
     # Graph level (eg: dynamic column additions), but these should be minor. We might allow Struct
-    # Types to be "open" (partial schema) or "closed".
+    # Types to be "open" (partial type) or "closed".
     #
     # Format and storage *should* be set with defaults on Artifact subclasses to ease most Graph
     # definitions, but will often need to be overridden at the Graph level.
     #
     # In order to override on the instance, avoid ClassVars lest mypy complains when/if we override.
-    schema: Optional[Type] = None
+    type: Optional[Type] = None
     format: Optional[Format] = None
     storage: Optional[Storage] = None
 
-    # is_scalar denotes whether this Artifacts represents a *single* value of the specified schema
-    # or a *collection*. Namely, even if the schema is a Struct(...), but there is only one, it will
-    # be scalar for our purposes.
+    # is_scalar denotes whether this Artifacts represents a *single* value of the specified type or
+    # a *collection*. Namely, even if the type is a Struct(...), but there is only one, it will be
+    # scalar for our purposes.
     is_scalar: bool
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)  # type: ignore # https://github.com/python/mypy/issues/4660
         if cls.format is not None:
-            cls.format.validate_artifact(schema=cls.schema)
+            cls.format.validate_artifact(type_=cls.type)
         if cls.storage is not None:
-            cls.storage.validate_artifact(schema=cls.schema, format=cls.format)
+            cls.storage.validate_artifact(type_=cls.type, format=cls.format)
 
     def __init__(self) -> None:
         # TODO: Allow storage/format override and re-validate them.
@@ -66,7 +58,7 @@ class Artifact(BaseArtifact):
     """An Artifact is the base structure describing an existing or generated dataset.
 
     An Artifact is comprised of three key elements:
-    - `schema`: spec of the data's structure, such as data types, nullable, etc.
+    - `type`: spec of the data's structure, such as data types, nullable, etc.
     - `format`: the data's serialized format, such as CSV, Parquet, database native, etc.
     - `storage`: the data's persistent storage system, such as blob storage, database native, etc.
 
