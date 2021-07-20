@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from arti.formats.core import Format
 from arti.internal.models import Model
 from arti.types.core import Type
@@ -10,7 +8,7 @@ from arti.types.core import Type
 class Storage(Model):
     _abstract_ = True
 
-    def validate_artifact(self, type_: Optional[Type], format: Optional[Format]) -> None:
+    def supports(self, type_: Type, format: Format) -> None:
         # TODO: Ensure the storage supports all of the specified types and partitioning on the
         # specified field(s).
         pass
