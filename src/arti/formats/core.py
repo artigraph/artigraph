@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import ClassVar, Optional
+from typing import ClassVar
 
 from arti.internal.models import Model
 from arti.types.core import Type, TypeSystem
@@ -16,7 +16,7 @@ class Format(Model):
     _abstract_ = True
     type_system: ClassVar[TypeSystem]
 
-    def validate_artifact(self, type_: Optional[Type]) -> None:
+    def supports(self, type_: Type) -> None:
         # TODO: Check self.type_system supports the type. We can likely add a TypeSystem method
         # that will check for matching TypeAdapters.
         pass
