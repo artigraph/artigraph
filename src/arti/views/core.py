@@ -8,7 +8,7 @@ from arti.artifacts.core import Artifact
 from arti.formats.core import Format
 from arti.internal.models import Model
 from arti.storage.core import Storage
-from arti.types.core import Type, TypeSystem
+from arti.types.core import TypeSystem
 
 
 class View(Model):
@@ -29,10 +29,6 @@ class View(Model):
 
     def write(self, artifact: Artifact) -> None:
         write(self, artifact.format, artifact.storage)
-
-    def validate(self, schema: Optional[Type]) -> View:
-        # TODO: eventually producer will validate
-        pass
 
 
 @multimethod

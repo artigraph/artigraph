@@ -7,7 +7,6 @@ from pydantic import ValidationError
 from arti.artifacts.core import Artifact
 from arti.formats.pickle import Pickle
 from arti.storage.local import LocalFile
-from arti.types.core import Int64
 from arti.views.core import View
 from arti.views.python import Python
 
@@ -30,5 +29,3 @@ def test_Python_View() -> None:
     with patch("builtins.open", mock_open()) as mock_file:
         view.write(a)
         mock_file.assert_called_with("/tmp/foo.pkl", "wb")
-
-    view.validate(Int64())
