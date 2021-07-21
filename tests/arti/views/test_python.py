@@ -8,7 +8,8 @@ from arti.views.python import Python
 
 
 def test_Python_View() -> None:
-    binary = pickle.dumps(1)
+    val = 1
+    binary = pickle.dumps(val)
     with named_temporary_file("w+b") as f:
         f.write(binary)
         f.seek(0)
@@ -17,7 +18,7 @@ def test_Python_View() -> None:
         test_storage = LocalFile(path=f.name)
         test_view = Python()
         data = read(test_format, test_storage, test_view)
-        assert data == 1
+        assert data == val
 
         f.truncate()
         write(data, test_format, test_storage, test_view)

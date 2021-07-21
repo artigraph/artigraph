@@ -25,14 +25,14 @@ class View(Model):
 
 
 @multidispatch
-def read(format: Format, storage: Storage, view: View) -> View:
+def read(*, format: Format, storage: Storage, view: View) -> Any:
     raise NotImplementedError(
         f"Read into {view} view from {format} format in {storage} storage not implemented."
     )
 
 
 @multidispatch
-def write(data: Any, format: Format, storage: Storage, view: View) -> None:
+def write(data: Any, *, format: Format, storage: Storage, view: View) -> None:
     raise NotImplementedError(
         f"Write from {view} view into {format} format in {storage} storage not implemented."
     )
