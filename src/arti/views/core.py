@@ -27,17 +27,21 @@ class View(Model):
 
     @classmethod
     def read(cls, artifact: Artifact) -> View:
-        return read(cls(), artifact.format, artifact.storage)
+        return read(artifact.format, artifact.storage, cls())
 
     def write(self, artifact: Artifact) -> None:
-        write(self, artifact.format, artifact.storage)
+        write(artifact.format, artifact.storage, self)
 
 
 @multidispatch
-def read(view: View, format: Format, storage: Storage) -> View:
-    ...  # pragma: no cover
+def read(format: Format, storage: Storage, view: View) -> View:
+    raise NotImplementedError(
+        f"Read into {view} view from {format} format in {storage} storage not implemented."
+    )
 
 
 @multidispatch
-def write(view: View, format: Format, storage: Storage) -> None:
-    ...  # pragma: no cover
+def write(format: Format, storage: Storage, view: View) -> None:
+    raise NotImplementedError(
+        f"Write from {view} view into {format} format in {storage} storage not implemented."
+    )
