@@ -30,6 +30,8 @@ class View(Model):
         return read(artifact.format, artifact.storage, cls())
 
     def write(self, artifact: Artifact) -> None:
+        if self.data is None:
+            raise ValueError(f"{self} view doesn't have any data to write!")
         write(artifact.format, artifact.storage, self)
 
 
