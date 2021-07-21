@@ -14,6 +14,7 @@ from arti.internal.utils import (
     class_name,
     classproperty,
     int64,
+    named_temporary_file,
     ordinal,
     qname,
     register,
@@ -121,6 +122,20 @@ def test_sizedint_cast() -> None:
     assert int64(uint64(5)) == int64(5)
     assert uint64(int64(-5)) == uint64(18446744073709551611)
     assert uint64(int64(5)) == uint64(5)
+
+
+@pytest.mark.parametrize(
+    ["mode"],
+    (
+        ("w+",),
+        ("wb",),
+    ),
+)
+def test_named_temporary_file(mode: str) -> None:
+    with named_temporary_file(mode=mode) as f:
+        assert f.mode == mode
+        with open(f.name, mode=f.mode) as f1:
+            assert f1
 
 
 def test_ordinal() -> None:
