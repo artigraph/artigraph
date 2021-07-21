@@ -28,5 +28,8 @@ class Model(BaseModel):
             raise ValueError(f"{cls} cannot be instantiated directly!")
         return values
 
+    def __str__(self) -> str:
+        return repr(self)
+
     class Config:
         extra = Extra.forbid

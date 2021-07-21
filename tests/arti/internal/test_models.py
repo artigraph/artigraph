@@ -15,7 +15,8 @@ class Concrete(Model):
 
 
 def test_Model() -> None:
-    assert Concrete()
+    obj = Concrete()
+    assert str(obj) == repr(obj)
     for model in (Model, Abstract):
         with pytest.raises(ValidationError, match="cannot be instantiated directly"):
             model()

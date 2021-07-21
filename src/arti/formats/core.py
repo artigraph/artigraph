@@ -18,5 +18,5 @@ class Format(Model):
 
     def validate_artifact(self, schema: Optional[Type]) -> None:
         # TODO: Check self.type_system supports the schema. We can likely add a TypeSystem method
-        # that will check for matching TypeAdaptors.
+        # that will check for matching TypeAdapters.
         pass
