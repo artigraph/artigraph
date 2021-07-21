@@ -1,11 +1,11 @@
 import pickle
-from typing import ClassVar, Any
+from typing import Any, ClassVar
 
 from arti.formats.pickle import Pickle
 from arti.storage.local import LocalFile
 from arti.types.core import TypeSystem
 from arti.types.python import python
-from arti.views.core import View, write, read
+from arti.views.core import View, read, write
 
 
 class Python(View):
@@ -24,4 +24,3 @@ def _write_pickle_localfile_python(
 ) -> None:
     with open(storage.path, "wb") as file:
         pickle.dump(data, file)
-
