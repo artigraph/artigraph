@@ -1,7 +1,10 @@
 from __future__ import annotations
 
-from collections.abc import Callable, MutableMapping
-from typing import Any, ClassVar, Generic, Optional, TypeVar, Union, cast
+import os.path
+from collections.abc import Callable, Generator, MutableMapping
+from contextlib import contextmanager
+from tempfile import TemporaryDirectory
+from typing import IO, Any, ClassVar, Generic, Optional, TypeVar, Union, cast
 
 from box import Box
 
@@ -151,6 +154,14 @@ class uint64(_int):
             else:
                 raise ValueError(f"{i} is negative. Hint: cast to int64 first.")
         return super().__new__(cls, i)
+
+
+@contextmanager
+def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any], None, None]:
+    """Minimal alternative to tempfile.NamedTemporaryFile that can be re-opened on Windows."""
+    with TemporaryDirectory() as d:
+        with open(os.path.join(d, "contents"), mode=mode) as f:
+            yield f
 
 
 def ordinal(n: int) -> str:
