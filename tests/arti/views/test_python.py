@@ -1,9 +1,9 @@
 import pickle
 
-from arti.artifacts.core import Artifact
 from arti.formats.pickle import Pickle
 from arti.internal.utils import named_temporary_file
 from arti.storage.local import LocalFile
+from arti.views.core import read, write
 from arti.views.python import Python
 
 
@@ -13,13 +13,12 @@ def test_Python_View() -> None:
         f.write(binary)
         f.seek(0)
 
-        a = Artifact()
-        a.storage = LocalFile(path=f.name)
-        a.format = Pickle()
-
-        view = Python.read(a)
-        assert view.data == 1
+        test_format = Pickle()
+        test_storage = LocalFile(path=f.name)
+        test_view = Python()
+        data = read(test_format, test_storage, test_view)
+        assert data == 1
 
         f.truncate()
-        view.write(a)
+        write(data, test_format, test_storage, test_view)
         assert f.read() == binary
