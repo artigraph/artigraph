@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
-from itertools import groupby
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional, Union
 
@@ -78,66 +77,50 @@ class Timestamp(Type):
 class TypeAdapter:
     """TypeAdapter maps between Artigraph types and a foreign type system."""
 
-    external: ClassVar[Optional[Any]] = None  # If available, the external type.
-    internal: ClassVar[type[Type]]  # Mark which Artigraph Type this maps to.
-    priority: ClassVar[int] = 0  # Set the priority of this mapping. Higher is better.
-
     key: ClassVar[str] = class_name()
 
+    artigraph: ClassVar[type[Type]]  # The internal Artigraph Type
+    system: ClassVar[Any]  # The external system's type
+
+    priority: ClassVar[int] = 0  # Set the priority of this mapping. Higher is better.
+
     @classmethod
-    def to_external(cls, type_: Type) -> Any:
+    def matches_artigraph(cls, type_: Type) -> bool:
+        return isinstance(type_, cls.artigraph)
+
+    @classmethod
+    def to_artigraph(cls, type_: Any) -> Type:
         raise NotImplementedError()
 
     @classmethod
-    def to_internal(cls, type_: Any) -> Type:
+    def matches_system(cls, type_: Any) -> bool:
+        raise NotImplementedError()
+
+    @classmethod
+    def to_system(cls, type_: Type) -> Any:
         raise NotImplementedError()
 
 
 class TypeSystem(Model):
     key: str
-    system_metaclass: bool = False  # whether system types are instances of metaclass (e.g., `type`)
 
     _adapter_by_key: dict[str, type[TypeAdapter]] = PrivateAttr(default_factory=dict)
+
+    def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
+        return register(self._adapter_by_key, adapter.key, adapter)
 
     @property
     def _priority_sorted_adapters(self) -> Iterator[type[TypeAdapter]]:
         return reversed(sorted(self._adapter_by_key.values(), key=attrgetter("priority")))
 
-    @property
-    def adapter_by_internal_priority(self) -> dict[Any, type[TypeAdapter]]:
-        return {
-            k: next(v)
-            for k, v in groupby(self._priority_sorted_adapters, key=attrgetter("internal"))
-        }
+    def to_artigraph(self, type_: Any) -> Type:
+        for adapter in self._priority_sorted_adapters:
+            if adapter.matches_system(type_):
+                return adapter.to_artigraph(type_)
+        raise NotImplementedError(f"No {repr(self)} adapter for system type: {type_}.")
 
-    @property
-    def adapter_by_external_priority(self) -> dict[Any, type[TypeAdapter]]:
-        return {
-            k: next(v)
-            for k, v in groupby(self._priority_sorted_adapters, key=attrgetter("external"))
-        }
-
-    def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
-        return register(self._adapter_by_key, adapter.key, adapter)
-
-    def _external_type_to_adapter_key(self, type_: Any) -> Any:
-        if self.system_metaclass:
-            return type_
-        else:
-            return type(type_)
-
-    def from_core(self, type_: Type) -> Any:
-        try:
-            external = self.adapter_by_internal_priority[type(type_)].to_external(type_)
-        except KeyError:
-            raise NotImplementedError(f"No TypeAdapter for core type {type(type_)}.")
-        return external
-
-    def to_core(self, type_: Any) -> Type:
-        try:
-            internal = self.adapter_by_external_priority[
-                self._external_type_to_adapter_key(type_)
-            ].to_internal(type_)
-        except KeyError:
-            raise NotImplementedError(f"No TypeAdapter for external type {type(type_)}.")
-        return internal
+    def to_system(self, type_: Type) -> Any:
+        for adapter in self._priority_sorted_adapters:
+            if adapter.matches_artigraph(type_):
+                return adapter.to_system(type_)
+        raise NotImplementedError(f"No {repr(self)} adapter for Artigraph type: {type_}.")
