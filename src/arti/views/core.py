@@ -21,7 +21,13 @@ class View(Model):
 
     build_type: ClassVar[type]
 
+    priority: ClassVar[int] = 0  # Set priority of this view for its build_type. Higher is better.
+
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if not cls.__abstract__:
             register(view_registry, cls.__name__, cls)
+
+    @classmethod
+    def match_build_type(cls, type_: Any) -> bool:
+        return type_ is cls.build_type

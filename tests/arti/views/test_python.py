@@ -17,6 +17,7 @@ def test_Int_View() -> None:
         test_format = Pickle()
         test_storage = LocalFile(path=f.name)
         test_view = Int()
+        assert test_view.match_build_type(int)
         data = read(test_format, test_storage, test_view)
         assert data == val
 
