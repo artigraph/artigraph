@@ -155,6 +155,25 @@ def test_register() -> None:
         register(reg, "x", 10)
 
 
+def test_register_priority() -> None:
+    class Val:
+        def __init__(self, priority: int):
+            self.priority = priority
+
+    get_priority = op.attrgetter("priority")
+
+    reg: dict[str, Val] = {}
+    x, y = Val(1), Val(1)
+    register(reg, "x", x, get_priority)
+    register(reg, "y", y, get_priority)
+    y2 = Val(y.priority + 1)
+    register(reg, "y", y2, get_priority)  # Override existing lower priority value
+    register(reg, "y", y, get_priority)  # Ensure lower priority value doesn't override
+    with pytest.raises(ValueError, match="is already registered"):
+        register(reg, "y", Val(y2.priority), get_priority)
+    assert reg == {"x": x, "y": y2}
+
+
 def test_qname() -> None:
     assert qname(TypedBox) == "TypedBox"
     assert qname(TypedBox()) == "TypedBox"
