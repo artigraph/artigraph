@@ -2,17 +2,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from arti.types.core import (
-    Float16,
-    Float32,
-    Float64,
-    Int32,
-    Int64,
-    String,
-    Type,
-    TypeAdapter,
-    TypeSystem,
-)
+import arti.types.core
+from arti.types.core import Type, TypeAdapter, TypeSystem
 
 python = TypeSystem(key="python")
 
@@ -43,9 +34,19 @@ def _gen_adapter(*, artigraph: type[Type], system: Any, precision: int = 0) -> t
     )
 
 
-_gen_adapter(artigraph=Float64, system=float, precision=64)
-_gen_adapter(artigraph=Float32, system=float, precision=32)
-_gen_adapter(artigraph=Float16, system=float, precision=16)
-_gen_adapter(artigraph=Int64, system=int, precision=64)
-_gen_adapter(artigraph=Int32, system=int, precision=32)
-_gen_adapter(artigraph=String, system=str)
+for precision in (16, 32, 64):
+    _gen_adapter(
+        artigraph=getattr(arti.types.core, f"Float{precision}"),
+        system=float,
+        precision=precision,
+    )
+
+
+for precision in (32, 64):
+    _gen_adapter(
+        artigraph=getattr(arti.types.core, f"Int{precision}"),
+        system=int,
+        precision=precision,
+    )
+
+_gen_adapter(artigraph=arti.types.core.String, system=str)
