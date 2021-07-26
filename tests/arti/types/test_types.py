@@ -8,7 +8,6 @@ from arti.types.core import (
     Float32,
     Float64,
     Int32,
-    Int64,
     Struct,
     Timestamp,
     Type,
@@ -123,10 +122,3 @@ def test_TypeSystem(
     dummy.register_adapter(Int32Adapter)
     assert isinstance(dummy.to_artigraph(MyInt), Int32)
     assert dummy.to_system(Int32()) is MyInt
-
-
-def test_python_TypeSystem() -> None:
-    from arti.types.python import python
-
-    assert isinstance(python.to_artigraph(int), Int64)
-    assert python.to_system(Int64()) is int

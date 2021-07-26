@@ -15,8 +15,16 @@ class _PythonBuiltin(View):
     type_system: ClassVar[TypeSystem] = python
 
 
+class Float(_PythonBuiltin):
+    python_type = float
+
+
 class Int(_PythonBuiltin):
     python_type = int
+
+
+class Str(_PythonBuiltin):
+    python_type = str
 
 
 @read.register
