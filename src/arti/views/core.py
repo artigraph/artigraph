@@ -15,7 +15,7 @@ class View(Model):
 
     __abstract__ = True
 
-    _registry_: ClassVar[dict[str, type[View]]] = dict()
+    _registry_: ClassVar[dict[type, type[View]]] = dict()
 
     type_system: ClassVar[TypeSystem]
 
@@ -26,8 +26,4 @@ class View(Model):
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if not cls.__abstract__:
-            register(cls._registry_, cls.__name__, cls)
-
-    @classmethod
-    def match_build_type(cls, type_: Any) -> bool:
-        return type_ is cls.build_type
+            register(cls._registry_, cls.build_type, cls)
