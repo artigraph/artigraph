@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import datetime
 from typing import Any
 
 import arti.types.core
@@ -50,3 +51,14 @@ for precision in (32, 64):
     )
 
 _gen_adapter(artigraph=arti.types.core.String, system=str)
+_gen_adapter(artigraph=arti.types.core.Date, system=datetime.date)
+
+
+@python.register_adapter
+class PyDatetime(_SingletonTypeAdapter):
+    artigraph = arti.types.core.Timestamp
+    system = datetime.datetime
+
+    @classmethod
+    def to_artigraph(cls, type_: Any) -> Type:
+        return cls.artigraph(precision="microsecond")
