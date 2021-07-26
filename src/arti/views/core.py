@@ -23,4 +23,4 @@ class View(Model):
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if not cls.__abstract__:
-            register(cls._registry_, cls.python_type, cls)
+            register(cls._registry_, cls.python_type, cls, lambda x: x.priority)
