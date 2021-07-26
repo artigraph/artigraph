@@ -177,10 +177,23 @@ RegisterK = TypeVar("RegisterK")
 RegisterV = TypeVar("RegisterV")
 
 
-def register(registry: dict[RegisterK, RegisterV], key: RegisterK, value: RegisterV) -> RegisterV:
+def register(
+    registry: dict[RegisterK, RegisterV],
+    key: RegisterK,
+    value: RegisterV,
+    get_priority: Optional[Callable[[RegisterV], int]] = None,
+) -> RegisterV:
     if key in registry:
         existing = registry[key]
-        raise ValueError(f"{key} is already registered with: {existing}!")
+        if get_priority is None:
+            raise ValueError(f"{key} is already registered with: {existing}!")
+        existing_priority, new_priority = get_priority(existing), get_priority(value)
+        if existing_priority > new_priority:
+            return value
+        if existing_priority == new_priority:
+            raise ValueError(
+                f"{key} with matching priority ({existing_priority}) is already registered with: {existing}!"
+            )
     registry[key] = value
     return value
 
