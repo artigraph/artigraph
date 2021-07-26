@@ -6,8 +6,6 @@ from arti.internal.models import Model
 from arti.internal.utils import register
 from arti.types.core import TypeSystem
 
-view_registry: dict[str, type[View]] = dict()
-
 
 class View(Model):
     """View represents the in-memory representation of the artifact.
@@ -16,6 +14,8 @@ class View(Model):
     """
 
     __abstract__ = True
+
+    _registry_: ClassVar[dict[str, type[View]]] = dict()
 
     type_system: ClassVar[TypeSystem]
 
@@ -26,7 +26,7 @@ class View(Model):
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if not cls.__abstract__:
-            register(view_registry, cls.__name__, cls)
+            register(cls._registry_, cls.__name__, cls)
 
     @classmethod
     def match_build_type(cls, type_: Any) -> bool:
