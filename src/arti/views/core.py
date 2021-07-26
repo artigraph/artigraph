@@ -19,11 +19,11 @@ class View(Model):
 
     type_system: ClassVar[TypeSystem]
 
-    build_type: ClassVar[type]
+    python_type: ClassVar[type]
 
-    priority: ClassVar[int] = 0  # Set priority of this view for its build_type. Higher is better.
+    priority: ClassVar[int] = 0  # Set priority of this view for its python_type. Higher is better.
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if not cls.__abstract__:
-            register(cls._registry_, cls.build_type, cls)
+            register(cls._registry_, cls.python_type, cls)
