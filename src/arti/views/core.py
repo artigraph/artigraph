@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from typing import ClassVar
+from typing import Any, ClassVar
 
 from arti.internal.models import Model
+from arti.internal.utils import register
 from arti.types.core import TypeSystem
 
 
@@ -13,5 +14,13 @@ class View(Model):
     """
 
     __abstract__ = True
+    _registry_: ClassVar[dict[type, type[View]]] = dict()
 
+    priority: ClassVar[int] = 0  # Set priority of this view for its python_type. Higher is better.
+    python_type: ClassVar[type]
     type_system: ClassVar[TypeSystem]
+
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if not cls.__abstract__:
+            register(cls._registry_, cls.python_type, cls)

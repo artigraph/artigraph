@@ -173,7 +173,7 @@ def ordinal(n: int) -> str:
     return str(n) + suffix
 
 
-RegisterK = TypeVar("RegisterK", bound=str)
+RegisterK = TypeVar("RegisterK")
 RegisterV = TypeVar("RegisterV")
 
 
