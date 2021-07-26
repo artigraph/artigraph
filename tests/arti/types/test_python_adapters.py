@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from arti.types.core import Date, Float16, Float32, Float64, Int32, Int64, String, Timestamp
+from arti.types.core import Date, Float16, Float32, Float64, Int32, Int64, Null, String, Timestamp
 from arti.types.python import python
 
 
@@ -25,3 +25,8 @@ def test_python_datetime() -> None:
 
     assert isinstance(python.to_artigraph(date), Date)
     assert python.to_system(Date()) is date
+
+
+def test_python_null() -> None:
+    assert isinstance(python.to_artigraph(type(None)), Null)
+    assert python.to_system(Null()) is type(None)  # noqa: E721

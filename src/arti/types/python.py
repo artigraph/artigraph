@@ -50,6 +50,7 @@ for precision in (32, 64):
         precision=precision,
     )
 
+_gen_adapter(artigraph=arti.types.core.Null, system=type(None))
 _gen_adapter(artigraph=arti.types.core.String, system=str)
 _gen_adapter(artigraph=arti.types.core.Date, system=datetime.date)
 
