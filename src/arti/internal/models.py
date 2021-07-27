@@ -1,8 +1,21 @@
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Literal, get_origin
 
-from pydantic import BaseModel, Extra, root_validator
+from pydantic import BaseModel, Extra, root_validator, validator
+from pydantic.fields import ModelField
 
 from arti.internal.utils import class_name
+
+
+def _check_types(value: Any, type_: type) -> None:
+    if type_ is Any:
+        return
+    origin = get_origin(type_)
+    if origin is not None:
+        if origin is Literal:  # pragma: no cover
+            return  # Let pydantic verify
+        # Don't need to handle Union[...]: pydantic splits up validator
+    if not isinstance(value, type_):
+        raise ValueError(f"Expected an instance of {type_.__name__}, got: {value}")
 
 
 class Model(BaseModel):
@@ -28,8 +41,16 @@ class Model(BaseModel):
             raise ValueError(f"{cls} cannot be instantiated directly!")
         return values
 
+    @validator("*", pre=True, each_item=True)
+    @classmethod
+    def _strict_types(cls, v: Any, field: ModelField) -> Any:
+        _check_types(v, field.type_)
+        return v
+
     def __str__(self) -> str:
         return repr(self)
 
     class Config:
         extra = Extra.forbid
+        frozen = True
+        validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
