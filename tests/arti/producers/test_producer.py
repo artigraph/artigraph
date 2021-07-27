@@ -3,6 +3,7 @@ from typing import Any
 import pytest
 
 from arti.fingerprints.core import Fingerprint
+from arti.internal.models import Model
 from arti.producers.core import Producer
 from arti.versions.core import String
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
@@ -14,6 +15,10 @@ class DummyProducer(Producer):
 
     def map(self, a1: A1) -> Any:
         pass
+
+
+def check_model_matches(a: Model, b: Model, *, exclude: set[str]) -> None:
+    assert a.dict(exclude=exclude) == b.dict(exclude=exclude)
 
 
 def test_Producer() -> None:
@@ -36,15 +41,22 @@ def test_Producer_fingerprint() -> None:
 def test_Producer_out() -> None:
     a1, a2, a3, a4 = A1(), A2(), A3(), A4()
     # single return Producer
-    assert P1(a1=a1).out(a2) is a2
-    assert isinstance(P1(a1=a1).out(), A2)
-    assert isinstance(list(P1(a1=a1))[0], A2)
+    p1 = P1(a1=a1)
+    a2_ = p1.out(a2)
     # multi return Producer
-    assert P2(a2=a2).out(a3, a4) == (a3, a4)
-    assert isinstance(P2(a2=a2).out()[0], A3)
-    assert isinstance(P2(a2=a2).out()[1], A4)
-    assert isinstance(list(P2(a2=a2))[0], A3)
-    assert isinstance(list(P2(a2=a2))[1], A4)
+    p2 = P2(a2=a2)
+    a3_, a4_ = p2.out(a3, a4)
+    for (producer, inp, out, type_) in (
+        (p1, a2, a2_, A2),
+        (p2, a3, a3_, A3),
+        (p2, a4, a4_, A4),
+    ):
+        assert inp is not out
+        assert isinstance(out, type_)
+        assert out.producer is producer
+        check_model_matches(inp, out, exclude={"producer"})
+    assert list(p1) == [a2_]
+    assert list(p2) == [a3_, a4_]
 
 
 @pytest.mark.xfail(raises=ValueError)
@@ -53,16 +65,6 @@ def test_Producer_map_defaults() -> None:
     # We can make .map defaulting a bit smarter by inspecting how the input artifacts are
     # partitioned (or not).
     p1.map()  # ValueError
-
-
-def test_Producer_mutations() -> None:
-    producer = DummyProducer(a1=A1())
-    for output in producer:
-        assert output.producer is producer
-    o1, o2 = A2(), A3()
-    producer.out(o1, o2)
-    assert o1.producer is producer
-    assert o2.producer is producer
 
 
 def test_Producer_bad_signature() -> None:  # noqa: C901

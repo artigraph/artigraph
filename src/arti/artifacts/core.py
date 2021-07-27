@@ -1,20 +1,19 @@
 from __future__ import annotations
 
-from collections.abc import Iterable
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Optional
+from typing import Any, ClassVar, Optional
+
+from pydantic import validator
+from pydantic.fields import ModelField
 
 from arti.annotations.core import Annotation
 from arti.formats.core import Format
+from arti.internal.models import Model
 from arti.storage.core import Storage
 from arti.types.core import Type
 
-if TYPE_CHECKING:
-    from arti.producers.core import Producer
-    from arti.statistics.core import Statistic
 
-
-class BaseArtifact:
+class BaseArtifact(Model):
     """A BaseArtifact is the most basic data structure describing data in the Artigraph ecosystem.
 
     A BaseArtifact is comprised of three key elements:
@@ -22,6 +21,11 @@ class BaseArtifact:
     - format: the data's serialized format, such as CSV, Parquet, database native, etc.
     - storage: the data's persistent storage system, such as blob storage, database native, etc.
     """
+
+    # is_scalar denotes whether this Artifacts represents a *single* value of the specified type or
+    # a *collection*. Namely, even if the type is a Struct(...), but there is only one, it will be
+    # scalar for our purposes.
+    is_scalar: ClassVar[bool]
 
     # Type *must* be set on the class and be rather static - small additions may be necessary at
     # Graph level (eg: dynamic column additions), but these should be minor. We might allow Struct
@@ -31,27 +35,34 @@ class BaseArtifact:
     # definitions, but will often need to be overridden at the Graph level.
     #
     # In order to override on the instance, avoid ClassVars lest mypy complains when/if we override.
-    type: Optional[Type] = None
-    format: Optional[Format] = None
-    storage: Optional[Storage] = None
+    type: Type
+    format: Format
+    storage: Storage
 
-    # is_scalar denotes whether this Artifacts represents a *single* value of the specified type or
-    # a *collection*. Namely, even if the type is a Struct(...), but there is only one, it will be
-    # scalar for our purposes.
-    is_scalar: bool
+    producer: Optional[Producer] = None
 
+    # TODO: Allow smarter type/format/storage merging w/ the default?
+
+    @validator("format", always=True)
     @classmethod
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)  # type: ignore # https://github.com/python/mypy/issues/4660
-        if cls.type is not None and cls.format is not None:
-            cls.format.supports(type_=cls.type)
-            if cls.storage is not None:
-                cls.storage.supports(type_=cls.type, format=cls.format)
+    def _validate_format(cls, format: Format, values: dict[str, Any]) -> Format:
+        format.supports(type_=values["type"])
+        return format
 
-    def __init__(self) -> None:
-        # TODO: Allow storage/format override and re-validate them.
-        self.producer: Optional[Producer] = None
-        super().__init__()
+    @validator("storage", always=True)
+    @classmethod
+    def _validate_storage(cls, storage: Storage, values: dict[str, Any]) -> Storage:
+        # format won't be available if it doesn't pass validation.
+        if "format" in values:
+            storage.supports(type_=values["type"], format=values["format"])
+        return storage
+
+    # TODO: Remove after making Producers models
+    class Config:
+        arbitrary_types_allowed = True
+
+
+from arti.statistics.core import Statistic  # noqa: E402 # # pylint: disable=wrong-import-position
 
 
 class Artifact(BaseArtifact):
@@ -67,11 +78,16 @@ class Artifact(BaseArtifact):
     over time).
     """
 
+    # Artifacts are collections by default (think database tables, etc), but may be overridden.
+    is_scalar: ClassVar[bool] = False
+
     annotations: tuple[Annotation, ...] = ()
     statistics: tuple[Statistic, ...] = ()
 
-    # Artifacts are collections by default (think database tables, etc), but may be overridden.
-    is_scalar = False
+    @validator("annotations", "statistics", always=True, pre=True)
+    @classmethod
+    def _validate_annotations(cls, value: tuple[Any, ...], field: ModelField) -> tuple[Any, ...]:
+        return tuple(chain(cls.__fields__[field.name].default, value))
 
     @classmethod
     def cast(cls, value: Any) -> Artifact:
@@ -86,8 +102,6 @@ class Artifact(BaseArtifact):
         """
         # TODO: Leverage a TypeSystem("python") to cast to Artifact classes with "backend native"
         # storage to support builtin assignment and custom type registration.
-        from arti.producers.core import Producer
-
         if isinstance(value, Artifact):
             return value
         if isinstance(value, Producer):
@@ -105,13 +119,8 @@ class Artifact(BaseArtifact):
 
         raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
 
-    def __init__(
-        self,
-        *,
-        annotations: Iterable[Annotation] = (),
-        statistics: Iterable[Statistic] = (),
-    ) -> None:
-        # Add the instance metadata to the class default.
-        self.annotations = tuple(chain(self.annotations, annotations))
-        self.statistics = tuple(chain(self.statistics, statistics))
-        super().__init__()
+
+from arti.producers.core import Producer  # noqa: E402 # # pylint: disable=wrong-import-position
+
+BaseArtifact.update_forward_refs()
+Artifact.update_forward_refs()
