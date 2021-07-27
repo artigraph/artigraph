@@ -32,7 +32,8 @@ class ODs(Artifact):
 class TracesToODs(Producer):
     # This currently takes the Artifact directly, but eventually it'll take a "view" of the artifact (eg: pd.DataFrame)
     # and optionally a "field slice" (eg: [lat, lng, timestamp]).
-    def build(self, traces: Traces) -> ODs:
+    @classmethod
+    def build(cls, traces: Traces) -> ODs:
         ...
 
 

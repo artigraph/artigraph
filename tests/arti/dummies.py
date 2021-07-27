@@ -57,15 +57,25 @@ class A4(Artifact):
 
 
 class P1(Producer):
-    def build(self, a1: A1) -> A2:
+    a1: A1
+
+    @staticmethod
+    def build(a1: A1) -> A2:
         return A2()
 
 
 class P2(Producer):
-    def build(self, a2: A2) -> tuple[A3, A4]:
+    a2: A2
+
+    @staticmethod
+    def build(a2: A2) -> tuple[A3, A4]:
         return A3(), A4()
 
 
 class P3(Producer):
-    def build(self, a1: A1, a2: A2) -> tuple[A3, A4]:
+    a1: A1
+    a2: A2
+
+    @staticmethod
+    def build(a1: A1, a2: A2) -> tuple[A3, A4]:
         return A3(), A4()

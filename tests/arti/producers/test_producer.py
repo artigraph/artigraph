@@ -1,19 +1,22 @@
-from typing import Any
+from typing import Any, Optional
 
 import pytest
 
 from arti.fingerprints.core import Fingerprint
 from arti.internal.models import Model
 from arti.producers.core import Producer
-from arti.versions.core import String
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 
 
 class DummyProducer(Producer):
-    def build(self, a1: A1) -> tuple[A2, A3]:
+    a1: A1
+
+    @staticmethod
+    def build(a1: A1) -> tuple[A2, A3]:
         pass
 
-    def map(self, a1: A1) -> Any:
+    @staticmethod
+    def map(a1: A1) -> Any:
         pass
 
 
@@ -24,7 +27,7 @@ def check_model_matches(a: Model, b: Model, *, exclude: set[str]) -> None:
 def test_Producer() -> None:
     a1 = A1()
     producer = DummyProducer(a1=a1)
-    assert producer._input_artifacts["a1"] is a1
+    assert producer.a1 == a1
     assert len(list(producer)) == 2
     expected_output_classes = [A2, A3]
     for i, output in enumerate(producer):
@@ -34,8 +37,6 @@ def test_Producer() -> None:
 def test_Producer_fingerprint() -> None:
     p1 = P1(a1=A1())
     assert p1.fingerprint == Fingerprint.from_string("P1") ^ p1.version.fingerprint
-    p1.key, p1.version = "abc", String(value="xyz")
-    assert p1.fingerprint == Fingerprint.from_string("abc") ^ String(value="xyz").fingerprint
 
 
 def test_Producer_out() -> None:
@@ -70,99 +71,242 @@ def test_Producer_map_defaults() -> None:
 def test_Producer_bad_signature() -> None:  # noqa: C901
     # pylint: disable=function-redefined
 
+    # Ensure no error if _abstract_
+    class OkProducer(Producer):
+        _abstract_ = True
+
     with pytest.raises(ValueError, match="Producers must implement"):
 
         class BadProducer(Producer):
             pass
 
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.build - the following parameter\(s\) must be defined as a field: {'a1'}",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            @classmethod
+            def build(cls, a1: A1) -> A2:
+                pass
+
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.map - the following parameter\(s\) must be defined as a field: {'a1'}",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            @classmethod
+            def build(cls) -> A2:
+                pass
+
+            @classmethod
+            def map(cls, a1: A1) -> A2:
+                pass
+
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer - the following fields aren't used in `.build` or `.map`: {'a2'}",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            a1: A1
+            a2: A2
+
+            @classmethod
+            def build(cls, a1: A1) -> A3:
+                pass
+
     with pytest.raises(ValueError, match="must have a type hint"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact):  # type: ignore
+            a1: A1
+
+            @classmethod
+            def build(cls, a1):  # type: ignore
                 pass
 
     with pytest.raises(ValueError, match="type hint must be an Artifact subclass"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: str) -> tuple[A2, A3]:
+            a1: str
+
+            @classmethod
+            def build(cls, a1: str) -> tuple[A2, A3]:
                 pass
 
     with pytest.raises(ValueError, match="must not have a default"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1 = A1()):  # type: ignore
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: A1 = A1()):  # type: ignore
                 pass
 
     with pytest.raises(ValueError, match="parameter must be usable as a keyword argument"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1, /):  # type: ignore
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: A1, /):  # type: ignore
                 pass
 
     with pytest.raises(ValueError, match="parameter must be usable as a keyword argument"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, *args: A1):  # type: ignore
+            @classmethod
+            def build(cls, *args: A1):  # type: ignore
                 pass
 
     with pytest.raises(ValueError, match="parameter must be usable as a keyword argument"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, **kwargs: A1):  # type: ignore
-                pass
-
-    with pytest.raises(ValueError, match="return value must be an Artifact"):
-
-        class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1) -> None:
+            @classmethod
+            def build(cls, **kwargs: A1):  # type: ignore
                 pass
 
     with pytest.raises(ValueError, match="A return value must be set"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1):  # type: ignore
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: A1):  # type: ignore
                 pass
 
     with pytest.raises(ValueError, match="return value must be an Artifact"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1) -> str:
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: A1) -> None:
                 pass
 
     with pytest.raises(ValueError, match="return value must be an Artifact"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1) -> tuple[A2, str]:
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: A1) -> str:
                 pass
 
-    with pytest.raises(ValueError, match="The parameters to `map` .* must match `build`"):
+    with pytest.raises(ValueError, match="return value must be an Artifact"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1) -> A2:
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: A1) -> tuple[A2, str]:
                 pass
 
-            def map(self, input_artifact: A2) -> Any:
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.build - `a1` parameter type hint must match the field: <class 'tests.arti.dummies.A1'>",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: A2) -> A2:
+                pass
+
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.map - `a1` parameter type hint must match the field: <class 'tests.arti.dummies.A1'>",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: A1) -> A2:
+                pass
+
+            @classmethod
+            def map(self, a1: A2) -> Any:
+                pass
+
+    with pytest.raises(
+        ValueError, match="BadProducer.a1 - field must not have a default nor be Optional."
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            a1: A1 = None  # type: ignore
+
+            @classmethod
+            def build(cls, a1: A1):  # type: ignore
+                pass
+
+    with pytest.raises(
+        ValueError, match="BadProducer.a1 - field must not have a default nor be Optional."
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            a1: Optional[A1]
+
+            @classmethod
+            def build(cls, a1: A1):  # type: ignore
+                pass
+
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.a1 - field must not have a default nor be Optional.",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            a1: A1 = A1()
+
+            @classmethod
+            def build(cls, a1: A1) -> A2:
+                pass
+
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.build - must be a @classmethod or @staticmethod.",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            def build(cls) -> A2:
+                pass
+
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.map - must be a @classmethod or @staticmethod.",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            @classmethod
+            def build(cls) -> A2:
+                pass
+
+            def map(cls) -> A2:
                 pass
 
 
 def test_Producer_bad_init() -> None:
-    # NOTE: Producers aren't currently models - so raises a ValueError rather than pydantic.ValidationError
     with pytest.raises(ValueError, match="cannot be instantiated directly"):
         Producer()
-    with pytest.raises(ValueError, match="Unknown argument"):
-        DummyProducer(junk=5)  # type: ignore
-    with pytest.raises(ValueError, match="Missing argument"):
+    with pytest.raises(ValueError, match="extra fields not permitted"):
+        DummyProducer(junk=5)
+    with pytest.raises(ValueError, match="field required"):
         DummyProducer()
-    with pytest.raises(ValueError, match="expects an instance of"):
-        DummyProducer(a1=5)  # type: ignore
+    with pytest.raises(ValueError, match="Expected an instance of"):
+        DummyProducer(a1=5)
+    with pytest.raises(ValueError, match="Expected an instance of"):
+        DummyProducer(a1=A2())
 
 
 def test_Producer_bad_out() -> None:
     producer = DummyProducer(a1=A1())
     with pytest.raises(ValueError, match="Expected 2 arguments of"):
-        producer.out(1)
+        producer.out(1)  # type: ignore
     with pytest.raises(ValueError, match="Expected the 1st argument to be"):
-        producer.out(1, 2)
+        producer.out(1, 2)  # type: ignore
     with pytest.raises(ValueError, match="Expected the 2nd argument to be"):
         producer.out(A2(), A2())
     output = producer.out(A2(), A3())
