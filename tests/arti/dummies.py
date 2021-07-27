@@ -17,30 +17,43 @@ class DummyFormat(Format):
     type_system = dummy_type_system
 
 
-class DummyStatistic(Statistic):
-    pass
-
-
 class DummyStorage(Storage):
     pass
 
 
+# NOTE: when using a subclass of the original type hint, we must override[1].
+#
+# 1: https://github.com/samuelcolvin/pydantic/pull/3018
+
+
+class DummyStatistic(Statistic):
+    type: Int32 = Int32()
+    format: DummyFormat = DummyFormat()
+    storage: DummyStorage = DummyStorage()
+
+
 class A1(Artifact):
-    type = Struct(fields={"x": Int32()})
-    format = DummyFormat()
-    storage = DummyStorage()
+    type: Struct = Struct(fields={"1": Int32()})
+    format: DummyFormat = DummyFormat()
+    storage: DummyStorage = DummyStorage()
 
 
 class A2(Artifact):
-    pass
+    type: Struct = Struct(fields={"2": Int32()})
+    format: DummyFormat = DummyFormat()
+    storage: DummyStorage = DummyStorage()
 
 
 class A3(Artifact):
-    pass
+    type: Struct = Struct(fields={"3": Int32()})
+    format: DummyFormat = DummyFormat()
+    storage: DummyStorage = DummyStorage()
 
 
 class A4(Artifact):
-    pass
+    type: Struct = Struct(fields={"4": Int32()})
+    format: DummyFormat = DummyFormat()
+    storage: DummyStorage = DummyStorage()
 
 
 class P1(Producer):

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator
 from inspect import Signature
-from typing import Any, ClassVar, Union
+from typing import Any, ClassVar, Union, cast
 
 from arti.artifacts.core import Artifact
 from arti.fingerprints.core import Fingerprint
@@ -179,15 +179,18 @@ class Producer:
             raise ValueError(
                 f"{type(self).__name__}.out() - Expected {expected_n} arguments of ({ret_str}), but got: {outputs}"
             )
-        for i, artifact in enumerate(outputs):
-            expected_type = self.signature.return_annotation[i]
+
+        def validate(artifact: Artifact, *, ord: int) -> Artifact:
+            expected_type = self.signature.return_annotation[ord]
             if not isinstance(artifact, expected_type):
                 raise ValueError(
-                    f"{type(self).__name__}.out() - Expected the {ordinal(i+1)} argument to be {expected_type}, got {type(artifact)}"
+                    f"{type(self).__name__}.out() - Expected the {ordinal(ord+1)} argument to be {expected_type}, got {type(artifact)}"
                 )
             if artifact.producer is not None:
                 raise ValueError(f"{artifact} is produced by {artifact.producer}!")
-            artifact.producer = self
+            return cast(Artifact, artifact.copy(update={"producer": self}))
+
+        outputs = tuple(validate(artifact, ord=i) for i, artifact in enumerate(outputs))
         if len(outputs) == 1:
             return outputs[0]
         return outputs

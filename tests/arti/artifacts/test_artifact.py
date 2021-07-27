@@ -1,10 +1,11 @@
 import pytest
 
+from arti.annotations.core import Annotation
 from arti.artifacts.core import Artifact
 from arti.formats.core import Format
-from arti.storage.core import Storage
+from arti.statistics.core import Statistic
 from arti.types.core import Int64, Type
-from tests.arti.dummies import A1, A2, P1, P2, DummyFormat
+from tests.arti.dummies import A1, A2, P1, P2, DummyFormat, DummyStatistic, DummyStorage
 
 
 def test_cast() -> None:
@@ -29,7 +30,7 @@ def test_class_validation() -> None:
             if self.error:
                 raise ValueError("Format - Boo!")
 
-    class S1(Storage):
+    class S1(DummyStorage):
         error: bool
 
         def supports(self, type_: Type, format: Format) -> None:
@@ -39,18 +40,39 @@ def test_class_validation() -> None:
     with pytest.raises(ValueError, match="Format - Boo!"):
 
         class BadFormatArtifact(Artifact):
-            type = Int64()
-            format = F1(error=True)
-            storage = S1(error=False)
+            type: Int64 = Int64()
+            format: F1 = F1(error=True)
+            storage: S1 = S1(error=False)
+
+        BadFormatArtifact()
 
     with pytest.raises(ValueError, match="Storage - Boo!"):
 
         class BadStorageArtifact(Artifact):
-            type = Int64()
-            format = F1(error=False)
-            storage = S1(error=True)
+            type: Int64 = Int64()
+            format: F1 = F1(error=False)
+            storage: S1 = S1(error=True)
 
-    # Check Artifact can validate w/o storage
-    class NoStorage(Artifact):
-        type = Int64()
-        format = F1(error=False)
+        BadStorageArtifact()
+
+
+def test_instance_attr_merging() -> None:
+    class Ann1(Annotation):
+        x: int
+
+    class Ann2(Annotation):
+        y: int
+
+    class Stat1(DummyStatistic):
+        pass
+
+    class Stat2(DummyStatistic):
+        pass
+
+    class MyArtifact(A1):
+        annotations: tuple[Annotation, ...] = (Ann1(x=5),)
+        statistics: tuple[Statistic, ...] = (Stat1(),)
+
+    artifact = MyArtifact(annotations=[Ann2(y=10)], statistics=[Stat2()])
+    assert tuple(type(a) for a in artifact.annotations) == (Ann1, Ann2)
+    assert tuple(type(s) for s in artifact.statistics) == (Stat1, Stat2)
