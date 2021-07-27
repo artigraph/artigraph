@@ -63,3 +63,34 @@ class PyDatetime(_SingletonTypeAdapter):
     @classmethod
     def to_artigraph(cls, type_: Any) -> Type:
         return cls.artigraph(precision="microsecond")
+
+
+@python.register_adapter
+class PyStruct(TypeAdapter):
+    artigraph = arti.types.core.Struct
+    system = dict[str, type]
+
+    @classmethod
+    def to_artigraph(cls, type_: Any) -> Type:
+        return arti.types.core.Struct(
+            fields={
+                field_name: python.to_artigraph(field_type)
+                for field_name, field_type in type_.items()
+            }
+        )
+
+    @classmethod
+    def matches_system(cls, type_: Any) -> bool:
+        return isinstance(type_, dict) and all(
+            [
+                isinstance(field_name, str) and isinstance(field_type, type)
+                for field_name, field_type in type_.items()
+            ]
+        )
+
+    @classmethod
+    def to_system(cls, type_: Type) -> Any:
+        return {
+            field_name: python.to_system(field_type)
+            for field_name, field_type in type_.fields.items()  # type: ignore
+        }

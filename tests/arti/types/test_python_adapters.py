@@ -1,6 +1,17 @@
 from datetime import date, datetime
 
-from arti.types.core import Date, Float16, Float32, Float64, Int32, Int64, Null, String, Timestamp
+from arti.types.core import (
+    Date,
+    Float16,
+    Float32,
+    Float64,
+    Int32,
+    Int64,
+    Null,
+    String,
+    Struct,
+    Timestamp,
+)
 from arti.types.python import python
 
 
@@ -30,3 +41,11 @@ def test_python_datetime() -> None:
 def test_python_null() -> None:
     assert isinstance(python.to_artigraph(type(None)), Null)
     assert python.to_system(Null()) is type(None)  # noqa: E721
+
+
+def test_python_struct() -> None:
+    s = Struct(fields={"x": Int64()})
+    p = {"x": int}
+
+    assert python.to_system(s) == p
+    assert python.to_artigraph(p) == s
