@@ -100,7 +100,7 @@ disable = """
 
 
 [tool.pytest.ini_options]
-addopts = "--black --cov --cov-report=term-missing --flake8 --isort --mypy"
+addopts = "--black --cov --cov-report=term-missing --flake8 --isort --mypy --no-cov-on-fail "
 filterwarnings = ["error",]
 testpaths = [
     "src/",
