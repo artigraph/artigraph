@@ -13,9 +13,9 @@ def test_python_View() -> None:
     for val, view, python_type in [
         (date(1970, 1, 1), Date, date),
         (datetime(1970, 1, 1, 0), Datetime, datetime),
-        (1, Int, int),
         (dict(a=1), Dict, dict),
         (1.0, Float, float),
+        (1, Int, int),
         (None, Null, type(None)),
         ("", Str, str),
     ]:
