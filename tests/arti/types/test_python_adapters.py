@@ -33,6 +33,8 @@ def test_python_str() -> None:
 def test_python_datetime() -> None:
     assert isinstance(python.to_artigraph(datetime), Timestamp)
     assert python.to_system(Timestamp(precision="microsecond")) is datetime
+    assert python.to_system(Timestamp(precision="millisecond")) is datetime
+    assert python.to_system(Timestamp(precision="second")) is datetime
 
     assert isinstance(python.to_artigraph(date), Date)
     assert python.to_system(Date()) is date

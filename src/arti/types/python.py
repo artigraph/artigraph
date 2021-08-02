@@ -1,10 +1,10 @@
 from __future__ import annotations
 
 import datetime
-from typing import Any
+from typing import Any, cast
 
 import arti.types.core
-from arti.types.core import Type, TypeAdapter, TypeSystem
+from arti.types.core import Struct, Type, TypeAdapter, TypeSystem
 
 python = TypeSystem(key="python")
 
@@ -25,12 +25,12 @@ class _SingletonTypeAdapter(TypeAdapter):
         return cls.system
 
 
-def _gen_adapter(*, artigraph: type[Type], system: Any, precision: int = 0) -> type[TypeAdapter]:
+def _gen_adapter(*, artigraph: type[Type], system: Any, priority: int = 0) -> type[TypeAdapter]:
     return python.register_adapter(
         type(
             f"Py{artigraph.__name__}",
             (_SingletonTypeAdapter,),
-            {"artigraph": artigraph, "system": system, "priority": precision},
+            {"artigraph": artigraph, "system": system, "priority": priority},
         )
     )
 
@@ -39,7 +39,7 @@ for precision in (16, 32, 64):
     _gen_adapter(
         artigraph=getattr(arti.types.core, f"Float{precision}"),
         system=float,
-        precision=precision,
+        priority=precision,
     )
 
 
@@ -47,7 +47,7 @@ for precision in (32, 64):
     _gen_adapter(
         artigraph=getattr(arti.types.core, f"Int{precision}"),
         system=int,
-        precision=precision,
+        priority=precision,
     )
 
 _gen_adapter(artigraph=arti.types.core.Null, system=type(None))
@@ -90,7 +90,8 @@ class PyStruct(TypeAdapter):
 
     @classmethod
     def to_system(cls, type_: Type) -> Any:
+        type_ = cast(Struct, type_)
         return {
             field_name: python.to_system(field_type)
-            for field_name, field_type in type_.fields.items()  # type: ignore
+            for field_name, field_type in type_.fields.items()
         }
