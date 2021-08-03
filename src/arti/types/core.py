@@ -71,7 +71,7 @@ class Date(Type):
 class Timestamp(Type):
     """UTC timestamp with configurable precision."""
 
-    precision: Union[Literal["second"], Literal["millisecond"]]
+    precision: Union[Literal["second"], Literal["millisecond"], Literal["microsecond"]]
 
 
 class TypeAdapter:

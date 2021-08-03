@@ -1,4 +1,5 @@
 import pickle
+from datetime import date, datetime
 from typing import Any, ClassVar
 
 from arti.formats.pickle import Pickle
@@ -15,8 +16,32 @@ class _PythonBuiltin(View):
     type_system: ClassVar[TypeSystem] = python
 
 
+class Date(_PythonBuiltin):
+    python_type = date
+
+
+class Datetime(_PythonBuiltin):
+    python_type = datetime
+
+
+class Dict(_PythonBuiltin):
+    python_type = dict
+
+
+class Float(_PythonBuiltin):
+    python_type = float
+
+
 class Int(_PythonBuiltin):
     python_type = int
+
+
+class Null(_PythonBuiltin):
+    python_type = type(None)
+
+
+class Str(_PythonBuiltin):
+    python_type = str
 
 
 @read.register
