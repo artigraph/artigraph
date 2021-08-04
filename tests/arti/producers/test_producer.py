@@ -72,7 +72,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
     with pytest.raises(ValueError, match="Producers must implement"):
 
-        class BadProducer(Producer):  # type: ignore
+        class BadProducer(Producer):
             pass
 
     with pytest.raises(ValueError, match="must have a type hint"):
@@ -84,7 +84,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
     with pytest.raises(ValueError, match="type hint must be an Artifact subclass"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: str) -> tuple[A2, A3]:  # type: ignore
+            def build(self, input_artifact: str) -> tuple[A2, A3]:
                 pass
 
     with pytest.raises(ValueError, match="must not have a default"):
@@ -114,7 +114,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
     with pytest.raises(ValueError, match="return value must be an Artifact"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1) -> None:  # type: ignore
+            def build(self, input_artifact: A1) -> None:
                 pass
 
     with pytest.raises(ValueError, match="A return value must be set"):
@@ -126,13 +126,13 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
     with pytest.raises(ValueError, match="return value must be an Artifact"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1) -> str:  # type: ignore
+            def build(self, input_artifact: A1) -> str:
                 pass
 
     with pytest.raises(ValueError, match="return value must be an Artifact"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(self, input_artifact: A1) -> tuple[A2, str]:  # type: ignore
+            def build(self, input_artifact: A1) -> tuple[A2, str]:
                 pass
 
     with pytest.raises(ValueError, match="The parameters to `map` .* must match `build`"):
@@ -152,7 +152,7 @@ def test_Producer_bad_init() -> None:
     with pytest.raises(ValueError, match="Unknown argument"):
         DummyProducer(junk=5)  # type: ignore
     with pytest.raises(ValueError, match="Missing argument"):
-        DummyProducer()  # type: ignore
+        DummyProducer()
     with pytest.raises(ValueError, match="expects an instance of"):
         DummyProducer(a1=5)  # type: ignore
 
