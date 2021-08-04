@@ -1,157 +1,180 @@
 from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Iterator
-from inspect import Signature
+from inspect import Signature, getattr_static
 from typing import Any, ClassVar, Union, cast
 
+from pydantic.fields import ModelField
+
+from arti.annotations.core import Annotation
 from arti.artifacts.core import Artifact
 from arti.fingerprints.core import Fingerprint
+from arti.internal.models import Model
 from arti.internal.type_hints import signature
-from arti.internal.utils import class_name, ordinal
+from arti.internal.utils import ordinal
 from arti.versions.core import SemVer, Version
-
-# TODO: Consider making Producer a proper pydantic Model:
-# - pydantic would be responsible for figuring out __init__ (not us)
-# - `build` and `map` signatures subsets of __init__, after unwrapping (eg: View[...])
-#   - eases separate inputs for `build` and `map` (eg: mapping only args not used in build)
-#
-# TODO: Add ProducerMetadata model:
-#     class Producer(Model):
-#         annotations: tuple[Annotation, ...]
-#         fingerprint: Fingerprint
-#         version: Version
 
 
 def _commas(vals: Iterable[Any]) -> str:
     return ", ".join([str(v) for v in vals])
 
 
-class Producer:
+class Producer(Model):
     """A Producer is a task that builds one or more Artifacts."""
 
     # User fields/methods
 
-    key: str = class_name()
-    version: Version = SemVer(major=0, minor=0, patch=1)
+    annotations: tuple[Annotation, ...] = ()
+    version: ClassVar[Version] = SemVer(major=0, minor=0, patch=1)
 
-    # Relax mypy "incompatible signature" warning for subclasses - we add some stricter checking
-    # with the arti.internal.mypy_plugin. Once PEP 612[1] is available in 3.10+typing_extensions[2],
-    # we can make Producer generic with something like: Generic[ParamSpec(P), TypeVar("R")] and
-    # possibly remove the plugin.
-    #
-    # 1: https://www.python.org/dev/peps/pep-0612/
-    # 2: https://github.com/python/mypy/issues/8645
-    build: Callable[..., Any]
-    map: Callable[..., Any]
+    # build and map must be @classmethods or @staticmethods.
+    build: ClassVar[Callable[..., Any]]
+    map: ClassVar[Callable[..., Any]]
 
-    # pylint: disable=function-redefined,no-self-use
-    def build(self, **kwargs: Artifact) -> tuple[Artifact, ...]:  # type: ignore # pragma: no cover
-        raise NotImplementedError(
-            f"{type(self).__name__} - Producers must implement the `build` method."
-        )
+    # Internal fields/methods
 
-    # pylint: disable=function-redefined,no-self-use
-    def map(self, **kwargs: Artifact) -> Any:  # type: ignore
-        """Map dependencies between input and output Artifact partitions.
-
-        If there are multiple output Artifacts, they must have equivalent
-        partitioning schemes.
-
-        The method parameters must match the `build` method.
-        """
-        # TODO: if (input_is_partitioned, output_is_partitioned):
-        # - (input_is,     output_is    ): Must be overridden (even w/ equivalent partitioning, we can't know if the columns actually align)
-        # - (input_is,     output_is_not): Default to all input partitions -> the one output, but may be overridden to filter input partitions
-        # - (input_is_not, output_is    ): Must be overridden (they must define the output partitions by inspecting the input statistics or whatever)
-        # - (input_is_not, output_is_not): Default 1<->1, any override must return 1<->1 too
-        raise ValueError("Implement the default")
-
-    # Internal methods
-
-    signature: ClassVar[Signature]
+    _abstract_: ClassVar[bool] = True
+    # NOTE: The following are set in __init_subclass__
+    _artifact_fields_: ClassVar[dict[str, ModelField]]
+    _build_sig_: ClassVar[Signature]
+    _map_sig_: ClassVar[Signature]
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)  # type: ignore # https://github.com/python/mypy/issues/4660
-        cls.signature = signature(cls.build)
-        cls._validate_build_sig()
-        cls._validate_map_sig()
+        super().__init_subclass__(**kwargs)
+        if not cls._abstract_:
+            cls._artifact_fields_ = cls._validate_fields()
+            cls._build_sig_ = cls._validate_build_sig()
+            cls._map_sig_ = cls._validate_map_sig()
+            cls._validate_cohesive_params()
 
     @classmethod
-    def _validate_build_sig(cls) -> None:
-        """Validate the .build method"""
-        if cls.build is Producer.build:
-            raise ValueError(f"{cls.__name__} - Producers must implement the `build` method.")
-        # Validate the parameter definition
-        for name, param in cls.signature.parameters.items():
-            if param.annotation is param.empty:
-                raise ValueError(f"{cls.__name__} - `{name}` must have a type hint.")
-            if not issubclass(param.annotation, Artifact):
+    def _validate_fields(cls) -> dict[str, ModelField]:
+        # NOTE: Aside from the base producer fields, all others should be Artifacts.
+        #
+        # Users can set additional class attributes, but they must be properly hinted as ClassVars.
+        # These won't interact with the "framework" and can't be parameters to build/map.
+        artifact_fields = {k: v for k, v in cls.__fields__.items() if k not in Producer.__fields__}
+        for name, field in artifact_fields.items():
+            if not (field.default is None and field.default_factory is None and field.required):
                 raise ValueError(
-                    f"{cls.__name__} - `{name}` type hint must be an Artifact subclass, got: {param}"
+                    f"{cls.__name__}.{name} - field must not have a default nor be Optional."
+                )
+            if not issubclass(field.outer_type_, Artifact):
+                raise ValueError(
+                    f"{cls.__name__}.{name} - type hint must be an Artifact subclass, got: {field.outer_type_}"
+                )
+        return artifact_fields
+
+    @classmethod
+    def _validate_parameters(cls, fn_name: str, sig: Signature) -> None:
+        for name, param in sig.parameters.items():
+            if param.annotation is param.empty:
+                raise ValueError(
+                    f"{cls.__name__}.{fn_name} - `{name}` parameter must have a type hint."
                 )
             if param.default is not param.empty:
-                raise ValueError(f"{cls.__name__} - `{name}` parameter must not have a default.")
+                raise ValueError(
+                    f"{cls.__name__}.{fn_name} - `{name}` parameter must not have a default."
+                )
             if param.kind not in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY):
                 raise ValueError(
-                    "{cls.__name__} - `{name}` parameter must be usable as a keyword argument."
+                    "{cls.__name__}.{fn_name} - `{name}` parameter must be usable as a keyword argument."
                 )
+
+    @classmethod
+    def _validate_build_sig(cls) -> Signature:
+        """Validate the .build method"""
+        if not hasattr(cls, "build"):
+            raise ValueError(f"{cls.__name__} - Producers must implement the `build` method.")
+        if not isinstance(getattr_static(cls, "build"), (classmethod, staticmethod)):
+            raise ValueError(f"{cls.__name__}.build - must be a @classmethod or @staticmethod.")
+        build_sig = signature(cls.build)
+        cls._validate_parameters("build", build_sig)
         # Validate the return definition
-        return_annotation = cls.signature.return_annotation
-        if return_annotation is cls.signature.empty:
+        return_annotation = build_sig.return_annotation
+        if return_annotation is build_sig.empty:
             # TODO: "side effect" Producers: https://github.com/replicahq/artigraph/issues/11
             raise ValueError(
-                f"{cls.__name__} - A return value must be set with the output Artifact(s)."
+                f"{cls.__name__}.build - A return value must be set with the output Artifact(s)."
             )
         for i, annotation in enumerate(return_annotation, 1):
             if annotation is None or not issubclass(annotation, Artifact):
                 raise ValueError(
-                    f"{cls.__name__} - The {ordinal(i)} return value must be an Artifact, got: {annotation}"
+                    f"{cls.__name__}.build - The {ordinal(i)} return value must be an Artifact, got: {annotation}"
                 )
+        return build_sig
 
     @classmethod
-    def _validate_map_sig(cls) -> None:
+    def _validate_map_sig(cls) -> Signature:
         """Validate partitioned Artifacts and the .map method"""
-        # TODO: Verify cls.signature output Artifacts (if multiple) have equivalent partitioning schemes
-        sig = signature(cls.map)
-        map_is_overridden = cls.map is not Producer.map
-        map_params_match = cls.signature.parameters == sig.parameters
-        if map_is_overridden and not map_params_match:
-            map_param = _commas(sig.parameters.values())
-            build_param = _commas(cls.signature.parameters.values())
+        if not hasattr(cls, "map"):
+            # TODO: if (input_is_partitioned, output_is_partitioned):
+            # - (input_is, output_is):
+            #       Error requiring override (even w/ equivalent partitioning, we can't know if the
+            #       columns actually align)
+            # - (input_is, output_is_not):
+            #       Default to all input partitions -> the one output, but may be overridden to
+            #       filter input partitions
+            # - (input_is_not, output_is):
+            #       Error requiring override (they must define the output partitions by inspecting
+            #       the input statistics or whatever)
+            # - (input_is_not, output_is_not):
+            #       Default 1<->1, any override must return 1<->1 too
+            def map() -> Any:
+                """Map dependencies between input and output Artifact partitions.
+
+                If there are multiple output Artifacts, they must have equivalent partitioning
+                schemes.
+                """
+                raise ValueError("Implement the default")
+
+            cls.map = staticmethod(map)  # type: ignore
+        if not isinstance(getattr_static(cls, "map"), (classmethod, staticmethod)):
+            raise ValueError(f"{cls.__name__}.map - must be a @classmethod or @staticmethod.")
+        map_sig = signature(cls.map)
+        cls._validate_parameters("map", map_sig)
+        # TODO: Verify cls._build_sig_ output Artifacts (if multiple) have equivalent partitioning schemes
+        return map_sig  # TODO: Verify map output hint matches TBD spec
+
+    @classmethod
+    def _validate_cohesive_params(cls) -> None:
+        artifact_names = set(cls._artifact_fields_)
+        if unused_fields := artifact_names - (
+            set(cls._build_sig_.parameters) | set(cls._map_sig_.parameters)
+        ):
             raise ValueError(
-                f"{cls.__name__} - The parameters to `map` ({map_param}) must match `build` ({build_param})."
+                f"{cls.__name__} - the following fields aren't used in `.build` or `.map`: {unused_fields}"
             )
-        if not map_is_overridden:
-            pass  # TODO: Error if the output is partitioned
-        pass  # TODO: Verify map output hint matches TBD spec
+        for (fn, sig) in (
+            ("build", cls._build_sig_),
+            ("map", cls._map_sig_),
+        ):
+            if undefined_params := set(sig.parameters) - artifact_names:
+                raise ValueError(
+                    f"{cls.__name__}.{fn} - the following parameter(s) must be defined as a field: {undefined_params}"
+                )
+            for param in sig.parameters.values():
+                field = cls.__fields__[param.name]
+                # TODO: Handle proper per-method annotations:
+                # - build: Replace with python type and match to a View + check if we can convert
+                #          from the Artifact's format/storage.
+                # - map:   Expect some ArtifactPartition[MyArtifact] type and match on wrapped type
+                #
+                # These checks should probably apply at class definition _and_ instantiation.
+                if field.type_ != param.annotation:
+                    raise ValueError(
+                        f"{cls.__name__}.{fn} - `{param.name}` parameter type hint must match the field: {field.type_}"
+                    )
 
-    def __init__(self, **kwargs: Artifact) -> None:
-        if type(self) is Producer:  # pylint: disable=unidiomatic-typecheck
-            raise ValueError("Producer cannot be instantiated directly!")
-        self._validate_build_args(kwargs)
-        self._input_artifacts = kwargs
-        super().__init__()
-
-    def __iter__(self) -> Iterator[Artifact]:
+    # NOTE: pydantic defines .__iter__ to return `self.__dict__.items()` to support `dict(model)`,
+    # but we want to override to support easy expansion/assignment to a Graph  without `.out()` (eg:
+    # `g.artifacts.a, g.artifacts.b = MyProducer(...)`).
+    def __iter__(self) -> Iterator[Artifact]:  # type: ignore
         ret = self.out()
         if not isinstance(ret, tuple):
             ret = (ret,)
         return iter(ret)
-
-    def _validate_build_args(self, values: dict[str, Artifact]) -> None:
-        passed_params, expected_params = set(values), set(self.signature.parameters)
-        if unknown := passed_params - expected_params:
-            raise ValueError(f"{type(self).__name__} - Unknown argument(s): {unknown}")
-        if missing := expected_params - passed_params:
-            # TODO: Support Optional input/output artifacts?
-            raise ValueError(f"{type(self).__name__} - Missing argument(s): {missing}")
-        for name, arg in values.items():
-            expected_type = self.signature.parameters[name].annotation
-            if not isinstance(arg, expected_type):
-                raise ValueError(
-                    f"{type(self).__name__} - `{name}` expects an instance of {expected_type}, got: {arg}"
-                )
 
     @property
     def fingerprint(self) -> Fingerprint:
@@ -162,29 +185,29 @@ class Producer:
         *each* output with the static Producer.fingerprint + that output's specific input
         partition dependencies.
         """
-        return Fingerprint.from_string(self.key).combine(self.version.fingerprint)
+        return Fingerprint.from_string(self._class_key_).combine(self.version.fingerprint)
 
-    out: Callable[..., Any]
-
-    def out(self, *outputs: Artifact) -> Union[Artifact, tuple[Artifact, ...]]:  # type: ignore
+    def out(self, *outputs: Artifact) -> Union[Artifact, tuple[Artifact, ...]]:
         """Configure the output Artifacts this Producer will build.
 
         The arguments are matched to the `Producer.build` return signature in order.
         """
         if not outputs:
-            outputs = tuple(artifact() for artifact in self.signature.return_annotation)
-        passed_n, expected_n = len(outputs), len(self.signature.return_annotation)
+            # TODO: Raise a better error if the Artifacts don't have defaults set for
+            # type/format/storage.
+            outputs = tuple(artifact() for artifact in self._build_sig_.return_annotation)
+        passed_n, expected_n = len(outputs), len(self._build_sig_.return_annotation)
         if passed_n != expected_n:
-            ret_str = _commas(self.signature.return_annotation)
+            ret_str = _commas(self._build_sig_.return_annotation)
             raise ValueError(
-                f"{type(self).__name__}.out() - Expected {expected_n} arguments of ({ret_str}), but got: {outputs}"
+                f"{self._class_key_}.out() - Expected {expected_n} arguments of ({ret_str}), but got: {outputs}"
             )
 
         def validate(artifact: Artifact, *, ord: int) -> Artifact:
-            expected_type = self.signature.return_annotation[ord]
+            expected_type = self._build_sig_.return_annotation[ord]
             if not isinstance(artifact, expected_type):
                 raise ValueError(
-                    f"{type(self).__name__}.out() - Expected the {ordinal(ord+1)} argument to be {expected_type}, got {type(artifact)}"
+                    f"{self._class_key_}.out() - Expected the {ordinal(ord+1)} argument to be {expected_type}, got {type(artifact)}"
                 )
             if artifact.producer is not None:
                 raise ValueError(f"{artifact} is produced by {artifact.producer}!")

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from itertools import chain
 from typing import Any, ClassVar, Optional
 
-from pydantic import validator
+from pydantic import Field, validator
 from pydantic.fields import ModelField
 
 from arti.annotations.core import Annotation
@@ -39,7 +40,18 @@ class BaseArtifact(Model):
     format: Format
     storage: Storage
 
-    producer: Optional[Producer] = None
+    # Hide the producer to prevent showing the entire upstream graph
+    producer: Optional[Producer] = Field(None, repr=False)
+
+    def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
+        # NOTE: This method won't be necessary once [1] is released.
+        #
+        # 1: https://github.com/samuelcolvin/pydantic/pull/2593
+        return [
+            (k, v)
+            for k, v in self.__dict__.items()
+            if self.__fields__[k].field_info.extra.get("repr", True)
+        ]
 
     # TODO: Allow smarter type/format/storage merging w/ the default?
 
@@ -56,10 +68,6 @@ class BaseArtifact(Model):
         if "format" in values:
             storage.supports(type_=values["type"], format=values["format"])
         return storage
-
-    # TODO: Remove after making Producers models
-    class Config:
-        arbitrary_types_allowed = True
 
 
 from arti.statistics.core import Statistic  # noqa: E402 # # pylint: disable=wrong-import-position
