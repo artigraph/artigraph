@@ -19,20 +19,9 @@ class Type(Model):
     description: Optional[str]
 
 
-# TODO: Expand the core types (and/or describe how to customize).
-
-
-class Struct(Type):
-    name: str = "anon"
-    fields: dict[str, Type]
-
-
-class Null(Type):
-    pass
-
-
-class String(Type):
-    pass
+########################
+# Core Artigraph Types #
+########################
 
 
 class _Numeric(Type):
@@ -40,6 +29,18 @@ class _Numeric(Type):
 
 
 class _Float(_Numeric):
+    pass
+
+
+class _Int(_Numeric):
+    pass
+
+
+class Boolean(Type):
+    pass
+
+
+class Date(Type):
     pass
 
 
@@ -55,7 +56,11 @@ class Float64(_Float):
     pass
 
 
-class _Int(_Numeric):
+class Int8(_Int):
+    pass
+
+
+class Int16(_Int):
     pass
 
 
@@ -67,14 +72,55 @@ class Int64(_Int):
     pass
 
 
-class Date(Type):
+class List(Type):
+    value_type: Type
+
+
+class Map(Type):
+    key_type: Type
+    value_type: Type
+
+
+class Null(Type):
     pass
+
+
+class String(Type):
+    pass
+
+
+class Struct(Type):
+    name: str = "anon"
+    fields: dict[str, Type]
 
 
 class Timestamp(Type):
     """UTC timestamp with configurable precision."""
 
-    precision: Union[Literal["second"], Literal["millisecond"], Literal["microsecond"]]
+    precision: Union[
+        Literal["second"], Literal["millisecond"], Literal["microsecond"], Literal["nanosecond"]
+    ]
+
+
+class UInt8(_Int):
+    pass
+
+
+class UInt16(_Int):
+    pass
+
+
+class UInt32(_Int):
+    pass
+
+
+class UInt64(_Int):
+    pass
+
+
+##############################
+# Type conversion interfaces #
+##############################
 
 
 class TypeAdapter:

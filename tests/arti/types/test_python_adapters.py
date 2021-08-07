@@ -1,12 +1,17 @@
 from datetime import date, datetime
+from typing import TypedDict, get_type_hints
 
 from arti.types import (
     Date,
     Float16,
     Float32,
     Float64,
+    Int8,
+    Int16,
     Int32,
     Int64,
+    List,
+    Map,
     Null,
     String,
     Struct,
@@ -17,7 +22,7 @@ from arti.types.python import python_type_system
 
 def test_python_numerics() -> None:
     assert isinstance(python_type_system.to_artigraph(int), Int64)
-    for int_type in (Int64, Int32):
+    for int_type in (Int64, Int32, Int16, Int8):
         assert python_type_system.to_system(int_type()) is int
 
     assert isinstance(python_type_system.to_artigraph(float), Float64)
@@ -45,9 +50,30 @@ def test_python_null() -> None:
     assert python_type_system.to_system(Null()) is type(None)  # noqa: E721
 
 
-def test_python_struct() -> None:
-    s = Struct(fields={"x": Int64()})
-    p = {"x": int}
+def test_python_list() -> None:
+    a = List(value_type=Int64())
+    p = list[int]
 
-    assert python_type_system.to_system(s) == p
-    assert python_type_system.to_artigraph(p) == s
+    assert python_type_system.to_system(a) == p
+    assert python_type_system.to_artigraph(p) == a
+
+
+def test_python_map() -> None:
+    a = Map(key_type=String(), value_type=Int64())
+    p = dict[str, int]
+
+    assert python_type_system.to_system(a) == p
+    assert python_type_system.to_artigraph(p) == a
+
+
+def test_python_struct() -> None:
+    a = Struct(name="P", fields={"x": Int64()})
+
+    class P(TypedDict):
+        x: int
+
+    # TypedDicts don't support equality (they must check on id or similar).
+    P1 = python_type_system.to_system(a)
+    assert P1.__name__ == P.__name__
+    assert get_type_hints(P1) == {"x": int}
+    assert python_type_system.to_artigraph(P) == a
