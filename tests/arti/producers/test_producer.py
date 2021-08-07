@@ -2,9 +2,9 @@ from typing import Any, Optional
 
 import pytest
 
-from arti.fingerprints.core import Fingerprint
+from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
-from arti.producers.core import Producer
+from arti.producers import Producer
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 
 

@@ -3,7 +3,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from arti.types.core import (
+from arti.types import (
     Float16,
     Float32,
     Float64,

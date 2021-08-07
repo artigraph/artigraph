@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 from functools import reduce
 from operator import xor
 from typing import Optional

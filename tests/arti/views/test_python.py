@@ -3,9 +3,9 @@ from datetime import date, datetime
 
 from arti.formats.pickle import Pickle
 from arti.internal.utils import named_temporary_file
-from arti.io.core import read, write
+from arti.io import read, write
 from arti.storage.local import LocalFile
-from arti.views.core import View
+from arti.views import View
 from arti.views.python import Date, Datetime, Dict, Float, Int, Null, Str
 
 

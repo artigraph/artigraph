@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 from typing import Any, ClassVar, Generic, TypeVar
 
-from arti.types.core import Type
+from arti.types import Type
 
 
 class Partitioner:
@@ -24,4 +26,4 @@ class PartitionKey(Generic[_Downstream]):
 
 
 # Import type annotation references so we can resolve ForwardRefs at runtime with get_type_hints.
-from arti.artifacts.core import Artifact  # noqa: E402 # # pylint: disable=wrong-import-position
+from arti.artifacts import Artifact  # noqa: E402 # # pylint: disable=wrong-import-position

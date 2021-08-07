@@ -1,6 +1,6 @@
 from datetime import date, datetime
 
-from arti.types.core import (
+from arti.types import (
     Date,
     Float16,
     Float32,

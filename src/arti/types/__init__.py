@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 from collections.abc import Iterator
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional, Union

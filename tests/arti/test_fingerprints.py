@@ -2,7 +2,7 @@ from itertools import permutations
 
 import pytest
 
-from arti.fingerprints.core import Fingerprint
+from arti.fingerprints import Fingerprint
 from arti.internal.utils import int64, uint64
 
 

@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 from types import TracebackType
 from typing import Optional
 
-from arti.artifacts.core import Artifact
-from arti.backends.core import Backend
+from arti.artifacts import Artifact
+from arti.backends import Backend
 from arti.internal.utils import TypedBox
 
 # TODO: Add GraphMetadata model

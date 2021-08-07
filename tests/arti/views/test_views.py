@@ -5,7 +5,7 @@ from typing import ClassVar
 import pytest
 from pydantic import ValidationError
 
-from arti.views.core import View
+from arti.views import View
 
 
 def test_View() -> None:

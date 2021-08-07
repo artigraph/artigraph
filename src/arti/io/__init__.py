@@ -1,10 +1,14 @@
+from __future__ import annotations
+
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 from typing import Any
 
 from multimethod import multidispatch
 
-from arti.formats.core import Format
-from arti.storage.core import Storage
-from arti.views.core import View
+from arti.formats import Format
+from arti.storage import Storage
+from arti.views import View
 
 # TODO write/read partitioned data, column subset
 

@@ -3,11 +3,11 @@ from datetime import date, datetime
 from typing import Any, ClassVar
 
 from arti.formats.pickle import Pickle
-from arti.io.core import read, write
+from arti.io import read, write
 from arti.storage.local import LocalFile
-from arti.types.core import TypeSystem
+from arti.types import TypeSystem
 from arti.types.python import python
-from arti.views.core import View
+from arti.views import View
 
 
 class _PythonBuiltin(View):

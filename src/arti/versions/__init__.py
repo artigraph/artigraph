@@ -1,3 +1,7 @@
+from __future__ import annotations
+
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 import inspect
 import subprocess
 from abc import abstractmethod
@@ -7,7 +11,7 @@ from typing import Any, cast
 
 from pydantic import Field, validator
 
-from arti.fingerprints.core import Fingerprint
+from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import qname
 

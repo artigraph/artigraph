@@ -1,10 +1,10 @@
 import pytest
 
-from arti.annotations.core import Annotation
-from arti.artifacts.core import Artifact
-from arti.formats.core import Format
-from arti.statistics.core import Statistic
-from arti.types.core import Int64, Type
+from arti.annotations import Annotation
+from arti.artifacts import Artifact
+from arti.formats import Format
+from arti.statistics import Statistic
+from arti.types import Int64, Type
 from tests.arti.dummies import A1, A2, P1, P2, DummyFormat, DummyStatistic, DummyStorage
 
 

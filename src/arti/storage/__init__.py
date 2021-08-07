@@ -1,8 +1,10 @@
 from __future__ import annotations
 
-from arti.formats.core import Format
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
+from arti.formats import Format
 from arti.internal.models import Model
-from arti.types.core import Type
+from arti.types import Type
 
 
 class Storage(Model):

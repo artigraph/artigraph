@@ -1,4 +1,4 @@
-from arti.storage.core import Storage
+from arti.storage import Storage
 
 
 class LocalFile(Storage):

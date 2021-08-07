@@ -1,18 +1,20 @@
 from __future__ import annotations
 
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 from collections.abc import Callable, Iterable, Iterator
 from inspect import Signature, getattr_static
 from typing import Any, ClassVar, Union, cast
 
 from pydantic.fields import ModelField
 
-from arti.annotations.core import Annotation
-from arti.artifacts.core import Artifact
-from arti.fingerprints.core import Fingerprint
+from arti.annotations import Annotation
+from arti.artifacts import Artifact
+from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.type_hints import signature
 from arti.internal.utils import ordinal
-from arti.versions.core import SemVer, Version
+from arti.versions import SemVer, Version
 
 
 def _commas(vals: Iterable[Any]) -> str:

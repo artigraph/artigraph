@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 from collections.abc import Sequence
 from itertools import chain
 from typing import Any, ClassVar, Optional
@@ -7,11 +9,11 @@ from typing import Any, ClassVar, Optional
 from pydantic import Field, validator
 from pydantic.fields import ModelField
 
-from arti.annotations.core import Annotation
-from arti.formats.core import Format
+from arti.annotations import Annotation
+from arti.formats import Format
 from arti.internal.models import Model
-from arti.storage.core import Storage
-from arti.types.core import Type
+from arti.storage import Storage
+from arti.types import Type
 
 
 class BaseArtifact(Model):
@@ -70,7 +72,7 @@ class BaseArtifact(Model):
         return storage
 
 
-from arti.statistics.core import Statistic  # noqa: E402 # # pylint: disable=wrong-import-position
+from arti.statistics import Statistic  # noqa: E402 # # pylint: disable=wrong-import-position
 
 
 class Artifact(BaseArtifact):
@@ -128,7 +130,7 @@ class Artifact(BaseArtifact):
         raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
 
 
-from arti.producers.core import Producer  # noqa: E402 # # pylint: disable=wrong-import-position
+from arti.producers import Producer  # noqa: E402 # # pylint: disable=wrong-import-position
 
 BaseArtifact.update_forward_refs()
 Artifact.update_forward_refs()

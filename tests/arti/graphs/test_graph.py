@@ -1,7 +1,7 @@
 import pytest
 from box import BoxError
 
-from arti.graphs.core import Graph
+from arti.graphs import Graph
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2, P3
 
 

@@ -1,10 +1,10 @@
-from arti.annotations.core import Annotation
-from arti.artifacts.core import Artifact
-from arti.formats.core import Format
-from arti.producers.core import Producer
-from arti.statistics.core import Statistic
-from arti.storage.core import Storage
-from arti.types.core import Int32, Struct, TypeSystem
+from arti.annotations import Annotation
+from arti.artifacts import Artifact
+from arti.formats import Format
+from arti.producers import Producer
+from arti.statistics import Statistic
+from arti.storage import Storage
+from arti.types import Int32, Struct, TypeSystem
 
 dummy_type_system = TypeSystem(key="dummy")
 

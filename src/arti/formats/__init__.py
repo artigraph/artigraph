@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
 from typing import ClassVar
 
 from arti.internal.models import Model
-from arti.types.core import Type, TypeSystem
+from arti.types import Type, TypeSystem
 
 
 class Format(Model):

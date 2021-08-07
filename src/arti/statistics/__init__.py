@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from arti.artifacts.core import BaseArtifact
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+
+from arti.artifacts import BaseArtifact
 
 
 class Statistic(BaseArtifact):

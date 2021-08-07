@@ -2,7 +2,7 @@ from datetime import datetime, timezone
 
 import pytest
 
-from arti.versions.core import GitCommit, SemVer, String, Timestamp, Version, _Source
+from arti.versions import GitCommit, SemVer, String, Timestamp, Version, _Source
 
 
 def test_GitCommit() -> None:

@@ -3,8 +3,8 @@ from __future__ import annotations
 import datetime
 from typing import Any, cast
 
-import arti.types.core
-from arti.types.core import Struct, Type, TypeAdapter, TypeSystem
+import arti.types
+from arti.types import Struct, Type, TypeAdapter, TypeSystem
 
 python = TypeSystem(key="python")
 
@@ -37,7 +37,7 @@ def _gen_adapter(*, artigraph: type[Type], system: Any, priority: int = 0) -> ty
 
 for precision in (16, 32, 64):
     _gen_adapter(
-        artigraph=getattr(arti.types.core, f"Float{precision}"),
+        artigraph=getattr(arti.types, f"Float{precision}"),
         system=float,
         priority=precision,
     )
@@ -45,19 +45,19 @@ for precision in (16, 32, 64):
 
 for precision in (32, 64):
     _gen_adapter(
-        artigraph=getattr(arti.types.core, f"Int{precision}"),
+        artigraph=getattr(arti.types, f"Int{precision}"),
         system=int,
         priority=precision,
     )
 
-_gen_adapter(artigraph=arti.types.core.Null, system=type(None))
-_gen_adapter(artigraph=arti.types.core.String, system=str)
-_gen_adapter(artigraph=arti.types.core.Date, system=datetime.date)
+_gen_adapter(artigraph=arti.types.Null, system=type(None))
+_gen_adapter(artigraph=arti.types.String, system=str)
+_gen_adapter(artigraph=arti.types.Date, system=datetime.date)
 
 
 @python.register_adapter
 class PyDatetime(_SingletonTypeAdapter):
-    artigraph = arti.types.core.Timestamp
+    artigraph = arti.types.Timestamp
     system = datetime.datetime
 
     @classmethod
@@ -67,12 +67,12 @@ class PyDatetime(_SingletonTypeAdapter):
 
 @python.register_adapter
 class PyStruct(TypeAdapter):
-    artigraph = arti.types.core.Struct
+    artigraph = arti.types.Struct
     system = dict[str, type]
 
     @classmethod
     def to_artigraph(cls, type_: Any) -> Type:
-        return arti.types.core.Struct(
+        return arti.types.Struct(
             fields={
                 field_name: python.to_artigraph(field_type)
                 for field_name, field_type in type_.items()
