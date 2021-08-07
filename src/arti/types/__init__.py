@@ -23,6 +23,7 @@ class Type(Model):
 
 
 class Struct(Type):
+    name: str = "anon"
     fields: dict[str, Type]
 
 
