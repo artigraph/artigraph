@@ -1,4 +1,7 @@
-from typing import Any, ClassVar, Literal, cast, get_origin
+from __future__ import annotations
+
+from collections.abc import Sequence
+from typing import Any, ClassVar, Literal, Optional, cast, get_origin
 
 from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField
@@ -56,6 +59,10 @@ class Model(BaseModel):
         if isinstance(other, BaseModel):
             return (self.__class__, self.dict()) == (other.__class__, other.dict())
         return cast(bool, self.dict() == other)
+
+    # Omitting unpassed args in repr by default
+    def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
+        return [(k, v) for k, v in super().__repr_args__() if k in self.__fields_set__]
 
     def __str__(self) -> str:
         return repr(self)

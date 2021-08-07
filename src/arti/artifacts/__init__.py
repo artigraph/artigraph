@@ -51,8 +51,8 @@ class BaseArtifact(Model):
         # 1: https://github.com/samuelcolvin/pydantic/pull/2593
         return [
             (k, v)
-            for k, v in self.__dict__.items()
-            if self.__fields__[k].field_info.extra.get("repr", True)
+            for k, v in super().__repr_args__()
+            if (True if k is None else self.__fields__[k].field_info.extra.get("repr", True))
         ]
 
     # TODO: Allow smarter type/format/storage merging w/ the default?
