@@ -1,4 +1,4 @@
-from typing import Any, ClassVar, Literal, get_origin
+from typing import Any, ClassVar, Literal, cast, get_origin
 
 from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField
@@ -46,6 +46,16 @@ class Model(BaseModel):
     def _strict_types(cls, v: Any, field: ModelField) -> Any:
         _check_types(v, field.type_)
         return v
+
+    # By default, pydantic just compares models by their dict representation, causing models of
+    # different types but same fields (eg: Int8 and Int16) to be equivalent. This can be removed if
+    # [1] is merged+released.
+    #
+    # 1: https://github.com/samuelcolvin/pydantic/pull/3066
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, BaseModel):
+            return (self.__class__, self.dict()) == (other.__class__, other.dict())
+        return cast(bool, self.dict() == other)
 
     def __str__(self) -> str:
         return repr(self)
