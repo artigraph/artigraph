@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any, ClassVar, Literal, Optional, cast, get_origin
+from typing import Any, ClassVar, Literal, Optional, get_origin
 
 from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField
@@ -56,11 +56,7 @@ class Model(BaseModel):
     #
     # 1: https://github.com/samuelcolvin/pydantic/pull/3066
     def __eq__(self, other: Any) -> bool:
-        if isinstance(other, BaseModel):
-            if self.__class__ != other.__class__:
-                return False
-            return all(self.__dict__[k] == other.__dict__[k] for k in self.__fields__)
-        return cast(bool, self.dict() == other)
+        return self.__class__ == other.__class__ and tuple(self._iter()) == tuple(other._iter())
 
     # Omitting unpassed args in repr by default
     def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
