@@ -38,3 +38,23 @@ def test_Model_static_types() -> None:
         M(a=5, b=5, c=0)
     with pytest.raises(ValidationError, match=r"Expected an instance of int, got"):
         M(a=5, b="b", c=0.0)
+
+
+def test_Model_equality() -> None:
+    class Animal(Model):
+        name: str = ""
+
+    class Dog(Animal):
+        pass
+
+    class Cat(Animal):
+        pass
+
+    class Owner(Model):
+        name: str = ""
+        pets: list[Animal]
+
+    assert Dog() != 5
+    assert Dog() == Dog()
+    assert Dog() != Cat()
+    assert Owner(pets=[Dog()]) != Owner(pets=[Cat()])

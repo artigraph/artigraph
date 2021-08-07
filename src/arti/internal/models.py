@@ -57,7 +57,9 @@ class Model(BaseModel):
     # 1: https://github.com/samuelcolvin/pydantic/pull/3066
     def __eq__(self, other: Any) -> bool:
         if isinstance(other, BaseModel):
-            return (self.__class__, self.dict()) == (other.__class__, other.dict())
+            if self.__class__ != other.__class__:
+                return False
+            return all(self.__dict__[k] == other.__dict__[k] for k in self.__fields__)
         return cast(bool, self.dict() == other)
 
     # Omitting unpassed args in repr by default
