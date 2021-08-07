@@ -6,7 +6,7 @@ from typing import Any, cast
 import arti.types
 from arti.types import Struct, Type, TypeAdapter, TypeSystem
 
-python = TypeSystem(key="python")
+python_type_system = TypeSystem(key="python")
 
 
 # Python types are all instances of `type` - there is no "meaningful" metaclass. Hence, we must
@@ -26,7 +26,7 @@ class _SingletonTypeAdapter(TypeAdapter):
 
 
 def _gen_adapter(*, artigraph: type[Type], system: Any, priority: int = 0) -> type[TypeAdapter]:
-    return python.register_adapter(
+    return python_type_system.register_adapter(
         type(
             f"Py{artigraph.__name__}",
             (_SingletonTypeAdapter,),
@@ -55,7 +55,7 @@ _gen_adapter(artigraph=arti.types.String, system=str)
 _gen_adapter(artigraph=arti.types.Date, system=datetime.date)
 
 
-@python.register_adapter
+@python_type_system.register_adapter
 class PyDatetime(_SingletonTypeAdapter):
     artigraph = arti.types.Timestamp
     system = datetime.datetime
@@ -65,7 +65,7 @@ class PyDatetime(_SingletonTypeAdapter):
         return cls.artigraph(precision="microsecond")
 
 
-@python.register_adapter
+@python_type_system.register_adapter
 class PyStruct(TypeAdapter):
     artigraph = arti.types.Struct
     system = dict[str, type]
@@ -74,7 +74,7 @@ class PyStruct(TypeAdapter):
     def to_artigraph(cls, type_: Any) -> Type:
         return arti.types.Struct(
             fields={
-                field_name: python.to_artigraph(field_type)
+                field_name: python_type_system.to_artigraph(field_type)
                 for field_name, field_type in type_.items()
             }
         )
@@ -92,6 +92,6 @@ class PyStruct(TypeAdapter):
     def to_system(cls, type_: Type) -> Any:
         type_ = cast(Struct, type_)
         return {
-            field_name: python.to_system(field_type)
+            field_name: python_type_system.to_system(field_type)
             for field_name, field_type in type_.fields.items()
         }

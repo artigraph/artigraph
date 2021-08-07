@@ -6,14 +6,14 @@ from arti.formats.pickle import Pickle
 from arti.io import read, write
 from arti.storage.local import LocalFile
 from arti.types import TypeSystem
-from arti.types.python import python
+from arti.types.python import python_type_system
 from arti.views import View
 
 
 class _PythonBuiltin(View):
     _abstract_ = True
 
-    type_system: ClassVar[TypeSystem] = python
+    type_system: ClassVar[TypeSystem] = python_type_system
 
 
 class Date(_PythonBuiltin):
