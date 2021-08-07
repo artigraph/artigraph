@@ -34,7 +34,8 @@ use_parentheses = true
 
 
 [tool.mypy]
-mypy_path = "$MYPY_CONFIG_FILE_DIR/stubs"
+explicit_package_bases = true
+mypy_path = "$MYPY_CONFIG_FILE_DIR/src,$MYPY_CONFIG_FILE_DIR/stubs"
 namespace_packages = true
 strict = true
 
