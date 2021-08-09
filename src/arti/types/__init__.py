@@ -37,7 +37,7 @@ class _Int(_Numeric):
 
 
 class Binary(Type):
-    pass
+    length: Optional[int]
 
 
 class Boolean(Type):
