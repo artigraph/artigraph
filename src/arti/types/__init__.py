@@ -36,6 +36,10 @@ class _Int(_Numeric):
     pass
 
 
+class Binary(Type):
+    pass
+
+
 class Boolean(Type):
     pass
 
