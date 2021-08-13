@@ -212,6 +212,42 @@ class TypeAdapter:
         raise NotImplementedError()
 
 
+# _ScalarClassTypeAdapter can be used for scalars defined as python types (eg: int or str for the
+# python TypeSystem).
+class _ScalarClassTypeAdapter(TypeAdapter):
+    @classmethod
+    def to_artigraph(cls, type_: Any) -> Type:
+        return cls.artigraph()
+
+    @classmethod
+    def matches_system(cls, type_: Any) -> bool:
+        return lenient_issubclass(type_, cls.system)
+
+    @classmethod
+    def to_system(cls, type_: Type) -> Any:
+        return cls.system
+
+    @classmethod
+    def generate(
+        cls,
+        *,
+        artigraph: type[Type],
+        system: Any,
+        priority: int = 0,
+        type_system: TypeSystem,
+        name: Optional[str] = None,
+    ) -> type[TypeAdapter]:
+        """Generate a _ScalarClassTypeAdapter subclass for the scalar system type."""
+        name = name or f"{type_system.key}{artigraph.__name__}"
+        return type_system.register_adapter(
+            type(
+                name,
+                (cls,),
+                {"artigraph": artigraph, "system": system, "priority": priority},
+            )
+        )
+
+
 class TypeSystem(Model):
     key: str
 

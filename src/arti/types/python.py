@@ -1,55 +1,30 @@
 from __future__ import annotations
 
 import datetime
+from functools import partial
 from itertools import chain
 from typing import _TypedDictMeta  # type: ignore
 from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_origin, get_type_hints
 
 import arti.types
 from arti.internal.type_hints import NoneType, is_optional_hint, is_union
-from arti.types import Type, TypeAdapter, TypeSystem
+from arti.types import Type, TypeAdapter, TypeSystem, _ScalarClassTypeAdapter
 
 python_type_system = TypeSystem(key="python")
+_generate = partial(_ScalarClassTypeAdapter.generate, type_system=python_type_system)
 
-
-# Python types are all instances of `type` - there is no "meaningful" metaclass. Hence, we must
-# match on and return the type identity.
-class _SingletonTypeAdapter(TypeAdapter):
-    @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
-        return cls.artigraph()
-
-    @classmethod
-    def matches_system(cls, type_: Any) -> bool:
-        return type_ is cls.system
-
-    @classmethod
-    def to_system(cls, type_: Type) -> Any:
-        return cls.system
-
-
-def _gen_adapter(*, artigraph: type[Type], system: Any, priority: int = 0) -> type[TypeAdapter]:
-    return python_type_system.register_adapter(
-        type(
-            f"Py{artigraph.__name__}",
-            (_SingletonTypeAdapter,),
-            {"artigraph": artigraph, "system": system, "priority": priority},
-        )
-    )
-
-
-_gen_adapter(artigraph=arti.types.Boolean, system=bool)
-_gen_adapter(artigraph=arti.types.Date, system=datetime.date)
-_gen_adapter(artigraph=arti.types.Null, system=NoneType)
-_gen_adapter(artigraph=arti.types.String, system=str)
+_generate(artigraph=arti.types.Boolean, system=bool)
+_generate(artigraph=arti.types.Date, system=datetime.date)
+_generate(artigraph=arti.types.Null, system=NoneType)
+_generate(artigraph=arti.types.String, system=str)
 for _precision in (16, 32, 64):
-    _gen_adapter(
+    _generate(
         artigraph=getattr(arti.types, f"Float{_precision}"),
         system=float,
         priority=_precision,
     )
 for _precision in (8, 16, 32, 64):
-    _gen_adapter(
+    _generate(
         artigraph=getattr(arti.types, f"Int{_precision}"),
         system=int,
         priority=_precision,
@@ -57,7 +32,7 @@ for _precision in (8, 16, 32, 64):
 
 
 @python_type_system.register_adapter
-class PyDatetime(_SingletonTypeAdapter):
+class PyDatetime(_ScalarClassTypeAdapter):
     artigraph = arti.types.Timestamp
     system = datetime.datetime
 
