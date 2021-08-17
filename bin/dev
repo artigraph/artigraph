@@ -6,6 +6,7 @@ import typer
 from sh import ErrorReturnCode_128, bash, git  # pylint: disable=no-name-in-module
 
 REPO_ROOT = Path(git("rev-parse", "--show-toplevel").stdout.decode().strip())
+WORKTREE_BASE_DIR = REPO_ROOT / ".wt"
 
 app = typer.Typer(name="dev")
 worktree = typer.Typer(name="worktree")
@@ -27,9 +28,9 @@ def worktree_add(
         except ErrorReturnCode_128:
             typer.secho(f"Creating `{branch}` branch from `origin/{branch}`...", fg="yellow")
             git.branch(branch, f"origin/{branch}")
-    branch_dir = Path(branch).absolute()
+    branch_dir = WORKTREE_BASE_DIR / branch
     typer.secho(f"Creating {branch_dir} worktree...", fg="green")
-    git.worktree.add(branch)
+    git.worktree.add(branch_dir, branch)
     if (envrc_secrets := REPO_ROOT / ".envrc.secrets").exists():
         (branch_dir / ".envrc.secrets").symlink_to(envrc_secrets)
     typer.secho("Bootstrapping direnv...", fg="green")
