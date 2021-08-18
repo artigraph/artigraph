@@ -1,24 +1,62 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from typing import Any, ClassVar, Literal, Optional, get_origin
+from typing import Annotated, Any, ClassVar, Literal, Optional, get_args, get_origin
 
 from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField
 
+from arti.internal.type_hints import is_union, lenient_issubclass
 from arti.internal.utils import class_name
 
 
-def _check_types(value: Any, type_: type) -> None:
+def _check_types(value: Any, type_: type) -> None:  # noqa: C901
+    mismatch_error = ValueError(f"Expected an instance of {type_}, got: {value}")
+
     if type_ is Any:
         return
     origin = get_origin(type_)
     if origin is not None:
-        if origin is Literal:  # pragma: no cover
-            return  # Let pydantic verify
-        # Don't need to handle Union[...]: pydantic splits up validator
-    if not isinstance(value, type_):
-        raise ValueError(f"Expected an instance of {type_.__name__}, got: {value}")
+        args = get_args(type_)
+        if origin is Annotated:
+            _check_types(value, args[0])
+            return
+        if origin is Literal:
+            _check_types(value, type(args[0]))
+            return
+        # NOTE: Optional[t] -> Union[t, NoneType]
+        if is_union(origin):
+            for subtype in args:
+                try:
+                    _check_types(value, subtype)
+                except ValueError:
+                    pass
+                else:
+                    return
+            raise mismatch_error
+        if issubclass(origin, dict):
+            _check_types(value, origin)
+            for k, v in value.items():
+                _check_types(k, args[0])
+                _check_types(v, args[1])
+            return
+        # Variadic tuples will be handled below
+        if issubclass(origin, tuple) and ... not in args:
+            _check_types(value, origin)
+            if len(value) != len(args):
+                raise mismatch_error
+            for i, subtype in enumerate(args):
+                _check_types(value[i], subtype)
+            return
+        for t in (tuple, list, set, frozenset, Sequence):
+            if issubclass(origin, t):
+                _check_types(value, origin)
+                for subvalue in value:
+                    _check_types(subvalue, args[0])
+                return
+        raise NotImplementedError(f"Missing handler for {type_} with {value}!")
+    if not lenient_issubclass(type(value), type_):
+        raise mismatch_error
 
 
 class Model(BaseModel):
@@ -44,11 +82,33 @@ class Model(BaseModel):
             raise ValueError(f"{cls} cannot be instantiated directly!")
         return values
 
-    @validator("*", pre=True, each_item=True)
+    @validator("*", pre=True)
     @classmethod
-    def _strict_types(cls, v: Any, field: ModelField) -> Any:
-        _check_types(v, field.type_)
-        return v
+    def _strict_types(cls, value: Any, field: ModelField) -> Any:
+        """Check that the value is a stricter instance of the declared type annotation.
+
+        Pydantic will attempt to *parse* values (eg: "5" -> 5), but we'd prefer stricter values for
+        clarity and to avoid silent precision loss (eg: 5.3 -> 5).
+
+        NOTE: (at least) one edge case exists with `Union[str, float]` style annotations [1] that
+        causes a `5.0` input value to be output as `"5.0"`. This can be worked around by ordering
+        the types in the Union from most to least specific (eg: `Union[float, str]`). Alternatively,
+        there is an `each_item=True` arg to `@validator` that would let us validate/pick individual
+        Union member with `_check_types`, but this mode doesn't let us validate dictionary keys.
+        Giving priority to dicts in this case, as I expect they'll be more common.
+
+        1: https://github.com/samuelcolvin/pydantic/issues/1423
+        """
+        # `field.type_` points to the *inner* type (eg: `int`->`int`; `tuple[int, ...]` -> `int`)
+        # while `field.outer_type_` will (mostly) include the full spec and match the `value` we
+        # received. The caveat is the `field.outer_type_` will never be wrapped in `Optional`
+        # (though nested fields like `tuple[tuple[Optional[int]]]` would). Hence, we pull the
+        # `field.outer_type_`, but add back the `Optional` wrapping if necessary.
+        type_ = field.outer_type_
+        if field.allow_none:
+            type_ = Optional[type_]
+        _check_types(value, type_)
+        return value
 
     # By default, pydantic just compares models by their dict representation, causing models of
     # different types but same fields (eg: Int8 and Int16) to be equivalent. This can be removed if
