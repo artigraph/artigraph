@@ -2,14 +2,15 @@ from __future__ import annotations
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
-from collections.abc import Iterator, Mapping
+from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
-from typing import Any, ClassVar, Literal, Optional, Union, cast
+from typing import Any, ClassVar, Literal, Optional, cast
 
 from box.box import NO_DEFAULT as _NO_DEFAULT
 from pydantic import PrivateAttr, validator
 
 from arti.internal.models import Model
+from arti.internal.type_hints import lenient_issubclass
 from arti.internal.utils import ObjectBox, class_name, register
 
 
@@ -71,6 +72,34 @@ class Date(Type):
     pass
 
 
+class Enum(Type):
+    type: Type
+    items: frozenset[Any]
+
+    @validator("items", pre=True)
+    @classmethod
+    def _cast_values(cls, items: Any) -> Any:
+        if isinstance(items, Iterable) and not isinstance(items, Mapping):
+            return frozenset(items)
+        return items
+
+    @validator("items")
+    @classmethod
+    def _validate_values(cls, items: frozenset[Any], values: dict[str, Any]) -> frozenset[Any]:
+        from arti.types.python import python_type_system
+
+        if len(items) == 0:
+            raise ValueError("cannot be empty.")
+        # `type` will be missing if it doesn't pass validation.
+        if (arti_type := values.get("type")) is None:
+            return items
+        py_type = python_type_system.to_system(arti_type)
+        mismatched_items = [item for item in items if not lenient_issubclass(type(item), py_type)]
+        if mismatched_items:
+            raise ValueError(f"incompatible {arti_type} ({py_type}) item(s): {mismatched_items}")
+        return items
+
+
 class Float16(_Float):
     pass
 
@@ -124,9 +153,7 @@ class Struct(Type):
 class Timestamp(Type):
     """UTC timestamp with configurable precision."""
 
-    precision: Union[
-        Literal["second"], Literal["millisecond"], Literal["microsecond"], Literal["nanosecond"]
-    ]
+    precision: Literal["second", "millisecond", "microsecond", "nanosecond"]
 
 
 class UInt8(_Int):

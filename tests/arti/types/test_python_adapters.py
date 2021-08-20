@@ -1,11 +1,13 @@
+import re
 from datetime import date, datetime
-from typing import Any, Optional, TypedDict, get_args, get_type_hints
+from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_type_hints
 
 import pytest
 
 from arti.internal.type_hints import NoneType
 from arti.types import (
     Date,
+    Enum,
     Float16,
     Float32,
     Float64,
@@ -21,7 +23,7 @@ from arti.types import (
     Timestamp,
     Type,
 )
-from arti.types.python import PyOptional, python_type_system
+from arti.types.python import PyLiteral, PyOptional, python_type_system
 
 
 def test_python_numerics() -> None:
@@ -57,6 +59,42 @@ def test_python_list() -> None:
     assert python_type_system.to_artigraph(p) == a
 
 
+def test_python_literal() -> None:
+    # Order shouldn't matter
+    a = Enum(type=Int64(), items=(1, 2, 3))
+    p = Literal[3, 2, 1]
+
+    assert python_type_system.to_system(a) == p
+    assert python_type_system.to_artigraph(p) == a
+    assert python_type_system.to_artigraph(Literal[1.0, 2.0]) == Enum(
+        type=Float64(), items=(1.0, 2.0)
+    )
+    # Check for Union+Literal combos
+    assert python_type_system.to_artigraph(Union[Literal[1], Literal[2, 3]]) == a
+    # Optional uses a Union as well, so add a few extra checks
+    nullable_a = a.copy(update={"nullable": True})
+    assert python_type_system.to_artigraph(Optional[Literal[1, 2, 3]]) == nullable_a
+    assert python_type_system.to_artigraph(Union[Literal[1, 2, 3], None]) == nullable_a
+
+
+def test_python_literal_errors() -> None:
+    with pytest.raises(ValueError, match="All Literals must be the same type"):
+        assert python_type_system.to_artigraph(Literal[1, 1.0])
+    with pytest.raises(NotImplementedError, match="Invalid Literal with no values"):
+        PyLiteral.to_artigraph(Literal[()])
+    # Confirm other Unions aren't handled
+    for invalid_hint in (Union[int, str], Union[int, Literal[1]]):
+        with pytest.raises(NotImplementedError, match="No TypeSystem.* adapter for system type"):
+            assert python_type_system.to_artigraph(invalid_hint)
+    # This path shouldn't normally be accessible (ie: `match_system` should guard against it, as
+    # above), but are there for extra safety.
+    with pytest.raises(
+        NotImplementedError,
+        match=re.escape("Only Union[Literal[...], ...] (enums) are currently supported"),
+    ):
+        PyLiteral.to_artigraph(Union[int, str])
+
+
 def test_python_map() -> None:
     a = Map(key_type=String(), value_type=Int64())
     p = dict[str, int]
@@ -75,6 +113,7 @@ def test_python_null() -> None:
     (
         (Int64(nullable=True), Optional[int]),
         (Float64(nullable=True), Optional[float]),
+        (Enum(type=Int64(), items=(1, 2, 3), nullable=True), Optional[Literal[1, 2, 3]]),
     ),
 )
 def test_python_optional(arti: Type, py: Any) -> None:
