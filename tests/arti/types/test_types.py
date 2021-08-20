@@ -1,3 +1,4 @@
+import re
 from typing import Any
 
 import pytest
@@ -6,6 +7,7 @@ from pydantic import ValidationError
 
 from arti.internal.utils import ObjectBox
 from arti.types import (
+    Enum,
     Float16,
     Float32,
     Float64,
@@ -80,6 +82,38 @@ def test_Type() -> None:
 
     my_type = MyType(description="Hi")
     assert my_type.description == "Hi"
+
+
+def test_Enum() -> None:
+    float32, items = Float32(), frozenset((1.0, 2.0, 3.0))
+    enum = Enum(type=float32, items=items)
+    assert enum.type == float32
+    assert enum.items == items
+
+    for other_items in (items, list(items), tuple(items)):
+        other = Enum(type=float32, items=other_items)
+        assert enum == other
+        assert isinstance(enum.items, frozenset)
+
+
+def test_Enum_errors() -> None:
+    float32, items = Float32(), frozenset((1.0, 2.0, 3.0))
+
+    with pytest.raises(ValueError, match="cannot be empty"):
+        Enum(type=float32, items=[])
+
+    with pytest.raises(ValueError, match="Expected an instance of"):
+        Enum(type=float32, items={v: v for v in items})
+
+    mismatch_prefix = "incompatible Float32() (<class 'float'>) item(s)"
+    with pytest.raises(ValueError, match=re.escape(f"{mismatch_prefix}: [1, 2, 3]")):
+        Enum(type=float32, items=(1, 2, 3))
+    with pytest.raises(ValueError, match=re.escape(f"{mismatch_prefix}: [3]")):
+        Enum(type=float32, items=(1.0, 2.0, 3))
+
+    with pytest.raises(ValueError, match="Expected an instance of <class 'arti.types.Type'>"):
+        # NOTE: using a python type instead of an Artigraph type
+        Enum(type=float, items=items)
 
 
 def test_Struct() -> None:

@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import datetime
+from itertools import chain
 from typing import _TypedDictMeta  # type: ignore
-from typing import Any, Optional, TypedDict, Union, get_args, get_origin, get_type_hints
+from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_origin, get_type_hints
 
 import arti.types
-from arti.internal.type_hints import NoneType, is_optional_hint
+from arti.internal.type_hints import NoneType, is_optional_hint, is_union
 from arti.types import Type, TypeAdapter, TypeSystem
 
 python_type_system = TypeSystem(key="python")
@@ -87,6 +88,51 @@ class PyList(TypeAdapter):
         return cls.system[
             python_type_system.to_system(type_.value_type),
         ]  # type: ignore
+
+
+@python_type_system.register_adapter
+class PyLiteral(TypeAdapter):
+    artigraph = arti.types.Enum
+    system = Literal
+
+    @classmethod
+    def to_artigraph(cls, type_: Any) -> Type:
+        origin, items = get_origin(type_), get_args(type_)
+        if is_union(origin):
+            assert not is_optional_hint(type_)  # Should be handled by PyOptional
+            # We only support Enums currently, so all subtypes must be Literal
+            if non_literals := [sub for sub in items if not get_origin(sub) is Literal]:
+                raise NotImplementedError(
+                    f"Only Union[Literal[...], ...] (enums) are currently supported, got invalid subtypes: {non_literals}"
+                )
+            # Flatten Union[Literal[1], Literal[1,2,3]]
+            origin, items = Literal, tuple(chain.from_iterable(get_args(sub) for sub in items))
+        assert origin is Literal
+        assert isinstance(items, tuple)
+        if len(items) == 0:
+            raise NotImplementedError(f"Invalid Literal with no values: {type_}")
+        py_type, *other_types = [type(v) for v in items]
+        if not all(t is py_type for t in other_types):
+            raise ValueError("All Literals must be the same type, got: {(py_type, *other_types)}")
+        return cls.artigraph(
+            type=python_type_system.to_artigraph(py_type),
+            items=items,
+        )
+
+    @classmethod
+    def matches_system(cls, type_: Any) -> bool:
+        # We don't (currently) support arbitrary Unions, but can map Union[Literal[1], Literal[2]]
+        # to an Enum. Python's Optional is also represented as a Union, but we handle that with the
+        # high priority PyOptional.
+        origin, items = get_origin(type_), get_args(type_)
+        return origin is Literal or (
+            is_union(origin) and all(get_origin(sub) is Literal for sub in items)
+        )
+
+    @classmethod
+    def to_system(cls, type_: Type) -> Any:
+        assert isinstance(type_, cls.artigraph)
+        return cls.system[tuple(type_.items)]
 
 
 @python_type_system.register_adapter
