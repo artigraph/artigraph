@@ -219,7 +219,11 @@ class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):
     def __class_getitem__(cls, target_type: type[T]) -> TypedBox[T]:
         return cast(
             "TypedBox[T]",
-            type(f"{target_type.__name__}Box", (cls,), {"__target_type__": target_type}),
+            type(
+                f"{target_type.__name__.title()}Box",
+                (cls,),
+                {"__target_type__": target_type},
+            ),
         )
 
     def __cast_value(self, value: Any) -> T:
@@ -243,3 +247,6 @@ class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):
             raise ValueError(f"{item} is already set!")
         else:
             super()._Box__convert_and_store(item, self.__cast_value(value))
+
+
+ObjectBox = TypedBox[object]

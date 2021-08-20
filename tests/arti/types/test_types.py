@@ -1,8 +1,10 @@
 from typing import Any
 
 import pytest
+from box import BoxError
 from pydantic import ValidationError
 
+from arti.internal.utils import ObjectBox
 from arti.types import (
     Float16,
     Float32,
@@ -122,3 +124,20 @@ def test_TypeSystem(
     dummy.register_adapter(Int32Adapter)
     assert isinstance(dummy.to_artigraph(MyInt), Int32)
     assert dummy.to_system(Int32()) is MyInt
+
+
+def test_type_metadata() -> None:
+    metadata = {"a": {"b": "c"}}
+    m = Int32(metadata=metadata)
+    assert m.metadata == metadata  # type: ignore
+    assert isinstance(m.metadata, ObjectBox)  # type: ignore
+    # Confirm box is immutable
+    assert m.metadata._Box__box_config()["frozen_box"]
+    with pytest.raises(BoxError, match="Box is frozen"):
+        m.metadata["a"] = 5
+    # ... including sub-dicts.
+    with pytest.raises(BoxError, match="Box is frozen"):
+        m.metadata["a"]["b"] = 5
+    # And confirm odd input errors helpfully
+    with pytest.raises(ValidationError, match="Expected an instance of"):
+        Int32(metadata=5)
