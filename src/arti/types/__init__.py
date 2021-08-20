@@ -2,14 +2,14 @@ from __future__ import annotations
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
-from collections.abc import Iterator
+from collections.abc import Iterator, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional, Union
 
-from pydantic import PrivateAttr
+from pydantic import PrivateAttr, validator
 
 from arti.internal.models import Model
-from arti.internal.utils import class_name, register
+from arti.internal.utils import ObjectBox, class_name, register
 
 
 class Type(Model):
@@ -17,6 +17,15 @@ class Type(Model):
 
     _abstract_ = True
     description: Optional[str]
+    metadata: ObjectBox = ObjectBox(frozen_box=True)
+
+    @validator("metadata", pre=True)
+    @classmethod
+    def _freeze_metadata(cls, metadata: Any) -> Any:
+        # Convert existing mappings; otherwise let Model validate incorrect types.
+        if isinstance(metadata, Mapping):
+            return ObjectBox(metadata, frozen_box=True)
+        return metadata
 
 
 ########################
