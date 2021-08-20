@@ -8,9 +8,16 @@ from typing import _GenericAlias  # type: ignore
 from typing import Any, Union, get_args, get_origin
 
 
-def lenient_issubclass(klass: Any, class_or_tuple: Union[type[Any], tuple[type[Any], ...]]) -> bool:
+def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:
+    if not isinstance(klass, type):
+        return False
+    if isinstance(class_or_tuple, tuple):
+        return any(lenient_issubclass(klass, subtype) for subtype in class_or_tuple)
+    check_type = class_or_tuple
+    if is_union(get_origin(check_type)):
+        return any(lenient_issubclass(klass, subtype) for subtype in get_args(check_type))
     try:
-        return isinstance(klass, type) and issubclass(klass, class_or_tuple)
+        return issubclass(klass, check_type)
     except TypeError:
         if isinstance(klass, (types.GenericAlias, _GenericAlias)):
             return False

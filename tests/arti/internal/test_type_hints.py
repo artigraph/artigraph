@@ -6,26 +6,56 @@ import pytest
 from arti.internal.type_hints import is_union, lenient_issubclass
 
 
-def test_lenient_issubclass() -> None:
-    class MyTuple(tuple):  # type: ignore
-        pass
+class MyTuple(tuple):  # type: ignore
+    pass
 
-    assert lenient_issubclass(MyTuple, tuple)
-    assert lenient_issubclass(tuple, Tuple)  # type: ignore
-    assert lenient_issubclass(tuple, tuple)
-    assert not lenient_issubclass(Tuple, tuple)
-    assert not lenient_issubclass(list, tuple)
-    assert not lenient_issubclass(tuple[int], tuple)
-    # These raise a `TypeError: issubclass() arg 1 must be a class` for stock `issubclass` (but
-    # oddly, `issubclass(tuple[int], tuple)` does not).
-    #
-    # It might be nice for them to return True, but we will likely need to handle Generics more
-    # specifically anyway.
-    assert not lenient_issubclass(Optional[int], int)
-    assert not lenient_issubclass(Tuple[int], tuple)
-    assert not lenient_issubclass(dict[str, int], Mapping)
-    assert not lenient_issubclass(tuple[int], Sequence)
 
+@pytest.mark.parametrize(
+    ("klass", "class_or_tuple"),
+    (
+        (MyTuple, tuple),
+        (int, (int, str)),
+        (int, Optional[int]),
+        (int, Union[int, str]),
+        (str, Union[int, str]),
+        (tuple, Tuple),
+        (tuple, tuple),
+        (type(None), (int, type(None))),
+        (type(None), Optional[int]),
+    ),
+)
+def test_lenient_issubclass_true(
+    klass: type, class_or_tuple: Union[type, tuple[type, ...]]
+) -> None:
+    assert lenient_issubclass(klass, class_or_tuple)
+
+
+@pytest.mark.parametrize(
+    ("klass", "class_or_tuple"),
+    (
+        (list, tuple),
+        (str, Optional[int]),
+        (str, Union[int, float]),
+        (str, (int, float)),
+        (tuple[int], tuple),
+        # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for these (but
+        # oddly, `issubclass(tuple[int], tuple)` does not).
+        #
+        # It might be nice for some of them (eg: Mapping, Sequence) to return True, but we will likely
+        # need to handle Generics more specifically anyway.
+        (Optional[int], int),
+        (Tuple[int], tuple),
+        (dict[str, int], Mapping),
+        (tuple[int], Sequence),
+    ),
+)
+def test_lenient_issubclass_false(
+    klass: type, class_or_tuple: Union[type, tuple[type, ...]]
+) -> None:
+    assert not lenient_issubclass(klass, class_or_tuple)
+
+
+def test_lenient_issubclass_error_cases() -> None:
     assert not lenient_issubclass(5, 5)  # type: ignore
     with pytest.raises(TypeError, match="arg 2 must be a class or tuple of classes"):
         lenient_issubclass(tuple, 5)  # type: ignore
