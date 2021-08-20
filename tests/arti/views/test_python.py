@@ -2,6 +2,7 @@ import pickle
 from datetime import date, datetime
 
 from arti.formats.pickle import Pickle
+from arti.internal.type_hints import NoneType
 from arti.internal.utils import named_temporary_file
 from arti.io import read, write
 from arti.storage.local import LocalFile
@@ -16,7 +17,7 @@ def test_python_View() -> None:
         (dict(a=1), Dict, dict),
         (1.0, Float, float),
         (1, Int, int),
-        (None, Null, type(None)),
+        (None, Null, NoneType),
         ("", Str, str),
     ]:
         binary = pickle.dumps(val)

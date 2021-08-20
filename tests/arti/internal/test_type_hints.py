@@ -1,9 +1,15 @@
 from collections.abc import Mapping, Sequence
-from typing import Literal, Optional, Tuple, Union, get_origin
+from typing import Any, Literal, Optional, Tuple, Union, get_origin
 
 import pytest
 
-from arti.internal.type_hints import is_union, lenient_issubclass
+from arti.internal.type_hints import (
+    NoneType,
+    is_optional_hint,
+    is_union,
+    is_union_hint,
+    lenient_issubclass,
+)
 
 
 class MyTuple(tuple):  # type: ignore
@@ -20,8 +26,8 @@ class MyTuple(tuple):  # type: ignore
         (str, Union[int, str]),
         (tuple, Tuple),
         (tuple, tuple),
-        (type(None), (int, type(None))),
-        (type(None), Optional[int]),
+        (NoneType, (int, NoneType)),
+        (NoneType, Optional[int]),
     ),
 )
 def test_lenient_issubclass_true(
@@ -63,12 +69,25 @@ def test_lenient_issubclass_error_cases() -> None:
         lenient_issubclass(tuple, tuple[int])
 
 
-def test_is_union() -> None:
-    assert is_union(Union)
-    assert not is_union(Literal)
+def test_is_optional_hint() -> None:
+    assert is_optional_hint(Optional[int])
+    assert is_optional_hint(Union[int, None])
+    assert is_optional_hint(Union[int, str, NoneType])
+    assert is_optional_hint(Union[int, NoneType])
+    assert not is_optional_hint(Union[int, str])
+    assert not is_optional_hint(int)
 
-    assert is_union(get_origin(Union[int, str]))
-    assert not is_union(Union[int, str])
 
-    assert not is_union(Optional[int])
-    assert is_union(get_origin(Optional[int]))
+@pytest.mark.parametrize(
+    ["hint", "should_match"],
+    (
+        (Literal[5], False),
+        (Optional[int], True),
+        (Union[int, str], True),
+    ),
+)
+def test_is_union(hint: Any, should_match: bool) -> None:
+    if should_match:
+        assert is_union(get_origin(hint)) is is_union_hint(hint) is True
+    else:
+        assert is_union(get_origin(hint)) is is_union_hint(hint) is False

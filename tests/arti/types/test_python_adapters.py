@@ -1,6 +1,7 @@
 from datetime import date, datetime
 from typing import TypedDict, get_type_hints
 
+from arti.internal.type_hints import NoneType
 from arti.types import (
     Date,
     Float16,
@@ -45,11 +46,6 @@ def test_python_datetime() -> None:
     assert python_type_system.to_system(Date()) is date
 
 
-def test_python_null() -> None:
-    assert isinstance(python_type_system.to_artigraph(type(None)), Null)
-    assert python_type_system.to_system(Null()) is type(None)  # noqa: E721
-
-
 def test_python_list() -> None:
     a = List(value_type=Int64())
     p = list[int]
@@ -64,6 +60,11 @@ def test_python_map() -> None:
 
     assert python_type_system.to_system(a) == p
     assert python_type_system.to_artigraph(p) == a
+
+
+def test_python_null() -> None:
+    assert isinstance(python_type_system.to_artigraph(NoneType), Null)
+    assert python_type_system.to_system(Null()) is NoneType
 
 
 def test_python_struct() -> None:
