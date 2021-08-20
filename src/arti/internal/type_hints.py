@@ -5,7 +5,9 @@ import sys
 import types
 from collections.abc import Callable
 from typing import _GenericAlias  # type: ignore
-from typing import Any, Union, get_args, get_origin
+from typing import Any, Union, cast, get_args, get_origin
+
+NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
 
 def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:
@@ -14,7 +16,7 @@ def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]
     if isinstance(class_or_tuple, tuple):
         return any(lenient_issubclass(klass, subtype) for subtype in class_or_tuple)
     check_type = class_or_tuple
-    if is_union(get_origin(check_type)):
+    if is_union_hint(check_type):
         return any(lenient_issubclass(klass, subtype) for subtype in get_args(check_type))
     try:
         return issubclass(klass, check_type)
@@ -55,12 +57,21 @@ def signature(fn: Callable[..., Any], *, follow_wrapped: bool = True) -> inspect
 
 if sys.version_info < (3, 10):
 
-    def is_union(tp: Any) -> bool:
-        return tp is Union
+    def is_union(type_: Any) -> bool:
+        return type_ is Union
 
 
 else:  # pragma: no cover
 
-    def is_union(tp: Any) -> bool:
+    def is_union(type_: Any) -> bool:
         # `Union[int, str]` or `int | str`
-        return tp is Union or tp is types.Union
+        return type_ is Union or type_ is types.Union
+
+
+def is_optional_hint(type_: Any) -> bool:
+    # Optional[x] is represented as Union[x, NoneType]
+    return is_union(get_origin(type_)) and NoneType in get_args(type_)
+
+
+def is_union_hint(type_: Any) -> bool:
+    return get_origin(type_) is Union

@@ -5,6 +5,7 @@ from typing import _TypedDictMeta  # type: ignore
 from typing import Any, TypedDict, get_args, get_origin, get_type_hints
 
 import arti.types
+from arti.internal.type_hints import NoneType
 from arti.types import Type, TypeAdapter, TypeSystem
 
 python_type_system = TypeSystem(key="python")
@@ -38,7 +39,7 @@ def _gen_adapter(*, artigraph: type[Type], system: Any, priority: int = 0) -> ty
 
 _gen_adapter(artigraph=arti.types.Boolean, system=bool)
 _gen_adapter(artigraph=arti.types.Date, system=datetime.date)
-_gen_adapter(artigraph=arti.types.Null, system=type(None))
+_gen_adapter(artigraph=arti.types.Null, system=NoneType)
 _gen_adapter(artigraph=arti.types.String, system=str)
 for _precision in (16, 32, 64):
     _gen_adapter(

@@ -3,6 +3,7 @@ from datetime import date, datetime
 from typing import Any, ClassVar
 
 from arti.formats.pickle import Pickle
+from arti.internal.type_hints import NoneType
 from arti.io import read, write
 from arti.storage.local import LocalFile
 from arti.types import TypeSystem
@@ -37,7 +38,7 @@ class Int(_PythonBuiltin):
 
 
 class Null(_PythonBuiltin):
-    python_type = type(None)
+    python_type = NoneType
 
 
 class Str(_PythonBuiltin):
