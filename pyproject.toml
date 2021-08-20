@@ -51,6 +51,7 @@ include = ["src/arti/py.typed"]
 deprecation = "^2.1.0"
 frozendict = "^2.0.6"
 multimethod = "^1.6"
+parse = "^1.19.0"
 pydantic = "^1.8.1"
 pyfarmhash = "^0.2.2"
 python = "^3.9"
