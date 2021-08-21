@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import datetime
 from typing import _TypedDictMeta  # type: ignore
-from typing import Any, TypedDict, cast, get_args, get_origin, get_type_hints
+from typing import Any, TypedDict, get_args, get_origin, get_type_hints
 
 import arti.types
 from arti.types import Type, TypeAdapter, TypeSystem
@@ -82,7 +82,7 @@ class PyList(TypeAdapter):
 
     @classmethod
     def to_system(cls, type_: Type) -> Any:
-        type_ = cast(arti.types.List, type_)
+        assert isinstance(type_, cls.artigraph)
         return cls.system[
             python_type_system.to_system(type_.value_type),
         ]  # type: ignore
@@ -107,7 +107,7 @@ class PyMap(TypeAdapter):
 
     @classmethod
     def to_system(cls, type_: Type) -> Any:
-        type_ = cast(arti.types.Map, type_)
+        assert isinstance(type_, cls.artigraph)
         return cls.system[
             python_type_system.to_system(type_.key_type),
             python_type_system.to_system(type_.value_type),
@@ -119,7 +119,7 @@ class PyStruct(TypeAdapter):
     artigraph = arti.types.Struct
     system = TypedDict
 
-    # TODO: Support and inspect '__optional_keys__', '__required_keys__', '__total__'
+    # TODO: Support and inspect TypedDict's '__optional_keys__', '__required_keys__', '__total__'
 
     @classmethod
     def to_artigraph(cls, type_: Any) -> Type:
@@ -139,7 +139,7 @@ class PyStruct(TypeAdapter):
 
     @classmethod
     def to_system(cls, type_: Type) -> Any:
-        type_ = cast(arti.types.Struct, type_)
+        assert isinstance(type_, cls.artigraph)
         return TypedDict(
             type_.name,
             {
