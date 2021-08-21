@@ -19,6 +19,7 @@ class Type(Model):
     _abstract_ = True
     description: Optional[str]
     metadata: ObjectBox = ObjectBox(frozen_box=True)
+    nullable: bool = False
 
     @validator("metadata", pre=True)
     @classmethod

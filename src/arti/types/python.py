@@ -2,10 +2,10 @@ from __future__ import annotations
 
 import datetime
 from typing import _TypedDictMeta  # type: ignore
-from typing import Any, TypedDict, get_args, get_origin, get_type_hints
+from typing import Any, Optional, TypedDict, Union, get_args, get_origin, get_type_hints
 
 import arti.types
-from arti.internal.type_hints import NoneType
+from arti.internal.type_hints import NoneType, is_optional_hint
 from arti.types import Type, TypeAdapter, TypeSystem
 
 python_type_system = TypeSystem(key="python")
@@ -113,6 +113,32 @@ class PyMap(TypeAdapter):
             python_type_system.to_system(type_.key_type),
             python_type_system.to_system(type_.value_type),
         ]  # type: ignore
+
+
+@python_type_system.register_adapter
+class PyOptional(TypeAdapter):
+    artigraph = arti.types.Type  # Check against isinstance *and* .nullable
+    system = Optional
+    # Set very high priority to intercept other matching arti.types.Types/py Union in order to set .nullable
+    priority = int(1e9)
+
+    @classmethod
+    def matches_artigraph(cls, type_: Type) -> bool:
+        return super().matches_artigraph(type_) and type_.nullable
+
+    @classmethod
+    def to_artigraph(cls, type_: Any) -> Type:
+        # Optional is represented as a Union; strip out NoneType before dispatching
+        type_ = Union[tuple(subtype for subtype in get_args(type_) if subtype is not NoneType)]
+        return python_type_system.to_artigraph(type_).copy(update={"nullable": True})
+
+    @classmethod
+    def matches_system(cls, type_: Any) -> bool:
+        return is_optional_hint(type_)
+
+    @classmethod
+    def to_system(cls, type_: Type) -> Any:
+        return cls.system[python_type_system.to_system(type_.copy(update={"nullable": False}))]
 
 
 @python_type_system.register_adapter
