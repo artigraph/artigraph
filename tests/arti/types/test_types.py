@@ -141,3 +141,15 @@ def test_type_metadata() -> None:
     # And confirm odd input errors helpfully
     with pytest.raises(ValidationError, match="Expected an instance of"):
         Int32(metadata=5)
+
+
+def test_type_get_metadata() -> None:
+    m = Int32(metadata={"a": {"b": "c"}})
+    assert m.metadata.a == m.get_metadata("a")
+    assert m.metadata.a.b == m.get_metadata("a.b")
+
+    # Check missing keys ops
+    with pytest.raises(KeyError, match="'z'"):
+        assert m.get_metadata("z.y")
+    assert m.get_metadata("z", 0) == 0  # Fetch first level default
+    assert m.get_metadata("z.y.x", 0) == 0  # Fetch nested default
