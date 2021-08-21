@@ -1,5 +1,7 @@
 from datetime import date, datetime
-from typing import TypedDict, get_type_hints
+from typing import Any, Optional, TypedDict, get_args, get_type_hints
+
+import pytest
 
 from arti.internal.type_hints import NoneType
 from arti.types import (
@@ -17,8 +19,9 @@ from arti.types import (
     String,
     Struct,
     Timestamp,
+    Type,
 )
-from arti.types.python import python_type_system
+from arti.types.python import PyOptional, python_type_system
 
 
 def test_python_numerics() -> None:
@@ -65,6 +68,28 @@ def test_python_map() -> None:
 def test_python_null() -> None:
     assert isinstance(python_type_system.to_artigraph(NoneType), Null)
     assert python_type_system.to_system(Null()) is NoneType
+
+
+@pytest.mark.parametrize(
+    ["arti", "py"],
+    (
+        (Int64(nullable=True), Optional[int]),
+        (Float64(nullable=True), Optional[float]),
+    ),
+)
+def test_python_optional(arti: Type, py: Any) -> None:
+    for (a, p) in [
+        (arti, py),
+        # Confirm non-null too
+        (arti.copy(update={"nullable": False}), get_args(py)[0]),
+    ]:
+        assert python_type_system.to_system(a) == p
+        assert python_type_system.to_artigraph(p) == a
+
+
+def test_python_optional_priority() -> None:
+    # Confirm PyOptional is first since we need to wrap all other types if applicable.
+    assert tuple(python_type_system._priority_sorted_adapters)[0] is PyOptional
 
 
 def test_python_struct() -> None:
