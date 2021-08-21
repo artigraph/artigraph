@@ -4,8 +4,9 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from collections.abc import Iterator, Mapping
 from operator import attrgetter
-from typing import Any, ClassVar, Literal, Optional, Union
+from typing import Any, ClassVar, Literal, Optional, Union, cast
 
+from box.box import NO_DEFAULT as _NO_DEFAULT
 from pydantic import PrivateAttr, validator
 
 from arti.internal.models import Model
@@ -26,6 +27,18 @@ class Type(Model):
         if isinstance(metadata, Mapping):
             return ObjectBox(metadata, frozen_box=True)
         return metadata
+
+    def get_metadata(self, key: str, default: Any = _NO_DEFAULT) -> Any:
+        *parts, tail = key.split(".")
+        metadata = cast(dict[str, Any], self.metadata)
+        for part in parts:
+            if default is _NO_DEFAULT:
+                metadata = metadata[part]
+            else:
+                metadata = metadata.get(part, {})
+        if default is _NO_DEFAULT:
+            return metadata[tail]
+        return metadata.get(tail, default=default)
 
 
 ########################
