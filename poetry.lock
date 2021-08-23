@@ -637,7 +637,7 @@ termcolor = ">=1.1.0"
 
 [[package]]
 name = "python-box"
-version = "5.4.0"
+version = "5.4.1"
 description = "Advanced Python dictionaries with dot notation access"
 category = "main"
 optional = false
@@ -791,7 +791,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "aad270467a944da5f2839c078350063ee8c8952fdb8b33b362cad10d4d317373"
+content-hash = "70553e1fc1ce9830f3a64d2b62e31bc5218dfcda7cfb438a200c40a5d86bbaa0"
 
 [metadata.files]
 appdirs = [
@@ -1127,8 +1127,8 @@ pytest-sugar = [
     {file = "pytest-sugar-0.9.4.tar.gz", hash = "sha256:b1b2186b0a72aada6859bea2a5764145e3aaa2c1cfbb23c3a19b5f7b697563d3"},
 ]
 python-box = [
-    {file = "python-box-5.4.0.tar.gz", hash = "sha256:a95dff6be412948605ec11a27e796a8a2c76f525b6be28bca4a9469d34299dd3"},
-    {file = "python_box-5.4.0-py3-none-any.whl", hash = "sha256:992b550d4b51f7fdab80b5d770fd25b03ac47f54042d5bd4c32c6da004d63a0d"},
+    {file = "python-box-5.4.1.tar.gz", hash = "sha256:b68e0f8abc86f3deda751b3390f64df64a0989459de51ba4db949662a7b4d8ac"},
+    {file = "python_box-5.4.1-py3-none-any.whl", hash = "sha256:60ae9156de34cf92b899bd099580950df70a5b0813e67a3310a1cdd1976457fa"},
 ]
 pyyaml = [
     {file = "PyYAML-5.4.1-cp27-cp27m-macosx_10_9_x86_64.whl", hash = "sha256:3b2b1824fe7112845700f815ff6a489360226a5609b96ec2190a45e62a9fc922"},
