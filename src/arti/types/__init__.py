@@ -149,6 +149,13 @@ class Struct(Type):
     name: str = "anon"
     fields: dict[str, Type]
 
+    @validator("fields")
+    @classmethod
+    def _validate_fields(cls, fields: dict[str, Type]) -> dict[str, Type]:
+        if len(fields) == 0:
+            raise ValueError("cannot be empty")
+        return fields
+
 
 class Timestamp(Type):
     """UTC timestamp with configurable precision."""

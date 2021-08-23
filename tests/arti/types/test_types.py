@@ -119,6 +119,8 @@ def test_Enum_errors() -> None:
 def test_Struct() -> None:
     fields: dict[str, Type] = {"x": Int32()}
     assert Struct(fields=fields).fields == fields
+    with pytest.raises(ValidationError, match="cannot be empty"):
+        Struct(fields={})
 
 
 def test_Timestamp() -> None:
