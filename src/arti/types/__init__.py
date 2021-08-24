@@ -73,6 +73,7 @@ class Date(Type):
 
 
 class Enum(Type):
+    name: str = "anon"
     type: Type
     items: frozenset[Any]
 

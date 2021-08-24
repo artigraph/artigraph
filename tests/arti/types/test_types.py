@@ -86,12 +86,13 @@ def test_Type() -> None:
 
 def test_Enum() -> None:
     float32, items = Float32(), frozenset((1.0, 2.0, 3.0))
-    enum = Enum(type=float32, items=items)
-    assert enum.type == float32
+    enum = Enum(name="Rating", type=float32, items=items)
     assert enum.items == items
+    assert enum.name == "Rating"
+    assert enum.type == float32
 
     for other_items in (items, list(items), tuple(items)):
-        other = Enum(type=float32, items=other_items)
+        other = Enum(name="Rating", type=float32, items=other_items)
         assert enum == other
         assert isinstance(enum.items, frozenset)
 
