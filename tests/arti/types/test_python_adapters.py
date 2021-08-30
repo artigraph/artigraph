@@ -6,6 +6,7 @@ import pytest
 
 from arti.internal.type_hints import NoneType
 from arti.types import (
+    Boolean,
     Date,
     Enum,
     Float16,
@@ -24,6 +25,11 @@ from arti.types import (
     Type,
 )
 from arti.types.python import PyLiteral, PyOptional, python_type_system
+
+
+def test_python_bool() -> None:
+    assert isinstance(python_type_system.to_artigraph(bool), Boolean)
+    assert python_type_system.to_system(Boolean()) is bool
 
 
 def test_python_numerics() -> None:
