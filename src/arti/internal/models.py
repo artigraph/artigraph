@@ -8,7 +8,7 @@ from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField
 
 from arti.internal.type_hints import is_union, lenient_issubclass
-from arti.internal.utils import class_name
+from arti.internal.utils import class_name, classproperty
 
 
 def _check_types(value: Any, type_: type) -> None:  # noqa: C901
@@ -129,8 +129,8 @@ class Model(BaseModel):
     class Config:
         extra = Extra.forbid
         frozen = True
+        keep_untouched = (cached_property, classproperty)
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
-        keep_untouched = (cached_property,)
 
     @classmethod
     def _pydantic_type_system_post_field_conversion_hook_(
