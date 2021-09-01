@@ -13,7 +13,7 @@ from arti.types import Type, TypeAdapter, TypeSystem, _ScalarClassTypeAdapter
 python_type_system = TypeSystem(key="python")
 _generate = partial(_ScalarClassTypeAdapter.generate, type_system=python_type_system)
 
-# NOTE: isinstance(bool, int) is True, so set higher priority
+# NOTE: issubclass(bool, int) is True, so set higher priority
 _generate(artigraph=arti.types.Boolean, system=bool, priority=int(1e9))
 _generate(artigraph=arti.types.Date, system=datetime.date)
 _generate(artigraph=arti.types.Null, system=NoneType)
