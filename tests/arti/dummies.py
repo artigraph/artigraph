@@ -1,6 +1,7 @@
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.formats import Format
+from arti.partitions import PartitionKey
 from arti.producers import Producer
 from arti.statistics import Statistic
 from arti.storage import Storage
@@ -18,7 +19,10 @@ class DummyFormat(Format):
 
 
 class DummyStorage(Storage):
-    pass
+    def discover_partitions(
+        self, **key_types: type[PartitionKey]
+    ) -> tuple[dict[str, PartitionKey], ...]:
+        return tuple()
 
 
 # NOTE: when using a subclass of the original type hint, we must override[1].
