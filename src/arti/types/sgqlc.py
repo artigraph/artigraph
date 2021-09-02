@@ -39,7 +39,6 @@ class _SgqlcTypeSystem(TypeSystem):
 
 
 sgqlc_type_system = _SgqlcTypeSystem(key="sgqlc")
-SGQLC_METADATA_KEY = sgqlc_type_system.key
 
 _generate = partial(_ScalarClassTypeAdapter.generate, type_system=sgqlc_type_system)
 
@@ -123,7 +122,7 @@ class _StructAdapter(TypeAdapter):
 
     @classmethod
     def matches_artigraph(cls, type_: arti.types.Type) -> bool:
-        abstract = type_.get_metadata(f"{SGQLC_METADATA_KEY}.abstract", False)
+        abstract = type_.get_metadata(f"{sgqlc_type_system.key}.abstract", False)
         # Interfaces should be abstract, Types not.
         return isinstance(type_, cls.artigraph) and (
             abstract if cls.kind == "interface" else not abstract
@@ -136,7 +135,7 @@ class _StructAdapter(TypeAdapter):
             name=type_.__name__,
             fields={field.name: sgqlc_type_system.to_artigraph(field.type) for field in type_},
             metadata={
-                SGQLC_METADATA_KEY: {
+                sgqlc_type_system.key: {
                     "abstract": cls.kind == "interface",
                     "interfaces": type_.__interfaces__,
                 },
@@ -154,7 +153,7 @@ class _StructAdapter(TypeAdapter):
             type_.name,
             (
                 cls.system,
-                *type_.get_metadata(f"{SGQLC_METADATA_KEY}.interfaces", ()),
+                *type_.get_metadata(f"{sgqlc_type_system.key}.interfaces", ()),
             ),
             {
                 "__schema__": sgqlc.types.Schema(),  # Don't reference the global schema

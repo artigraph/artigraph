@@ -1,13 +1,14 @@
 from __future__ import annotations
 
 import datetime
+from collections.abc import Mapping
 from functools import partial
 from itertools import chain
 from typing import _TypedDictMeta  # type: ignore
 from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_origin, get_type_hints
 
 import arti.types
-from arti.internal.type_hints import NoneType, is_optional_hint, is_union
+from arti.internal.type_hints import NoneType, is_optional_hint, is_union, lenient_issubclass
 from arti.types import Type, TypeAdapter, TypeSystem, _ScalarClassTypeAdapter
 
 python_type_system = TypeSystem(key="python")
@@ -56,7 +57,7 @@ class PyList(TypeAdapter):
 
     @classmethod
     def matches_system(cls, type_: Any) -> bool:
-        return get_origin(type_) is cls.system
+        return lenient_issubclass(get_origin(type_), cls.system)
 
     @classmethod
     def to_system(cls, type_: Type) -> Any:
@@ -126,7 +127,7 @@ class PyMap(TypeAdapter):
 
     @classmethod
     def matches_system(cls, type_: Any) -> bool:
-        return get_origin(type_) is cls.system
+        return lenient_issubclass(get_origin(type_), (cls.system, Mapping))
 
     @classmethod
     def to_system(cls, type_: Type) -> Any:
