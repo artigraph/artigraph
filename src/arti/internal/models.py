@@ -129,3 +129,16 @@ class Model(BaseModel):
         extra = Extra.forbid
         frozen = True
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
+
+    @classmethod
+    def _pydantic_type_system_ignored_fields_hook_(cls) -> frozenset[str]:
+        return frozenset()
+
+    @classmethod
+    def _pydantic_type_system_post_field_conversion_hook_(
+        cls, type_: arti.types.Type, *, name: str, required: bool
+    ) -> arti.types.Type:
+        return type_
+
+
+import arti.types  # noqa: E402 # # pylint: disable=wrong-import-position

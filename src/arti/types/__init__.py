@@ -42,6 +42,28 @@ class Type(Model):
             return metadata[tail]
         return metadata.get(tail, default=default)
 
+    # The metadata ObjectBox can't be converted to a python type (via the python_type_system), so
+    # ignore it when converting into Struct instances (for loading into databases, eg: sgqlc).
+    # Alternatively, we may consider converting to a JSON/unstructured Type of some sort.
+    @classmethod
+    def _pydantic_type_system_ignored_fields_hook_(cls) -> frozenset[str]:
+        return frozenset(["metadata"]) | super()._pydantic_type_system_ignored_fields_hook_()
+
+
+class _NamedMixin(Model):
+    name: str = "anon"
+
+    @classmethod
+    def _pydantic_type_system_post_field_conversion_hook_(
+        cls, type_: Type, *, name: str, required: bool
+    ) -> Type:
+        type_ = super()._pydantic_type_system_post_field_conversion_hook_(
+            type_, name=name, required=required
+        )
+        if "name" not in type_.__fields_set__:
+            type_ = type_.copy(update={"name": name})
+        return type_
+
 
 ########################
 # Core Artigraph Types #
@@ -72,8 +94,7 @@ class Date(Type):
     pass
 
 
-class Enum(Type):
-    name: str = "anon"
+class Enum(Type, _NamedMixin):
     type: Type
     items: frozenset[Any]
 
@@ -146,8 +167,7 @@ class String(Type):
     pass
 
 
-class Struct(Type):
-    name: str = "anon"
+class Struct(Type, _NamedMixin):
     fields: dict[str, Type]
 
     @validator("fields")
