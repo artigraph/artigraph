@@ -40,7 +40,7 @@ class BaseArtifact(Model):
     # In order to override on the instance, avoid ClassVars lest mypy complains when/if we override.
     type: Type
     format: Format
-    storage: Storage
+    storage: Storage[Any]
 
     # Hide the producer to prevent showing the entire upstream graph
     producer: Optional[Producer] = Field(None, repr=False)
@@ -65,7 +65,7 @@ class BaseArtifact(Model):
 
     @validator("storage", always=True)
     @classmethod
-    def _validate_storage(cls, storage: Storage, values: dict[str, Any]) -> Storage:
+    def _validate_storage(cls, storage: Storage[Any], values: dict[str, Any]) -> Storage[Any]:
         # format won't be available if it doesn't pass validation.
         if "format" in values:
             storage.supports(type_=values["type"], format=values["format"])

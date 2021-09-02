@@ -7,7 +7,7 @@ from typing import Any, Iterable, Optional
 
 import parse
 
-from arti.partitions import PartitionKey
+from arti.partitions import CompositeKey, PartitionKey
 
 
 class WildcardPlaceholder:
@@ -79,7 +79,7 @@ def _extract_partition_keys(
     parser: parse.Parser,
     path: str,
     spec: str,
-) -> dict[str, PartitionKey]:
+) -> CompositeKey:
     parsed_value = parser.parse(path)
     if parsed_value is None:
         raise ValueError(f"Unable to parse '{path}' with '{spec}'.")
@@ -103,10 +103,10 @@ def _extract_partition_keys(
 
 
 def parse_partition_keys(
-    paths: list[str], *, spec: str, key_types: Mapping[str, type[PartitionKey]]
-) -> tuple[dict[str, PartitionKey], ...]:
+    paths: set[str], *, spec: str, key_types: Mapping[str, type[PartitionKey]]
+) -> Mapping[str, CompositeKey]:
     parser = parse.compile(spec, case_sensitive=True)
-    return tuple(
-        _extract_partition_keys(parser=parser, path=path, spec=spec, key_types=key_types)
+    return {
+        path: _extract_partition_keys(parser=parser, path=path, spec=spec, key_types=key_types)
         for path in paths
-    )
+    }

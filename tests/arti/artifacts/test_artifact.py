@@ -23,26 +23,20 @@ def test_cast_todo() -> None:
 
 
 def test_class_validation() -> None:
-    class F1(DummyFormat):
-        error: bool
-
+    class BadFormat(DummyFormat):
         def supports(self, type_: Type) -> None:
-            if self.error:
-                raise ValueError("Format - Boo!")
+            raise ValueError("Format - Boo!")
 
-    class S1(DummyStorage):
-        error: bool
-
+    class BadStorage(DummyStorage):
         def supports(self, type_: Type, format: Format) -> None:
-            if self.error:
-                raise ValueError("Storage - Boo!")
+            raise ValueError("Storage - Boo!")
 
     with pytest.raises(ValueError, match="Format - Boo!"):
 
         class BadFormatArtifact(Artifact):
             type: Int64 = Int64()
-            format: F1 = F1(error=True)
-            storage: S1 = S1(error=False)
+            format: BadFormat = BadFormat()
+            storage: DummyStorage = DummyStorage()
 
         BadFormatArtifact()
 
@@ -50,8 +44,8 @@ def test_class_validation() -> None:
 
         class BadStorageArtifact(Artifact):
             type: Int64 = Int64()
-            format: F1 = F1(error=False)
-            storage: S1 = S1(error=True)
+            format: DummyFormat = DummyFormat()
+            storage: BadStorage = BadStorage()
 
         BadStorageArtifact()
 

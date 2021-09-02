@@ -3,6 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 import abc
+from collections.abc import Mapping
 from datetime import date
 
 from arti.internal.models import Model
@@ -25,6 +26,10 @@ class PartitionKey(Model):
     @abc.abstractmethod
     def from_key_components(cls, **key_components: str) -> PartitionKey:
         raise NotImplementedError(f"Unable to parse '{cls.__name__}' from: {key_components}")
+
+
+# CompositeKey is the set of named PartitionKeys that uniquely identify a single partition.
+CompositeKey = Mapping[str, PartitionKey]
 
 
 class DateKey(PartitionKey):

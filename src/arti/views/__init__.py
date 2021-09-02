@@ -22,6 +22,7 @@ class View(Model):
     python_type: ClassVar[type]
     type_system: ClassVar[TypeSystem]
 
+    @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if not cls._abstract_:

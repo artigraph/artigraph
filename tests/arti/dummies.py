@@ -1,10 +1,11 @@
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
+from arti.fingerprints import Fingerprint
 from arti.formats import Format
-from arti.partitions import PartitionKey
+from arti.partitions import CompositeKey, PartitionKey
 from arti.producers import Producer
 from arti.statistics import Statistic
-from arti.storage import Storage
+from arti.storage import Storage, StoragePartition
 from arti.types import Int32, Struct, TypeSystem
 
 dummy_type_system = TypeSystem(key="dummy")
@@ -18,11 +19,14 @@ class DummyFormat(Format):
     type_system = dummy_type_system
 
 
-class DummyStorage(Storage):
-    def discover_partitions(
-        self, **key_types: type[PartitionKey]
-    ) -> tuple[dict[str, PartitionKey], ...]:
-        return tuple()
+class DummyPartition(StoragePartition):
+    def compute_fingerprint(self) -> Fingerprint:
+        return Fingerprint(key=5)
+
+
+class DummyStorage(Storage[DummyPartition]):
+    def discover_partition_keys(self, **key_types: type[PartitionKey]) -> dict[str, CompositeKey]:
+        return {}
 
 
 # NOTE: when using a subclass of the original type hint, we must override[1].
