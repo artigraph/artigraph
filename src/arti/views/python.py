@@ -5,7 +5,7 @@ from typing import Any, ClassVar
 from arti.formats.pickle import Pickle
 from arti.internal.type_hints import NoneType
 from arti.io import read, write
-from arti.storage.local import LocalFile
+from arti.storage.local import LocalFilePartition
 from arti.types import TypeSystem
 from arti.types.python import python_type_system
 from arti.views import View
@@ -45,17 +45,21 @@ class Str(_PythonBuiltin):
     python_type = str
 
 
+def _read_pickle_file(path: str) -> Any:
+    with open(path, "rb") as file:
+        return pickle.load(file)
+
+
 @read.register
 def _read_pickle_localfile_python(
-    *, format: Pickle, storage: LocalFile, view: _PythonBuiltin
+    *, format: Pickle, storage_partitions: list[LocalFilePartition], view: _PythonBuiltin
 ) -> Any:
-    with open(storage.path, "rb") as file:
-        return pickle.load(file)
+    return [_read_pickle_file(storage_partition.path) for storage_partition in storage_partitions]
 
 
 @write.register
 def _write_pickle_localfile_python(
-    data: Any, *, format: Pickle, storage: LocalFile, view: _PythonBuiltin
+    data: Any, *, format: Pickle, storage_partition: LocalFilePartition, view: _PythonBuiltin
 ) -> None:
-    with open(storage.path, "wb") as file:
+    with open(storage_partition.path, "wb") as file:
         pickle.dump(data, file)

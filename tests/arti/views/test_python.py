@@ -5,7 +5,7 @@ from arti.formats.pickle import Pickle
 from arti.internal.type_hints import NoneType
 from arti.internal.utils import named_temporary_file
 from arti.io import read, write
-from arti.storage.local import LocalFile
+from arti.storage.local import LocalFilePartition
 from arti.views import View
 from arti.views.python import Date, Datetime, Dict, Float, Int, Null, Str
 
@@ -26,12 +26,18 @@ def test_python_View() -> None:
             f.seek(0)
 
             test_format = Pickle()
-            test_storage = LocalFile(path=f.name)
+            test_storage_partition = LocalFilePartition(partition_key={}, path=f.name)
             test_view = view()
             assert View._registry_[python_type] is view
-            data = read(format=test_format, storage=test_storage, view=test_view)
+            # read returns a list, matching the passed partitions
+            data, *tail = read(
+                format=test_format, storage_partitions=[test_storage_partition], view=test_view
+            )
             assert data == val
+            assert not tail
 
             f.truncate()
-            write(data, format=test_format, storage=test_storage, view=test_view)
+            write(
+                data, format=test_format, storage_partition=test_storage_partition, view=test_view
+            )
             assert f.read() == binary

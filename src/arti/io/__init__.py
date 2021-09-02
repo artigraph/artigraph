@@ -6,21 +6,21 @@ from typing import Any
 
 from arti.formats import Format
 from arti.internal.utils import dispatch
-from arti.storage import Storage
+from arti.storage import StoragePartition
 from arti.views import View
 
 # TODO write/read partitioned data, column subset
 
 
 @dispatch
-def read(*, format: Format, storage: Storage, view: View) -> Any:
+def read(*, format: Format, storage_partitions: list[StoragePartition], view: View) -> Any:
     raise NotImplementedError(
-        f"Read into {view} view from {format} format in {storage} storage not implemented."
+        f"Read into {view} view from {format} format in {storage_partitions} storage not implemented."
     )
 
 
 @dispatch
-def write(data: Any, *, format: Format, storage: Storage, view: View) -> None:
+def write(data: Any, *, format: Format, storage_partition: StoragePartition, view: View) -> None:
     raise NotImplementedError(
-        f"Write from {view} view into {format} format in {storage} storage not implemented."
+        f"Write from {view} view into {format} format in {storage_partition} storage not implemented."
     )

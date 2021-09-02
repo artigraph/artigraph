@@ -85,20 +85,20 @@ def test_parse_partition_keys() -> None:
     PKS = {"x": IntKey, "y": IntKey}
 
     pks = parse_partition_keys(
-        ["/p/1/0x1", "/p/2/0x2", "/p/3/0x3"], spec="/p/{x.key}/{y.hex}", key_types=PKS
+        {"/p/1/0x1", "/p/2/0x2", "/p/3/0x3"}, spec="/p/{x.key}/{y.hex}", key_types=PKS
     )
-    assert pks == (
-        {"x": IntKey(key=1), "y": IntKey(key=1)},
-        {"x": IntKey(key=2), "y": IntKey(key=2)},
-        {"x": IntKey(key=3), "y": IntKey(key=3)},
-    )
+    assert pks == {
+        "/p/1/0x1": {"x": IntKey(key=1), "y": IntKey(key=1)},
+        "/p/2/0x2": {"x": IntKey(key=2), "y": IntKey(key=2)},
+        "/p/3/0x3": {"x": IntKey(key=3), "y": IntKey(key=3)},
+    }
 
     with pytest.raises(
         ValueError, match=re.escape("Unable to parse '/p/1/' with '/p/{x.key}/{y.hex}'")
     ):
-        parse_partition_keys(["/p/1/"], spec="/p/{x.key}/{y.hex}", key_types=PKS)
+        parse_partition_keys({"/p/1/"}, spec="/p/{x.key}/{y.hex}", key_types=PKS)
     with pytest.raises(
         ValueError,
         match=re.escape("Expected to find partition keys for ['x', 'y'], only found ['x']."),
     ):
-        parse_partition_keys(["/p/1/"], spec="/p/{x.key}/", key_types=PKS)
+        parse_partition_keys({"/p/1/"}, spec="/p/{x.key}/", key_types=PKS)
