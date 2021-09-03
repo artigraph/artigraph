@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from functools import cached_property
 from typing import Annotated, Any, ClassVar, Literal, Optional, get_args, get_origin
 
 from pydantic import BaseModel, Extra, root_validator, validator
@@ -129,6 +130,7 @@ class Model(BaseModel):
         extra = Extra.forbid
         frozen = True
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
+        keep_untouched = (cached_property,)
 
     @classmethod
     def _pydantic_type_system_ignored_fields_hook_(cls) -> frozenset[str]:
