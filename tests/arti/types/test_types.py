@@ -165,6 +165,7 @@ def test_type_metadata() -> None:
     metadata = {"a": {"b": "c"}}
     m = Int32(metadata=metadata)
     assert m.metadata == metadata  # type: ignore
+    assert m.with_metadata({"test": True}).metadata == metadata | {"test": True}  # type: ignore
     assert isinstance(m.metadata, ObjectBox)  # type: ignore
     # Confirm box is immutable
     assert m.metadata._Box__box_config()["frozen_box"]

@@ -4,7 +4,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
-from typing import Any, ClassVar, Literal, Optional, cast
+from typing import Any, ClassVar, Literal, Optional, Union, cast
 
 from box.box import NO_DEFAULT as _NO_DEFAULT
 from pydantic import PrivateAttr, validator
@@ -41,6 +41,9 @@ class Type(Model):
         if default is _NO_DEFAULT:
             return metadata[tail]
         return metadata.get(tail, default=default)
+
+    def with_metadata(self, metadata: Union[ObjectBox, dict[str, Any]]) -> Model:
+        return self.copy(update={"metadata": self._freeze_metadata({**self.metadata, **metadata})})
 
     # The metadata ObjectBox can't be converted to a python type (via the python_type_system), so
     # ignore it when converting into Struct instances (for loading into databases, eg: sgqlc).
