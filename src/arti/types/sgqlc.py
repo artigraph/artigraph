@@ -21,17 +21,17 @@ def is_list(type_: type[sgqlc.types.BaseType]) -> bool:
 # This differs from the python_type_system, where not-null is the default AND there's an Optional
 # type we can easily match against.
 class _SgqlcTypeSystem(TypeSystem):
-    def to_artigraph(self, type_: Any) -> arti.types.Type:
+    def to_artigraph(self, type_: Any, *, hints: dict[str, Any]) -> arti.types.Type:
         if not (nullable := is_nullable(type_)):
             # non_null subclasses the input type (hence, we can fetch it with .mro)
             type_ = type_.mro()[1]
-        ret = super().to_artigraph(type_)
+        ret = super().to_artigraph(type_, hints=hints)
         if ret.nullable != nullable:
             ret = ret.copy(update={"nullable": nullable})
         return ret
 
-    def to_system(self, type_: arti.types.Type) -> Any:
-        ret = super().to_system(type_.copy(update={"nullable": True}))
+    def to_system(self, type_: arti.types.Type, *, hints: dict[str, Any]) -> Any:
+        ret = super().to_system(type_.copy(update={"nullable": True}), hints=hints)
         assert is_nullable(ret)  # sgqlc default
         if not type_.nullable:
             ret = sgqlc.types.non_null(ret)
@@ -67,7 +67,7 @@ class SgqlcEnumAdapter(TypeAdapter):
     system = sgqlc.types.Enum
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> arti.types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> arti.types.Type:
         assert issubclass(type_, cls.system)
         return cls.artigraph(
             name=type_.__name__,
@@ -76,11 +76,11 @@ class SgqlcEnumAdapter(TypeAdapter):
         )
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         return issubclass(type_, cls.system)
 
     @classmethod
-    def to_system(cls, type_: arti.types.Type) -> Any:
+    def to_system(cls, type_: arti.types.Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         assert isinstance(type_.type, arti.types.String)
         return type(
@@ -101,19 +101,19 @@ class SgqlcList(TypeAdapter):
     priority = int(1e9)  # May wrap other types, so must be highest priority
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> arti.types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> arti.types.Type:
         assert issubclass(type_, cls.system)
         # list_of subclasses the input type (hence, we can fetch it with .mro)
-        return cls.artigraph(value_type=sgqlc_type_system.to_artigraph(type_.mro()[1]))
+        return cls.artigraph(value_type=sgqlc_type_system.to_artigraph(type_.mro()[1], hints=hints))
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         return issubclass(type_, cls.system) and is_list(type_)
 
     @classmethod
-    def to_system(cls, type_: arti.types.Type) -> Any:
+    def to_system(cls, type_: arti.types.Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return sgqlc.types.list_of(sgqlc_type_system.to_system(type_.value_type))
+        return sgqlc.types.list_of(sgqlc_type_system.to_system(type_.value_type, hints=hints))
 
 
 class _StructAdapter(TypeAdapter):
@@ -121,44 +121,41 @@ class _StructAdapter(TypeAdapter):
     kind: ClassVar[Literal["interface", "type"]]
 
     @classmethod
-    def matches_artigraph(cls, type_: arti.types.Type) -> bool:
-        abstract = type_.get_metadata(f"{sgqlc_type_system.key}.abstract", False)
+    def matches_artigraph(cls, type_: arti.types.Type, *, hints: dict[str, Any]) -> bool:
+        abstract = hints.get(f"{sgqlc_type_system.key}.abstract", False)
         # Interfaces should be abstract, Types not.
         return isinstance(type_, cls.artigraph) and (
             abstract if cls.kind == "interface" else not abstract
         )
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> arti.types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> arti.types.Type:
         assert issubclass(type_, cls.system)
         return cls.artigraph(
             name=type_.__name__,
-            fields={field.name: sgqlc_type_system.to_artigraph(field.type) for field in type_},
-            metadata={
-                sgqlc_type_system.key: {
-                    "abstract": cls.kind == "interface",
-                    "interfaces": type_.__interfaces__,
-                },
+            fields={
+                field.name: sgqlc_type_system.to_artigraph(field.type, hints=hints)
+                for field in type_
             },
         )
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         return issubclass(type_, cls.system) and type_.__kind__ == cls.kind
 
     @classmethod
-    def to_system(cls, type_: arti.types.Type) -> Any:
+    def to_system(cls, type_: arti.types.Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         return type(
             type_.name,
             (
                 cls.system,
-                *type_.get_metadata(f"{sgqlc_type_system.key}.interfaces", ()),
+                *hints.get(f"{sgqlc_type_system.key}.interfaces", ()),
             ),
             {
                 "__schema__": sgqlc.types.Schema(),  # Don't reference the global schema
                 f"_{type_.name}__auto_register": False,  # Disable registering with the global schema
-                **{k: sgqlc_type_system.to_system(v) for k, v in type_.fields.items()},
+                **{k: sgqlc_type_system.to_system(v, hints=hints) for k, v in type_.fields.items()},
             },
         )
 

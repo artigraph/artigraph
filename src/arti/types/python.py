@@ -39,7 +39,7 @@ class PyDatetime(_ScalarClassTypeAdapter):
     system = datetime.datetime
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         return cls.artigraph(precision="microsecond")
 
 
@@ -49,21 +49,21 @@ class PyList(TypeAdapter):
     system = list
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         (value_type,) = get_args(type_)
         return cls.artigraph(
-            value_type=python_type_system.to_artigraph(value_type),
+            value_type=python_type_system.to_artigraph(value_type, hints=hints),
         )
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         return lenient_issubclass(get_origin(type_), cls.system)
 
     @classmethod
-    def to_system(cls, type_: Type) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system[
-            python_type_system.to_system(type_.value_type),
+            python_type_system.to_system(type_.value_type, hints=hints),
         ]  # type: ignore
 
 
@@ -73,7 +73,7 @@ class PyLiteral(TypeAdapter):
     system = Literal
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         origin, items = get_origin(type_), get_args(type_)
         if is_union(origin):
             assert not is_optional_hint(type_)  # Should be handled by PyOptional
@@ -92,12 +92,12 @@ class PyLiteral(TypeAdapter):
         if not all(t is py_type for t in other_types):
             raise ValueError("All Literals must be the same type, got: {(py_type, *other_types)}")
         return cls.artigraph(
-            type=python_type_system.to_artigraph(py_type),
+            type=python_type_system.to_artigraph(py_type, hints=hints),
             items=items,
         )
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         # We don't (currently) support arbitrary Unions, but can map Union[Literal[1], Literal[2]]
         # to an Enum. Python's Optional is also represented as a Union, but we handle that with the
         # high priority PyOptional.
@@ -107,7 +107,7 @@ class PyLiteral(TypeAdapter):
         )
 
     @classmethod
-    def to_system(cls, type_: Type) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system[tuple(type_.items)]
 
@@ -118,23 +118,23 @@ class PyMap(TypeAdapter):
     system = dict
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         key_type, value_type = get_args(type_)
         return cls.artigraph(
-            key_type=python_type_system.to_artigraph(key_type),
-            value_type=python_type_system.to_artigraph(value_type),
+            key_type=python_type_system.to_artigraph(key_type, hints=hints),
+            value_type=python_type_system.to_artigraph(value_type, hints=hints),
         )
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         return lenient_issubclass(get_origin(type_), (cls.system, Mapping))
 
     @classmethod
-    def to_system(cls, type_: Type) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system[
-            python_type_system.to_system(type_.key_type),
-            python_type_system.to_system(type_.value_type),
+            python_type_system.to_system(type_.key_type, hints=hints),
+            python_type_system.to_system(type_.value_type, hints=hints),
         ]  # type: ignore
 
 
@@ -146,22 +146,24 @@ class PyOptional(TypeAdapter):
     priority = int(1e9)
 
     @classmethod
-    def matches_artigraph(cls, type_: Type) -> bool:
-        return super().matches_artigraph(type_) and type_.nullable
+    def matches_artigraph(cls, type_: Type, *, hints: dict[str, Any]) -> bool:
+        return super().matches_artigraph(type_, hints=hints) and type_.nullable
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         # Optional is represented as a Union; strip out NoneType before dispatching
         type_ = Union[tuple(subtype for subtype in get_args(type_) if subtype is not NoneType)]
-        return python_type_system.to_artigraph(type_).copy(update={"nullable": True})
+        return python_type_system.to_artigraph(type_, hints=hints).copy(update={"nullable": True})
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         return is_optional_hint(type_)
 
     @classmethod
-    def to_system(cls, type_: Type) -> Any:
-        return cls.system[python_type_system.to_system(type_.copy(update={"nullable": False}))]
+    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
+        return cls.system[
+            python_type_system.to_system(type_.copy(update={"nullable": False}), hints=hints)
+        ]
 
 
 @python_type_system.register_adapter
@@ -172,28 +174,28 @@ class PyStruct(TypeAdapter):
     # TODO: Support and inspect TypedDict's '__optional_keys__', '__required_keys__', '__total__'
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         return arti.types.Struct(
             name=type_.__name__,
             fields={
-                field_name: python_type_system.to_artigraph(field_type)
+                field_name: python_type_system.to_artigraph(field_type, hints=hints)
                 for field_name, field_type in get_type_hints(type_).items()
             },
         )
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         # NOTE: This check is probably a little shaky, particularly across python versions. Consider
         # using the typing_inspect package.
         return isinstance(type_, _TypedDictMeta)
 
     @classmethod
-    def to_system(cls, type_: Type) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         return TypedDict(
             type_.name,
             {
-                field_name: python_type_system.to_system(field_type)
+                field_name: python_type_system.to_system(field_type, hints=hints)
                 for field_name, field_type in type_.fields.items()
             },
         )  # type: ignore

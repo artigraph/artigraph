@@ -36,15 +36,15 @@ class MySuperType(st.Type):
     ),
 )
 def test_sgqlc_scalars(sgqlc_type: type[st.Scalar], arti_type: type[at.Type]) -> None:
-    a = sgqlc_type_system.to_artigraph(sgqlc_type)
+    a = sgqlc_type_system.to_artigraph(sgqlc_type, hints={})
     assert isinstance(a, arti_type)
-    assert sgqlc_type_system.to_system(a) is sgqlc_type
+    assert sgqlc_type_system.to_system(a, hints={}) is sgqlc_type
 
 
 def test_nested_sgqlc_type() -> None:
-    a = sgqlc_type_system.to_artigraph(MySuperType)
+    a = sgqlc_type_system.to_artigraph(MySuperType, hints={})
     assert isinstance(a, at.Struct)
-    s = sgqlc_type_system.to_system(a)
+    s = sgqlc_type_system.to_system(a, hints={})
     assert issubclass(s, st.Type)
 
     # root arti
@@ -83,13 +83,13 @@ def test_nested_sgqlc_type() -> None:
 
 
 def test_sgqlc_enum_adapter() -> None:
-    arti_enum = sgqlc_type_system.to_artigraph(MyEnum)
+    arti_enum = sgqlc_type_system.to_artigraph(MyEnum, hints={})
     assert isinstance(arti_enum, at.Enum)
     assert isinstance(arti_enum.type, at.String)
     assert arti_enum.items == set(MyEnum.__choices__)
     assert arti_enum.name == "MyEnum"
 
-    sgqlc_enum = sgqlc_type_system.to_system(arti_enum)
+    sgqlc_enum = sgqlc_type_system.to_system(arti_enum, hints={})
     assert issubclass(sgqlc_enum, st.Enum)
     assert sgqlc_enum.__name__ == "MyEnum"
     assert set(sgqlc_enum.__choices__) == arti_enum.items
@@ -98,11 +98,11 @@ def test_sgqlc_enum_adapter() -> None:
 def test_sgqlc_list_adapter() -> None:
     base = st.list_of(st.Int)
 
-    arti_t = sgqlc_type_system.to_artigraph(base)
+    arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.List)
     assert isinstance(arti_t.value_type, at.Int64)
 
-    sgqlc_t = sgqlc_type_system.to_system(arti_t)
+    sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Int)
     assert sgqlc_t.__name__.startswith("[")
     assert sgqlc_t.__name__.endswith("]")
@@ -111,11 +111,11 @@ def test_sgqlc_list_adapter() -> None:
 def test_sgqlc_non_null_adapting() -> None:
     base = st.non_null(MyEnum)
 
-    arti_t = sgqlc_type_system.to_artigraph(base)
+    arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.Enum)
     assert not arti_t.nullable
 
-    sgqlc_t = sgqlc_type_system.to_system(arti_t)
+    sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Enum)
     assert sgqlc_t.__name__.endswith("!")
 
@@ -123,13 +123,13 @@ def test_sgqlc_non_null_adapting() -> None:
 def test_sgqlc_list_of_non_null_adapting() -> None:
     base = st.list_of(st.non_null(MyEnum))
 
-    arti_t = sgqlc_type_system.to_artigraph(base)
+    arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.List)
     assert arti_t.nullable
     assert isinstance(arti_t.value_type, at.Enum)
     assert not arti_t.value_type.nullable
 
-    sgqlc_t = sgqlc_type_system.to_system(arti_t)
+    sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Enum)
     assert sgqlc_t.__name__.startswith("[")
     assert sgqlc_t.__name__.endswith("]")
@@ -139,13 +139,13 @@ def test_sgqlc_list_of_non_null_adapting() -> None:
 def test_sgqlc_non_null_list_of_adapting() -> None:
     base = st.non_null(st.list_of(MyEnum))
 
-    arti_t = sgqlc_type_system.to_artigraph(base)
+    arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.List)
     assert not arti_t.nullable
     assert isinstance(arti_t.value_type, at.Enum)
     assert arti_t.value_type.nullable
 
-    sgqlc_t = sgqlc_type_system.to_system(arti_t)
+    sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Enum)
     assert sgqlc_t.__name__.endswith("!")
     assert sgqlc_t.mro()[1].__name__.startswith("[")
@@ -155,13 +155,13 @@ def test_sgqlc_non_null_list_of_adapting() -> None:
 def test_sgqlc_non_null_list_of_non_null_adapting() -> None:
     base = st.non_null(st.list_of(st.non_null(MyEnum)))
 
-    arti_t = sgqlc_type_system.to_artigraph(base)
+    arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.List)
     assert not arti_t.nullable
     assert isinstance(arti_t.value_type, at.Enum)
     assert not arti_t.value_type.nullable
 
-    sgqlc_t = sgqlc_type_system.to_system(arti_t)
+    sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Enum)
     assert sgqlc_t.__name__.endswith("!")
     assert sgqlc_t.mro()[1].__name__.startswith("[")
@@ -169,27 +169,22 @@ def test_sgqlc_non_null_list_of_non_null_adapting() -> None:
 
 
 def test_sgqlc_interface_adapter() -> None:
-    arti_iface = sgqlc_type_system.to_artigraph(MyInterface)
-    sgqlc_iface = sgqlc_type_system.to_system(arti_iface)
-
+    arti_iface = sgqlc_type_system.to_artigraph(MyInterface, hints={})
     assert isinstance(arti_iface, at.Struct)
-    assert arti_iface.get_metadata("sgqlc.abstract") is True
+    sgqlc_iface = sgqlc_type_system.to_system(arti_iface, hints={"sgqlc.abstract": True})
+    assert issubclass(sgqlc_iface, st.Interface)
 
     for k, v in MyInterface._ContainerTypeMeta__fields.items():
         assert k in sgqlc_iface._ContainerTypeMeta__fields
-
         # these are st.BaseMeta types
         assert v.type == sgqlc_iface._ContainerTypeMeta__fields[k].type
 
 
 def test_sgqlc_type_adapter() -> None:
-    arti_type = sgqlc_type_system.to_artigraph(MyType)
-    sgqlc_type = sgqlc_type_system.to_system(arti_type)
-
+    arti_type = sgqlc_type_system.to_artigraph(MyType, hints={})
     assert isinstance(arti_type, at.Struct)
     assert list(arti_type.fields.keys()) == [field.name for field in MyType]
-    assert arti_type.get_metadata("sgqlc.abstract") is False
-
+    sgqlc_type = sgqlc_type_system.to_system(arti_type, hints={"sgqlc.interfaces": (MyInterface,)})
+    assert issubclass(sgqlc_type, st.Type)
     # check that the MyType interface(s) got passed around
-    assert arti_type.get_metadata("sgqlc.interfaces") == (MyInterface,)
     assert sgqlc_type.__interfaces__ == (MyInterface,)
