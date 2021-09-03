@@ -4,14 +4,13 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
-from typing import Any, ClassVar, Literal, Optional, Union, cast
+from typing import Any, ClassVar, Literal, Optional
 
-from box.box import NO_DEFAULT as _NO_DEFAULT
 from pydantic import PrivateAttr, validator
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
-from arti.internal.utils import ObjectBox, class_name, register
+from arti.internal.utils import class_name, register
 
 
 class Type(Model):
@@ -19,38 +18,7 @@ class Type(Model):
 
     _abstract_ = True
     description: Optional[str]
-    metadata: ObjectBox = ObjectBox(frozen_box=True)
     nullable: bool = False
-
-    @validator("metadata", pre=True)
-    @classmethod
-    def _freeze_metadata(cls, metadata: Any) -> Any:
-        # Convert existing mappings; otherwise let Model validate incorrect types.
-        if isinstance(metadata, Mapping):
-            return ObjectBox(metadata, frozen_box=True)
-        return metadata
-
-    def get_metadata(self, key: str, default: Any = _NO_DEFAULT) -> Any:
-        *parts, tail = key.split(".")
-        metadata = cast(dict[str, Any], self.metadata)
-        for part in parts:
-            if default is _NO_DEFAULT:
-                metadata = metadata[part]
-            else:
-                metadata = metadata.get(part, {})
-        if default is _NO_DEFAULT:
-            return metadata[tail]
-        return metadata.get(tail, default=default)
-
-    def with_metadata(self, metadata: Union[ObjectBox, dict[str, Any]]) -> Model:
-        return self.copy(update={"metadata": self._freeze_metadata({**self.metadata, **metadata})})
-
-    # The metadata ObjectBox can't be converted to a python type (via the python_type_system), so
-    # ignore it when converting into Struct instances (for loading into databases, eg: sgqlc).
-    # Alternatively, we may consider converting to a JSON/unstructured Type of some sort.
-    @classmethod
-    def _pydantic_type_system_ignored_fields_hook_(cls) -> frozenset[str]:
-        return frozenset(["metadata"]) | super()._pydantic_type_system_ignored_fields_hook_()
 
 
 class _NamedMixin(Model):
@@ -118,7 +86,7 @@ class Enum(Type, _NamedMixin):
         # `type` will be missing if it doesn't pass validation.
         if (arti_type := values.get("type")) is None:
             return items
-        py_type = python_type_system.to_system(arti_type)
+        py_type = python_type_system.to_system(arti_type, hints={})
         mismatched_items = [item for item in items if not lenient_issubclass(type(item), py_type)]
         if mismatched_items:
             raise ValueError(f"incompatible {arti_type} ({py_type}) item(s): {mismatched_items}")
@@ -212,19 +180,19 @@ class TypeAdapter:
     priority: ClassVar[int] = 0  # Set the priority of this mapping. Higher is better.
 
     @classmethod
-    def matches_artigraph(cls, type_: Type) -> bool:
+    def matches_artigraph(cls, type_: Type, *, hints: dict[str, Any]) -> bool:
         return isinstance(type_, cls.artigraph)
 
     @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         raise NotImplementedError()
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         raise NotImplementedError()
 
     @classmethod
-    def to_system(cls, type_: Type) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         raise NotImplementedError()
 
 
@@ -232,15 +200,15 @@ class TypeAdapter:
 # python TypeSystem).
 class _ScalarClassTypeAdapter(TypeAdapter):
     @classmethod
-    def to_artigraph(cls, type_: Any) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         return cls.artigraph()
 
     @classmethod
-    def matches_system(cls, type_: Any) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         return lenient_issubclass(type_, cls.system)
 
     @classmethod
-    def to_system(cls, type_: Type) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         return cls.system
 
     @classmethod
@@ -276,14 +244,14 @@ class TypeSystem(Model):
     def _priority_sorted_adapters(self) -> Iterator[type[TypeAdapter]]:
         return reversed(sorted(self._adapter_by_key.values(), key=attrgetter("priority")))
 
-    def to_artigraph(self, type_: Any) -> Type:
+    def to_artigraph(self, type_: Any, *, hints: dict[str, Any]) -> Type:
         for adapter in self._priority_sorted_adapters:
-            if adapter.matches_system(type_):
-                return adapter.to_artigraph(type_)
+            if adapter.matches_system(type_, hints=hints):
+                return adapter.to_artigraph(type_, hints=hints)
         raise NotImplementedError(f"No {self} adapter for system type: {type_}.")
 
-    def to_system(self, type_: Type) -> Any:
+    def to_system(self, type_: Type, *, hints: dict[str, Any]) -> Any:
         for adapter in self._priority_sorted_adapters:
-            if adapter.matches_artigraph(type_):
-                return adapter.to_system(type_)
+            if adapter.matches_artigraph(type_, hints=hints):
+                return adapter.to_system(type_, hints=hints)
         raise NotImplementedError(f"No {self} adapter for Artigraph type: {type_}.")

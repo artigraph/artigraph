@@ -6,11 +6,7 @@ from pydantic import BaseModel
 
 from arti.internal.type_hints import lenient_issubclass
 from arti.types import Boolean, Enum, List, Map, String, Struct, Timestamp, Type, _Float, _Int
-from arti.types.pydantic import (
-    get_ignored_fields,
-    get_post_field_conversion_hook,
-    pydantic_type_system,
-)
+from arti.types.pydantic import get_post_field_conversion_hook, pydantic_type_system
 
 
 class MyModel(BaseModel):
@@ -27,7 +23,7 @@ class NestedModel(BaseModel):
 
 
 def test_pydantic_conversion() -> None:
-    arti_type = pydantic_type_system.to_artigraph(MyModel)
+    arti_type = pydantic_type_system.to_artigraph(MyModel, hints={})
     assert isinstance(arti_type, Struct)
     assert set(arti_type.fields) == {"x", "y", "tags"}
     assert isinstance(arti_type.fields["x"], _Int)
@@ -37,31 +33,11 @@ def test_pydantic_conversion() -> None:
 
 
 def test_pydantic_field_naming() -> None:
-    arti_type = pydantic_type_system.to_artigraph(Timestamp)
+    arti_type = pydantic_type_system.to_artigraph(Timestamp, hints={})
     assert isinstance(arti_type, Struct)
     precision = arti_type.fields["precision"]
     assert isinstance(precision, Enum)
     assert precision.name == "precision"
-
-
-def test_get_ignored_fields() -> None:
-    class X(BaseModel):
-        i: int
-
-    fields = get_ignored_fields(X)
-    assert isinstance(fields, frozenset)
-    assert fields == frozenset()
-
-    class Y(BaseModel):
-        i: int
-
-        @classmethod
-        def _pydantic_type_system_ignored_fields_hook_(cls) -> frozenset[str]:
-            return frozenset(["i"])
-
-    fields = get_ignored_fields(Y)
-    assert isinstance(fields, frozenset)
-    assert fields == frozenset(["i"])
 
 
 def test_get_post_field_conversion_hook() -> None:
@@ -107,11 +83,7 @@ _scalar_type_mapping = {
 def compare_model_to_type(model: type[BaseModel], type_: Type) -> None:  # noqa: C901
     assert isinstance(type_, Struct)
     assert type_.name == model.__name__
-    ignored_fields = get_ignored_fields(model)
     for k, expected_field in model.__fields__.items():
-        if k in ignored_fields:
-            assert k not in type_.fields
-            continue
         expected_type, spec = expected_field.outer_type_, type_.fields[k]
         origin = get_origin(expected_type)
         if origin is not None:
@@ -155,11 +127,7 @@ def compare_model_to_generated(  # noqa: C901
 ) -> None:
     assert issubclass(generated, BaseModel)
     assert generated.__name__ == model.__name__
-    ignored_fields = get_ignored_fields(model)
     for k, v in model.__fields__.items():
-        if k in ignored_fields:
-            assert k not in generated.__fields__
-            continue
         expected_type, got_type = v.outer_type_, generated.__fields__[k].outer_type_
         expected_origin, got_origin = get_origin(expected_type), get_origin(got_type)
         if expected_origin is not None:
@@ -199,8 +167,8 @@ def compare_model_to_generated(  # noqa: C901
     ),
 )
 def test_pydantic_type_system(model: type[BaseModel]) -> None:
-    arti_type = pydantic_type_system.to_artigraph(model)
+    arti_type = pydantic_type_system.to_artigraph(model, hints={})
     compare_model_to_type(model, arti_type)
 
-    pydantic_model = pydantic_type_system.to_system(arti_type)
+    pydantic_model = pydantic_type_system.to_system(arti_type, hints={"pydantic.is_model": True})
     compare_model_to_generated(model, pydantic_model)

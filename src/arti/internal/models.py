@@ -133,10 +133,6 @@ class Model(BaseModel):
         keep_untouched = (cached_property,)
 
     @classmethod
-    def _pydantic_type_system_ignored_fields_hook_(cls) -> frozenset[str]:
-        return frozenset()
-
-    @classmethod
     def _pydantic_type_system_post_field_conversion_hook_(
         cls, type_: arti.types.Type, *, name: str, required: bool
     ) -> arti.types.Type:

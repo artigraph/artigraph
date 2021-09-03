@@ -2,10 +2,8 @@ import re
 from typing import Any
 
 import pytest
-from box import BoxError
 from pydantic import ValidationError
 
-from arti.internal.utils import ObjectBox
 from arti.types import (
     Enum,
     Float16,
@@ -39,15 +37,15 @@ def _gen_numeric_adapter(
         priority = precision
 
         @classmethod
-        def to_artigraph(cls, type_: Any) -> Type:
+        def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
             return cls.artigraph()
 
         @classmethod
-        def matches_system(cls, type_: Any) -> bool:
+        def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
             return type_ is cls.system
 
         @classmethod
-        def to_system(cls, type_: Type) -> Any:
+        def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
             return cls.system
 
     return Adapter
@@ -137,9 +135,9 @@ def test_TypeSystem(
     assert dummy.key == "dummy"
 
     with pytest.raises(NotImplementedError):
-        dummy.to_system(Float32())
+        dummy.to_system(Float32(), hints={})
     with pytest.raises(NotImplementedError):
-        dummy.to_artigraph(MyFloat)
+        dummy.to_artigraph(MyFloat, hints={})
     # Register adapters sequentially. With a single matching adapter registered, we expect the
     # matching type. With conflicting matching adapters registered, we expect the type of the
     # adapter with the highest priority.
@@ -149,43 +147,13 @@ def test_TypeSystem(
         (Float64Adapter, Float64),
     ]:
         dummy.register_adapter(adapter)
-        assert isinstance(dummy.to_artigraph(MyFloat), artigraph_type)
-        assert dummy.to_system(artigraph_type()) is MyFloat
+        assert isinstance(dummy.to_artigraph(MyFloat, hints={}), artigraph_type)
+        assert dummy.to_system(artigraph_type(), hints={}) is MyFloat
 
     with pytest.raises(NotImplementedError):
-        assert isinstance(dummy.to_artigraph(MyInt), Int32)
+        assert isinstance(dummy.to_artigraph(MyInt, hints={}), Int32)
     with pytest.raises(NotImplementedError):
-        assert dummy.to_system(Int32()) is MyInt
+        assert dummy.to_system(Int32(), hints={}) is MyInt
     dummy.register_adapter(Int32Adapter)
-    assert isinstance(dummy.to_artigraph(MyInt), Int32)
-    assert dummy.to_system(Int32()) is MyInt
-
-
-def test_type_metadata() -> None:
-    metadata = {"a": {"b": "c"}}
-    m = Int32(metadata=metadata)
-    assert m.metadata == metadata  # type: ignore
-    assert m.with_metadata({"test": True}).metadata == metadata | {"test": True}  # type: ignore
-    assert isinstance(m.metadata, ObjectBox)  # type: ignore
-    # Confirm box is immutable
-    assert m.metadata._Box__box_config()["frozen_box"]
-    with pytest.raises(BoxError, match="Box is frozen"):
-        m.metadata["a"] = 5
-    # ... including sub-dicts.
-    with pytest.raises(BoxError, match="Box is frozen"):
-        m.metadata["a"]["b"] = 5
-    # And confirm odd input errors helpfully
-    with pytest.raises(ValidationError, match="Expected an instance of"):
-        Int32(metadata=5)
-
-
-def test_type_get_metadata() -> None:
-    m = Int32(metadata={"a": {"b": "c"}})
-    assert m.metadata.a == m.get_metadata("a")
-    assert m.metadata.a.b == m.get_metadata("a.b")
-
-    # Check missing keys ops
-    with pytest.raises(KeyError, match="'z'"):
-        assert m.get_metadata("z.y")
-    assert m.get_metadata("z", 0) == 0  # Fetch first level default
-    assert m.get_metadata("z.y.x", 0) == 0  # Fetch nested default
+    assert isinstance(dummy.to_artigraph(MyInt, hints={}), Int32)
+    assert dummy.to_system(Int32(), hints={}) is MyInt

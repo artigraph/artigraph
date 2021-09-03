@@ -306,6 +306,3 @@ class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):
             raise ValueError(f"{item} is already set!")
         else:
             super()._Box__convert_and_store(item, self.__cast_value(value))
-
-
-ObjectBox = TypedBox[object]
