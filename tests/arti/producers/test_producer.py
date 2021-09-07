@@ -34,6 +34,18 @@ def test_Producer() -> None:
         assert isinstance(output, expected_output_classes[i])
 
 
+def test_Producer_string_annotation() -> None:
+    # This may be from `x: "Type"` or `from __future__ import annotations`.
+    class StrAnnotation(Producer):
+        a1: "A1"
+
+        @staticmethod
+        def build(a1: "A1") -> "A2":
+            pass
+
+    assert isinstance(StrAnnotation(a1=A1()).out(), A2)
+
+
 def test_Producer_fingerprint() -> None:
     p1 = P1(a1=A1())
     assert p1.fingerprint == Fingerprint.from_string("P1") ^ p1.version.fingerprint

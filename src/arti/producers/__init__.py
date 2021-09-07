@@ -91,7 +91,7 @@ class Producer(Model):
             raise ValueError(f"{cls.__name__} - Producers must implement the `build` method.")
         if not isinstance(getattr_static(cls, "build"), (classmethod, staticmethod)):
             raise ValueError(f"{cls.__name__}.build - must be a @classmethod or @staticmethod.")
-        build_sig = signature(cls.build)
+        build_sig = signature(cls.build, force_tuple_return=True, remove_owner=True)
         cls._validate_parameters("build", build_sig)
         # Validate the return definition
         return_annotation = build_sig.return_annotation

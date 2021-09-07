@@ -5,7 +5,7 @@ import sys
 import types
 from collections.abc import Callable
 from typing import _GenericAlias  # type: ignore
-from typing import Any, Union, cast, get_args, get_origin
+from typing import Any, Union, cast, get_args, get_origin, get_type_hints
 
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
@@ -26,26 +26,55 @@ def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]
         raise
 
 
-def signature(fn: Callable[..., Any], *, follow_wrapped: bool = True) -> inspect.Signature:
-    """Convenience wrapper around `inspect.signature`.
+def _tidy_return(return_annotation: Any, *, force_tuple_return: bool) -> Any:
+    if not force_tuple_return:
+        return return_annotation
+    if lenient_issubclass(get_origin(return_annotation), tuple):
+        return get_args(return_annotation)
+    return (return_annotation,)
 
-    The returned Signature will have `cls`/`self` parameters removed and
-    `tuple[...]` converted to `tuple(...)` in the `return_annotation`.
-    """
-    sig = inspect.signature(fn, follow_wrapped=follow_wrapped)
-    sig = sig.replace(
-        parameters=[p for p in sig.parameters.values() if p.name not in ("cls", "self")],
+
+def tidy_signature(
+    fn: Callable[..., Any],
+    sig: inspect.Signature,
+    *,
+    force_tuple_return: bool = False,
+    remove_owner: bool = False,
+) -> inspect.Signature:
+    type_hints = get_type_hints(fn)
+    sig = sig.replace(return_annotation=type_hints.get("return", sig.return_annotation))
+    return sig.replace(
+        parameters=[
+            p.replace(annotation=type_hints.get(p.name, p.annotation))
+            for p in sig.parameters.values()
+            if (p.name not in ("cls", "self") if remove_owner else True)
+        ],
         return_annotation=(
-            get_args(sig.return_annotation)
-            if lenient_issubclass(get_origin(sig.return_annotation), tuple)
-            else (
-                sig.return_annotation
-                if sig.return_annotation is sig.empty
-                else (sig.return_annotation,)
-            )
+            sig.empty
+            if sig.return_annotation is sig.empty
+            else _tidy_return(sig.return_annotation, force_tuple_return=force_tuple_return)
         ),
     )
-    return sig
+
+
+def signature(
+    fn: Callable[..., Any],
+    *,
+    follow_wrapped: bool = True,
+    force_tuple_return: bool = False,
+    remove_owner: bool = True,
+) -> inspect.Signature:
+    """Convenience wrapper around `inspect.signature`.
+
+    The returned Signature will have `cls`/`self` parameters removed if `remove_owner` is `True` and
+    `tuple[...]` converted to `tuple(...)` in the `return_annotation`.
+    """
+    return tidy_signature(
+        fn=fn,
+        sig=inspect.signature(fn, follow_wrapped=follow_wrapped),
+        force_tuple_return=force_tuple_return,
+        remove_owner=remove_owner,
+    )
 
 
 #############################################
