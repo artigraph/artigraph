@@ -5,7 +5,7 @@ import operator as op
 import re
 from collections.abc import Callable
 from functools import partial
-from typing import Any, Union, cast
+from typing import Any, Union, cast, get_args, get_origin
 
 import pytest
 
@@ -260,7 +260,7 @@ def test_TypedBox() -> None:
     class Coord(BaseCoord):
         pass
 
-    CoordBox = TypedBox[Coord]
+    CoordBox = TypedBox[str, Coord]
 
     box = CoordBox({"home": Coord(1, 1)})
     assert (box.home.x, box.home.y) == (1, 1)
@@ -271,13 +271,31 @@ def test_TypedBox() -> None:
         box.school = (3, 3)
 
 
+def test_TypedBox_introspection() -> None:
+    # We subclass the original TypedBox to set .__target_type__
+    hint = TypedBox[str, str]
+    origin, args = get_origin(hint), get_args(hint)
+    assert origin is not None
+    assert issubclass(origin, TypedBox)
+    assert args == (str, str)
+
+
+def test_TypedBox_bad_hint() -> None:
+    with pytest.raises(TypeError, match="TypedBox expects a key and value type"):
+        TypedBox[str]  # type: ignore
+    with pytest.raises(TypeError, match="TypedBox expects a key and value type"):
+        TypedBox[str, str, str]  # type: ignore
+    with pytest.raises(TypeError, match="TypedBox key must be `str`"):
+        TypedBox[int, str]
+
+
 def test_TypedBox_cast() -> None:
     class Coord(BaseCoord):
         @classmethod
         def cast(cls, value: tuple[int, int]) -> Coord:
             return cls(*value)
 
-    CoordBox = TypedBox[Coord]
+    CoordBox = TypedBox[str, Coord]
 
     home = Coord(1, 1)
     box = CoordBox(
@@ -299,7 +317,7 @@ def test_TypedBox_bad_cast() -> None:
         def cast(cls, value: tuple[int, int]) -> tuple[int, int]:  # Should return a Coord
             return value
 
-    CoordBox = TypedBox[Coord]
+    CoordBox = TypedBox[str, Coord]
 
     box = CoordBox()
     box.home = Coord(1, 1)

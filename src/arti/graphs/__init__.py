@@ -12,7 +12,7 @@ from arti.internal.utils import TypedBox
 # TODO: Add GraphMetadata model
 
 
-ArtifactBox = TypedBox[Artifact]
+ArtifactBox = TypedBox[str, Artifact]
 
 
 # TODO: When building out run logic, resolve and statically set all available fingerprints.

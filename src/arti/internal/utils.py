@@ -5,12 +5,16 @@ import os.path
 from collections.abc import Callable, Generator, MutableMapping
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
+from types import GenericAlias
 from typing import IO, Any, ClassVar, Generic, Optional, TypeVar, Union, cast, overload
 
 from box import Box
 from multimethod import multidispatch
 
 from arti.internal.type_hints import lenient_issubclass, tidy_signature
+
+_K = TypeVar("_K")
+_V = TypeVar("_V")
 
 
 class ClassName:
@@ -228,16 +232,12 @@ def ordinal(n: int) -> str:
     return str(n) + suffix
 
 
-RegisterK = TypeVar("RegisterK")
-RegisterV = TypeVar("RegisterV")
-
-
 def register(
-    registry: dict[RegisterK, RegisterV],
-    key: RegisterK,
-    value: RegisterV,
-    get_priority: Optional[Callable[[RegisterV], int]] = None,
-) -> RegisterV:
+    registry: dict[_K, _V],
+    key: _K,
+    value: _V,
+    get_priority: Optional[Callable[[_V], int]] = None,
+) -> _V:
     if key in registry:
         existing = registry[key]
         if get_priority is None:
@@ -259,29 +259,41 @@ def qname(val: Union[object, type]) -> str:
     return type(val).__qualname__
 
 
-T = TypeVar("T")
-
-
-class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):
+class TypedBox(Box, MutableMapping[_K, Union[_V, MutableMapping[_K, _V]]]):
     """TypedBox holds a collection of typed values.
 
     Subclasses must set the __target_type__ to a base class for the contained values.
     """
 
-    __target_type__: ClassVar[type[T]]
+    __target_type__: ClassVar[type[_V]]
 
     @classmethod
-    def __class_getitem__(cls, target_type: type[T]) -> TypedBox[T]:
-        return cast(
-            "TypedBox[T]",
+    def __class_getitem__(cls, item: tuple[type[_K], type[_V]]) -> GenericAlias:
+        if not isinstance(item, tuple) or len(item) != 2:
+            raise TypeError(f"{cls.__name__} expects a key and value type")
+        key_type, value_type = item
+        if key_type is not str:
+            raise TypeError(f"{cls.__name__} key must be `str`")
+        return GenericAlias(
             type(
-                f"{target_type.__name__.title()}Box",
+                cls.__name__,
                 (cls,),
-                {"__target_type__": target_type},
+                {
+                    "__module__": __name__,
+                    "__target_type__": value_type,
+                },
             ),
+            item,
         )
 
-    def __cast_value(self, value: Any) -> T:
+    def __setattr__(self, key: str, value: Any) -> None:
+        # GenericAlias sets __orig_class__ after __init__, so preempt Box from storing that (or
+        # erroring if frozen).
+        if key == "__orig_class__":
+            return object.__setattr__(self, key, value)
+        super().__setattr__(key, value)
+
+    def __cast_value(self, value: Any) -> _V:
         if isinstance(value, self.__target_type__):
             return value
         tgt_name = self.__target_type__.__name__
@@ -295,7 +307,7 @@ class TypedBox(Box, MutableMapping[str, Union[T, MutableMapping[str, T]]]):
         raise TypeError(f"Expected an instance of {tgt_name}, got: {value}")
 
     # NOTE: Box uses name mangling (double __) to prevent conflicts with contained values.
-    def _Box__convert_and_store(self, item: str, value: T) -> None:
+    def _Box__convert_and_store(self, item: str, value: _V) -> None:
         if isinstance(value, dict):
             super()._Box__convert_and_store(item, value)  # pylint: disable=no-member
         elif item in self:
