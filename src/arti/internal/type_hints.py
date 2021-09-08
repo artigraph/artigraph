@@ -4,10 +4,42 @@ import inspect
 import sys
 import types
 from collections.abc import Callable
-from typing import _GenericAlias  # type: ignore
 from typing import Any, Union, cast, get_args, get_origin, get_type_hints
 
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
+
+
+def _check_issubclass(klass: Any, check_type: type) -> bool:
+    klass_origin, check_type_origin = get_origin(klass), get_origin(check_type)
+    klass_args, check_type_args = get_args(klass), get_args(check_type)
+    # eg: issubclass(tuple, tuple)
+    if klass_origin is None and check_type_origin is None:
+        return issubclass(klass, check_type)
+    # eg: issubclass(tuple[int], tuple)
+    if klass_origin is not None and check_type_origin is None:
+        return issubclass(klass_origin, check_type)
+    # eg: issubclass(tuple, tuple[int])
+    if klass_origin is None and check_type_origin is not None:
+        return issubclass(klass, check_type_origin) and not check_type_args
+    # eg: issubclass(tuple[int], tuple[int])
+    if klass_origin is not None and check_type_origin is not None:
+        # NOTE: Considering all container types covariant for simplicity (mypy may be more strict).
+        #
+        # The builtin mutable containers (list, dict, etc) are invariant (klass_args ==
+        # check_type_args), but the interfaces (Mapping, Sequence, etc) and immutable containers are
+        # covariant.
+        if check_type_args:
+            if not (
+                len(klass_args) == len(check_type_args)
+                and all(
+                    lenient_issubclass(klass_arg, check_type_arg)
+                    for (klass_arg, check_type_arg) in zip(klass_args, check_type_args)
+                )
+            ):
+                return False
+        return lenient_issubclass(klass_origin, check_type_origin)
+    # Shouldn't happen, but need to explicitly say "x is not None" to narrow mypy types.
+    raise NotImplementedError("The origin conditions don't cover all cases!")
 
 
 def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:
@@ -18,12 +50,7 @@ def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]
     check_type = class_or_tuple
     if is_union_hint(check_type):
         return any(lenient_issubclass(klass, subtype) for subtype in get_args(check_type))
-    try:
-        return issubclass(klass, check_type)
-    except TypeError:
-        if isinstance(klass, (types.GenericAlias, _GenericAlias)):
-            return False
-        raise
+    return _check_issubclass(klass, check_type)
 
 
 def _tidy_return(return_annotation: Any, *, force_tuple_return: bool) -> Any:
