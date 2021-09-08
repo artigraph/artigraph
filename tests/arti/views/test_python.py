@@ -29,9 +29,9 @@ def test_python_View() -> None:
             test_storage = LocalFile(path=f.name)
             test_view = view()
             assert View._registry_[python_type] is view
-            data = read(test_format, test_storage, test_view)
+            data = read(format=test_format, storage=test_storage, view=test_view)
             assert data == val
 
             f.truncate()
-            write(data, test_format, test_storage, test_view)
+            write(data, format=test_format, storage=test_storage, view=test_view)
             assert f.read() == binary

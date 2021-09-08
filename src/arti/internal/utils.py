@@ -1,12 +1,16 @@
 from __future__ import annotations
 
+import inspect
 import os.path
 from collections.abc import Callable, Generator, MutableMapping
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
-from typing import IO, Any, ClassVar, Generic, Optional, TypeVar, Union, cast
+from typing import IO, Any, ClassVar, Generic, Optional, TypeVar, Union, cast, overload
 
 from box import Box
+from multimethod import multidispatch
+
+from arti.internal.type_hints import lenient_issubclass, tidy_signature
 
 
 class ClassName:
@@ -33,6 +37,61 @@ class classproperty(Generic[PropReturn]):
 
     def __get__(self, obj: Any, type_: Any) -> PropReturn:
         return self.f(type_)
+
+
+RETURN = TypeVar("RETURN")
+REGISTERED = TypeVar("REGISTERED", bound=Callable[..., Any])
+
+
+# This may be less useful once mypy supports ParamSpecs - after that, we might be able to define
+# multidispatch with a ParamSpec and have mypy check the handlers' arguments are covariant.
+class dispatch(multidispatch[RETURN]):
+    """Multiple dispatch for a set of functions based on parameter type.
+
+    Usage is similar to `@functools.singledispatch`. The original definition defines the "spec" that
+    subsequent handlers must follow, namely the name and (base)class of parameters.
+    """
+
+    def __init__(self, func: Callable[..., RETURN]) -> None:
+        super().__init__(func)
+        if not hasattr(self, "signature"):  # Added in future multimethod versions
+            self.signature = inspect.signature(func)
+        # __init__ is called *for each registered handler*, but we want the signature of the first.
+        if not hasattr(self, "clean_signature"):
+            self.clean_signature = tidy_signature(func, self.signature)
+            if self.clean_signature.return_annotation not in (Any, type(None)):
+                raise NotImplementedError("Return type checking is not implemented yet!")
+
+    @overload
+    def register(self, __func: REGISTERED) -> REGISTERED:
+        ...
+
+    @overload
+    def register(self, *args: type) -> Callable[[REGISTERED], REGISTERED]:
+        ...
+
+    def register(self, *args: Any) -> Callable[[REGISTERED], REGISTERED]:
+        if len(args) == 1 and hasattr(args[0], "__annotations__"):
+            func = args[0]
+            sig = tidy_signature(func, inspect.signature(func))
+            spec = self.clean_signature
+            if set(sig.parameters) != set(spec.parameters):
+                raise TypeError(
+                    f"Expected `{func.__name__}` to have {sorted(set(spec.parameters))} parameters, got {sorted(set(sig.parameters))}"
+                )
+            for name in sig.parameters:
+                sig_param, spec_param = sig.parameters[name], spec.parameters[name]
+                if sig_param.kind != spec_param.kind:
+                    raise TypeError(
+                        f"Expected the `{func.__name__}.{name}` parameter to be {spec_param.kind}, got {sig_param.kind}"
+                    )
+                if sig_param.annotation is not Any and not lenient_issubclass(
+                    sig_param.annotation, spec_param.annotation
+                ):
+                    raise TypeError(
+                        f"Expected the `{func.__name__}.{name}` parameter to be a subclass of {spec_param.annotation}, got {sig_param.annotation}"
+                    )
+        return super().register(*args)  # type: ignore
 
 
 _int_sub = TypeVar("_int_sub", bound="_int")

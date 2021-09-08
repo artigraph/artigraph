@@ -46,14 +46,16 @@ class Str(_PythonBuiltin):
 
 
 @read.register
-def _read_pickle_localfile_python(format: Pickle, storage: LocalFile, view: _PythonBuiltin) -> Any:
+def _read_pickle_localfile_python(
+    *, format: Pickle, storage: LocalFile, view: _PythonBuiltin
+) -> Any:
     with open(storage.path, "rb") as file:
         return pickle.load(file)
 
 
 @write.register
 def _write_pickle_localfile_python(
-    data: Any, format: Pickle, storage: LocalFile, view: _PythonBuiltin
+    data: Any, *, format: Pickle, storage: LocalFile, view: _PythonBuiltin
 ) -> None:
     with open(storage.path, "wb") as file:
         pickle.dump(data, file)
