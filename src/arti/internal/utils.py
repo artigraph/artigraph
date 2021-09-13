@@ -54,13 +54,9 @@ class dispatch(multidispatch[RETURN]):
 
     def __init__(self, func: Callable[..., RETURN]) -> None:
         super().__init__(func)
-        if not hasattr(self, "signature"):  # Added in future multimethod versions
-            self.signature = inspect.signature(func)
-        # __init__ is called *for each registered handler*, but we want the signature of the first.
-        if not hasattr(self, "clean_signature"):
-            self.clean_signature = tidy_signature(func, self.signature)
-            if self.clean_signature.return_annotation not in (Any, type(None)):
-                raise NotImplementedError("Return type checking is not implemented yet!")
+        self.clean_signature = tidy_signature(func, self.signature)
+        if self.clean_signature.return_annotation not in (Any, type(None)):
+            raise NotImplementedError("Return type checking is not implemented yet!")
 
     @overload
     def register(self, __func: REGISTERED) -> REGISTERED:
