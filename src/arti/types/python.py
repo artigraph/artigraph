@@ -43,11 +43,7 @@ class PyDatetime(_ScalarClassTypeAdapter):
         return cls.artigraph(precision="microsecond")
 
 
-@python_type_system.register_adapter
-class PyList(TypeAdapter):
-    artigraph = arti.types.List
-    system = list
-
+class PyValueContainer(TypeAdapter):
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
         (value_type,) = get_args(type_)
@@ -63,8 +59,58 @@ class PyList(TypeAdapter):
     def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system[
-            python_type_system.to_system(type_.value_type, hints=hints),
-        ]  # type: ignore
+            python_type_system.to_system(type_.value_type, hints=hints),  # type: ignore
+        ]
+
+
+@python_type_system.register_adapter
+class PyList(PyValueContainer):
+    artigraph = arti.types.List
+    system = list
+    priority = 1
+
+
+# NOTE: PyTuple only covers sequences (eg: tuple[int, ...]), not structure (eg: tuple[int, str]).
+@python_type_system.register_adapter
+class PyTuple(PyValueContainer):
+    artigraph = arti.types.List
+    system = tuple
+
+    @classmethod
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
+        origin, args = get_origin(type_), get_args(type_)
+        assert origin is not None
+        assert len(args) == 2 and args[1] is ...
+        return super().to_artigraph(origin[args[0]], hints=hints)
+
+    @classmethod
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
+        if super().matches_system(type_, hints=hints):
+            args = get_args(type_)
+            if len(args) == 2 and args[1] is ...:
+                return True
+        return False
+
+    @classmethod
+    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
+        ret = super().to_system(type_, hints=hints)
+        origin, args = get_origin(ret), get_args(ret)
+        assert origin is not None
+        assert len(args) == 1
+        return origin[args[0], ...]
+
+
+@python_type_system.register_adapter
+class PyFrozenset(PyValueContainer):
+    artigraph = arti.types.Set
+    system = frozenset
+
+
+@python_type_system.register_adapter
+class PySet(PyValueContainer):
+    artigraph = arti.types.Set
+    system = set
+    priority = 1  # Set above frozenset
 
 
 @python_type_system.register_adapter

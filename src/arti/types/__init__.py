@@ -134,6 +134,10 @@ class Null(Type):
     pass
 
 
+class Set(Type):
+    value_type: Type
+
+
 class String(Type):
     pass
 

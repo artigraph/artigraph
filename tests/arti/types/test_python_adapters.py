@@ -19,12 +19,13 @@ from arti.types import (
     List,
     Map,
     Null,
+    Set,
     String,
     Struct,
     Timestamp,
     Type,
 )
-from arti.types.python import PyLiteral, PyOptional, python_type_system
+from arti.types.python import PyLiteral, PyOptional, PyTuple, python_type_system
 
 
 def test_python_bool() -> None:
@@ -55,6 +56,14 @@ def test_python_datetime() -> None:
 
     assert isinstance(python_type_system.to_artigraph(date, hints={}), Date)
     assert python_type_system.to_system(Date(), hints={}) is date
+
+
+def test_python_frozenset() -> None:
+    a = Set(value_type=Int64())
+    p = frozenset[int]
+
+    assert python_type_system.to_system(a, hints={}) == set[int]  # set has higher priority
+    assert python_type_system.to_artigraph(p, hints={}) == a
 
 
 def test_python_list() -> None:
@@ -137,6 +146,14 @@ def test_python_optional_priority() -> None:
     assert tuple(python_type_system._priority_sorted_adapters)[0] is PyOptional
 
 
+def test_python_set() -> None:
+    a = Set(value_type=Int64())
+    p = set[int]
+
+    assert python_type_system.to_system(a, hints={}) == p
+    assert python_type_system.to_artigraph(p, hints={}) == a
+
+
 def test_python_struct() -> None:
     a = Struct(name="P", fields={"x": Int64()})
 
@@ -148,3 +165,17 @@ def test_python_struct() -> None:
     assert P1.__name__ == P.__name__
     assert get_type_hints(P1) == {"x": int}
     assert python_type_system.to_artigraph(P, hints={}) == a
+
+
+def test_python_tuple() -> None:
+    a = List(value_type=Int64())
+    # mypy errors here for some reason...?
+    p = tuple[int, ...]  # type: ignore
+
+    assert python_type_system.to_system(a, hints={}) == list[int]  # list has higher priority
+    assert PyTuple.to_system(List(value_type=Int64()), hints={}) == p
+    assert python_type_system.to_artigraph(p, hints={}) == a
+
+    # We don't (currently) support structure based tuples
+    with pytest.raises(NotImplementedError):
+        python_type_system.to_artigraph(tuple[str, int], hints={})  # type: ignore
