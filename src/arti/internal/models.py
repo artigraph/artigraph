@@ -1,63 +1,65 @@
 from __future__ import annotations
 
-from collections.abc import Sequence
+from collections.abc import Mapping, Sequence
 from functools import cached_property
 from typing import Annotated, Any, ClassVar, Literal, Optional, get_args, get_origin
 
 from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField
 
+from arti.internal.patches import patch_pydantic_ModelField__type_analysis
 from arti.internal.type_hints import is_union, lenient_issubclass
-from arti.internal.utils import class_name, classproperty
+from arti.internal.utils import class_name, classproperty, frozendict
+
+patch_pydantic_ModelField__type_analysis()
 
 
-def _check_types(value: Any, type_: type) -> None:  # noqa: C901
+def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
     mismatch_error = ValueError(f"Expected an instance of {type_}, got: {value}")
 
     if type_ is Any:
-        return
+        return value
     origin = get_origin(type_)
     if origin is not None:
         args = get_args(type_)
         if origin is Annotated:
-            _check_types(value, args[0])
-            return
+            return _check_types(value, args[0])
         if origin is Literal:
-            _check_types(value, type(args[0]))
-            return
+            return _check_types(value, type(args[0]))
         # NOTE: Optional[t] -> Union[t, NoneType]
         if is_union(origin):
             for subtype in args:
                 try:
-                    _check_types(value, subtype)
+                    return _check_types(value, subtype)
                 except ValueError:
                     pass
-                else:
-                    return
             raise mismatch_error
-        if issubclass(origin, dict):
-            _check_types(value, origin)
+        if issubclass(origin, (dict, Mapping)):
+            value = _check_types(value, origin)
             for k, v in value.items():
                 _check_types(k, args[0])
                 _check_types(v, args[1])
-            return
+            return value
         # Variadic tuples will be handled below
         if issubclass(origin, tuple) and ... not in args:
-            _check_types(value, origin)
+            value = _check_types(value, origin)
             if len(value) != len(args):
                 raise mismatch_error
             for i, subtype in enumerate(args):
                 _check_types(value[i], subtype)
-            return
+            return value
         for t in (tuple, list, set, frozenset, Sequence):
             if issubclass(origin, t):
-                _check_types(value, origin)
+                value = _check_types(value, origin)
                 for subvalue in value:
                     _check_types(subvalue, args[0])
-                return
+                return value
         raise NotImplementedError(f"Missing handler for {type_} with {value}!")
+    if isinstance(value, Mapping) and not isinstance(value, frozendict):
+        value = frozendict(value)
     if not lenient_issubclass(type(value), type_):
         raise mismatch_error
+    return value
 
 
 class Model(BaseModel):
@@ -108,8 +110,7 @@ class Model(BaseModel):
         type_ = field.outer_type_
         if field.allow_none:
             type_ = Optional[type_]
-        _check_types(value, type_)
-        return value
+        return _check_types(value, type_)
 
     # By default, pydantic just compares models by their dict representation, causing models of
     # different types but same fields (eg: Int8 and Int16) to be equivalent. This can be removed if

@@ -9,6 +9,7 @@ from types import GenericAlias
 from typing import IO, Any, ClassVar, Generic, Optional, TypeVar, Union, cast, overload
 
 from box import Box
+from frozendict.core import frozendict as _frozendict
 from multimethod import multidispatch
 
 from arti.internal.type_hints import lenient_issubclass, tidy_signature
@@ -92,6 +93,19 @@ class dispatch(multidispatch[RETURN]):
                         f"Expected the `{func.__name__}.{name}` parameter to be a subclass of {spec_param.annotation}, got {sig_param.annotation}"
                     )
         return super().register(*args)  # type: ignore
+
+
+# frozendict is useful for models to preserve hashability (eg: key in a dict). Unfortunately, there
+# is 1 small pydantic issue[1] and an upstream issue with types.GenericAlias + deepcopy[2,3]. We can
+# work around the blocking deepcopy issue by replacing types.GenericAlias with typing.Generic (which
+# returns a typing._GenericAlias). The pydantic bug (which returns a dict instead of a frozendict)
+# is worked around in arti.internal.patches.patch_pydantic_ModelField__type_analysis.
+#
+# 1: https://github.com/samuelcolvin/pydantic/pull/3138
+# 2: https://github.com/Marco-Sulla/python-frozendict/issues/29
+# 3: https://bugs.python.org/issue45167
+class frozendict(Generic[_K, _V], _frozendict[_K, _V]):
+    pass
 
 
 _int_sub = TypeVar("_int_sub", bound="_int")

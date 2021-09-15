@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
+from arti.internal.utils import frozendict
 from arti.types import (
     Enum,
     Float16,
@@ -116,8 +117,10 @@ def test_Enum_errors() -> None:
 
 
 def test_Struct() -> None:
-    fields: dict[str, Type] = {"x": Int32()}
-    assert Struct(fields=fields).fields == fields
+    fields = {"x": Int32()}
+    s = Struct(fields=fields)
+    assert isinstance(s.fields, frozendict)
+    assert s.fields == frozendict(fields)
 
 
 def test_Timestamp() -> None:

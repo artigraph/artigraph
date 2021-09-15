@@ -5,6 +5,7 @@ import pytest
 from pydantic import ValidationError
 
 from arti.internal.models import Model
+from arti.internal.utils import frozendict
 
 
 class Abstract(Model):
@@ -33,8 +34,11 @@ def test_Model_static_types() -> None:
         a: Any
         b: Literal["b"]
         c: int
+        d: frozendict[str, int]
 
-    M(a=5, b="b", c=0)
+    # frozendict is special cased in the type conversions to automatically convert dicts.
+    m = M(a=5, b="b", c=0, d={"a": 1})
+    assert isinstance(m.d, frozendict)
     with pytest.raises(ValidationError, match="Expected an instance of <class 'str'>, got"):
         M(a=5, b=5, c=0)
     with pytest.raises(ValidationError, match=r"Expected an instance of <class 'int'>, got"):

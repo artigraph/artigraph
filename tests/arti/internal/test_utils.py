@@ -4,6 +4,7 @@ import math
 import operator as op
 import re
 from collections.abc import Callable
+from copy import deepcopy
 from functools import partial
 from typing import Any, Union, cast, get_args, get_origin
 
@@ -15,6 +16,7 @@ from arti.internal.utils import (
     class_name,
     classproperty,
     dispatch,
+    frozendict,
     int64,
     named_temporary_file,
     ordinal,
@@ -117,6 +119,26 @@ def test_dispatch() -> None:
     # Check that a bad one didn't get registered
     with pytest.raises(TypeError):
         assert dispatch_test(5, "")
+
+
+def test_frozendict() -> None:
+    for klass in (
+        frozendict,
+        frozendict[str, int],
+    ):
+        # Confirm deepcopying the class works:
+        #     https://bugs.python.org/issue45167
+        assert deepcopy(klass) == klass
+        val = klass(x=5)
+        assert isinstance(val, frozendict)
+        assert val == {"x": 5}  # type: ignore
+        with pytest.raises(TypeError, match="doesn't support item assignment"):
+            val["x"] = 10  # type: ignore
+        with pytest.raises(TypeError, match="doesn't support item assignment"):
+            val["y"] = 10  # type: ignore
+
+    assert get_origin(frozendict[str, int]) is frozendict
+    assert get_args(frozendict[str, int]) == (str, int)
 
 
 class _I(_int):

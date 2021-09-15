@@ -10,7 +10,7 @@ from pydantic import PrivateAttr, validator
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
-from arti.internal.utils import class_name, register
+from arti.internal.utils import class_name, frozendict, register
 
 
 class Type(Model):
@@ -139,7 +139,7 @@ class String(Type):
 
 
 class Struct(Type, _NamedMixin):
-    fields: dict[str, Type]
+    fields: frozendict[str, Type]
 
 
 class Timestamp(Type):
