@@ -72,7 +72,12 @@ class BaseArtifact(Model):
         return storage
 
 
-from arti.statistics import Statistic  # noqa: E402 # # pylint: disable=wrong-import-position
+class Statistic(BaseArtifact):
+    """A Statistic is a piece of data derived from an Artifact that can be tracked over time."""
+
+    # TODO: Set format/storage to some "system default" that can be used across backends.
+
+    is_scalar = True
 
 
 class Artifact(BaseArtifact):
@@ -133,4 +138,5 @@ class Artifact(BaseArtifact):
 from arti.producers import Producer  # noqa: E402 # # pylint: disable=wrong-import-position
 
 BaseArtifact.update_forward_refs()
+Statistic.update_forward_refs()
 Artifact.update_forward_refs()
