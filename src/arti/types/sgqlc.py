@@ -1,5 +1,5 @@
 from functools import partial
-from typing import Any, ClassVar, Literal
+from typing import Any, Callable, ClassVar, Literal, Optional, cast
 
 import sgqlc.types as st
 
@@ -13,6 +13,28 @@ def is_nullable(type_: type[st.BaseType]) -> bool:
 
 def is_list(type_: type[st.BaseType]) -> bool:
     return type_.__name__.startswith("[")
+
+
+def get_schema(hints: dict[str, Any]) -> st.Schema:
+    if (schema := hints.get(SGQLC_HINT_SCHEMA)) is not None:
+        return cast(st.Schema, schema)
+    # Avoid referencing (and thus polluting) the global schema.
+    return st.Schema()
+
+
+def get_existing(
+    type_: at.Type,
+    schema: st.Schema,
+    equals: Callable[[at.Type, type[st.BaseType]], bool],
+) -> Optional[type[st.BaseType]]:
+    assert isinstance(type_, at._NamedMixin)
+    if (existing := getattr(schema, type_.name, None)) is not None:
+        if not equals(type_, existing):
+            raise ValueError(
+                f"Detected duplicate but mismatched sgqlc {existing.__name__} type when converting {type_}: {repr(existing)}"
+            )
+        return cast(type[st.BaseType], existing)
+    return None
 
 
 # sgqlc types are implicitly nullable, which is the opposite of the arti Type default. Rather than
@@ -39,6 +61,10 @@ class _SgqlcTypeSystem(TypeSystem):
 
 
 sgqlc_type_system = _SgqlcTypeSystem(key="sgqlc")
+
+SGQLC_HINT_ABSTRACT = f"{sgqlc_type_system.key}.abstract"
+SGQLC_HINT_INTERFACES = f"{sgqlc_type_system.key}.interfaces"
+SGQLC_HINT_SCHEMA = f"{sgqlc_type_system.key}.schema"
 
 _generate = partial(_ScalarClassTypeAdapter.generate, type_system=sgqlc_type_system)
 
@@ -80,16 +106,24 @@ class SgqlcEnumAdapter(TypeAdapter):
         return issubclass(type_, cls.system)
 
     @classmethod
+    def _compare_existing(cls, type_: at.Type, existing: type[st.BaseType]) -> bool:
+        return cls.matches_system(existing, hints={}) and cast(at.Enum, type_).items == set(
+            existing  # type: ignore
+        )
+
+    @classmethod
     def to_system(cls, type_: at.Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         assert isinstance(type_.type, at.String)
+        schema = get_schema(hints)
+        if (existing := get_existing(type_, schema, equals=cls._compare_existing)) is not None:
+            return existing
         return type(
             type_.name,
             (cls.system,),
             {
                 "__choices__": tuple(type_.items),
-                "__schema__": st.Schema(),  # Don't reference the global schema
-                f"_{type_.name}__auto_register": False,  # Disable registering with the global schema
+                "__schema__": schema,
             },
         )
 
@@ -122,7 +156,7 @@ class _StructAdapter(TypeAdapter):
 
     @classmethod
     def matches_artigraph(cls, type_: at.Type, *, hints: dict[str, Any]) -> bool:
-        abstract = hints.get(f"{sgqlc_type_system.key}.abstract", False)
+        abstract = hints.get(SGQLC_HINT_ABSTRACT, False)
         # Interfaces should be abstract, Types not.
         return isinstance(type_, cls.artigraph) and (
             abstract if cls.kind == "interface" else not abstract
@@ -144,18 +178,31 @@ class _StructAdapter(TypeAdapter):
         return issubclass(type_, cls.system) and type_.__kind__ == cls.kind
 
     @classmethod
+    def _compare_existing(
+        cls, type_: at.Type, existing: type[st.BaseType], field_types: dict[str, type[st.BaseType]]
+    ) -> bool:
+        assert set(cast(at.Struct, type_).fields) == set(field_types)
+        return cls.matches_system(existing, hints={}) and field_types == {
+            field.name: field.type for field in cast(st.Type, existing)
+        }
+
+    @classmethod
     def to_system(cls, type_: at.Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
+        schema = get_schema(hints)
+        fields = {k: sgqlc_type_system.to_system(v, hints=hints) for k, v in type_.fields.items()}
+        compare_existing = partial(cls._compare_existing, field_types=fields)
+        if (existing := get_existing(type_, schema, equals=compare_existing)) is not None:
+            return existing
         return type(
             type_.name,
             (
                 cls.system,
-                *hints.get(f"{sgqlc_type_system.key}.interfaces", ()),
+                *hints.get(SGQLC_HINT_INTERFACES, ()),
             ),
             {
-                "__schema__": st.Schema(),  # Don't reference the global schema
-                f"_{type_.name}__auto_register": False,  # Disable registering with the global schema
-                **{k: sgqlc_type_system.to_system(v, hints=hints) for k, v in type_.fields.items()},
+                "__schema__": schema,
+                **fields,
             },
         )
 
