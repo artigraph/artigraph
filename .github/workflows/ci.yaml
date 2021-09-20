@@ -37,7 +37,7 @@ jobs:
     - name: pytest
       run: |
         poetry run pytest --cov-report="xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml"
-    - uses: codecov/codecov-action@v2.0.3
+    - uses: codecov/codecov-action@v2.1.0
       env:
         CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
       with:
