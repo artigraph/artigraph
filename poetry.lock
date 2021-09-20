@@ -705,7 +705,7 @@ python-versions = "*"
 
 [[package]]
 name = "sgqlc"
-version = "14.0"
+version = "14.1"
 description = "Simple GraphQL Client"
 category = "main"
 optional = false
@@ -716,7 +716,7 @@ graphql-core = "*"
 
 [package.extras]
 requests = ["requests"]
-sphinx = ["sphinx"]
+sphinx = ["sphinx", "sphinx-argparse"]
 websocket = ["websocket-client"]
 
 [[package]]
@@ -843,7 +843,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "7f32fb70dae83b85be0a9616a74616cd9ac1dcd626b8ad29ecfb7bfd5a2c8a9a"
+content-hash = "2d9dd222edab72d2d7a4174d1545b535a2f8b570672c38f20b8d8ce9c80f8235"
 
 [metadata.files]
 appdirs = [
@@ -1269,9 +1269,9 @@ regex = [
     {file = "regex-2020.11.13.tar.gz", hash = "sha256:83d6b356e116ca119db8e7c6fc2983289d87b27b3fac238cfe5dca529d884562"},
 ]
 sgqlc = [
-    {file = "sgqlc-14.0-py3-none-any.whl", hash = "sha256:0242ab86d391953283359cf734808359e981acaf52e117504d28b7fc15e439dd"},
-    {file = "sgqlc-14.0-py3.9.egg", hash = "sha256:91d2778575f2dd8dd0ac6b2009f7206d5e8a177f2f33c6473fbc5288724e07e0"},
-    {file = "sgqlc-14.0.tar.gz", hash = "sha256:5d85835d0a9e1e0dd3350a804004d8c5c5ba40f30f32e3bc5d6e2b544f06fe0a"},
+    {file = "sgqlc-14.1-py3-none-any.whl", hash = "sha256:a172b8489824ff026d3608fe348cb1d2507b656127800f2fbf24ee8acf535372"},
+    {file = "sgqlc-14.1-py3.9.egg", hash = "sha256:ccaaf960724792af6c6c9c46624876a50aceb305634a131a5ee9ec54d10ef42b"},
+    {file = "sgqlc-14.1.tar.gz", hash = "sha256:71364af1884cf7e402cfd35058dafbcddf825b986898f68e6dd5195e2cd0472d"},
 ]
 sh = [
     {file = "sh-1.14.2-py2.py3-none-any.whl", hash = "sha256:4921ac9c1a77ec8084bdfaf152fe14138e2b3557cc740002c1a97076321fce8a"},
