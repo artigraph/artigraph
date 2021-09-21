@@ -3,11 +3,10 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 import abc
-from collections.abc import Mapping
 from datetime import date
 
 from arti.internal.models import Model
-from arti.internal.utils import classproperty
+from arti.internal.utils import classproperty, frozendict
 
 
 class key_component(property):
@@ -29,7 +28,7 @@ class PartitionKey(Model):
 
 
 # CompositeKey is the set of named PartitionKeys that uniquely identify a single partition.
-CompositeKey = Mapping[str, PartitionKey]
+CompositeKey = frozendict[str, PartitionKey]
 
 
 class DateKey(PartitionKey):

@@ -3,10 +3,11 @@ from __future__ import annotations
 import string
 from collections import defaultdict
 from collections.abc import Mapping
-from typing import Any, Iterable, Optional
+from typing import Any, Iterable, Literal, Optional, overload
 
 import parse
 
+from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey, PartitionKey
 
 
@@ -73,16 +74,43 @@ def spec_to_wildcard(spec: str, key_types: Mapping[str, type[PartitionKey]]) -> 
     return string.Formatter().vformat(spec, (), WildcardFormatDict(key_types))
 
 
-def _extract_partition_keys(
+@overload
+def extract_partition_keys(
     *,
+    error_on_no_match: Literal[False],
+    key_types: Mapping[str, type[PartitionKey]],
+    parser: parse.Parser,
+    path: str,
+    spec: str,
+) -> Optional[CompositeKey]:
+    ...
+
+
+@overload
+def extract_partition_keys(
+    *,
+    error_on_no_match: Literal[True] = True,
     key_types: Mapping[str, type[PartitionKey]],
     parser: parse.Parser,
     path: str,
     spec: str,
 ) -> CompositeKey:
+    ...
+
+
+def extract_partition_keys(
+    *,
+    error_on_no_match: bool = True,
+    key_types: Mapping[str, type[PartitionKey]],
+    parser: parse.Parser,
+    path: str,
+    spec: str,
+) -> Optional[CompositeKey]:
     parsed_value = parser.parse(path)
     if parsed_value is None:
-        raise ValueError(f"Unable to parse '{path}' with '{spec}'.")
+        if error_on_no_match:
+            raise ValueError(f"Unable to parse '{path}' with '{spec}'.")
+        return None
     key_components = defaultdict[str, dict[str, str]](dict)
     for k, v in parsed_value.named.items():
         key, component = k.split(".")
@@ -99,7 +127,7 @@ def _extract_partition_keys(
         raise ValueError(
             f"Expected to find partition keys for {sorted(key_types)}, only found {sorted(key)}. Is the partitioning spec ('{spec}') complete?"
         )
-    return keys
+    return frozendict(keys)
 
 
 def parse_partition_keys(
@@ -107,6 +135,6 @@ def parse_partition_keys(
 ) -> Mapping[str, CompositeKey]:
     parser = parse.compile(spec, case_sensitive=True)
     return {
-        path: _extract_partition_keys(parser=parser, path=path, spec=spec, key_types=key_types)
+        path: extract_partition_keys(parser=parser, path=path, spec=spec, key_types=key_types)
         for path in paths
     }

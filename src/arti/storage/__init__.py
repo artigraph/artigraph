@@ -3,7 +3,6 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 import abc
-from collections.abc import Mapping
 from types import GenericAlias
 from typing import Any, ClassVar, Generic, Optional, TypeVar
 
@@ -15,7 +14,7 @@ from arti.types import Type
 
 
 class StoragePartition(Model):
-    partition_key: CompositeKey
+    keys: CompositeKey
     fingerprint: Optional[Fingerprint] = None
 
     def with_fingerprint(self) -> StoragePartition:
@@ -74,17 +73,6 @@ class Storage(Model, Generic[_StoragePartition]):
         # specified field(s).
         pass
 
-    def discover_partitions(self, **key_types: type[PartitionKey]) -> tuple[_StoragePartition, ...]:
-        return tuple(
-            self.storage_partition_type(
-                path=path,
-                partition_key=partition_key,
-            )
-            for path, partition_key in self.discover_partition_keys(**key_types).items()
-        )
-
     @abc.abstractmethod
-    def discover_partition_keys(
-        self, **key_types: type[PartitionKey]
-    ) -> Mapping[str, CompositeKey]:
+    def discover_partitions(self, **key_types: type[PartitionKey]) -> tuple[_StoragePartition, ...]:
         raise NotImplementedError()

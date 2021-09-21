@@ -1,9 +1,8 @@
 import hashlib
-from collections.abc import Mapping
 from glob import glob
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import CompositeKey, PartitionKey
+from arti.partitions import PartitionKey
 from arti.storage import Storage, StoragePartition
 from arti.storage._internal import parse_partition_keys, spec_to_wildcard
 
@@ -24,9 +23,16 @@ class LocalFilePartition(StoragePartition):
 class LocalFile(Storage[LocalFilePartition]):
     path: str
 
-    def discover_partition_keys(
+    def discover_partitions(
         self, **key_types: type[PartitionKey]
-    ) -> Mapping[str, CompositeKey]:
+    ) -> tuple[LocalFilePartition, ...]:
         wildcard = spec_to_wildcard(self.path, key_types)
         paths = set(glob(wildcard))
-        return parse_partition_keys(paths, spec=self.path, key_types=key_types)
+        path_keys = parse_partition_keys(paths, spec=self.path, key_types=key_types)
+        return tuple(
+            self.storage_partition_type(
+                path=path,
+                keys=keys,
+            )
+            for path, keys in path_keys.items()
+        )

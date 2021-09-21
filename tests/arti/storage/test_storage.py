@@ -1,11 +1,10 @@
-from collections.abc import Mapping
 from typing import Any, get_args
 
 import pytest
 
 from arti.fingerprints import Fingerprint
 from arti.internal.type_hints import lenient_issubclass
-from arti.partitions import CompositeKey, IntKey, PartitionKey
+from arti.partitions import IntKey, PartitionKey
 from arti.storage import Storage, StoragePartition
 
 
@@ -19,18 +18,18 @@ class MockStoragePartition(StoragePartition):
 class MockStorage(Storage[MockStoragePartition]):
     path: str
 
-    def discover_partition_keys(
+    def discover_partitions(
         self, **key_types: type[PartitionKey]
-    ) -> Mapping[str, CompositeKey]:
+    ) -> tuple[MockStoragePartition, ...]:
         assert all(v is IntKey for v in key_types.values())  # Simplifies logic here...
-        return {
-            self.path.format(**keys): keys
+        return tuple(
+            self.storage_partition_type(path=self.path.format(**keys), keys=keys)
             for keys in ({k: IntKey(key=i) for k in key_types} for i in range(3))
-        }
+        )
 
 
 def test_StoragePartition_fingerprint() -> None:
-    sp = MockStoragePartition(path="/tmp/test", partition_key={"key": IntKey(key=5)})
+    sp = MockStoragePartition(path="/tmp/test", keys={"key": IntKey(key=5)})
     assert sp.fingerprint is None
     modified = sp.with_fingerprint()
     assert sp.fingerprint is None
@@ -64,5 +63,5 @@ def test_Storage_discover_partitions() -> None:
     partitions = s.discover_partitions(i=IntKey)
     for i, sp in enumerate(sorted(partitions, key=lambda x: x.path)):
         assert sp.path == f"/test/{i}/file"
-        assert isinstance(sp.partition_key["i"], IntKey)
-        assert sp.partition_key["i"].key == i
+        assert isinstance(sp.keys["i"], IntKey)
+        assert sp.keys["i"].key == i

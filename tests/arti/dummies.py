@@ -2,7 +2,7 @@ from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
-from arti.partitions import CompositeKey, PartitionKey
+from arti.partitions import PartitionKey
 from arti.producers import Producer
 from arti.statistics import Statistic
 from arti.storage import Storage, StoragePartition
@@ -25,8 +25,8 @@ class DummyPartition(StoragePartition):
 
 
 class DummyStorage(Storage[DummyPartition]):
-    def discover_partition_keys(self, **key_types: type[PartitionKey]) -> dict[str, CompositeKey]:
-        return {}
+    def discover_partitions(self, **key_types: type[PartitionKey]) -> tuple[DummyPartition, ...]:
+        return ()
 
 
 # NOTE: when using a subclass of the original type hint, we must override[1].
