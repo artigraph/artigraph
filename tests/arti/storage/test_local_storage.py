@@ -43,19 +43,20 @@ def tmp_date_files(date_partitions: frozenset[DateKey], filename: str) -> Iterat
 
 def test_local_partitioning(date_keys: frozenset[DateKey]) -> None:
     with tmp_date_files(date_keys, "test") as tmpdir:
-        path_partitions = LocalFile(
+        partitions = LocalFile(
             path=str(tmpdir / "{data_date.Y}" / "{data_date.m}" / "{data_date.d}" / "test")
-        ).discover_partition_keys(data_date=DateKey)
-        for partition in path_partitions.values():
-            assert set(partition) == {"data_date"}
-            assert partition["data_date"] in date_keys
-            assert isinstance(partition["data_date"], DateKey)
+        ).discover_partitions(data_date=DateKey)
+        for partition in partitions:
+            assert isinstance(partition, LocalFilePartition)
+            assert set(partition.keys) == {"data_date"}
+            assert partition.keys["data_date"] in date_keys
+            assert isinstance(partition.keys["data_date"], DateKey)
 
 
 def test_local_partitioning_filtered(date_keys: frozenset[DateKey]) -> None:
     with tmp_date_files(date_keys, "test") as tmpdir:
         for year in {k.Y for k in date_keys}:
-            path_partitions = LocalFile(
+            partitions = LocalFile(
                 path=str(
                     tmpdir
                     / ("{data_date.Y[" + str(year) + "]}")
@@ -63,12 +64,13 @@ def test_local_partitioning_filtered(date_keys: frozenset[DateKey]) -> None:
                     / "{data_date.d}"
                     / "test"
                 )
-            ).discover_partition_keys(data_date=DateKey)
-            for partition in path_partitions.values():
-                assert set(partition) == {"data_date"}
-                assert partition["data_date"] in date_keys
-                assert isinstance(partition["data_date"], DateKey)
-                assert partition["data_date"].Y == year
+            ).discover_partitions(data_date=DateKey)
+            for partition in partitions:
+                assert isinstance(partition, LocalFilePartition)
+                assert set(partition.keys) == {"data_date"}
+                assert partition.keys["data_date"] in date_keys
+                assert isinstance(partition.keys["data_date"], DateKey)
+                assert partition.keys["data_date"].Y == year
 
 
 def test_local_partitioning_errors(date_keys: frozenset[DateKey]) -> None:
@@ -81,7 +83,7 @@ def test_local_partitioning_errors(date_keys: frozenset[DateKey]) -> None:
                 path=str(
                     tmpdir / "{data_date.Y[2021]}" / "{data_date.m}" / "{data_date.d}" / "test"
                 )
-            ).discover_partition_keys(date=DateKey)
+            ).discover_partitions(date=DateKey)
 
 
 def test_local_file_partition_fingerprint() -> None:
@@ -91,7 +93,7 @@ def test_local_file_partition_fingerprint() -> None:
         with path.open("w") as f:
             f.write("hello world")
 
-        partition = LocalFilePartition(partition_key={}, path=str(path)).with_fingerprint()
+        partition = LocalFilePartition(keys={}, path=str(path)).with_fingerprint()
         assert partition.fingerprint == Fingerprint.from_string(
             hashlib.sha1(text.encode()).hexdigest()
         )

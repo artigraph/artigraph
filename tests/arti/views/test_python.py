@@ -26,7 +26,7 @@ def test_python_View() -> None:
             f.seek(0)
 
             test_format = Pickle()
-            test_storage_partition = LocalFilePartition(partition_key={}, path=f.name)
+            test_storage_partition = LocalFilePartition(keys={}, path=f.name)
             test_view = view()
             assert View._registry_[python_type] is view
             # read returns a list, matching the passed partitions
