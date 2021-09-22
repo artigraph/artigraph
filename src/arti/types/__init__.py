@@ -185,6 +185,10 @@ class Struct(Type, _NamedMixin):
             )
         return values
 
+    @property
+    def partition_fields(self) -> frozendict[str, Type]:
+        return frozendict({name: self.fields[name] for name in self.partition_by})
+
 
 class Timestamp(Type):
     """UTC timestamp with configurable precision."""
