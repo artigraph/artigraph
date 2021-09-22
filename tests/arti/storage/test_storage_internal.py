@@ -4,7 +4,7 @@ import parse
 import pytest
 
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, IntKey, PartitionKey
+from arti.partitions import CompositeKey, Int8Key, PartitionKey
 from arti.storage._internal import (
     WildcardFormatDict,
     WildcardPlaceholder,
@@ -16,7 +16,7 @@ from arti.storage._internal import (
 
 @pytest.fixture
 def PKs() -> dict[str, type[PartitionKey]]:
-    return {"x": IntKey, "y": IntKey}
+    return {"x": Int8Key, "y": Int8Key}
 
 
 @pytest.fixture
@@ -32,17 +32,17 @@ def paths() -> set[str]:
 @pytest.fixture
 def paths_to_keys() -> dict[str, CompositeKey]:
     return {
-        "/p/1/0x1": frozendict({"x": IntKey(key=1), "y": IntKey(key=1)}),
-        "/p/2/0x2": frozendict({"x": IntKey(key=2), "y": IntKey(key=2)}),
-        "/p/3/0x3": frozendict({"x": IntKey(key=3), "y": IntKey(key=3)}),
+        "/p/1/0x1": frozendict({"x": Int8Key(key=1), "y": Int8Key(key=1)}),
+        "/p/2/0x2": frozendict({"x": Int8Key(key=2), "y": Int8Key(key=2)}),
+        "/p/3/0x3": frozendict({"x": Int8Key(key=3), "y": Int8Key(key=3)}),
     }
 
 
 @pytest.mark.parametrize(
     ("partition_key_type", "attribute", "valid_attributes"),
     (
-        (IntKey, "key", {"hex", "key"}),
-        (IntKey, "hex", {"hex", "key"}),
+        (Int8Key, "key", {"hex", "key"}),
+        (Int8Key, "hex", {"hex", "key"}),
     ),
 )
 def test_WildcardPlaceholder(
@@ -88,11 +88,11 @@ def test_WildcardPlaceholder(
 
 
 def test_WildcardFormatDict() -> None:
-    d = WildcardFormatDict({"test": IntKey}, tag="x")
+    d = WildcardFormatDict({"test": Int8Key}, tag="x")
     test_placeholder = d["test"]
     assert isinstance(test_placeholder, WildcardPlaceholder)
     assert test_placeholder._name == "test"
-    assert test_placeholder._key_type == IntKey
+    assert test_placeholder._key_type == Int8Key
     assert d["tag"] == "x"
 
     with pytest.raises(

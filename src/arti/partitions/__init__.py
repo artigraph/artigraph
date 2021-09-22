@@ -4,9 +4,12 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 import abc
 from datetime import date
+from inspect import getattr_static
+from typing import Any, ClassVar
 
 from arti.internal.models import Model
-from arti.internal.utils import classproperty, frozendict
+from arti.internal.utils import classproperty, frozendict, register
+from arti.types import Date, Int8, Int16, Int32, Int64, Null, Type
 
 
 class key_component(property):
@@ -14,11 +17,25 @@ class key_component(property):
 
 
 class PartitionKey(Model):
+    _abstract_ = True
+    _by_type_: ClassVar[dict[type[Type], type[PartitionKey]]] = {}
+
+    matching_type: ClassVar[type[Type]]
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if cls._abstract_:
+            return
+        if not hasattr(cls, "matching_type"):
+            raise TypeError(f"{cls.__name__} must set `matching_type`")
+        register(cls._by_type_, cls.matching_type, cls)
+
     @classproperty
     @classmethod
     def key_components(cls) -> frozenset[str]:
         return frozenset(
-            {name for name, attr in cls.__dict__.items() if isinstance(attr, key_component)}
+            {name for name in dir(cls) if isinstance(getattr_static(cls, name), key_component)}
         )
 
     @classmethod
@@ -32,6 +49,8 @@ CompositeKey = frozendict[str, PartitionKey]
 
 
 class DateKey(PartitionKey):
+    matching_type = Date
+
     key: date
 
     @key_component
@@ -62,7 +81,9 @@ class DateKey(PartitionKey):
         return super().from_key_components(**key_components)
 
 
-class IntKey(PartitionKey):
+class _IntKey(PartitionKey):
+    _abstract_ = True
+
     key: int
 
     @key_component
@@ -79,7 +100,25 @@ class IntKey(PartitionKey):
         return super().from_key_components(**key_components)
 
 
+class Int8Key(_IntKey):
+    matching_type = Int8
+
+
+class Int16Key(_IntKey):
+    matching_type = Int16
+
+
+class Int32Key(_IntKey):
+    matching_type = Int32
+
+
+class Int64Key(_IntKey):
+    matching_type = Int64
+
+
 class NullKey(PartitionKey):
+    matching_type = Null
+
     key: None = None
 
     @classmethod

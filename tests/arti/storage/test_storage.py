@@ -4,7 +4,7 @@ import pytest
 
 from arti.fingerprints import Fingerprint
 from arti.internal.type_hints import lenient_issubclass
-from arti.partitions import IntKey, PartitionKey
+from arti.partitions import Int8Key, PartitionKey
 from arti.storage import Storage, StoragePartition
 
 
@@ -21,15 +21,15 @@ class MockStorage(Storage[MockStoragePartition]):
     def discover_partitions(
         self, **key_types: type[PartitionKey]
     ) -> tuple[MockStoragePartition, ...]:
-        assert all(v is IntKey for v in key_types.values())  # Simplifies logic here...
+        assert all(v is Int8Key for v in key_types.values())  # Simplifies logic here...
         return tuple(
             self.storage_partition_type(path=self.path.format(**keys), keys=keys)
-            for keys in ({k: IntKey(key=i) for k in key_types} for i in range(3))
+            for keys in ({k: Int8Key(key=i) for k in key_types} for i in range(3))
         )
 
 
 def test_StoragePartition_fingerprint() -> None:
-    sp = MockStoragePartition(path="/tmp/test", keys={"key": IntKey(key=5)})
+    sp = MockStoragePartition(path="/tmp/test", keys={"key": Int8Key(key=5)})
     assert sp.fingerprint is None
     modified = sp.with_fingerprint()
     assert sp.fingerprint is None
@@ -60,8 +60,8 @@ def test_Storage_init_subclass() -> None:
 
 def test_Storage_discover_partitions() -> None:
     s = MockStorage(path="/test/{i.key}/file")
-    partitions = s.discover_partitions(i=IntKey)
+    partitions = s.discover_partitions(i=Int8Key)
     for i, sp in enumerate(sorted(partitions, key=lambda x: x.path)):
         assert sp.path == f"/test/{i}/file"
-        assert isinstance(sp.keys["i"], IntKey)
+        assert isinstance(sp.keys["i"], Int8Key)
         assert sp.keys["i"].key == i

@@ -1,9 +1,21 @@
 import re
 from datetime import date
+from typing import ClassVar
 
 import pytest
 
-from arti.partitions import DateKey, IntKey, NullKey, PartitionKey, key_component
+from arti.partitions import (
+    DateKey,
+    Int8Key,
+    Int16Key,
+    Int32Key,
+    Int64Key,
+    NullKey,
+    PartitionKey,
+    _IntKey,
+    key_component,
+)
+from arti.types import Int8, Int16, Int32, Int64, Type
 
 
 def test_PartitionKey_key_components() -> None:
@@ -11,12 +23,29 @@ def test_PartitionKey_key_components() -> None:
     assert isinstance(components, frozenset)
     assert components == frozenset()
 
-    components = IntKey.key_components
+    components = Int8Key.key_components
     assert isinstance(components, frozenset)
     assert components == {"hex"}
 
-    assert isinstance(IntKey.hex, key_component)
-    assert isinstance(IntKey.hex, property)
+    assert isinstance(Int8Key.hex, key_component)
+    assert isinstance(Int8Key.hex, property)
+
+
+def test_PartitionKey_subclass() -> None:
+    class AbstractKey(PartitionKey):
+        _abstract_ = True
+        _by_type_: ClassVar[dict[type[Type], type[PartitionKey]]] = {}
+
+    with pytest.raises(TypeError, match="must set `matching_type`"):
+
+        class JunkKey(AbstractKey):
+            pass
+
+    class SomeKey(AbstractKey):
+        matching_type = Int8
+
+    assert AbstractKey._by_type_ == {Int8: SomeKey}
+    assert SomeKey not in PartitionKey._by_type_.values()
 
 
 def test_DateKey() -> None:
@@ -37,7 +66,18 @@ def test_DateKey() -> None:
         DateKey.from_key_components(junk="abc")
 
 
-def test_IntKey() -> None:
+@pytest.mark.parametrize(
+    ["IntKey", "matching_type"],
+    (
+        (Int8Key, Int8),
+        (Int16Key, Int16),
+        (Int32Key, Int32),
+        (Int64Key, Int64),
+    ),
+)
+def test_IntKeys(IntKey: type[_IntKey], matching_type: type[Type]) -> None:
+    assert IntKey.matching_type is matching_type
+
     k = IntKey(key=1)
     assert k.hex == "0x1"
 
@@ -46,7 +86,7 @@ def test_IntKey() -> None:
 
     with pytest.raises(
         NotImplementedError,
-        match=re.escape("Unable to parse 'IntKey' from: {'junk': 'abc'}"),
+        match=re.escape(f"Unable to parse '{IntKey.__name__}' from: {{'junk': 'abc'}}"),
     ):
         IntKey.from_key_components(junk="abc")
 
