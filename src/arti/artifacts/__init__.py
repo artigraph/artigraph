@@ -101,7 +101,7 @@ class Artifact(BaseArtifact):
 
     @validator("annotations", "statistics", always=True, pre=True)
     @classmethod
-    def _validate_annotations(cls, value: tuple[Any, ...], field: ModelField) -> tuple[Any, ...]:
+    def _merge_class_defaults(cls, value: tuple[Any, ...], field: ModelField) -> tuple[Any, ...]:
         return tuple(chain(cls.__fields__[field.name].default, value))
 
     @classmethod
