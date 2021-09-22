@@ -125,6 +125,7 @@ def test_Struct() -> None:
     s = Struct(fields=fields, partition_by=("x",), cluster_by=("y",))
     assert s.partition_by == ("x",)
     assert s.cluster_by == ("y",)
+    assert s.partition_fields == frozendict({"x": fields["x"]})
 
 
 @pytest.mark.parametrize(["param"], (("partition_by",), ("cluster_by",)))

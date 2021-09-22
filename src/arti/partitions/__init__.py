@@ -9,7 +9,7 @@ from typing import Any, ClassVar
 
 from arti.internal.models import Model
 from arti.internal.utils import classproperty, frozendict, register
-from arti.types import Date, Int8, Int16, Int32, Int64, Null, Type
+from arti.types import Date, Int8, Int16, Int32, Int64, Null, Struct, Type
 
 
 class key_component(property):
@@ -42,6 +42,18 @@ class PartitionKey(Model):
     @abc.abstractmethod
     def from_key_components(cls, **key_components: str) -> PartitionKey:
         raise NotImplementedError(f"Unable to parse '{cls.__name__}' from: {key_components}")
+
+    @classmethod
+    def key_type_for(cls, type_: Type) -> type[PartitionKey]:
+        return cls._by_type_[type(type_)]
+
+    @classmethod
+    def key_types_from(cls, type_: Type) -> frozendict[str, type[PartitionKey]]:
+        if not isinstance(type_, Struct):
+            return frozendict()
+        return frozendict(
+            {name: cls.key_type_for(field) for name, field in type_.partition_fields.items()}
+        )
 
 
 # CompositeKey is the set of named PartitionKeys that uniquely identify a single partition.
