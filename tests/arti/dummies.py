@@ -41,25 +41,25 @@ class DummyStatistic(Statistic):
 
 
 class A1(Artifact):
-    type: Struct = Struct(fields={"1": Int32()})
+    type: Struct = Struct(fields={"a": Int32()})
     format: DummyFormat = DummyFormat()
     storage: DummyStorage = DummyStorage()
 
 
 class A2(Artifact):
-    type: Struct = Struct(fields={"2": Int32()})
+    type: Struct = Struct(fields={"b": Int32()})
     format: DummyFormat = DummyFormat()
     storage: DummyStorage = DummyStorage()
 
 
 class A3(Artifact):
-    type: Struct = Struct(fields={"3": Int32()})
+    type: Struct = Struct(fields={"c": Int32()})
     format: DummyFormat = DummyFormat()
     storage: DummyStorage = DummyStorage()
 
 
 class A4(Artifact):
-    type: Struct = Struct(fields={"4": Int32()})
+    type: Struct = Struct(fields={"d": Int32()})
     format: DummyFormat = DummyFormat()
     storage: DummyStorage = DummyStorage()
 

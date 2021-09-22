@@ -80,17 +80,17 @@ _scalar_type_mapping = {
 }
 
 
-def compare_model_to_type(model: type[BaseModel], type_: Type) -> None:  # noqa: C901
-    assert isinstance(type_, Struct)
-    assert type_.name == model.__name__
+def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # noqa: C901
+    assert isinstance(generated, Struct)
+    assert generated.name == model.__name__
     for k, expected_field in model.__fields__.items():
-        expected_type, spec = expected_field.outer_type_, type_.fields[k]
-        origin = get_origin(expected_type)
-        if origin is not None:
-            args = get_args(expected_type)
-            if lenient_issubclass(origin, Mapping):
+        expected_type, spec = expected_field.outer_type_, generated.fields[k]
+        expected_origin = get_origin(expected_type)
+        if expected_origin is not None:
+            expected_args = get_args(expected_type)
+            if lenient_issubclass(expected_origin, Mapping):
                 assert isinstance(spec, Map)
-                for (sub_type, sub_spec) in zip(args, (spec.key_type, spec.value_type)):
+                for (sub_type, sub_spec) in zip(expected_args, (spec.key_type, spec.value_type)):
                     if lenient_issubclass(sub_type, BaseModel):
                         compare_model_to_type(sub_type, sub_spec)
                     else:
@@ -98,9 +98,13 @@ def compare_model_to_type(model: type[BaseModel], type_: Type) -> None:  # noqa:
                         assert expected_spec_type is not None and isinstance(
                             sub_spec, expected_spec_type
                         )
-            elif lenient_issubclass(origin, list):
+            elif lenient_issubclass(expected_origin, (list, tuple)):
+                # We currently only support sequence-like tuples
+                if lenient_issubclass(expected_origin, tuple):
+                    assert len(expected_args) == 2
+                    assert expected_args[1] == ...
                 assert isinstance(spec, List)
-                sub_type, sub_spec = args[0], spec.value_type
+                sub_type, sub_spec = expected_args[0], spec.value_type
                 if lenient_issubclass(sub_type, BaseModel):
                     compare_model_to_type(sub_type, sub_spec)
                 else:
@@ -108,10 +112,10 @@ def compare_model_to_type(model: type[BaseModel], type_: Type) -> None:  # noqa:
                     assert expected_spec_type is not None and isinstance(
                         sub_spec, expected_spec_type
                     )
-            elif origin is Literal:
+            elif expected_origin is Literal:
                 assert isinstance(spec, Enum)
                 assert isinstance(spec.type, String)
-                assert set(args) == spec.items
+                assert set(expected_args) == spec.items
             else:
                 raise NotImplementedError(f"Don't know how to check {expected_type}")
         elif lenient_issubclass(expected_type, BaseModel):
@@ -127,8 +131,8 @@ def compare_model_to_generated(  # noqa: C901
 ) -> None:
     assert issubclass(generated, BaseModel)
     assert generated.__name__ == model.__name__
-    for k, v in model.__fields__.items():
-        expected_type, got_type = v.outer_type_, generated.__fields__[k].outer_type_
+    for k, expected_field in model.__fields__.items():
+        expected_type, got_type = expected_field.outer_type_, generated.__fields__[k].outer_type_
         expected_origin, got_origin = get_origin(expected_type), get_origin(got_type)
         if expected_origin is not None:
             expected_args, got_args = get_args(expected_type), get_args(got_type)
@@ -139,7 +143,12 @@ def compare_model_to_generated(  # noqa: C901
                         compare_model_to_generated(expected_arg, got_arg)
                     else:
                         assert lenient_issubclass(got_arg, expected_arg)
-            elif lenient_issubclass(expected_origin, list):
+            elif lenient_issubclass(expected_origin, (list, tuple)):
+                # We currently only support sequence-like tuples
+                if lenient_issubclass(expected_origin, tuple):
+                    assert len(expected_args) == 2
+                    assert expected_args[1] == ...
+                # ... which get converted to lists on the way out
                 assert lenient_issubclass(got_origin, list)
                 expected_arg, got_arg = expected_args[0], got_args[0]
                 if lenient_issubclass(expected_arg, BaseModel):
