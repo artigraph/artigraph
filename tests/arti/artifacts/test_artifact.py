@@ -22,7 +22,7 @@ def test_cast_todo() -> None:
     Artifact.cast([1, 2, 3])
 
 
-def test_class_validation() -> None:
+def test_Artifact_validation() -> None:
     class BadFormat(DummyFormat):
         def supports(self, type_: Type) -> None:
             raise ValueError("Format - Boo!")
@@ -48,6 +48,21 @@ def test_class_validation() -> None:
             storage: BadStorage = BadStorage()
 
         BadStorageArtifact()
+
+    with pytest.raises(ValueError, match="Expected an instance of") as exc:
+
+        class BadTypeArtifact(Artifact):
+            format: BadFormat = BadFormat()
+            storage: BadStorage = BadStorage()
+
+        BadTypeArtifact(type="junk")
+    # Confirm {Format,Storage}.support are not called
+    with pytest.raises(AssertionError):
+        exc.match("Format - Boo!")
+    with pytest.raises(AssertionError):
+        exc.match("Storage - Boo!")
+
+    Artifact(type=Int64(), format=DummyFormat(), storage=DummyStorage())
 
 
 def test_instance_attr_merging() -> None:

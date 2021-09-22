@@ -60,14 +60,14 @@ class BaseArtifact(Model):
     @validator("format", always=True)
     @classmethod
     def _validate_format(cls, format: Format, values: dict[str, Any]) -> Format:
-        format.supports(type_=values["type"])
+        if "type" in values:
+            format.supports(type_=values["type"])
         return format
 
     @validator("storage", always=True)
     @classmethod
     def _validate_storage(cls, storage: Storage[Any], values: dict[str, Any]) -> Storage[Any]:
-        # format won't be available if it doesn't pass validation.
-        if "format" in values:
+        if "type" in values and "format" in values:
             storage.supports(type_=values["type"], format=values["format"])
         return storage
 
