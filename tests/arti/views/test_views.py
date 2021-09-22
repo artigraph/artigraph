@@ -14,7 +14,7 @@ def test_View() -> None:
 def test_View_registry() -> None:
     class V(View):
         _abstract_ = True
-        _registry_: ClassVar[dict[type, type[View]]] = {}
+        _by_python_type_: ClassVar[dict[type, type[View]]] = {}
 
     class Int(V):
         python_type = int
@@ -26,4 +26,4 @@ def test_View_registry() -> None:
     class Str(V):
         python_type = str
 
-    assert V._registry_ == {int: Int2, str: Str}
+    assert V._by_python_type_ == {int: Int2, str: Str}
