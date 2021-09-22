@@ -16,7 +16,7 @@ class View(Model):
     """
 
     _abstract_ = True
-    _registry_: ClassVar[dict[type, type[View]]] = dict()
+    _registry_: ClassVar[dict[type, type[View]]] = {}
 
     priority: ClassVar[int] = 0  # Set priority of this view for its python_type. Higher is better.
     python_type: ClassVar[type]
