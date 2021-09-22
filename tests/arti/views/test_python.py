@@ -28,7 +28,7 @@ def test_python_View() -> None:
             test_format = Pickle()
             test_storage_partition = LocalFilePartition(keys={}, path=f.name)
             test_view = view()
-            assert View._registry_[python_type] is view
+            assert View._by_python_type_[python_type] is view
             # read returns a list, matching the passed partitions
             data, *tail = read(
                 format=test_format, storage_partitions=[test_storage_partition], view=test_view
