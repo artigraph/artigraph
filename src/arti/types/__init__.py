@@ -6,7 +6,7 @@ from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional
 
-from pydantic import PrivateAttr, validator
+from pydantic import PrivateAttr, root_validator, validator
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
@@ -144,6 +144,46 @@ class String(Type):
 
 class Struct(Type, _NamedMixin):
     fields: frozendict[str, Type]
+    partition_by: tuple[str, ...] = ()
+    cluster_by: tuple[str, ...] = ()
+
+    @validator("partition_by", "cluster_by")
+    @classmethod
+    def _validate_field_ref(
+        cls, references: tuple[str, ...], values: dict[str, Any]
+    ) -> tuple[str, ...]:
+        # Fields failed validation, so skip validating references
+        if (fields := values.get("fields")) is None:
+            return references
+        known, requested = set(fields), set(references)
+        if unknown := requested - known:
+            raise ValueError(f"Unknown field(s): {unknown}")
+        return references
+
+    @validator("cluster_by")
+    @classmethod
+    def _validate_cluster_by(
+        cls, cluster_by: tuple[str, ...], values: dict[str, Any]
+    ) -> tuple[str, ...]:
+        if (partition_by := values.get("partition_by")) is None:
+            return cluster_by
+        if overlapping := set(cluster_by) & set(partition_by):
+            raise ValueError(f"Clustering fields overlap with partition fields: {overlapping}")
+        return cluster_by
+
+    @root_validator
+    @classmethod
+    def _validate_nested_struct(cls, values: dict[str, Any]) -> dict[str, Any]:
+        subfields_with_root_settings = {
+            name
+            for name, type_ in values.get("fields", {}).items()
+            if isinstance(type_, Struct) and (type_.partition_by or type_.cluster_by)
+        }
+        if subfields_with_root_settings:
+            raise ValueError(
+                f"Nested Structs ({subfields_with_root_settings}) cannot set `partition_by` or `cluster_by`"
+            )
+        return values
 
 
 class Timestamp(Type):

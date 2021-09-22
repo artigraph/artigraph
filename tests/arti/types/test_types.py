@@ -117,10 +117,58 @@ def test_Enum_errors() -> None:
 
 
 def test_Struct() -> None:
-    fields = {"x": Int32()}
+    fields = {"x": Int32(), "y": Int32()}
     s = Struct(fields=fields)
     assert isinstance(s.fields, frozendict)
     assert s.fields == frozendict(fields)
+
+    s = Struct(fields=fields, partition_by=("x",), cluster_by=("y",))
+    assert s.partition_by == ("x",)
+    assert s.cluster_by == ("y",)
+
+
+@pytest.mark.parametrize(["param"], (("partition_by",), ("cluster_by",)))
+def test_Struct_field_references(param: str) -> None:
+    match = re.escape("Unknown field(s): {'z'}")
+
+    with pytest.raises(ValueError, match=match):
+        Struct(fields={"x": Int32(), "y": Int32()}, **{param: ("z",)})
+
+    # Test with a bad `fields` and confirm the error *does not* contain the "unknown field" error.
+    with pytest.raises(ValueError) as exc:
+        Struct(fields="junk", **{param: ("z",)})
+    with pytest.raises(AssertionError):
+        exc.match(match)
+
+
+def test_Struct_partition_cluster_overlapping() -> None:
+    match = re.escape("Clustering fields overlap with partition fields: {'x'}")
+
+    with pytest.raises(ValueError, match=match):
+        Struct(fields={"x": Int32(), "y": Int32()}, partition_by=("x",), cluster_by=("x",))
+
+    # Test with a bad `partition_by` and confirm the error *does not* contain the "unknown field" error.
+    with pytest.raises(ValueError) as exc:
+        Struct(fields={"x": Int32(), "y": Int32()}, partition_by="x", cluster_by=("y",))
+    with pytest.raises(AssertionError):
+        exc.match(match)
+
+
+@pytest.mark.parametrize(
+    ["sub_params"],
+    (
+        ({"partition_by": ("x",)},),
+        ({"cluster_by": ("x",)},),
+        ({"partition_by": ("x",), "cluster_by": ("y",)},),
+    ),
+)
+def test_Struct_incorrect_nesting(sub_params: dict[str, Any]) -> None:
+    sub = Struct(fields={"x": Int32(), "y": Int32()}, **sub_params)
+    with pytest.raises(
+        ValueError,
+        match=re.escape("Nested Structs ({'sub'}) cannot set `partition_by` or `cluster_by`"),
+    ):
+        Struct(fields={"sub": sub})
 
 
 def test_Timestamp() -> None:
