@@ -42,6 +42,15 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
     raise NotImplementedError("The origin conditions don't cover all cases!")
 
 
+def get_class_type_vars(klass: type) -> tuple[type, ...]:
+    base = klass.__orig_bases__[0]  # type: ignore
+    base_origin = get_origin(base)
+    if base_origin is None:
+        raise TypeError(f"{klass.__name__} must subclass a subscripted Generic")
+    assert lenient_issubclass(klass, base_origin)
+    return get_args(base)
+
+
 def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:
     if not isinstance(klass, type):
         return False

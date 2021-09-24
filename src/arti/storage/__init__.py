@@ -3,12 +3,12 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 import abc
-from types import GenericAlias
 from typing import Any, ClassVar, Generic, Optional, TypeVar
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
 from arti.internal.models import Model
+from arti.internal.type_hints import get_class_type_vars
 from arti.partitions import CompositeKey, PartitionKey
 from arti.types import Type
 
@@ -32,27 +32,12 @@ class Storage(Model, Generic[_StoragePartition]):
     _abstract_ = True
     storage_partition_type: ClassVar[type[_StoragePartition]]
 
-    def __class_getitem__(cls, item: type[_StoragePartition]) -> GenericAlias:
-        # Artifact.storage is marked as Storage[Any] for simplicity
-        if item is Any:
-            return cls  # type: ignore
-        return GenericAlias(
-            type(
-                f"{item.__name__}Owner",
-                (cls,),
-                # Mark _abstract_ to require subclassing the subscripted type in order to set the
-                # appropriate fields matching the StoragePartition (which __init_subclass__ will
-                # then check).
-                {"_abstract_": True, "storage_partition_type": item},
-            ),
-            item,
-        )
-
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         if cls._abstract_:
             return
+        cls.storage_partition_type = get_class_type_vars(cls)[0]
         expected_field_types = {
             name: info.outer_type_
             for name, info in cls.storage_partition_type.__fields__.items()

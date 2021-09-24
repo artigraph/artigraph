@@ -1,9 +1,6 @@
-from typing import Any, get_args
-
 import pytest
 
 from arti.fingerprints import Fingerprint
-from arti.internal.type_hints import lenient_issubclass
 from arti.partitions import Int8Key, PartitionKey
 from arti.storage import Storage, StoragePartition
 
@@ -36,17 +33,17 @@ def test_StoragePartition_fingerprint() -> None:
     assert modified.fingerprint == Fingerprint.from_string(sp.path)
 
 
-def test_Storage_class_getitem() -> None:
-    assert Storage[Any] is Storage
-
-    s = Storage[MockStoragePartition]
-    assert lenient_issubclass(s, Storage)
-    assert s._abstract_
-    assert s.storage_partition_type is MockStoragePartition  # type: ignore
-    assert get_args(s) == (MockStoragePartition,)
-
-
 def test_Storage_init_subclass() -> None:
+    class Abstract(Storage):  # type: ignore
+        _abstract_ = True
+
+    assert not hasattr(Abstract, "storage_partition_type")
+
+    with pytest.raises(TypeError, match="NoSubscript must subclass a subscripted Generic"):
+
+        class NoSubscript(Storage):  # type: ignore
+            pass
+
     with pytest.raises(TypeError, match="Bad fields must match MockStoragePartition"):
 
         class Bad(Storage[MockStoragePartition]):
@@ -55,6 +52,7 @@ def test_Storage_init_subclass() -> None:
     class S(Storage[MockStoragePartition]):
         path: str
 
+    assert not hasattr(Storage, "storage_partition_type")
     assert S.storage_partition_type is MockStoragePartition  # type: ignore
 
 

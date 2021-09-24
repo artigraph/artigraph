@@ -54,6 +54,8 @@ def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
                 for subvalue in value:
                     _check_types(subvalue, args[0])
                 return value
+        if set(args) == {Any}:
+            return _check_types(value, origin)
         raise NotImplementedError(f"Missing handler for {type_} with {value}!")
     if isinstance(value, Mapping) and not isinstance(value, frozendict):
         value = frozendict(value)
