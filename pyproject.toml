@@ -63,7 +63,7 @@ black = "21.9b0"
 coverage = {version = "^5.5", extras = ["toml"]} # pyproject.toml support
 flake8 = "3.9.2"
 ipdb = "^0.13.9"
-ipython = "^7.27.0"
+ipython = "^7.28.0"
 isort = "5.9.3"
 mypy = "0.910"
 pre-commit = "2.15.0"
