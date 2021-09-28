@@ -1,16 +1,20 @@
 from __future__ import annotations
 
+import importlib
 import inspect
 import os.path
+import pkgutil
+import threading
 from collections.abc import Callable, Generator, MutableMapping
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
-from types import GenericAlias
+from types import GenericAlias, ModuleType
 from typing import IO, Any, ClassVar, Generic, Optional, TypeVar, Union, cast, overload
 
 from box import Box
 from frozendict.core import frozendict as _frozendict
 from multimethod import multidispatch
+from setuptools import find_namespace_packages
 
 from arti.internal.type_hints import lenient_issubclass, tidy_signature
 
@@ -106,6 +110,43 @@ class dispatch(multidispatch[RETURN]):
 # 3: https://bugs.python.org/issue45167
 class frozendict(Generic[_K, _V], _frozendict[_K, _V]):
     pass
+
+
+def import_submodules(
+    path: list[str],  # module.__path__ is a list[str]
+    name: str,
+    *,
+    lock: threading.Lock = threading.Lock(),
+) -> dict[str, ModuleType]:
+    """Recursively import submodules.
+
+    This can be useful with registry patterns to automatically discover and import submodules
+    defining additional implementations.
+
+    `path` and `name` are usually provided from an existing module's `__path__` and `__name__`.
+
+    This function is thread-safe and supports namespace modules.
+
+    NOTE: This inherently triggers eager imports, which has performance impacts and may cause import
+    cycles. To reduce these issues, avoid calling during module definition.
+    """
+    # pkgutil.iter_modules is not recursive and pkgutil.walk_packages does not handle namespace
+    # packages... however we can leverage setuptools.find_namespace_packages, which is build for
+    # exactly this.
+    path_names = {p: name for p in path}
+    path_names.update(
+        {
+            os.sep.join([path, *name.split(".")]): f"{root_name}.{name}"
+            for path, root_name in path_names.items()
+            for name in find_namespace_packages(path)
+        }
+    )
+    with lock:
+        return {
+            name: importlib.import_module(name)
+            for path, name in path_names.items()
+            for _, name, _ in pkgutil.iter_modules([path], prefix=f"{name}.")
+        }
 
 
 _int_sub = TypeVar("_int_sub", bound="_int")

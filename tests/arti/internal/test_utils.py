@@ -2,10 +2,13 @@ from __future__ import annotations
 
 import math
 import operator as op
+import os
 import re
 from collections.abc import Callable
 from copy import deepcopy
 from functools import partial
+from pathlib import Path
+from types import ModuleType
 from typing import Any, Union, cast, get_args, get_origin
 
 import pytest
@@ -17,6 +20,7 @@ from arti.internal.utils import (
     classproperty,
     dispatch,
     frozendict,
+    import_submodules,
     int64,
     named_temporary_file,
     ordinal,
@@ -139,6 +143,32 @@ def test_frozendict() -> None:
 
     assert get_origin(frozendict[str, int]) is frozendict
     assert get_args(frozendict[str, int]) == (str, int)
+
+
+# NOTE: We don't test the thread safety here
+def test_import_submodules() -> None:
+    from tests.arti.internal import import_submodules_test_modules
+
+    basedir = Path(import_submodules_test_modules.__file__).parent
+    modules = {
+        "a",
+        "sub.b",
+        "sub.folder.c",
+    }
+
+    assert import_submodules_test_modules.entries == set()
+    output = import_submodules(
+        import_submodules_test_modules.__path__,  # type: ignore
+        import_submodules_test_modules.__name__,
+    )
+    assert {
+        name.replace(f"{import_submodules_test_modules.__name__}.", "") for name in output
+    } == modules
+    assert all(isinstance(mod, ModuleType) for mod in output.values())
+    assert {
+        str(Path(path).relative_to(basedir)).replace(".py", "")
+        for path in import_submodules_test_modules.entries
+    } == {name.replace(".", os.sep) for name in modules}
 
 
 class _I(_int):
