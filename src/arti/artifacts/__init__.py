@@ -44,7 +44,29 @@ class BaseArtifact(Model):
     # Hide the producer to prevent showing the entire upstream graph
     producer: Optional[Producer] = Field(None, repr=False)
 
-    # TODO: Allow smarter type/format/storage merging w/ the default?
+    # Class level alias for `type`, which must be set on (non-abstract) subclasses.
+    #
+    # Pydantic removes class defaults and stashes them in cls.__fields__. To ease access, we
+    # automatically populate this from `type` in `__init_subclass__`.
+    _type: ClassVar[Type]
+
+    @classmethod
+    def __init_subclass__(cls, **kwargs: Any) -> None:
+        super().__init_subclass__(**kwargs)
+        if not cls._abstract_ and cls.__fields__["type"].default is None:
+            raise ValueError(f"{cls.__name__} must set `type`")
+        cls._type = cls.__fields__["type"].default
+
+    @validator("type", always=True)
+    @classmethod
+    def _validate_type(cls, type_: Type) -> Type:
+        if type_ != cls._type:
+            # NOTE: We do a lot of class level validation (particularly in Producer) that relies on
+            # the *class* type, such as partition key validation. It's possible we could loosen this
+            # a bit by allowing *new* Struct fields, but still requiring an exact match for other
+            # Types (including existing Struct fields).
+            raise ValueError("overriding `type` is not supported")
+        return type_
 
     @validator("format", always=True)
     @classmethod
@@ -66,6 +88,7 @@ class Statistic(BaseArtifact):
 
     # TODO: Set format/storage to some "system default" that can be used across backends.
 
+    _abstract_ = True
     is_scalar = True
 
 
@@ -82,6 +105,7 @@ class Artifact(BaseArtifact):
     over time).
     """
 
+    _abstract_ = True
     # Artifacts are collections by default (think database tables, etc), but may be overridden.
     is_scalar: ClassVar[bool] = False
 
