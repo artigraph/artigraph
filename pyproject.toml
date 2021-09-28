@@ -20,8 +20,9 @@ fail_under = 100
 skip_covered = true
 
 [tool.coverage.run]
-source = ["arti"]
 branch = true
+omit = ["src/arti/internal/vendored/*" ]
+source = ["arti"]
 
 
 [tool.isort] # Black compatible config
@@ -57,7 +58,6 @@ pyfarmhash = "^0.2.2"
 python = "^3.9"
 python-box = "^5.4.1"
 sgqlc = "^14.1"
-types-pyfarmhash = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "21.11b1"
@@ -79,6 +79,7 @@ pytest-mypy = "0.8.1"
 pytest-sugar = "0.9.4"
 sh = "^1.14.2"
 typer = "^0.4.0"
+types-pyfarmhash = "^0.2.1"
 
 
 [tool.pylint.format]
