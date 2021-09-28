@@ -5,9 +5,10 @@ import pytest
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.formats import Format
+from arti.partitions import CompositeKeyTypes, Int64Key
 from arti.statistics import Statistic
 from arti.storage import Storage
-from arti.types import Int64, Type
+from arti.types import Int64, List, Struct, Type
 from tests.arti.dummies import A1, A2, P1, P2, DummyFormat, DummyStatistic, DummyStorage
 
 
@@ -100,3 +101,17 @@ def test_instance_attr_merging() -> None:
     artifact = MyArtifact(annotations=[Ann2(y=10)], statistics=[Stat2()])
     assert tuple(type(a) for a in artifact.annotations) == (Ann1, Ann2)
     assert tuple(type(s) for s in artifact.statistics) == (Stat1, Stat2)
+
+
+def test_Artifact_partition_key_types() -> None:
+    class NonPartitioned(Artifact):
+        type: List = List(element=Struct(fields={"a": Int64()}))
+
+    assert NonPartitioned.partition_key_types == CompositeKeyTypes()
+    assert not NonPartitioned.is_partitioned
+
+    class Partitioned(Artifact):
+        type: List = List(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+
+    assert Partitioned.partition_key_types == CompositeKeyTypes({"a": Int64Key})
+    assert Partitioned.is_partitioned

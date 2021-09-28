@@ -1,7 +1,7 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from itertools import chain
-from typing import Any, ClassVar, Optional
+from typing import TYPE_CHECKING, Any, ClassVar, Optional
 
 from pydantic import Field, validator
 from pydantic.fields import ModelField
@@ -9,8 +9,13 @@ from pydantic.fields import ModelField
 from arti.annotations import Annotation
 from arti.formats import Format
 from arti.internal.models import Model
+from arti.internal.utils import classproperty
+from arti.partitions import CompositeKeyTypes, PartitionKey
 from arti.storage import Storage
 from arti.types import Type
+
+if TYPE_CHECKING:
+    from arti.producers import Producer
 
 
 class BaseArtifact(Model):
@@ -21,11 +26,6 @@ class BaseArtifact(Model):
     - format: the data's serialized format, such as CSV, Parquet, database native, etc.
     - storage: the data's persistent storage system, such as blob storage, database native, etc.
     """
-
-    # is_scalar denotes whether this Artifacts represents a *single* value of the specified type or
-    # a *collection*. Namely, even if the type is a Struct(...), but there is only one, it will be
-    # scalar for our purposes.
-    is_scalar: ClassVar[bool]
 
     # Type *must* be set on the class and be rather static - small additions may be necessary at
     # Graph level (eg: dynamic column additions), but these should be minor. We might allow Struct
@@ -80,14 +80,23 @@ class BaseArtifact(Model):
             storage.supports(type_=values["type"], format=values["format"])
         return storage
 
+    @classproperty
+    @classmethod
+    def partition_key_types(cls) -> CompositeKeyTypes:
+        return PartitionKey.types_from(cls._type)
+
+    @classproperty
+    @classmethod
+    def is_partitioned(cls) -> bool:
+        return bool(cls.partition_key_types)
+
 
 class Statistic(BaseArtifact):
     """A Statistic is a piece of data derived from an Artifact that can be tracked over time."""
 
-    # TODO: Set format/storage to some "system default" that can be used across backends.
+    # TODO: Set format/storage to some "system default" that can be used across backends?
 
     _abstract_ = True
-    is_scalar = True
 
 
 class Artifact(BaseArtifact):
@@ -104,8 +113,6 @@ class Artifact(BaseArtifact):
     """
 
     _abstract_ = True
-    # Artifacts are collections by default (think database tables, etc), but may be overridden.
-    is_scalar: ClassVar[bool] = False
 
     annotations: tuple[Annotation, ...] = ()
     statistics: tuple[Statistic, ...] = ()
@@ -126,6 +133,8 @@ class Artifact(BaseArtifact):
         - a Producer instance with a multiple output Artifacts, an error is raised
         - other types, an error is raised
         """
+        from arti.producers import Producer
+
         # TODO: Leverage a TypeSystem("python") to cast to Artifact classes with "backend native"
         # storage to support builtin assignment and custom type registration.
         if isinstance(value, Artifact):
@@ -144,10 +153,3 @@ class Artifact(BaseArtifact):
             )
 
         raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
-
-
-from arti.producers import Producer  # noqa: E402 # # pylint: disable=wrong-import-position
-
-BaseArtifact.update_forward_refs()
-Statistic.update_forward_refs()
-Artifact.update_forward_refs()

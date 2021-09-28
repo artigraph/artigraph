@@ -1,3 +1,5 @@
+from typing import Annotated
+
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
@@ -68,16 +70,16 @@ class P1(Producer):
     a1: A1
 
     @staticmethod
-    def build(a1: A1) -> A2:
-        return A2()
+    def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore
+        return {}
 
 
 class P2(Producer):
     a2: A2
 
     @staticmethod
-    def build(a2: A2) -> tuple[A3, A4]:
-        return A3(), A4()
+    def build(a2: dict) -> tuple[Annotated[dict, A3], Annotated[dict, A4]]:  # type: ignore
+        return {}, {}
 
 
 class P3(Producer):
@@ -85,5 +87,5 @@ class P3(Producer):
     a2: A2
 
     @staticmethod
-    def build(a1: A1, a2: A2) -> tuple[A3, A4]:
-        return A3(), A4()
+    def build(a1: dict, a2: dict) -> tuple[Annotated[dict, A3], Annotated[dict, A4]]:  # type: ignore
+        return {}, {}

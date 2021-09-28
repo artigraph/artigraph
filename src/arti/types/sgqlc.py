@@ -138,7 +138,7 @@ class SgqlcList(TypeAdapter):
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> at.Type:
         assert issubclass(type_, cls.system)
         # list_of subclasses the input type (hence, we can fetch it with .mro)
-        return cls.artigraph(value_type=sgqlc_type_system.to_artigraph(type_.mro()[1], hints=hints))
+        return cls.artigraph(element=sgqlc_type_system.to_artigraph(type_.mro()[1], hints=hints))
 
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
@@ -147,7 +147,7 @@ class SgqlcList(TypeAdapter):
     @classmethod
     def to_system(cls, type_: at.Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return st.list_of(sgqlc_type_system.to_system(type_.value_type, hints=hints))
+        return st.list_of(sgqlc_type_system.to_system(type_.element, hints=hints))
 
 
 class _StructAdapter(TypeAdapter):

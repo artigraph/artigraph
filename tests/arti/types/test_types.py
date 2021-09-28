@@ -11,6 +11,7 @@ from arti.types import (
     Float32,
     Float64,
     Int32,
+    List,
     Struct,
     Timestamp,
     Type,
@@ -102,7 +103,7 @@ def test_Enum_errors() -> None:
     with pytest.raises(ValueError, match="cannot be empty"):
         Enum(type=float32, items=[])
 
-    with pytest.raises(ValueError, match="Expected an instance of"):
+    with pytest.raises(ValueError, match="expected an instance of"):
         Enum(type=float32, items={v: v for v in items})
 
     mismatch_prefix = "incompatible Float32() (<class 'float'>) item(s)"
@@ -111,9 +112,64 @@ def test_Enum_errors() -> None:
     with pytest.raises(ValueError, match=re.escape(f"{mismatch_prefix}: [3]")):
         Enum(type=float32, items=(1.0, 2.0, 3))
 
-    with pytest.raises(ValueError, match="Expected an instance of <class 'arti.types.Type'>"):
+    with pytest.raises(ValueError, match="expected an instance of <class 'arti.types.Type'>"):
         # NOTE: using a python type instead of an Artigraph type
         Enum(type=float, items=items)
+
+
+def test_List() -> None:
+    lst = List(element=Int32())
+    assert lst.element == Int32()
+    assert lst.partition_by == ()
+    assert lst.cluster_by == ()
+    assert lst.partition_fields == frozendict()
+
+
+def test_List_partitioned() -> None:
+    fields = {"x": Int32(), "y": Int32()}
+
+    lst = List(element=Struct(fields=fields), partition_by=("x",), cluster_by=("y",))
+    assert lst.partition_by == ("x",)
+    assert lst.cluster_by == ("y",)
+    assert lst.partition_fields == frozendict({"x": fields["x"]})
+
+    with pytest.raises(ValueError, match="requires element to be a Struct"):
+        List(element=Int32(), partition_by=("x",))
+    with pytest.raises(ValueError, match="requires element to be a Struct"):
+        List(element=Int32(), cluster_by=("x",))
+
+
+@pytest.mark.parametrize(["param"], (("partition_by",), ("cluster_by",)))
+def test_List_field_references(param: str) -> None:
+    match = re.escape("unknown field(s): {'z'}")
+
+    with pytest.raises(ValueError, match=match):
+        List(element=Struct(fields={"x": Int32(), "y": Int32()}), **{param: ("z",)})
+
+    # Test with a bad `fields` and confirm the error *does not* contain the "unknown field" error.
+    with pytest.raises(ValueError, match="expected an instance of") as exc:
+        List(element="junk", **{param: ("z",)})
+    with pytest.raises(AssertionError):
+        exc.match(match)
+
+
+def test_List_partition_cluster_overlapping() -> None:
+    match = re.escape("clustering fields overlap with partition fields: {'x'}")
+
+    with pytest.raises(ValueError, match=match):
+        List(
+            element=Struct(fields={"x": Int32(), "y": Int32()}),
+            partition_by=("x",),
+            cluster_by=("x",),
+        )
+
+    # Test with a bad `partition_by` and confirm the error *does not* contain the "unknown field" error.
+    with pytest.raises(ValueError, match="expected an instance of") as exc:
+        List(
+            element=Struct(fields={"x": Int32(), "y": Int32()}), partition_by="x", cluster_by=("y",)
+        )
+    with pytest.raises(AssertionError):
+        exc.match(match)
 
 
 def test_Struct() -> None:
@@ -121,55 +177,6 @@ def test_Struct() -> None:
     s = Struct(fields=fields)
     assert isinstance(s.fields, frozendict)
     assert s.fields == frozendict(fields)
-
-    s = Struct(fields=fields, partition_by=("x",), cluster_by=("y",))
-    assert s.partition_by == ("x",)
-    assert s.cluster_by == ("y",)
-    assert s.partition_fields == frozendict({"x": fields["x"]})
-
-
-@pytest.mark.parametrize(["param"], (("partition_by",), ("cluster_by",)))
-def test_Struct_field_references(param: str) -> None:
-    match = re.escape("Unknown field(s): {'z'}")
-
-    with pytest.raises(ValueError, match=match):
-        Struct(fields={"x": Int32(), "y": Int32()}, **{param: ("z",)})
-
-    # Test with a bad `fields` and confirm the error *does not* contain the "unknown field" error.
-    with pytest.raises(ValueError) as exc:
-        Struct(fields="junk", **{param: ("z",)})
-    with pytest.raises(AssertionError):
-        exc.match(match)
-
-
-def test_Struct_partition_cluster_overlapping() -> None:
-    match = re.escape("Clustering fields overlap with partition fields: {'x'}")
-
-    with pytest.raises(ValueError, match=match):
-        Struct(fields={"x": Int32(), "y": Int32()}, partition_by=("x",), cluster_by=("x",))
-
-    # Test with a bad `partition_by` and confirm the error *does not* contain the "unknown field" error.
-    with pytest.raises(ValueError) as exc:
-        Struct(fields={"x": Int32(), "y": Int32()}, partition_by="x", cluster_by=("y",))
-    with pytest.raises(AssertionError):
-        exc.match(match)
-
-
-@pytest.mark.parametrize(
-    ["sub_params"],
-    (
-        ({"partition_by": ("x",)},),
-        ({"cluster_by": ("x",)},),
-        ({"partition_by": ("x",), "cluster_by": ("y",)},),
-    ),
-)
-def test_Struct_incorrect_nesting(sub_params: dict[str, Any]) -> None:
-    sub = Struct(fields={"x": Int32(), "y": Int32()}, **sub_params)
-    with pytest.raises(
-        ValueError,
-        match=re.escape("Nested Structs ({'sub'}) cannot set `partition_by` or `cluster_by`"),
-    ):
-        Struct(fields={"sub": sub})
 
 
 def test_Timestamp() -> None:
@@ -209,3 +216,7 @@ def test_TypeSystem(
     dummy.register_adapter(Int32Adapter)
     assert isinstance(dummy.to_artigraph(MyInt, hints={}), Int32)
     assert dummy.to_system(Int32(), hints={}) is MyInt
+
+    dummy.check_similarity(arti=Int32(), python_type=MyInt)
+    with pytest.raises(ValueError, match="MyInt'> cannot be used to represent Float64"):
+        dummy.check_similarity(arti=Float64(), python_type=MyInt)

@@ -1,10 +1,15 @@
-from typing import Any, Optional
+import re
+from typing import Annotated, Any, Optional
 
 import pytest
 
+from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
+from arti.internal.utils import frozendict
 from arti.producers import Producer
+from arti.types import Int64, List, Struct
+from arti.views import python as python_views
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 
 
@@ -12,7 +17,7 @@ class DummyProducer(Producer):
     a1: A1
 
     @staticmethod
-    def build(a1: A1) -> tuple[A2, A3]:
+    def build(a1: dict) -> tuple[Annotated[dict, A2], Annotated[dict, A3]]:  # type: ignore
         pass
 
     @staticmethod
@@ -34,13 +39,89 @@ def test_Producer() -> None:
         assert isinstance(output, expected_output_classes[i])
 
 
+def test_Producer_partitioned_input_validation() -> None:
+    class A(Artifact):
+        type: List = List(element=Struct(fields={"x": Int64()}), partition_by=("x",))
+
+    class P(Producer):
+        a: A
+
+        @staticmethod
+        def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore
+            pass
+
+    assert P._build_input_metadata_ == frozendict(a=(A, python_views.List))
+
+    with pytest.raises(ValueError, match="dict.* cannot be used to represent List"):
+
+        class SingularInput(Producer):
+            a: A
+
+            @staticmethod
+            def build(a: dict) -> Annotated[dict, A2]:  # type: ignore
+                pass
+
+    with pytest.raises(ValueError, match=re.escape("list[int] cannot be used to represent List")):
+
+        class IncompatibleInput(Producer):
+            a: A
+
+            @staticmethod
+            def build(a: list[int]) -> Annotated[dict, A]:  # type: ignore
+                pass
+
+
+def test_Producer_output_metadata() -> None:
+    assert DummyProducer._output_metadata_ == ((A2, python_views.Dict), (A3, python_views.Dict))
+
+    class ExplicitView(Producer):
+        a1: A1
+
+        @staticmethod
+        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict]:  # type: ignore
+            pass
+
+    assert ExplicitView._output_metadata_ == ((A2, python_views.Dict),)
+
+    with pytest.raises(ValueError, match="DupView.build 1st return - multiple Views set"):
+
+        class DupView(Producer):
+            a1: A1
+
+            @staticmethod
+            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore
+                pass
+
+    with pytest.raises(
+        ValueError, match="NoArtifact.build 1st return - output Artifact is not set "
+    ):
+
+        class NoArtifact(Producer):
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: dict) -> Annotated[None, 5]:  # type: ignore
+                pass
+
+    with pytest.raises(
+        ValueError, match="DupArtifact.build 1st return - multiple output Artifacts set"
+    ):
+
+        class DupArtifact(Producer):
+            a1: A1
+
+            @staticmethod
+            def build(a1: dict) -> Annotated[dict, A1, A2]:  # type: ignore
+                pass
+
+
 def test_Producer_string_annotation() -> None:
     # This may be from `x: "Type"` or `from __future__ import annotations`.
     class StrAnnotation(Producer):
         a1: "A1"
 
         @staticmethod
-        def build(a1: "A1") -> "A2":
+        def build(a1: "dict") -> "Annotated[dict, A2]":  # type: ignore
             pass
 
     assert isinstance(StrAnnotation(a1=A1()).out(), A2)
@@ -72,12 +153,68 @@ def test_Producer_out() -> None:
     assert list(p2) == [a3_, a4_]
 
 
-@pytest.mark.xfail(raises=ValueError)
+@pytest.mark.xfail(raises=NotImplementedError)
 def test_Producer_map_defaults() -> None:
     p1 = P1(a1=A1())
     # We can make .map defaulting a bit smarter by inspecting how the input artifacts are
     # partitioned (or not).
     p1.map()  # ValueError
+
+
+def test_Producer_map_artifacts() -> None:
+    class P(Producer):
+        a1: A1
+
+        @staticmethod
+        def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore
+            pass
+
+        @staticmethod
+        def map(a1: A1) -> A2:
+            pass
+
+    assert P._map_input_metadata_ == frozendict(a1=A1)
+
+    with pytest.raises(ValueError, match="parameter type hint must match the field"):
+
+        class BadMapParam(P):
+            @staticmethod
+            def map(a1: dict) -> A2:  # type: ignore
+                pass
+
+
+def test_Producer_build_outputs_check() -> None:
+    class A(Artifact):
+        type: Int64 = Int64()
+
+    class B(Artifact):
+        type: Int64 = Int64()
+
+    class C(Artifact):
+        type: List = List(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+
+    class D(Artifact):
+        type: List = List(element=Struct(fields={"a": Int64(), "b": Int64()}), partition_by=("b",))
+
+    class NoPartitioning(Producer):
+        @staticmethod
+        def build() -> tuple[Annotated[int, A], Annotated[int, B]]:
+            pass
+
+    class MatchingPartitioning(Producer):
+        @staticmethod
+        def build() -> tuple[Annotated[list[dict], C], Annotated[list[dict], C]]:  # type: ignore
+            pass
+
+    for first_output in [Annotated[int, A], Annotated[list[dict], C]]:  # type: ignore
+        with pytest.raises(
+            ValueError, match="all output Artifacts must have the same partitioning scheme"
+        ):
+
+            class MixedPartitioning(Producer):
+                @staticmethod
+                def build() -> tuple[first_output, Annotated[list[dict], D]]:  # type: ignore
+                    pass
 
 
 def test_Producer_bad_signature() -> None:  # noqa: C901
@@ -87,7 +224,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
     class OkProducer(Producer):
         _abstract_ = True
 
-    with pytest.raises(ValueError, match="Producers must implement"):
+    with pytest.raises(ValueError, match="BadProducer.build - must be implemented"):
 
         class BadProducer(Producer):
             pass
@@ -99,7 +236,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             @classmethod
-            def build(cls, a1: A1) -> A2:
+            def build(cls, a1: dict) -> Annotated[dict, A2]:  # type: ignore
                 pass
 
     with pytest.raises(
@@ -109,11 +246,11 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             @classmethod
-            def build(cls) -> A2:
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore
                 pass
 
             @classmethod
-            def map(cls, a1: A1) -> A2:
+            def map(cls, a1: dict) -> A2:  # type: ignore
                 pass
 
     with pytest.raises(
@@ -126,7 +263,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a2: A2
 
             @classmethod
-            def build(cls, a1: A1) -> A3:
+            def build(cls, a1: dict) -> Annotated[dict, A3]:  # type: ignore
                 pass
 
     with pytest.raises(ValueError, match="must have a type hint"):
@@ -153,94 +290,61 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a1: A1
 
             @classmethod
-            def build(cls, a1: A1 = A1()):  # type: ignore
+            def build(cls, a1: dict = A1()):  # type: ignore
                 pass
 
-    with pytest.raises(ValueError, match="parameter must be usable as a keyword argument"):
+    with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: A1, /):  # type: ignore
+            def build(cls, a1: dict, /):  # type: ignore
                 pass
 
-    with pytest.raises(ValueError, match="parameter must be usable as a keyword argument"):
-
-        class BadProducer(Producer):  # type: ignore # noqa: F811
-            @classmethod
-            def build(cls, *args: A1):  # type: ignore
-                pass
-
-    with pytest.raises(ValueError, match="parameter must be usable as a keyword argument"):
-
-        class BadProducer(Producer):  # type: ignore # noqa: F811
-            @classmethod
-            def build(cls, **kwargs: A1):  # type: ignore
-                pass
-
-    with pytest.raises(ValueError, match="A return value must be set"):
+    with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: A1):  # type: ignore
+            def build(cls, *a1: dict):  # type: ignore
                 pass
 
-    with pytest.raises(ValueError, match="return value must be an Artifact"):
+    with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: A1) -> None:
+            def build(cls, **a1: dict):  # type: ignore
                 pass
 
-    with pytest.raises(ValueError, match="return value must be an Artifact"):
+    with pytest.raises(ValueError, match="a return value must be set"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: A1) -> str:
+            def build(cls, a1: dict):  # type: ignore
                 pass
 
-    with pytest.raises(ValueError, match="return value must be an Artifact"):
+    with pytest.raises(ValueError, match="missing return signature"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: A1) -> tuple[A2, str]:
+            def build(cls, a1: dict) -> None:  # type: ignore
                 pass
 
-    with pytest.raises(
-        ValueError,
-        match=r"BadProducer.build - `a1` parameter type hint must match the field: <class 'tests.arti.dummies.A1'>",
-    ):
+    with pytest.raises(ValueError, match="2nd return - must be an Annotated hint"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: A2) -> A2:
-                pass
-
-    with pytest.raises(
-        ValueError,
-        match=r"BadProducer.map - `a1` parameter type hint must match the field: <class 'tests.arti.dummies.A1'>",
-    ):
-
-        class BadProducer(Producer):  # type: ignore # noqa: F811
-            a1: A1
-
-            @classmethod
-            def build(cls, a1: A1) -> A2:
-                pass
-
-            @classmethod
-            def map(self, a1: A2) -> Any:
+            def build(cls, a1: dict) -> tuple[Annotated[dict, A2], str]:  # type: ignore
                 pass
 
     with pytest.raises(
@@ -251,7 +355,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a1: A1 = None  # type: ignore
 
             @classmethod
-            def build(cls, a1: A1):  # type: ignore
+            def build(cls, a1: dict):  # type: ignore
                 pass
 
     with pytest.raises(
@@ -262,7 +366,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a1: Optional[A1]
 
             @classmethod
-            def build(cls, a1: A1):  # type: ignore
+            def build(cls, a1: dict):  # type: ignore
                 pass
 
     with pytest.raises(
@@ -274,26 +378,33 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a1: A1 = A1()
 
             @classmethod
-            def build(cls, a1: A1) -> A2:
+            def build(cls, a1: dict) -> A2:  # type: ignore
+                pass
+
+    with pytest.raises(ValueError, match=r"str.* cannot be used to represent Struct"):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            @classmethod
+            def build(cls) -> Annotated[str, A2]:
                 pass
 
     with pytest.raises(
         ValueError,
-        match=r"BadProducer.build - must be a @classmethod or @staticmethod.",
+        match=r"BadProducer.build - must be a @classmethod or @staticmethod",
     ):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(cls) -> A2:
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore
                 pass
 
     with pytest.raises(
         ValueError,
-        match=r"BadProducer.map - must be a @classmethod or @staticmethod.",
+        match=r"BadProducer.map - must be a @classmethod or @staticmethod",
     ):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             @classmethod
-            def build(cls) -> A2:
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore
                 pass
 
             def map(cls) -> A2:
@@ -307,19 +418,23 @@ def test_Producer_bad_init() -> None:
         DummyProducer(junk=5)
     with pytest.raises(ValueError, match="field required"):
         DummyProducer()
-    with pytest.raises(ValueError, match="Expected an instance of"):
+    with pytest.raises(ValueError, match="expected an instance of"):
         DummyProducer(a1=5)
-    with pytest.raises(ValueError, match="Expected an instance of"):
+    with pytest.raises(ValueError, match="expected an instance of"):
         DummyProducer(a1=A2())
 
 
 def test_Producer_bad_out() -> None:
     producer = DummyProducer(a1=A1())
-    with pytest.raises(ValueError, match="Expected 2 arguments of"):
+    with pytest.raises(ValueError, match="expected 2 arguments of"):
         producer.out(1)  # type: ignore
-    with pytest.raises(ValueError, match="Expected the 1st argument to be"):
+    with pytest.raises(
+        ValueError, match=r"DummyProducer.out\(\) 1st argument - expected instance of"
+    ):
         producer.out(1, 2)  # type: ignore
-    with pytest.raises(ValueError, match="Expected the 2nd argument to be"):
+    with pytest.raises(
+        ValueError, match=r"DummyProducer.out\(\) 2nd argument - expected instance of"
+    ):
         producer.out(A2(), A2())
     output = producer.out(A2(), A3())
     with pytest.raises(ValueError, match="is produced by"):

@@ -1,12 +1,11 @@
 import pickle
 from datetime import date, datetime
-from typing import Any, ClassVar
+from typing import Any
 
 from arti.formats.pickle import Pickle
 from arti.internal.type_hints import NoneType
 from arti.io import read, write
 from arti.storage.local import LocalFilePartition
-from arti.types import TypeSystem
 from arti.types.python import python_type_system
 from arti.views import View
 
@@ -14,7 +13,7 @@ from arti.views import View
 class _PythonBuiltin(View):
     _abstract_ = True
 
-    type_system: ClassVar[TypeSystem] = python_type_system
+    type_system = python_type_system
 
 
 class Date(_PythonBuiltin):
@@ -35,6 +34,10 @@ class Float(_PythonBuiltin):
 
 class Int(_PythonBuiltin):
     python_type = int
+
+
+class List(_PythonBuiltin):
+    python_type = list
 
 
 class Null(_PythonBuiltin):
