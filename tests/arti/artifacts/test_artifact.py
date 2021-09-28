@@ -1,9 +1,12 @@
+from typing import Any
+
 import pytest
 
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.formats import Format
 from arti.statistics import Statistic
+from arti.storage import Storage
 from arti.types import Int64, Type
 from tests.arti.dummies import A1, A2, P1, P2, DummyFormat, DummyStatistic, DummyStorage
 
@@ -31,6 +34,12 @@ def test_Artifact_validation() -> None:
         def supports(self, type_: Type, format: Format) -> None:
             raise ValueError("Storage - Boo!")
 
+    with pytest.raises(ValueError, match="MissingTypeArtifact must set `type`") as exc:
+
+        class MissingTypeArtifact(Artifact):
+            format: DummyFormat = DummyFormat()
+            storage: DummyStorage = DummyStorage()
+
     with pytest.raises(ValueError, match="Format - Boo!"):
 
         class BadFormatArtifact(Artifact):
@@ -49,20 +58,26 @@ def test_Artifact_validation() -> None:
 
         BadStorageArtifact()
 
-    with pytest.raises(ValueError, match="Expected an instance of") as exc:
+    with pytest.raises(ValueError, match="overriding `type` is not supported") as exc:
 
-        class BadTypeArtifact(Artifact):
-            format: BadFormat = BadFormat()
-            storage: BadStorage = BadStorage()
+        class OverrideTypeArtifact(Artifact):
+            type: Int64 = Int64()
+            format: DummyFormat = DummyFormat()
+            storage: DummyStorage = DummyStorage()
 
-        BadTypeArtifact(type="junk")
+        OverrideTypeArtifact(type=Int64(nullable=True))
     # Confirm {Format,Storage}.support are not called
     with pytest.raises(AssertionError):
         exc.match("Format - Boo!")
     with pytest.raises(AssertionError):
         exc.match("Storage - Boo!")
 
-    Artifact(type=Int64(), format=DummyFormat(), storage=DummyStorage())
+    class GoodArtifact(Artifact):
+        type: Type = Int64()
+        format: Format = DummyFormat()
+        storage: Storage[Any] = DummyStorage()
+
+    GoodArtifact()
 
 
 def test_instance_attr_merging() -> None:
