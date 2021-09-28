@@ -123,7 +123,7 @@ def test_nested_sgqlc_type() -> None:
     assert isinstance(a.fields["id"], at._Int)
     assert not a.fields["id"].nullable
     assert isinstance(a.fields["value"], at.List)
-    assert isinstance(a.fields["value"].value_type, at.Struct)
+    assert isinstance(a.fields["value"].element, at.Struct)
     # root sgqlc
     assert s.__name__ == MySuperType.__name__
     assert is_sgqlc_nullable(s)
@@ -137,7 +137,7 @@ def test_nested_sgqlc_type() -> None:
     a_container = a.fields["value"]
     assert isinstance(a_container, at.List)
     assert a_container.nullable
-    a_value = a_container.value_type
+    a_value = a_container.element
     assert isinstance(a_value, at.Struct)
     assert a_value.name == MyType.__name__
     assert not a_value.nullable
@@ -183,7 +183,7 @@ def test_sgqlc_list_adapter() -> None:
 
     arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.List)
-    assert isinstance(arti_t.value_type, at.Int64)
+    assert isinstance(arti_t.element, at.Int64)
 
     sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Int)
@@ -209,8 +209,8 @@ def test_sgqlc_list_of_non_null_adapting() -> None:
     arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.List)
     assert arti_t.nullable
-    assert isinstance(arti_t.value_type, at.Enum)
-    assert not arti_t.value_type.nullable
+    assert isinstance(arti_t.element, at.Enum)
+    assert not arti_t.element.nullable
 
     sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Enum)
@@ -225,8 +225,8 @@ def test_sgqlc_non_null_list_of_adapting() -> None:
     arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.List)
     assert not arti_t.nullable
-    assert isinstance(arti_t.value_type, at.Enum)
-    assert arti_t.value_type.nullable
+    assert isinstance(arti_t.element, at.Enum)
+    assert arti_t.element.nullable
 
     sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Enum)
@@ -241,8 +241,8 @@ def test_sgqlc_non_null_list_of_non_null_adapting() -> None:
     arti_t = sgqlc_type_system.to_artigraph(base, hints={})
     assert isinstance(arti_t, at.List)
     assert not arti_t.nullable
-    assert isinstance(arti_t.value_type, at.Enum)
-    assert not arti_t.value_type.nullable
+    assert isinstance(arti_t.element, at.Enum)
+    assert not arti_t.element.nullable
 
     sgqlc_t = sgqlc_type_system.to_system(arti_t, hints={})
     assert issubclass(sgqlc_t, st.Enum)

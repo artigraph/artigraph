@@ -49,9 +49,9 @@ class PyDatetime(_ScalarClassTypeAdapter):
 class PyValueContainer(TypeAdapter):
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
-        (value_type,) = get_args(type_)
+        (element,) = get_args(type_)
         return cls.artigraph(
-            value_type=python_type_system.to_artigraph(value_type, hints=hints),
+            element=python_type_system.to_artigraph(element, hints=hints),
         )
 
     @classmethod
@@ -62,7 +62,7 @@ class PyValueContainer(TypeAdapter):
     def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system[
-            python_type_system.to_system(type_.value_type, hints=hints),  # type: ignore
+            python_type_system.to_system(type_.element, hints=hints),  # type: ignore
         ]
 
 
@@ -168,10 +168,10 @@ class PyMap(TypeAdapter):
 
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
-        key_type, value_type = get_args(type_)
+        key, value = get_args(type_)
         return cls.artigraph(
-            key_type=python_type_system.to_artigraph(key_type, hints=hints),
-            value_type=python_type_system.to_artigraph(value_type, hints=hints),
+            key=python_type_system.to_artigraph(key, hints=hints),
+            value=python_type_system.to_artigraph(value, hints=hints),
         )
 
     @classmethod
@@ -182,8 +182,8 @@ class PyMap(TypeAdapter):
     def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system[
-            python_type_system.to_system(type_.key_type, hints=hints),
-            python_type_system.to_system(type_.value_type, hints=hints),
+            python_type_system.to_system(type_.key, hints=hints),
+            python_type_system.to_system(type_.value, hints=hints),
         ]  # type: ignore
 
 

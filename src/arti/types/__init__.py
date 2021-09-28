@@ -4,7 +4,8 @@ from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional
 
-from pydantic import PrivateAttr, root_validator, validator
+from pydantic import PrivateAttr, validator
+from pydantic.fields import ModelField
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
@@ -120,42 +121,22 @@ class Int64(_Int):
 
 
 class List(Type):
-    value_type: Type
-
-
-class Map(Type):
-    key_type: Type
-    value_type: Type
-
-
-class Null(Type):
-    pass
-
-
-class Set(Type):
-    value_type: Type
-
-
-class String(Type):
-    pass
-
-
-class Struct(Type, _NamedMixin):
-    fields: frozendict[str, Type]
+    element: Type
     partition_by: tuple[str, ...] = ()
     cluster_by: tuple[str, ...] = ()
 
     @validator("partition_by", "cluster_by")
     @classmethod
     def _validate_field_ref(
-        cls, references: tuple[str, ...], values: dict[str, Any]
+        cls, references: tuple[str, ...], values: dict[str, Any], field: ModelField
     ) -> tuple[str, ...]:
-        # Fields failed validation, so skip validating references
-        if (fields := values.get("fields")) is None:
+        if (element := values.get("element")) is None:
             return references
-        known, requested = set(fields), set(references)
+        if references and not isinstance(element, Struct):
+            raise ValueError("requires element to be a Struct")
+        known, requested = set(element.fields), set(references)
         if unknown := requested - known:
-            raise ValueError(f"Unknown field(s): {unknown}")
+            raise ValueError(f"unknown field(s): {unknown}")
         return references
 
     @validator("cluster_by")
@@ -166,26 +147,35 @@ class Struct(Type, _NamedMixin):
         if (partition_by := values.get("partition_by")) is None:
             return cluster_by
         if overlapping := set(cluster_by) & set(partition_by):
-            raise ValueError(f"Clustering fields overlap with partition fields: {overlapping}")
+            raise ValueError(f"clustering fields overlap with partition fields: {overlapping}")
         return cluster_by
-
-    @root_validator
-    @classmethod
-    def _validate_nested_struct(cls, values: dict[str, Any]) -> dict[str, Any]:
-        subfields_with_root_settings = {
-            name
-            for name, type_ in values.get("fields", {}).items()
-            if isinstance(type_, Struct) and (type_.partition_by or type_.cluster_by)
-        }
-        if subfields_with_root_settings:
-            raise ValueError(
-                f"Nested Structs ({subfields_with_root_settings}) cannot set `partition_by` or `cluster_by`"
-            )
-        return values
 
     @property
     def partition_fields(self) -> frozendict[str, Type]:
-        return frozendict({name: self.fields[name] for name in self.partition_by})
+        if not isinstance(self.element, Struct):
+            return frozendict()
+        return frozendict({name: self.element.fields[name] for name in self.partition_by})
+
+
+class Map(Type):
+    key: Type
+    value: Type
+
+
+class Null(Type):
+    pass
+
+
+class Set(Type):
+    element: Type
+
+
+class String(Type):
+    pass
+
+
+class Struct(Type, _NamedMixin):
+    fields: frozendict[str, Type]
 
 
 class Timestamp(Type):
@@ -301,3 +291,8 @@ class TypeSystem(Model):
             if adapter.matches_artigraph(type_, hints=hints):
                 return adapter.to_system(type_, hints=hints)
         raise NotImplementedError(f"No {self} adapter for Artigraph type: {type_}.")
+
+    def check_similarity(self, *, arti: Type, python_type: type) -> None:
+        system_type = self.to_system(arti, hints={})
+        if not lenient_issubclass(system_type, python_type):
+            raise ValueError(f"{python_type} cannot be used to represent {arti}")

@@ -95,7 +95,7 @@ def tidy_signature(
     force_tuple_return: bool = False,
     remove_owner: bool = False,
 ) -> inspect.Signature:
-    type_hints = get_type_hints(fn)
+    type_hints = get_type_hints(fn, include_extras=True)
     sig = sig.replace(return_annotation=type_hints.get("return", sig.return_annotation))
     return sig.replace(
         parameters=[
