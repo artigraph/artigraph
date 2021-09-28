@@ -29,7 +29,7 @@ def test_pydantic_conversion() -> None:
     assert isinstance(arti_type.fields["x"], _Int)
     assert isinstance(arti_type.fields["y"], String)
     assert isinstance(arti_type.fields["tags"], List)
-    assert isinstance(arti_type.fields["tags"].value_type, String)
+    assert isinstance(arti_type.fields["tags"].element, String)
 
 
 def test_pydantic_field_naming() -> None:
@@ -90,7 +90,7 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
             expected_args = get_args(expected_type)
             if lenient_issubclass(expected_origin, Mapping):
                 assert isinstance(spec, Map)
-                for (sub_type, sub_spec) in zip(expected_args, (spec.key_type, spec.value_type)):
+                for (sub_type, sub_spec) in zip(expected_args, (spec.key, spec.value)):
                     if lenient_issubclass(sub_type, BaseModel):
                         compare_model_to_type(sub_type, sub_spec)
                     else:
@@ -104,7 +104,7 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
                     assert len(expected_args) == 2
                     assert expected_args[1] == ...
                 assert isinstance(spec, List)
-                sub_type, sub_spec = expected_args[0], spec.value_type
+                sub_type, sub_spec = expected_args[0], spec.element
                 if lenient_issubclass(sub_type, BaseModel):
                     compare_model_to_type(sub_type, sub_spec)
                 else:

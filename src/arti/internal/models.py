@@ -15,7 +15,7 @@ patch_pydantic_ModelField__type_analysis()
 
 
 def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
-    mismatch_error = ValueError(f"Expected an instance of {type_}, got: {value}")
+    mismatch_error = ValueError(f"expected an instance of {type_}, got: {value}")
 
     if type_ is Any:
         return value

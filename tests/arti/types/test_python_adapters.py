@@ -59,7 +59,7 @@ def test_python_datetime() -> None:
 
 
 def test_python_frozenset() -> None:
-    a = Set(value_type=Int64())
+    a = Set(element=Int64())
     p = frozenset[int]
 
     assert python_type_system.to_system(a, hints={}) == set[int]  # set has higher priority
@@ -67,7 +67,7 @@ def test_python_frozenset() -> None:
 
 
 def test_python_list() -> None:
-    a = List(value_type=Int64())
+    a = List(element=Int64())
     p = list[int]
 
     assert python_type_system.to_system(a, hints={}) == p
@@ -111,7 +111,7 @@ def test_python_literal_errors() -> None:
 
 
 def test_python_map() -> None:
-    a = Map(key_type=String(), value_type=Int64())
+    a = Map(key=String(), value=Int64())
     p = dict[str, int]
 
     assert python_type_system.to_system(a, hints={}) == p
@@ -147,7 +147,7 @@ def test_python_optional_priority() -> None:
 
 
 def test_python_set() -> None:
-    a = Set(value_type=Int64())
+    a = Set(element=Int64())
     p = set[int]
 
     assert python_type_system.to_system(a, hints={}) == p
@@ -168,12 +168,12 @@ def test_python_struct() -> None:
 
 
 def test_python_tuple() -> None:
-    a = List(value_type=Int64())
+    a = List(element=Int64())
     # mypy errors here for some reason...?
     p = tuple[int, ...]  # type: ignore
 
     assert python_type_system.to_system(a, hints={}) == list[int]  # list has higher priority
-    assert PyTuple.to_system(List(value_type=Int64()), hints={}) == p
+    assert PyTuple.to_system(List(element=Int64()), hints={}) == p
     assert python_type_system.to_artigraph(p, hints={}) == a
 
     # We don't (currently) support structure based tuples
