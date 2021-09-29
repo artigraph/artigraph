@@ -1,5 +1,5 @@
 from collections.abc import Mapping, Sequence
-from typing import Any, Literal, Optional, Tuple, Union, get_origin
+from typing import Annotated, Any, Literal, Optional, Tuple, TypedDict, Union, get_origin
 
 import pytest
 
@@ -16,9 +16,19 @@ class MyTuple(tuple):  # type: ignore
     pass
 
 
+class MyTypedDict(TypedDict):
+    a: int
+
+
 @pytest.mark.parametrize(
     ("klass", "class_or_tuple"),
     (
+        (Annotated[int, 5], Annotated[int, 5]),
+        (Annotated[int, 5], int),
+        (Annotated[list[int], 5], Annotated[list[int], 5]),
+        (Annotated[list[int], 5], Annotated[list, 5]),
+        (Annotated[list[int], 5], list),
+        (Annotated[list[int], 5], list[int]),
         (MyTuple, tuple),
         (NoneType, (int, NoneType)),
         (NoneType, Optional[int]),
@@ -26,9 +36,13 @@ class MyTuple(tuple):  # type: ignore
         (dict[str, int], Mapping[str, int]),
         (dict[str, int], dict),
         (dict[str, int], dict[str, int]),
+        (MyTypedDict, dict),
         (int, (int, str)),
+        (int, Annotated[int, 5]),
         (int, Optional[int]),
         (int, Union[int, str]),
+        (list[int], Annotated[list[int], 5]),
+        (list[int], Annotated[list, 5]),
         (str, Union[int, str]),
         (tuple, Tuple),
         (tuple, tuple),
@@ -52,6 +66,8 @@ def test_lenient_issubclass_true(
 @pytest.mark.parametrize(
     ("klass", "class_or_tuple"),
     (
+        (MyTypedDict, dict[str, int]),  # Might implement in the future
+        (MyTypedDict, dict[str, str]),
         (dict, Mapping[str, int]),
         (dict, dict[str, int]),
         (dict[str, str], Mapping[str, int]),
@@ -81,6 +97,9 @@ def test_lenient_issubclass_error_cases() -> None:
     assert not lenient_issubclass(5, 5)  # type: ignore
     with pytest.raises(TypeError, match="arg 2 must be a class or tuple of classes"):
         lenient_issubclass(tuple, 5)  # type: ignore
+    # Might support this in the future
+    with pytest.raises(TypeError, match="TypedDict does not support instance and class checks"):
+        lenient_issubclass(dict, MyTypedDict)
 
 
 def test_is_optional_hint() -> None:

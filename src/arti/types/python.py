@@ -4,11 +4,16 @@ import datetime
 from collections.abc import Mapping
 from functools import partial
 from itertools import chain
-from typing import _TypedDictMeta  # type: ignore
 from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_origin, get_type_hints
 
 import arti.types
-from arti.internal.type_hints import NoneType, is_optional_hint, is_union, lenient_issubclass
+from arti.internal.type_hints import (
+    NoneType,
+    is_optional_hint,
+    is_typeddict,
+    is_union,
+    lenient_issubclass,
+)
 from arti.types import Type, TypeAdapter, TypeSystem, _ScalarClassTypeAdapter
 
 python_type_system = TypeSystem(key="python")
@@ -233,7 +238,7 @@ class PyStruct(TypeAdapter):
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         # NOTE: This check is probably a little shaky, particularly across python versions. Consider
         # using the typing_inspect package.
-        return isinstance(type_, _TypedDictMeta)
+        return is_typeddict(type_)
 
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
