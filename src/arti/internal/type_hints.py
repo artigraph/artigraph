@@ -2,14 +2,33 @@ import inspect
 import sys
 import types
 from collections.abc import Callable
-from typing import Any, Union, cast, get_args, get_origin, get_type_hints, no_type_check
+from typing import _AnnotatedAlias  # type: ignore
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+    get_type_hints,
+    no_type_check,
+)
 
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
 
 def _check_issubclass(klass: Any, check_type: type) -> bool:
-    klass_origin, check_type_origin = get_origin(klass), get_origin(check_type)
-    klass_args, check_type_args = get_args(klass), get_args(check_type)
+    # If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the
+    # annotations.
+    klass_origin, klass_args = get_origin(klass), get_args(klass)
+    if klass_origin is Annotated:
+        klass = klass_args[0]
+        klass_origin, klass_args = get_origin(klass), get_args(klass)
+    check_type_origin, check_type_args = get_origin(check_type), get_args(check_type)
+    if check_type_origin is Annotated:
+        check_type = check_type_args[0]
+        check_type_origin, check_type_args = get_origin(check_type), get_args(check_type)
     # eg: issubclass(tuple, tuple)
     if klass_origin is None and check_type_origin is None:
         return issubclass(klass, check_type)
@@ -50,7 +69,7 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
 
 
 def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:
-    if not isinstance(klass, type):
+    if not (isinstance(klass, type) or is_Annotated(klass)):
         return False
     if isinstance(class_or_tuple, tuple):
         return any(lenient_issubclass(klass, subtype) for subtype in class_or_tuple)
@@ -124,8 +143,19 @@ if sys.version_info < (3, 10):  # pragma: no cover
     def is_union(type_: Any) -> bool:
         return type_ is Union
 
+    def is_typeddict(type_: Any) -> bool:
+        # mypy doesn't know of typing._TypedDictMeta, but `type: ignore` would be "unused" (and error)
+        # on other python versions.
+        if TYPE_CHECKING:
+            from typing import _TypedDict as _TypedDictMeta
+        else:
+            from typing import _TypedDictMeta
+
+        return isinstance(type_, _TypedDictMeta)
+
 
 else:  # pragma: no cover
+    from typing import is_typeddict as is_typeddict  # noqa: F401
 
     # mypy doesn't know of types.UnionType yet, but `type: ignore` would be "unused"
     # (and error) on other python versions.
@@ -133,6 +163,10 @@ else:  # pragma: no cover
     def is_union(type_: Any) -> bool:
         # `Union[int, str]` or `int | str`
         return type_ is Union or type_ is types.UnionType  # noqa: E721
+
+
+def is_Annotated(type_: Any) -> bool:
+    return isinstance(type_, _AnnotatedAlias)
 
 
 def is_optional_hint(type_: Any) -> bool:
