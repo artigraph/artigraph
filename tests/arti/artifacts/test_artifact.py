@@ -115,3 +115,15 @@ def test_Artifact_partition_key_types() -> None:
 
     assert Partitioned.partition_key_types == CompositeKeyTypes({"a": Int64Key})
     assert Partitioned.is_partitioned
+
+
+def test_Artifact_storage_path_resolution() -> None:
+    class S(DummyStorage):
+        key = "test-{partition_key_spec}"
+
+    class A(Artifact):
+        type: Type = List(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        format: Format = DummyFormat()
+        storage: S
+
+    assert A(storage=S()).storage.key == "test-a_key={a.key}"

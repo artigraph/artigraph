@@ -79,6 +79,7 @@ class BaseArtifact(Model):
     @classmethod
     def _validate_storage(cls, storage: Storage[Any], values: dict[str, Any]) -> Storage[Any]:
         if "type" in values and "format" in values:
+            storage = storage.resolve_partition_key_spec(**cls.partition_key_types)
             storage.supports(type_=values["type"], format=values["format"])
         return storage
 

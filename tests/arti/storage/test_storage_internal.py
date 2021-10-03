@@ -4,12 +4,14 @@ import parse
 import pytest
 
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, Int8Key, PartitionKey
+from arti.partitions import CompositeKey, CompositeKeyTypes, Int8Key, PartitionKey
 from arti.storage._internal import (
-    WildcardFormatDict,
+    FormatDict,
+    FormatPlaceholder,
     WildcardPlaceholder,
     extract_partition_keys,
     parse_partition_keys,
+    partial_format,
     spec_to_wildcard,
 )
 
@@ -39,19 +41,43 @@ def paths_to_keys() -> dict[str, CompositeKey]:
 
 
 @pytest.mark.parametrize(
-    ("partition_key_type", "attribute", "valid_attributes"),
+    ("spec", "key"),
     (
-        (Int8Key, "key", {"hex", "key"}),
-        (Int8Key, "hex", {"hex", "key"}),
+        ("baseline", None),
+        ("{}", None),
+        ("{a}", "a"),
+        ("{a.5}", "a"),
+        ("{a[1]}", "a"),
+        ("{a[b]}", "a"),
+        ("{a[b].c}", "a"),
+        ("{a[b].c[d]}", "a"),
+        ("{a[b].c[d]:2d}", "a"),
+        ("hello {world}", "world"),
+    ),
+)
+def test_FormatPlaceholder(spec: str, key: str) -> None:
+    if key:
+        out = spec.format(**{key: FormatPlaceholder(key)})
+    else:
+        out = spec.format(FormatPlaceholder(""))
+    assert out == spec
+
+
+@pytest.mark.parametrize(
+    ("key", "partition_key_types", "attribute"),
+    (
+        ("test", CompositeKeyTypes(test=Int8Key), "key"),
+        ("test", CompositeKeyTypes(test=Int8Key), "hex"),
     ),
 )
 def test_WildcardPlaceholder(
-    partition_key_type: type[PartitionKey], attribute: str, valid_attributes: set[str]
+    key: str, partition_key_types: CompositeKeyTypes, attribute: str
 ) -> None:
-    placeholder = WildcardPlaceholder(name="test", key_type=partition_key_type)
-    assert placeholder._name == "test"
+    partition_key_type = partition_key_types[key]
+
+    placeholder = WildcardPlaceholder(key, partition_key_types)
+    assert placeholder._key == key
     assert placeholder._key_type == partition_key_type
-    assert placeholder._valid_attributes == valid_attributes
     assert placeholder._attribute is None
     assert getattr(placeholder, attribute) is placeholder
     assert placeholder._attribute == attribute
@@ -60,38 +86,43 @@ def test_WildcardPlaceholder(
     assert placeholder[5] == 5
     assert placeholder[10] == 10
 
-    placeholder = WildcardPlaceholder(name="test", key_type=partition_key_type)
+    partial = WildcardPlaceholder.with_key_types(partition_key_types)
+    applied = partial(key)
+    assert applied._key == key
+    assert applied._key_type == partition_key_type
+
+    placeholder = WildcardPlaceholder(key, partition_key_types)
     getattr(placeholder, attribute)
     with pytest.raises(
-        ValueError, match=f"'test.{attribute}.{attribute}' cannot be used in a partition path"
+        ValueError, match=f"'{key}.{attribute}.{attribute}' cannot be used in a partition path"
     ):
         getattr(placeholder, attribute)
 
-    placeholder = WildcardPlaceholder(name="test", key_type=partition_key_type)
+    placeholder = WildcardPlaceholder(key, partition_key_types)
     with pytest.raises(
         AttributeError,
         match=f"'{partition_key_type.__name__}' has no field or key component 'abc123'",
     ):
         placeholder.abc123
 
-    placeholder = WildcardPlaceholder(name="test", key_type=partition_key_type)
+    placeholder = WildcardPlaceholder(key, partition_key_types)
     with pytest.raises(
         ValueError,
-        match="'test' cannot be used directly in a partition path; access one of the key components",
+        match=f"'{key}' cannot be used directly in a partition path; access one of the key components",
     ):
         str(placeholder)
     with pytest.raises(
         ValueError,
-        match="'test' cannot be used directly in a partition path; access one of the key components",
+        match=f"'{key}' cannot be used directly in a partition path; access one of the key components",
     ):
         placeholder[5]
 
 
-def test_WildcardFormatDict() -> None:
-    d = WildcardFormatDict({"test": Int8Key}, tag="x")
+def test_FormatDict() -> None:
+    d = FormatDict(WildcardPlaceholder.with_key_types({"test": Int8Key}), tag="x")
     test_placeholder = d["test"]
     assert isinstance(test_placeholder, WildcardPlaceholder)
-    assert test_placeholder._name == "test"
+    assert test_placeholder._key == "test"
     assert test_placeholder._key_type == Int8Key
     assert d["tag"] == "x"
 
@@ -99,6 +130,27 @@ def test_WildcardFormatDict() -> None:
         ValueError, match=re.escape("No 'junk' partition key found, expected one of ('test',)")
     ):
         d["junk"]
+
+
+@pytest.mark.parametrize(
+    ("spec", "expected", "kwargs"),
+    (
+        ("baseline", "baseline", {}),
+        ("{a}", "a", {"a": "a"}),
+        ("{a}", "{a}", {}),
+        ("{hello} {world}", "hello {world}", {"hello": "hello"}),
+        ("{hello} {wo[rld]}", "hello {wo[rld]}", {"hello": "hello"}),
+    ),
+)
+def test_partial_format(spec: str, expected: str, kwargs: dict[str, str]) -> None:
+    assert partial_format(spec, **kwargs) == expected
+
+
+# To support positional args, we would need to introduce a FormatSequence (w/
+# __getitem__) similar to FormatDict. Easy enough, but don't need (yet).
+@pytest.mark.xfail(raises=IndexError)
+def test_partial_format_positional_args() -> None:
+    partial_format("{}")
 
 
 def test_spec_to_wildcard(PKs: dict[str, type[PartitionKey]]) -> None:

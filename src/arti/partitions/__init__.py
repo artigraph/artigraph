@@ -20,6 +20,7 @@ class PartitionKey(Model):
     _abstract_ = True
     _by_type_: ClassVar[dict[type[Type], type[PartitionKey]]] = {}
 
+    default_key_components: ClassVar[tuple[str, ...]]
     matching_type: ClassVar[type[Type]]
 
     @classmethod
@@ -27,15 +28,20 @@ class PartitionKey(Model):
         super().__init_subclass__(**kwargs)
         if cls._abstract_:
             return
-        if not hasattr(cls, "matching_type"):
-            raise TypeError(f"{cls.__name__} must set `matching_type`")
+        for attr in ("default_key_components", "matching_type"):
+            if not hasattr(cls, attr):
+                raise TypeError(f"{cls.__name__} must set `{attr}`")
+        if unknown := (set(cls.default_key_components) - cls.key_components):
+            raise TypeError(
+                f"Unknown key_components in {cls.__name__}.default_key_components: {unknown}"
+            )
         register(cls._by_type_, cls.matching_type, cls)
 
     @classproperty
     @classmethod
     def key_components(cls) -> frozenset[str]:
-        return frozenset(
-            {name for name in dir(cls) if isinstance(getattr_static(cls, name), key_component)}
+        return frozenset(cls.__fields__) | frozenset(
+            name for name in dir(cls) if isinstance(getattr_static(cls, name), key_component)
         )
 
     @classmethod
@@ -62,6 +68,7 @@ CompositeKeyTypes = frozendict[str, type[PartitionKey]]
 
 
 class DateKey(PartitionKey):
+    default_key_components = ("Y", "m", "d")
     matching_type = Date
 
     key: date
@@ -96,6 +103,7 @@ class DateKey(PartitionKey):
 
 class _IntKey(PartitionKey):
     _abstract_ = True
+    default_key_components = ("key",)
 
     key: int
 
@@ -130,6 +138,7 @@ class Int64Key(_IntKey):
 
 
 class NullKey(PartitionKey):
+    default_key_components = ("key",)
     matching_type = Null
 
     key: None = None
