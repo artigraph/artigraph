@@ -1,4 +1,8 @@
+from __future__ import annotations
+
 import hashlib
+import os
+import tempfile
 from glob import glob
 
 from arti.fingerprints import Fingerprint
@@ -21,7 +25,7 @@ class LocalFilePartition(StoragePartition):
 
 
 class LocalFile(Storage[LocalFilePartition]):
-    path: str
+    path: str = os.sep.join([tempfile.gettempdir(), "{partition_key_spec}"])
 
     def discover_partitions(
         self, **key_types: type[PartitionKey]

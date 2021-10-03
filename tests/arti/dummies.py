@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Annotated
 
 from arti.annotations import Annotation
@@ -22,13 +24,17 @@ class DummyFormat(Format):
 
 
 class DummyPartition(StoragePartition):
+    key: str = "test"
+
     def compute_fingerprint(self) -> Fingerprint:
-        return Fingerprint(key=5)
+        return Fingerprint.from_string(self.key)
 
 
 class DummyStorage(Storage[DummyPartition]):
+    key: str = "test"
+
     def discover_partitions(self, **key_types: type[PartitionKey]) -> tuple[DummyPartition, ...]:
-        return ()
+        return (self.storage_partition_type(key=self.key),)
 
 
 # NOTE: when using a subclass of the original type hint, we must override[1].
