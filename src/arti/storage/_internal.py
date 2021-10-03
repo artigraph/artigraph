@@ -1,34 +1,63 @@
 import string
 from collections import defaultdict
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
+from functools import partial
 from typing import Any, Iterable, Literal, Optional, overload
 
 import parse
 
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, PartitionKey
+from arti.partitions import CompositeKey, CompositeKeyTypes, PartitionKey
 
 
-class WildcardPlaceholder:
-    def __init__(self, name: str, key_type: type[PartitionKey]):
-        self._name = name
-        self._key_type = key_type
-        self._valid_attributes = set(key_type.__fields__) | key_type.key_components
+class Placeholder:
+    def __init__(self, key: str) -> None:
+        self._key = key
+
+
+class FormatPlaceholder(Placeholder):
+    def __format__(self, spec: str) -> str:
+        result = self._key
+        if spec:
+            result += ":" + spec
+        return "{" + result + "}"
+
+    def __getitem__(self, key: Any) -> FormatPlaceholder:
+        self._key = f"{self._key}[{key}]"
+        return self
+
+    def __getattr__(self, attr: str) -> FormatPlaceholder:
+        self._key = f"{self._key}.{attr}"
+        return self
+
+
+class WildcardPlaceholder(Placeholder):
+    def __init__(self, key: str, key_types: CompositeKeyTypes):
+        super().__init__(key)
+        if key not in key_types:
+            raise ValueError(f"No '{key}' partition key found, expected one of {tuple(key_types)}")
+        self._key_type = key_types[key]
         self._attribute: Optional[str] = None  # What field/key_component is being accessed
+
+    @classmethod
+    def with_key_types(
+        cls, key_types: Mapping[str, type[PartitionKey]]
+    ) -> Callable[[str], WildcardPlaceholder]:
+        return partial(cls, key_types=key_types)
 
     def _err_if_no_attribute(self) -> None:
         if self._attribute is None:
             example = sorted(self._key_type.key_components)[0]
             raise ValueError(
-                f"'{self._name}' cannot be used directly in a partition path; access one of the key components (eg: '{self._name}.{example}')."
+                f"'{self._key}' cannot be used directly in a partition path; access one of the key components (eg: '{self._key}.{example}')."
             )
 
     def __getattr__(self, name: str) -> "WildcardPlaceholder":
         if self._attribute is not None:
             raise ValueError(
-                f"'{self._name}.{self._attribute}.{name}' cannot be used in a partition path; only immediate '{self._name}' attributes (such as '{self._attribute}') can be used."
+                f"'{self._key}.{self._attribute}.{name}' cannot be used in a partition path; only immediate '{self._key}' attributes (such as '{self._attribute}') can be used."
             )
-        if name not in self._valid_attributes:
+        if name not in self._key_type.key_components:
             raise AttributeError(
                 f"'{self._key_type.__name__}' has no field or key component '{name}'"
             )
@@ -49,27 +78,29 @@ class WildcardPlaceholder:
 
 # NOTE: We might pre-populate this with the Graph tags so the hard coded templates are already available (rather than
 # being filled in with a WildcardPlaceholder).
-class WildcardFormatDict(dict[str, Any]):
+class FormatDict(dict[str, Any]):
     def __init__(
         self,
-        key_types: Mapping[str, type[PartitionKey]],
+        placeholder_type: Callable[[str], Placeholder],
         /,
         *args: Iterable[tuple[str, Any]],
         **kwargs: Any,
     ) -> None:
         super().__init__(*args, **kwargs)
-        self.key_types = key_types
+        self.placeholder_type = placeholder_type
 
-    def __missing__(self, key: str) -> WildcardPlaceholder:
-        if key not in self.key_types:
-            raise ValueError(
-                f"No '{key}' partition key found, expected one of {tuple(self.key_types)}"
-            )
-        return WildcardPlaceholder(name=key, key_type=self.key_types[key])
+    def __missing__(self, key: str) -> Placeholder:
+        return self.placeholder_type(key)
+
+
+def partial_format(spec: str, **kwargs: Any) -> str:
+    return string.Formatter().vformat(spec, (), FormatDict(FormatPlaceholder, **kwargs))
 
 
 def spec_to_wildcard(spec: str, key_types: Mapping[str, type[PartitionKey]]) -> str:
-    return string.Formatter().vformat(spec, (), WildcardFormatDict(key_types))
+    return string.Formatter().vformat(
+        spec, (), FormatDict(WildcardPlaceholder.with_key_types(key_types))
+    )
 
 
 @overload
@@ -123,7 +154,7 @@ def extract_partition_keys(
     }
     if set(keys) != set(key_types):
         raise ValueError(
-            f"Expected to find partition keys for {sorted(key_types)}, only found {sorted(key)}. Is the partitioning spec ('{spec}') complete?"
+            f"Expected to find partition keys for {sorted(key_types)}, only found {sorted(keys)}. Is the partitioning spec ('{spec}') complete?"
         )
     return frozendict(keys)
 

@@ -26,7 +26,7 @@ def test_PartitionKey_key_components() -> None:
 
     components = Int8Key.key_components
     assert isinstance(components, frozenset)
-    assert components == {"hex"}
+    assert components == {"key", "hex"}
 
     assert isinstance(Int8Key.hex, key_component)
     assert isinstance(Int8Key.hex, property)
@@ -49,12 +49,31 @@ def test_PartitionKey_subclass() -> None:
         _abstract_ = True
         _by_type_: ClassVar[dict[type[Type], type[PartitionKey]]] = {}
 
-    with pytest.raises(TypeError, match="must set `matching_type`"):
+        key: int
 
-        class JunkKey(AbstractKey):
+    with pytest.raises(TypeError, match="NoDefaultKey must set `default_key_components`"):
+
+        class NoDefaultKey(AbstractKey):
             pass
 
+    with pytest.raises(TypeError, match="NoMatchingTypeKey must set `matching_type`"):
+
+        class NoMatchingTypeKey(AbstractKey):
+            default_key_components = ("key",)
+
+    with pytest.raises(
+        TypeError,
+        match=re.escape(
+            r"Unknown key_components in UnknownDefaultKey.default_key_components: {'junk'}"
+        ),
+    ):
+
+        class UnknownDefaultKey(AbstractKey):
+            default_key_components = ("junk",)
+            matching_type = Int8
+
     class SomeKey(AbstractKey):
+        default_key_components = ("key",)
         matching_type = Int8
 
     assert AbstractKey._by_type_ == {Int8: SomeKey}

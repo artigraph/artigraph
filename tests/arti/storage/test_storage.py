@@ -1,7 +1,9 @@
+from __future__ import annotations
+
 import pytest
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import Int8Key, PartitionKey
+from arti.partitions import CompositeKeyTypes, DateKey, Int8Key, PartitionKey
 from arti.storage import Storage, StoragePartition
 
 
@@ -54,6 +56,63 @@ def test_Storage_init_subclass() -> None:
 
     assert not hasattr(Storage, "storage_partition_type")
     assert S.storage_partition_type is MockStoragePartition  # type: ignore
+
+
+@pytest.mark.parametrize(
+    ("spec", "expected", "key_types"),
+    (
+        (
+            "/tmp/test/{partition_key_spec}",
+            "/tmp/test/",
+            {},
+        ),
+        (
+            "/tmp/test/{partition_key_spec}",
+            "/tmp/test/date_Y={date.Y}/date_m={date.m}/date_d={date.d}",
+            {"date": DateKey},
+        ),
+        (
+            "/tmp/test/{partition_key_spec}",
+            "/tmp/test/a_key={a.key}/b_key={b.key}",
+            {"a": Int8Key, "b": Int8Key},
+        ),
+        (
+            "/tmp/test/{tag}/{partition_key_spec}",
+            "/tmp/test/{tag}/a_key={a.key}",
+            {"a": Int8Key},
+        ),
+    ),
+)
+def test_Storage_resolve_partition_key_spec(
+    spec: str, expected: str, key_types: CompositeKeyTypes
+) -> None:
+    assert MockStorage(path=spec).resolve_partition_key_spec(**key_types).path == expected
+
+
+def test_Storage_resolve_partition_key_spec_extra() -> None:
+    class TablePartition(StoragePartition):
+        dataset: str
+        name: str
+
+        def compute_fingerprint(self) -> Fingerprint:
+            return Fingerprint.empty()
+
+    class Table(Storage[TablePartition]):
+        key_value_sep = "_"
+        partition_name_component_sep = "_"
+        segment_sep = "__"
+
+        dataset: str = "s_{tag}"
+        name: str = "{partition_key_spec}"
+
+        def discover_partitions(
+            self, **key_types: type[PartitionKey]
+        ) -> tuple[TablePartition, ...]:
+            return ()
+
+    t = Table().resolve_partition_key_spec(a=Int8Key, b=Int8Key)
+    assert t.dataset == "s_{tag}"
+    assert t.name == "a_key_{a.key}__b_key_{b.key}"
 
 
 def test_Storage_discover_partitions() -> None:
