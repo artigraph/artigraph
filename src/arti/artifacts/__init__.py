@@ -2,7 +2,6 @@ from __future__ import annotations
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
-from collections.abc import Sequence
 from itertools import chain
 from typing import Any, ClassVar, Optional
 
@@ -44,16 +43,6 @@ class BaseArtifact(Model):
 
     # Hide the producer to prevent showing the entire upstream graph
     producer: Optional[Producer] = Field(None, repr=False)
-
-    def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
-        # NOTE: This method won't be necessary once [1] is released.
-        #
-        # 1: https://github.com/samuelcolvin/pydantic/pull/2593
-        return [
-            (k, v)
-            for k, v in super().__repr_args__()
-            if (True if k is None else self.__fields__[k].field_info.extra.get("repr", True))
-        ]
 
     # TODO: Allow smarter type/format/storage merging w/ the default?
 
