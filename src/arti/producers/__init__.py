@@ -3,9 +3,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator
 from inspect import Parameter, Signature, getattr_static
-from typing import Annotated, Any, ClassVar, TypeVar, Union, get_args, get_origin
-
-from pydantic.fields import ModelField
+from typing import Annotated, Any, ClassVar, Optional, TypeVar, Union, cast, get_args, get_origin
 
 from arti.annotations import Annotation
 from arti.artifacts import Artifact, BaseArtifact, Statistic
@@ -13,8 +11,9 @@ from arti.fingerprints import Fingerprint
 from arti.internal import wrap_exc
 from arti.internal.models import Model
 from arti.internal.type_hints import NoneType, lenient_issubclass, signature
-from arti.internal.utils import frozendict, ordinal
-from arti.partitions import CompositeKeyTypes
+from arti.internal.utils import classproperty, frozendict, ordinal
+from arti.partitions import CompositeKey, CompositeKeyTypes, NotPartitioned
+from arti.storage import StoragePartitions
 from arti.versions import SemVer, Version
 from arti.views import View
 
@@ -23,11 +22,19 @@ def _commas(vals: Iterable[Any]) -> str:
     return ", ".join([str(v) for v in vals])
 
 
+# TODO: Add @validator over all (build) fields checking for an io.{read,write} handler.
+
+
 ArtifactViewPair = tuple[type[Artifact], type[View]]
-BuildInputMetadata = frozendict[str, ArtifactViewPair]
+BuildInputViews = frozendict[str, type[View]]
 MapInputMetadata = frozendict[str, type[Artifact]]
 # mypy doesn't yet support homogeneous tuple aliases: https://github.com/python/mypy/issues/9980
 OutputMetadata = tuple[ArtifactViewPair, ...]  # type: ignore
+
+PartitionDependencies = frozendict[CompositeKey, frozendict[str, StoragePartitions]]
+
+BuildSig = Callable[..., Any]
+MapSig = Callable[..., PartitionDependencies]
 
 _T = TypeVar("_T")
 
@@ -41,16 +48,16 @@ class Producer(Model):
     version: ClassVar[Version] = SemVer(major=0, minor=0, patch=1)
 
     # build and map must be @classmethods or @staticmethods.
-    build: ClassVar[Callable[..., Any]]
-    map: ClassVar[Callable[..., Any]]
+    build: ClassVar[BuildSig]
+    map: ClassVar[MapSig]
 
     # Internal fields/methods
 
     _abstract_: ClassVar[bool] = True
     # NOTE: The following are set in __init_subclass__
-    _artifact_fields_: ClassVar[dict[str, ModelField]]
+    _input_artifact_types_: ClassVar[frozendict[str, type[Artifact]]]
     _build_sig_: ClassVar[Signature]
-    _build_input_metadata_: ClassVar[BuildInputMetadata]
+    _build_input_views_: ClassVar[BuildInputViews]
     _output_metadata_: ClassVar[OutputMetadata]
     _map_sig_: ClassVar[Signature]
     _map_input_metadata_: ClassVar[MapInputMetadata]
@@ -60,16 +67,32 @@ class Producer(Model):
         super().__init_subclass__(**kwargs)
         if not cls._abstract_:
             with wrap_exc(ValueError, prefix=cls.__name__):
-                cls._artifact_fields_ = cls._validate_fields()
+                cls._input_artifact_types_ = cls._validate_fields()
                 with wrap_exc(ValueError, prefix=".build"):
                     (
                         cls._build_sig_,
-                        cls._build_input_metadata_,
+                        cls._build_input_views_,
                         cls._output_metadata_,
                     ) = cls._validate_build_sig()
                 with wrap_exc(ValueError, prefix=".map"):
                     cls._map_sig_, cls._map_input_metadata_ = cls._validate_map_sig()
                 cls._validate_no_unused_fields()
+
+    @classmethod
+    def _get_artifact_from_annotation(cls, annotation: Any) -> type[Artifact]:
+        hint_example = "eg: `Annotated[pd.DataFrame, MyArtifact]`"
+        origin, args = get_origin(annotation), get_args(annotation)
+        if origin is not Annotated:
+            raise ValueError(f"must be an Annotated hint ({hint_example})")
+        # We don't need the underlying type here - `_get_view_from_annotation` requires the entire
+        # (possibly Annotated) annotation in order to discover explicitly set Views.
+        _, *hints = args
+        artifacts = [hint for hint in hints if lenient_issubclass(hint, Artifact)]
+        if len(artifacts) == 0:
+            raise ValueError(f"Artifact is not set ({hint_example})")
+        if len(artifacts) > 1:
+            raise ValueError("multiple Artifacts set")
+        return cast(type[Artifact], artifacts[0])
 
     @classmethod
     def _get_view_from_annotation(cls, annotation: Any, artifact: type[Artifact]) -> type[View]:
@@ -82,7 +105,7 @@ class Producer(Model):
         return view
 
     @classmethod
-    def _validate_fields(cls) -> dict[str, ModelField]:
+    def _validate_fields(cls) -> frozendict[str, type[Artifact]]:
         # NOTE: Aside from the base producer fields, all others should be Artifacts.
         #
         # Users can set additional class attributes, but they must be properly hinted as ClassVars.
@@ -96,13 +119,13 @@ class Producer(Model):
                     raise ValueError(
                         f"type hint must be an Artifact subclass, got: {field.outer_type_}"
                     )
-        return artifact_fields
+        return frozendict({name: field.outer_type_ for name, field in artifact_fields.items()})
 
     @classmethod
     def _validate_parameters(
         cls, sig: Signature, *, validator: Callable[[str, Parameter, type[Artifact]], _T]
     ) -> Iterator[_T]:
-        if undefined_params := set(sig.parameters) - set(cls._artifact_fields_):
+        if undefined_params := set(sig.parameters) - set(cls._input_artifact_types_):
             raise ValueError(
                 f"the following parameter(s) must be defined as a field: {undefined_params}"
             )
@@ -120,23 +143,11 @@ class Producer(Model):
     @classmethod
     def _validate_build_sig_return(cls, annotation: Any, *, i: int) -> ArtifactViewPair:
         with wrap_exc(ValueError, prefix=f" {ordinal(i)} return"):
-            hint_example = "eg: `Annotated[pd.DataFrame, MyArtifact]`"
-            origin, args = get_origin(annotation), get_args(annotation)
-            if origin is not Annotated:
-                raise ValueError(f"must be an Annotated hint ({hint_example})")
-            # We don't need the underlying type here - `_get_view_from_annotation` requires the entire
-            # (possibly Annotated) annotation in order to discover explicitly set Views.
-            _, *hints = args
-            artifacts = [hint for hint in hints if lenient_issubclass(hint, Artifact)]
-            if len(artifacts) == 0:
-                raise ValueError(f"output Artifact is not set ({hint_example})")
-            if len(artifacts) > 1:
-                raise ValueError("multiple output Artifacts set")
-            artifact = artifacts[0]
+            artifact = cls._get_artifact_from_annotation(annotation)
             return artifact, cls._get_view_from_annotation(annotation, artifact)
 
     @classmethod
-    def _validate_build_sig(cls) -> tuple[Signature, BuildInputMetadata, OutputMetadata]:
+    def _validate_build_sig(cls) -> tuple[Signature, BuildInputViews, OutputMetadata]:
         """Validate the .build method"""
         if not hasattr(cls, "build"):
             raise ValueError("must be implemented")
@@ -144,13 +155,13 @@ class Producer(Model):
             raise ValueError("must be a @classmethod or @staticmethod")
         build_sig = signature(cls.build, force_tuple_return=True, remove_owner=True)
         # Validate the parameters
-        build_input_metadata = BuildInputMetadata(
+        build_input_metadata = BuildInputViews(
             cls._validate_parameters(
                 build_sig,
                 validator=(
                     lambda name, param, artifact: (
                         name,
-                        (artifact, cls._get_view_from_annotation(param.annotation, artifact)),
+                        cls._get_view_from_annotation(param.annotation, artifact),
                     )
                 ),
             )
@@ -176,6 +187,7 @@ class Producer(Model):
             artifacts_by_composite_key[artifact.partition_key_types].append(artifact)
         if len(artifacts_by_composite_key) != 1:
             raise ValueError("all output Artifacts must have the same partitioning scheme")
+        # TODO: Save off output composite_key_types
 
         return build_sig, build_input_metadata, output_metadata
 
@@ -183,26 +195,31 @@ class Producer(Model):
     def _validate_map_sig(cls) -> tuple[Signature, MapInputMetadata]:
         """Validate partitioned Artifacts and the .map method"""
         if not hasattr(cls, "map"):
-            # TODO: if (input_is_partitioned, output_is_partitioned):
-            # - (input_is, output_is):
-            #       Error requiring override (even w/ equivalent partitioning, we can't know if the
-            #       columns actually align)
-            # - (input_is, output_is_not):
-            #       Default to all input partitions -> the one output, but may be overridden to
-            #       filter input partitions
-            # - (input_is_not, output_is):
-            #       Error requiring override (they must define the output partitions by inspecting
-            #       the input statistics or whatever)
-            # - (input_is_not, output_is_not):
-            #       Default 1<->1, any override must return 1<->1 too
-            def map() -> Any:
-                """Map dependencies between input and output Artifact partitions.
+            partitioned_outputs = [
+                artifact for (artifact, view) in cls._output_metadata_ if artifact.is_partitioned
+            ]
+            # TODO: Add runtime checking of `map` output (ie: output aligns w/ output
+            # artifacts and such).
+            if partitioned_outputs:
+                raise ValueError("must be implemented when the `build` outputs are partitioned")
+            else:
 
-                If there are multiple output Artifacts, they must have equivalent partitioning
-                schemes.
-                """
-                raise NotImplementedError("the default")
+                def map(**kwargs: StoragePartitions) -> PartitionDependencies:
+                    return PartitionDependencies(
+                        {NotPartitioned: {name: partitions for name, partitions in kwargs.items()}}
+                    )
 
+            # Narrow the map signature, which is validated below and used at graph build
+            # time (via cls._map_input_metadata_) to determine what arguments to pass to
+            # map.
+            map.__signature__ = Signature(  # type: ignore
+                [
+                    Parameter(name=name, annotation=StoragePartitions, kind=Parameter.KEYWORD_ONLY)
+                    for name, artifact in cls._input_artifact_types_.items()
+                    if name in cls._build_input_views_
+                ],
+                return_annotation=PartitionDependencies,
+            )
             cls.map = staticmethod(map)  # type: ignore
         if not isinstance(getattr_static(cls, "map"), (classmethod, staticmethod)):
             raise ValueError("must be a @classmethod or @staticmethod")
@@ -211,10 +228,9 @@ class Producer(Model):
         def validate_map_param(
             name: str, param: Parameter, artifact: type[Artifact]
         ) -> tuple[str, type[Artifact]]:
-            # TODO: Handle (and save off) proper map annotations: expect some
-            # ArtifactPartition[MyArtifact] type and match on wrapped type
-            if artifact != param.annotation:
-                raise ValueError(f"parameter type hint must match the field: {artifact}")
+            # TODO: Should we add some ArtifactPartition[MyArtifact] type?
+            if param.annotation != StoragePartitions:
+                raise ValueError("type hint must be `StoragePartitions`")
             return name, artifact
 
         map_input_metadata = MapInputMetadata(
@@ -224,7 +240,7 @@ class Producer(Model):
 
     @classmethod
     def _validate_no_unused_fields(cls) -> None:
-        if unused_fields := set(cls._artifact_fields_) - (
+        if unused_fields := set(cls._input_artifact_types_) - (
             set(cls._build_sig_.parameters) | set(cls._map_sig_.parameters)
         ):
             raise ValueError(
@@ -240,8 +256,9 @@ class Producer(Model):
             ret = (ret,)
         return iter(ret)
 
-    @property
-    def fingerprint(self) -> Fingerprint:
+    @classproperty
+    @classmethod
+    def fingerprint(cls) -> Fingerprint:
         """Return a Fingerprint of the Producer key + version.
 
         The input and output Artifacts are ignored as the Producer instance may be used multiple
@@ -249,7 +266,26 @@ class Producer(Model):
         *each* output with the static Producer.fingerprint + that output's specific input
         partition dependencies.
         """
-        return Fingerprint.from_string(self._class_key_).combine(self.version.fingerprint)
+        return Fingerprint.from_string(cls._class_key_).combine(cls.version.fingerprint)
+
+    def compute_input_fingerprint(
+        self, dependency_partitions: frozendict[str, StoragePartitions]
+    ) -> Fingerprint:
+        return self.fingerprint.combine(
+            *(
+                partition.fingerprint
+                for name, partitions in dependency_partitions.items()
+                for partition in partitions
+            )
+        )
+        # partition_input_fingerprints = {
+        #     composite_key:
+        #     for composite_key, dependency_partitions in partition_dependencies.items()
+        # }
+
+    @property
+    def inputs(self) -> dict[str, Artifact]:
+        return {k: getattr(self, k) for k in self._input_artifact_types_}
 
     def out(self, *outputs: Artifact) -> Union[Artifact, tuple[Artifact, ...]]:
         """Configure the output Artifacts this Producer will build.
@@ -273,9 +309,13 @@ class Producer(Model):
                 if not isinstance(artifact, expected_type):
                     raise ValueError(f"expected instance of {expected_type}, got {type(artifact)}")
                 # TODO: Validate type/format/storage/view compatibility?
-                if artifact.producer is not None:
-                    raise ValueError(f"{artifact} is produced by {artifact.producer}!")
-                return artifact.copy(update={"producer": self})
+                if artifact.producer_output is not None:
+                    raise ValueError(
+                        f"{artifact} is produced by {artifact.producer_output.producer}!"
+                    )
+            return artifact.copy(
+                update={"producer_output": ProducerOutput(producer=self, position=ord)}
+            )
 
         outputs = tuple(validate(artifact, ord=i) for i, artifact in enumerate(outputs))
         if len(outputs) == 1:
@@ -283,6 +323,46 @@ class Producer(Model):
         return outputs
 
 
-BaseArtifact.update_forward_refs(Producer=Producer)
-Statistic.update_forward_refs(Producer=Producer)
-Artifact.update_forward_refs(Producer=Producer)
+def producer(
+    *,
+    annotations: Optional[tuple[Annotation, ...]] = None,
+    map: Optional[MapSig] = None,
+    name: Optional[str] = None,
+    version: Optional[Version] = None,
+) -> Callable[[BuildSig], type[Producer]]:
+    def decorate(build: BuildSig) -> type[Producer]:
+        nonlocal name
+        name = build.__name__ if name is None else name
+        input_artifacts = {}
+        for param in signature(build).parameters.values():
+            with wrap_exc(ValueError, prefix=f"{name} {param.name} param"):
+                input_artifacts[param.name] = Producer._get_artifact_from_annotation(
+                    param.annotation
+                )
+        return type(
+            build.__name__,
+            (Producer,),
+            {
+                k: v
+                for k, v in {
+                    "__annotations__": input_artifacts,
+                    "annotations": annotations,
+                    "build": staticmethod(build),
+                    "map": None if map is None else staticmethod(map),
+                    "version": version,
+                }.items()
+                if v is not None
+            },
+        )
+
+    return decorate
+
+
+class ProducerOutput(Model):
+    producer: Producer
+    position: int  # TODO: Support named output (defaulting to artifact classname)
+
+
+BaseArtifact.update_forward_refs(ProducerOutput=ProducerOutput)
+Statistic.update_forward_refs(ProducerOutput=ProducerOutput)
+Artifact.update_forward_refs(ProducerOutput=ProducerOutput)

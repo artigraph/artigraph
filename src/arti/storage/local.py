@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import hashlib
-import os
 import tempfile
 from glob import glob
+from pathlib import Path
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import PartitionKey
-from arti.storage import Storage, StoragePartition
-from arti.storage._internal import parse_partition_keys, spec_to_wildcard
+from arti.partitions import CompositeKeyTypes
+from arti.storage import InputFingerprints, Storage, StoragePartition
+from arti.storage._internal import parse_spec, spec_to_wildcard
 
 
 class LocalFilePartition(StoragePartition):
@@ -25,18 +25,30 @@ class LocalFilePartition(StoragePartition):
 
 
 class LocalFile(Storage[LocalFilePartition]):
-    path: str = os.sep.join([tempfile.gettempdir(), "{partition_key_spec}"])
+    path: str = str(
+        Path(tempfile.gettempdir())
+        / "{graph_name}"
+        / "{path_tags}"
+        / "{names}"
+        / "{partition_key_spec}"
+        / "{input_fingerprint}"
+        / "{name}.{extension}"
+    )
 
     def discover_partitions(
-        self, **key_types: type[PartitionKey]
+        self,
+        key_types: CompositeKeyTypes,
+        input_fingerprints: InputFingerprints = InputFingerprints(),
     ) -> tuple[LocalFilePartition, ...]:
         wildcard = spec_to_wildcard(self.path, key_types)
         paths = set(glob(wildcard))
-        path_keys = parse_partition_keys(paths, spec=self.path, key_types=key_types)
+        path_metadata = parse_spec(
+            paths, spec=self.path, key_types=key_types, input_fingerprints=input_fingerprints
+        )
         return tuple(
             self.storage_partition_type(
                 path=path,
                 keys=keys,
             )
-            for path, keys in path_keys.items()
+            for path, (input_fingerprint, keys) in path_metadata.items()
         )

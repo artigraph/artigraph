@@ -14,6 +14,7 @@ class Format(Model):
     """
 
     _abstract_ = True
+    extension: str = ""
     type_system: ClassVar[TypeSystem]
 
     def supports(self, type_: Type) -> None:

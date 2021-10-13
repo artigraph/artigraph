@@ -1,19 +1,23 @@
 import re
+from typing import Optional
 
 import parse
 import pytest
 
+from arti.fingerprints import Fingerprint
 from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey, CompositeKeyTypes, Int8Key, PartitionKey
 from arti.storage._internal import (
     FormatDict,
     FormatPlaceholder,
     WildcardPlaceholder,
-    extract_partition_keys,
-    parse_partition_keys,
+    extract_placeholders,
+    parse_spec,
     partial_format,
     spec_to_wildcard,
 )
+
+PathPlaceholders = dict[str, tuple[Optional[Fingerprint], CompositeKey]]
 
 
 @pytest.fixture
@@ -32,11 +36,11 @@ def paths() -> set[str]:
 
 
 @pytest.fixture
-def paths_to_keys() -> dict[str, CompositeKey]:
+def paths_to_placeholders() -> PathPlaceholders:
     return {
-        "/p/1/0x1": frozendict({"x": Int8Key(key=1), "y": Int8Key(key=1)}),
-        "/p/2/0x2": frozendict({"x": Int8Key(key=2), "y": Int8Key(key=2)}),
-        "/p/3/0x3": frozendict({"x": Int8Key(key=3), "y": Int8Key(key=3)}),
+        "/p/1/0x1": (None, frozendict({"x": Int8Key(key=1), "y": Int8Key(key=1)})),
+        "/p/2/0x2": (None, frozendict({"x": Int8Key(key=2), "y": Int8Key(key=2)})),
+        "/p/3/0x3": (None, frozendict({"x": Int8Key(key=3), "y": Int8Key(key=3)})),
     }
 
 
@@ -159,59 +163,59 @@ def test_spec_to_wildcard(PKs: dict[str, type[PartitionKey]]) -> None:
     assert spec_to_wildcard("/p/{x.key[5]}/{y.hex}/", PKs) == "/p/5/*/"
 
 
-def test_extract_partition_keys(
+def test_extract_placeholders(
     PKs: dict[str, type[PartitionKey]],
     spec: str,
     paths: set[str],
-    paths_to_keys: dict[str, CompositeKey],
+    paths_to_placeholders: PathPlaceholders,
 ) -> None:
     parser = parse.compile(spec, case_sensitive=True)
 
     assert {
-        path: extract_partition_keys(
+        path: extract_placeholders(
             key_types=PKs,
             parser=parser,
             path=path,
             spec=spec,
         )
         for path in paths
-    } == paths_to_keys
+    } == paths_to_placeholders
     with pytest.raises(
         ValueError, match=re.escape("Unable to parse 'fake' with '/p/{x.key}/{y.hex}'.")
     ):
-        extract_partition_keys(
+        extract_placeholders(
             key_types=PKs,
             parser=parser,
             path="fake",
             spec=spec,
         )
     assert (
-        extract_partition_keys(
+        extract_placeholders(
             error_on_no_match=False,
             key_types=PKs,
             parser=parser,
             path="fake",
             spec=spec,
         )
-        is None
+        == (None, None)
     )
 
 
-def test_parse_partition_keys(
+def test_parse_spec(
     PKs: dict[str, type[PartitionKey]],
     spec: str,
     paths: set[str],
-    paths_to_keys: dict[str, CompositeKey],
+    paths_to_placeholders: PathPlaceholders,
 ) -> None:
-    pks = parse_partition_keys(paths, spec=spec, key_types=PKs)
-    assert pks == paths_to_keys
+    pks = parse_spec(paths, key_types=PKs, spec=spec)
+    assert pks == paths_to_placeholders
 
     with pytest.raises(
         ValueError, match=re.escape("Unable to parse '/p/1/' with '/p/{x.key}/{y.hex}'")
     ):
-        parse_partition_keys({"/p/1/"}, spec="/p/{x.key}/{y.hex}", key_types=PKs)
+        parse_spec({"/p/1/"}, spec="/p/{x.key}/{y.hex}", key_types=PKs)
     with pytest.raises(
         ValueError,
         match=re.escape("Expected to find partition keys for ['x', 'y'], only found ['x']."),
     ):
-        parse_partition_keys({"/p/1/"}, spec="/p/{x.key}/", key_types=PKs)
+        parse_spec({"/p/1/"}, spec="/p/{x.key}/", key_types=PKs)

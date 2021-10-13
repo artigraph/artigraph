@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+from typing import Optional
+
 import pytest
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import CompositeKeyTypes, DateKey, Int8Key, PartitionKey
-from arti.storage import Storage, StoragePartition
+from arti.partitions import CompositeKeyTypes, DateKey, Int8Key
+from arti.storage import InputFingerprints, Storage, StoragePartition
 
 
 class MockStoragePartition(StoragePartition):
@@ -15,10 +17,11 @@ class MockStoragePartition(StoragePartition):
 
 
 class MockStorage(Storage[MockStoragePartition]):
+    # TODO: Add default
     path: str
 
     def discover_partitions(
-        self, **key_types: type[PartitionKey]
+        self, key_types: CompositeKeyTypes, input_fingerprints: Optional[InputFingerprints] = None
     ) -> tuple[MockStoragePartition, ...]:
         assert all(v is Int8Key for v in key_types.values())  # Simplifies logic here...
         return tuple(
@@ -29,9 +32,9 @@ class MockStorage(Storage[MockStoragePartition]):
 
 def test_StoragePartition_fingerprint() -> None:
     sp = MockStoragePartition(path="/tmp/test", keys={"key": Int8Key(key=5)})
-    assert sp.fingerprint is None
+    assert sp.fingerprint == Fingerprint.empty()
     modified = sp.with_fingerprint()
-    assert sp.fingerprint is None
+    assert sp.fingerprint == Fingerprint.empty()
     assert modified.fingerprint == Fingerprint.from_string(sp.path)
 
 
@@ -86,7 +89,7 @@ def test_Storage_init_subclass() -> None:
 def test_Storage_resolve_partition_key_spec(
     spec: str, expected: str, key_types: CompositeKeyTypes
 ) -> None:
-    assert MockStorage(path=spec).resolve_partition_key_spec(**key_types).path == expected
+    assert MockStorage(path=spec).resolve_partition_key_spec(key_types).path == expected
 
 
 def test_Storage_resolve_partition_key_spec_extra() -> None:
@@ -106,18 +109,20 @@ def test_Storage_resolve_partition_key_spec_extra() -> None:
         name: str = "{partition_key_spec}"
 
         def discover_partitions(
-            self, **key_types: type[PartitionKey]
+            self,
+            key_types: CompositeKeyTypes,
+            input_fingerprints: Optional[InputFingerprints] = None,
         ) -> tuple[TablePartition, ...]:
             return ()
 
-    t = Table().resolve_partition_key_spec(a=Int8Key, b=Int8Key)
+    t = Table().resolve_partition_key_spec(CompositeKeyTypes(a=Int8Key, b=Int8Key))
     assert t.dataset == "s_{tag}"
     assert t.name == "a_key_{a.key}__b_key_{b.key}"
 
 
 def test_Storage_discover_partitions() -> None:
     s = MockStorage(path="/test/{i.key}/file")
-    partitions = s.discover_partitions(i=Int8Key)
+    partitions = s.discover_partitions(CompositeKeyTypes(i=Int8Key))
     for i, sp in enumerate(sorted(partitions, key=lambda x: x.path)):
         assert sp.path == f"/test/{i}/file"
         assert isinstance(sp.keys["i"], Int8Key)
