@@ -1,8 +1,23 @@
 from typing import no_type_check
 
 
+def patch_TopologicalSorter_class_getitem() -> None:
+    """Patch adding TopologicalSorter.__class_getitem__ to support subscription.
+
+    TopologicalSorter is considered Generic in typeshed (hence mypy expects a type arg),
+    but is not at runtime.
+
+    Pending: https://github.com/python/cpython/pull/28714
+    """
+    from graphlib import TopologicalSorter
+    from types import GenericAlias
+
+    if not hasattr(TopologicalSorter, "__class_getitem__"):
+        TopologicalSorter.__class_getitem__ = classmethod(GenericAlias)  # type: ignore
+
+
 @no_type_check
-def patch_pydantic_ModelField__type_analysis():  # noqa # pragma: no cover
+def patch_pydantic_ModelField__type_analysis() -> None:  # noqa # pragma: no cover
     """Patch to work around a bug causing dict subclasses to be converted to stock dicts[1].
 
     A PR to fix has been submitted[2] but not yet released - this patch pulls from that.

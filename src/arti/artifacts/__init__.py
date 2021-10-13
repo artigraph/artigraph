@@ -13,11 +13,11 @@ from arti.formats import Format
 from arti.internal.models import Model
 from arti.internal.utils import classproperty
 from arti.partitions import CompositeKeyTypes, PartitionKey
-from arti.storage import Storage
+from arti.storage import InputFingerprints, Storage, StoragePartition
 from arti.types import Type
 
 if TYPE_CHECKING:
-    from arti.producers import Producer
+    from arti.producers import ProducerOutput
 
 
 class BaseArtifact(Model):
@@ -41,8 +41,8 @@ class BaseArtifact(Model):
     format: Format
     storage: Storage[Any]
 
-    # Hide the producer to prevent showing the entire upstream graph
-    producer: Optional[Producer] = Field(None, repr=False)
+    # Hide in repr to prevent showing the entire upstream graph
+    producer_output: Optional[ProducerOutput] = Field(None, repr=False)
 
     # Class level alias for `type`, which must be set on (non-abstract) subclasses.
     #
@@ -79,8 +79,10 @@ class BaseArtifact(Model):
     @classmethod
     def _validate_storage(cls, storage: Storage[Any], values: dict[str, Any]) -> Storage[Any]:
         if "type" in values and "format" in values:
-            storage = storage.resolve_partition_key_spec(**cls.partition_key_types)
             storage.supports(type_=values["type"], format=values["format"])
+            storage = storage.resolve_partition_key_spec(cls.partition_key_types).resolve_extension(
+                values["format"].extension
+            )
         return storage
 
     @classproperty
@@ -92,6 +94,12 @@ class BaseArtifact(Model):
     @classmethod
     def is_partitioned(cls) -> bool:
         return bool(cls.partition_key_types)
+
+    def discover_storage_partitions(
+        self, input_fingerprints: InputFingerprints = InputFingerprints()
+    ) -> tuple[StoragePartition, ...]:
+        # TODO: Should we support calculating the input fingerprints if not passed?
+        return self.storage.discover_partitions(self.partition_key_types, input_fingerprints)
 
 
 class Statistic(BaseArtifact):
@@ -155,4 +163,6 @@ class Artifact(BaseArtifact):
                 f"{type(value).__name__} produces {len(output_artifacts)} Artifacts. Try assigning each to a new name in the Graph!"
             )
 
-        raise NotImplementedError("Casting python objects to Artifacts is not implemented yet!")
+        raise NotImplementedError(
+            f"Casting python objects ({value}) to Artifacts is not implemented yet!"
+        )

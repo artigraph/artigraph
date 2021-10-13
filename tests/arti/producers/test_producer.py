@@ -1,5 +1,5 @@
 import re
-from typing import Annotated, Any, Optional
+from typing import Annotated, Optional
 
 import pytest
 
@@ -7,7 +7,8 @@ from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import frozendict
-from arti.producers import Producer
+from arti.producers import PartitionDependencies, Producer
+from arti.storage import StoragePartitions
 from arti.types import Int64, List, Struct
 from arti.views import python as python_views
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
@@ -21,7 +22,7 @@ class DummyProducer(Producer):
         pass
 
     @staticmethod
-    def map(a1: A1) -> Any:
+    def map(a1: StoragePartitions) -> PartitionDependencies:
         pass
 
 
@@ -50,7 +51,8 @@ def test_Producer_partitioned_input_validation() -> None:
         def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore
             pass
 
-    assert P._build_input_metadata_ == frozendict(a=(A, python_views.List))
+    assert P._input_artifact_types_ == frozendict(a=A)
+    assert P._build_input_views_ == frozendict(a=python_views.List)
 
     with pytest.raises(ValueError, match="dict.* cannot be used to represent List"):
 
@@ -92,9 +94,7 @@ def test_Producer_output_metadata() -> None:
             def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore
                 pass
 
-    with pytest.raises(
-        ValueError, match="NoArtifact.build 1st return - output Artifact is not set "
-    ):
+    with pytest.raises(ValueError, match="NoArtifact.build 1st return - Artifact is not set "):
 
         class NoArtifact(Producer):
             a1: A1
@@ -103,9 +103,7 @@ def test_Producer_output_metadata() -> None:
             def build(cls, a1: dict) -> Annotated[None, 5]:  # type: ignore
                 pass
 
-    with pytest.raises(
-        ValueError, match="DupArtifact.build 1st return - multiple output Artifacts set"
-    ):
+    with pytest.raises(ValueError, match="DupArtifact.build 1st return - multiple Artifacts set"):
 
         class DupArtifact(Producer):
             a1: A1
@@ -140,15 +138,17 @@ def test_Producer_out() -> None:
     # multi return Producer
     p2 = P2(a2=a2)
     a3_, a4_ = p2.out(a3, a4)
-    for (producer, inp, out, type_) in (
-        (p1, a2, a2_, A2),
-        (p2, a3, a3_, A3),
-        (p2, a4, a4_, A4),
+    for (producer, inp, out, type_, position) in (
+        (p1, a2, a2_, A2, 0),
+        (p2, a3, a3_, A3, 0),
+        (p2, a4, a4_, A4, 1),
     ):
         assert inp is not out
         assert isinstance(out, type_)
-        assert out.producer is producer
-        check_model_matches(inp, out, exclude={"producer"})
+        assert out.producer_output is not None
+        assert out.producer_output.producer == producer
+        assert out.producer_output.position == position
+        check_model_matches(inp, out, exclude={"producer_output"})
     assert list(p1) == [a2_]
     assert list(p2) == [a3_, a4_]
 
@@ -170,16 +170,19 @@ def test_Producer_map_artifacts() -> None:
             pass
 
         @staticmethod
-        def map(a1: A1) -> A2:
+        def map(a1: StoragePartitions) -> PartitionDependencies:
             pass
 
     assert P._map_input_metadata_ == frozendict(a1=A1)
 
-    with pytest.raises(ValueError, match="parameter type hint must match the field"):
+    with pytest.raises(
+        ValueError,
+        match="BadMapParam.map a1 param - type hint must be `StoragePartitions`",
+    ):
 
         class BadMapParam(P):
             @staticmethod
-            def map(a1: dict) -> A2:  # type: ignore
+            def map(a1: list) -> PartitionDependencies:  # type: ignore
                 pass
 
 
@@ -205,6 +208,10 @@ def test_Producer_build_outputs_check() -> None:
         @staticmethod
         def build() -> tuple[Annotated[list[dict], C], Annotated[list[dict], C]]:  # type: ignore
             pass
+
+        @staticmethod
+        def map() -> PartitionDependencies:
+            return PartitionDependencies()
 
     for first_output in [Annotated[int, A], Annotated[list[dict], C]]:  # type: ignore
         with pytest.raises(
@@ -250,7 +257,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
                 pass
 
             @classmethod
-            def map(cls, a1: dict) -> A2:  # type: ignore
+            def map(cls, a1: StoragePartitions) -> PartitionDependencies:
                 pass
 
     with pytest.raises(
@@ -407,7 +414,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             def build(cls) -> Annotated[dict, A2]:  # type: ignore
                 pass
 
-            def map(cls) -> A2:
+            def map(cls) -> PartitionDependencies:
                 pass
 
 

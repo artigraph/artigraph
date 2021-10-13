@@ -41,7 +41,8 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
             if not (
                 len(klass_args) == len(check_type_args)
                 and all(
-                    lenient_issubclass(klass_arg, check_type_arg)
+                    # check subclass OR things like "..."
+                    lenient_issubclass(klass_arg, check_type_arg) or klass_arg is check_type_arg
                     for (klass_arg, check_type_arg) in zip(klass_args, check_type_args)
                 )
             ):

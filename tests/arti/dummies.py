@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from typing import Annotated
+from typing import Annotated, Optional
 
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
-from arti.partitions import PartitionKey
+from arti.partitions import CompositeKeyTypes
 from arti.producers import Producer
 from arti.statistics import Statistic
-from arti.storage import Storage, StoragePartition
+from arti.storage import InputFingerprints, Storage, StoragePartition
 from arti.types import Int32, Struct, TypeSystem
 
 dummy_type_system = TypeSystem(key="dummy")
@@ -33,7 +33,9 @@ class DummyPartition(StoragePartition):
 class DummyStorage(Storage[DummyPartition]):
     key: str = "test"
 
-    def discover_partitions(self, **key_types: type[PartitionKey]) -> tuple[DummyPartition, ...]:
+    def discover_partitions(
+        self, key_types: CompositeKeyTypes, input_fingerprints: Optional[InputFingerprints] = None
+    ) -> tuple[DummyPartition, ...]:
         return (self.storage_partition_type(key=self.key),)
 
 

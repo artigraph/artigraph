@@ -11,7 +11,7 @@ from pydantic.fields import ModelField
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
-from arti.internal.utils import class_name, frozendict, register
+from arti.internal.utils import class_name, classproperty, frozendict, register
 
 
 class Type(Model):
@@ -151,6 +151,11 @@ class List(Type):
         if overlapping := set(cluster_by) & set(partition_by):
             raise ValueError(f"clustering fields overlap with partition fields: {overlapping}")
         return cluster_by
+
+    @classproperty
+    @classmethod
+    def is_partitioned(cls) -> bool:
+        return bool(cls.partition_fields)
 
     @property
     def partition_fields(self) -> frozendict[str, Type]:

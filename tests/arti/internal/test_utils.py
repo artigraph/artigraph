@@ -72,7 +72,7 @@ class B1(B):
 
 
 def test_dispatch() -> None:
-    @dispatch
+    @dispatch()
     def dispatch_test(a: A, b: B) -> Any:
         return "good_a_b"
 

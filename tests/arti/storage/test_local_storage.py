@@ -9,7 +9,7 @@ from typing import Iterator
 import pytest
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import DateKey
+from arti.partitions import CompositeKeyTypes, DateKey
 from arti.storage.local import LocalFile, LocalFilePartition
 
 
@@ -45,7 +45,7 @@ def test_local_partitioning(date_keys: frozenset[DateKey]) -> None:
     with tmp_date_files(date_keys, "test") as tmpdir:
         partitions = LocalFile(
             path=str(tmpdir / "{data_date.Y}" / "{data_date.m}" / "{data_date.d}" / "test")
-        ).discover_partitions(data_date=DateKey)
+        ).discover_partitions(CompositeKeyTypes(data_date=DateKey))
         for partition in partitions:
             assert isinstance(partition, LocalFilePartition)
             assert set(partition.keys) == {"data_date"}
@@ -64,7 +64,7 @@ def test_local_partitioning_filtered(date_keys: frozenset[DateKey]) -> None:
                     / "{data_date.d}"
                     / "test"
                 )
-            ).discover_partitions(data_date=DateKey)
+            ).discover_partitions(CompositeKeyTypes(data_date=DateKey))
             for partition in partitions:
                 assert isinstance(partition, LocalFilePartition)
                 assert set(partition.keys) == {"data_date"}
@@ -83,7 +83,7 @@ def test_local_partitioning_errors(date_keys: frozenset[DateKey]) -> None:
                 path=str(
                     tmpdir / "{data_date.Y[2021]}" / "{data_date.m}" / "{data_date.d}" / "test"
                 )
-            ).discover_partitions(date=DateKey)
+            ).discover_partitions(CompositeKeyTypes(date=DateKey))
 
 
 def test_local_file_partition_fingerprint() -> None:
