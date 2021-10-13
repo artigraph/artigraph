@@ -1,9 +1,10 @@
+import functools
 import importlib
 import inspect
 import os.path
 import pkgutil
 import threading
-from collections.abc import Callable, Generator, MutableMapping
+from collections.abc import Callable, Generator, Iterator, MutableMapping
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
@@ -52,18 +53,35 @@ REGISTERED = TypeVar("REGISTERED", bound=Callable[..., Any])
 
 # This may be less useful once mypy supports ParamSpecs - after that, we might be able to define
 # multidispatch with a ParamSpec and have mypy check the handlers' arguments are covariant.
-class dispatch(multidispatch[RETURN]):
+class Dispatch(multidispatch[RETURN]):
     """Multiple dispatch for a set of functions based on parameter type.
 
     Usage is similar to `@functools.singledispatch`. The original definition defines the "spec" that
     subsequent handlers must follow, namely the name and (base)class of parameters.
     """
 
-    def __init__(self, func: Callable[..., RETURN]) -> None:
+    # multimethod/multidispatch __new__/__init__ work a bit specially - __new__ doesn't
+    # call __init__, but instead
+
+    # Modified from multidispatch to allow our extra kwargs
+    def __new__(
+        cls, func: Callable[..., RETURN], once_before: Callable[[], None]
+    ) -> "Dispatch[RETURN]":
+        return functools.update_wrapper(dict.__new__(cls), func)
+
+    def __init__(self, func: Callable[..., RETURN], once_before: Callable[[], None]) -> None:
         super().__init__(func)
         self.clean_signature = tidy_signature(func, self.signature)
         if self.clean_signature.return_annotation not in (Any, type(None)):
             raise NotImplementedError("Return type checking is not implemented yet!")
+        self.once_before = once_before
+        self.once_before_finished = False
+
+    def __call__(self, *args: Any, **kwargs: Any) -> RETURN:
+        if not self.once_before_finished:
+            self.once_before()
+            self.once_before_finished = True
+        return super().__call__(*args, **kwargs)
 
     @overload
     def register(self, __func: REGISTERED) -> REGISTERED:
@@ -95,6 +113,15 @@ class dispatch(multidispatch[RETURN]):
                         f"Expected the `{func.__name__}.{name}` parameter to be a subclass of {spec_param.annotation}, got {sig_param.annotation}"
                     )
         return super().register(*args)  # type: ignore
+
+
+def dispatch(
+    once_before: Callable[[], None] = lambda: None
+) -> Callable[[Callable[..., RETURN]], Dispatch[RETURN]]:
+    def decorate(func: Callable[..., RETURN]) -> Dispatch[RETURN]:
+        return Dispatch(func, once_before)
+
+    return decorate
 
 
 # frozendict is useful for models to preserve hashability (eg: key in a dict). Unfortunately, there
@@ -155,6 +182,9 @@ _int_sub = TypeVar("_int_sub", bound="_int")
 class _int(int):
     def __repr__(self) -> str:
         return f"{qname(self)}({int(self)})"
+
+    def __str__(self) -> str:
+        return str(int(self))
 
     # Stock magics.
     #
@@ -348,7 +378,7 @@ class TypedBox(Box, MutableMapping[_K, Union[_V, MutableMapping[_K, _V]]]):
             return object.__setattr__(self, key, value)
         super().__setattr__(key, value)
 
-    def __cast_value(self, value: Any) -> _V:
+    def __cast_value(self, item: str, value: Any) -> _V:
         if isinstance(value, self.__target_type__):
             return value
         tgt_name = self.__target_type__.__name__
@@ -368,4 +398,12 @@ class TypedBox(Box, MutableMapping[_K, Union[_V, MutableMapping[_K, _V]]]):
         elif item in self:
             raise ValueError(f"{item} is already set!")
         else:
-            super()._Box__convert_and_store(item, self.__cast_value(value))
+            super()._Box__convert_and_store(item, self.__cast_value(item, value))
+
+    def walk(self, root: tuple[_K, ...] = ()) -> Iterator[tuple[tuple[_K, ...], _V]]:
+        for k, v in self.items():
+            subroot = root + (k,)
+            if isinstance(v, TypedBox):
+                yield from v.walk(root=subroot)
+            else:
+                yield subroot, v  # type: ignore

@@ -14,30 +14,40 @@ def test_python_View() -> None:
     for val, view, python_type in [
         (date(1970, 1, 1), Date, date),
         (datetime(1970, 1, 1, 0), Datetime, datetime),
-        (dict(a=1), Dict, dict),
+        (dict(a=1), Dict, dict[str, int]),
         (1.0, Float, float),
         (1, Int, int),
         (None, Null, NoneType),
         ("", Str, str),
     ]:
+        assert View.get_class_for(python_type) is view
+
+        test_type = view.type_system.to_artigraph(python_type, hints={})
+        test_format = Pickle()
+        test_view = view()
+
         binary = pickle.dumps(val)
         with named_temporary_file("w+b") as f:
+            test_storage_partition = LocalFilePartition(keys={}, path=f.name)
+
             f.write(binary)
             f.seek(0)
 
-            test_format = Pickle()
-            test_storage_partition = LocalFilePartition(keys={}, path=f.name)
-            test_view = view()
-            assert View._by_python_type_[python_type] is view
             # read returns a list, matching the passed partitions
-            data, *tail = read(
-                format=test_format, storage_partitions=[test_storage_partition], view=test_view
+            data = read(
+                type=test_type,
+                format=test_format,
+                storage_partitions=(test_storage_partition,),
+                view=test_view,
             )
             assert data == val
-            assert not tail
 
             f.truncate()
             write(
-                data, format=test_format, storage_partition=test_storage_partition, view=test_view
+                data,
+                type=test_type,
+                format=test_format,
+                storage_partition=test_storage_partition,
+                view=test_view,
             )
             assert f.read() == binary

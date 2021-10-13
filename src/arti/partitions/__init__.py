@@ -64,6 +64,8 @@ class PartitionKey(Model):
 CompositeKey = frozendict[str, PartitionKey]
 CompositeKeyTypes = frozendict[str, type[PartitionKey]]
 
+NotPartitioned = CompositeKey()
+
 
 class DateKey(PartitionKey):
     default_key_components = ("Y", "m", "d")

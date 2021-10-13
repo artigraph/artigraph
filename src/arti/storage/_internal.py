@@ -6,8 +6,11 @@ from typing import Any, Iterable, Literal, Optional, overload
 
 import parse
 
+from arti.fingerprints import Fingerprint
 from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey, CompositeKeyTypes, PartitionKey
+
+InputFingerprints = frozendict[CompositeKey, Fingerprint]
 
 
 class Placeholder:
@@ -28,6 +31,13 @@ class FormatPlaceholder(Placeholder):
 
     def __getattr__(self, attr: str) -> FormatPlaceholder:
         self._key = f"{self._key}.{attr}"
+        return self
+
+
+# Used to convert things like `/{date_key.Y[1970]` to `/{date_key.Y` so we can format in
+# *real* partition key values.
+class StripIndexPlaceholder(FormatPlaceholder):
+    def __getitem__(self, key: Any) -> StripIndexPlaceholder:
         return self
 
 
@@ -97,51 +107,63 @@ def partial_format(spec: str, **kwargs: Any) -> str:
     return string.Formatter().vformat(spec, (), FormatDict(FormatPlaceholder, **kwargs))
 
 
+# This is hacky...
+def strip_partition_indexes(spec: str) -> str:
+    return string.Formatter().vformat(spec, (), FormatDict(StripIndexPlaceholder))
+
+
 def spec_to_wildcard(spec: str, key_types: Mapping[str, type[PartitionKey]]) -> str:
     return string.Formatter().vformat(
-        spec, (), FormatDict(WildcardPlaceholder.with_key_types(key_types))
+        spec.replace("{input_fingerprint}", "*"),
+        (),
+        FormatDict(WildcardPlaceholder.with_key_types(key_types)),
     )
 
 
 @overload
-def extract_partition_keys(
+def extract_placeholders(
     *,
     error_on_no_match: Literal[False],
     key_types: Mapping[str, type[PartitionKey]],
     parser: parse.Parser,
     path: str,
     spec: str,
-) -> Optional[CompositeKey]:
+) -> tuple[Optional[Fingerprint], Optional[CompositeKey]]:
     ...
 
 
 @overload
-def extract_partition_keys(
+def extract_placeholders(
     *,
     error_on_no_match: Literal[True] = True,
     key_types: Mapping[str, type[PartitionKey]],
     parser: parse.Parser,
     path: str,
     spec: str,
-) -> CompositeKey:
+) -> tuple[Optional[Fingerprint], CompositeKey]:
     ...
 
 
-def extract_partition_keys(
+def extract_placeholders(
     *,
     error_on_no_match: bool = True,
     key_types: Mapping[str, type[PartitionKey]],
     parser: parse.Parser,
     path: str,
     spec: str,
-) -> Optional[CompositeKey]:
+) -> tuple[Optional[Fingerprint], Optional[CompositeKey]]:
     parsed_value = parser.parse(path)
     if parsed_value is None:
         if error_on_no_match:
             raise ValueError(f"Unable to parse '{path}' with '{spec}'.")
-        return None
+        return None, None
+    input_fingerprint = None
     key_components = defaultdict[str, dict[str, str]](dict)
     for k, v in parsed_value.named.items():
+        if k == "input_fingerprint":
+            assert isinstance(v, str)
+            input_fingerprint = Fingerprint.from_int(int(v))
+            continue
         key, component = k.split(".")
         # parsing a string like "{date.Y[1970]}" will return a dict like {'1970': '1970'}.
         if isinstance(v, dict):
@@ -156,14 +178,22 @@ def extract_partition_keys(
         raise ValueError(
             f"Expected to find partition keys for {sorted(key_types)}, only found {sorted(keys)}. Is the partitioning spec ('{spec}') complete?"
         )
-    return frozendict(keys)
+    return input_fingerprint, frozendict(keys)
 
 
-def parse_partition_keys(
-    paths: set[str], *, spec: str, key_types: Mapping[str, type[PartitionKey]]
-) -> Mapping[str, CompositeKey]:
+def parse_spec(
+    paths: set[str],
+    *,
+    input_fingerprints: InputFingerprints = InputFingerprints(),
+    key_types: Mapping[str, type[PartitionKey]],
+    spec: str,
+) -> Mapping[str, tuple[Optional[Fingerprint], CompositeKey]]:
     parser = parse.compile(spec, case_sensitive=True)
     return {
-        path: extract_partition_keys(parser=parser, path=path, spec=spec, key_types=key_types)
-        for path in paths
+        path: (input_fingerprint, keys)
+        for (path, (input_fingerprint, keys)) in (
+            (path, extract_placeholders(parser=parser, path=path, spec=spec, key_types=key_types))
+            for path in paths
+        )
+        if input_fingerprints.get(keys) == input_fingerprint
     }
