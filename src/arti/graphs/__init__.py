@@ -93,6 +93,7 @@ class ArtifactBox(TypedBox[str, Artifact]):
         return value
 
 
+ArtifactToNames = frozendict[Artifact, str]
 Node = Union[Artifact, Producer]
 NodeDependencies = frozendict[Node, frozenset[Node]]
 
@@ -107,6 +108,7 @@ class Graph(Model):
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
     _status: Optional[bool] = PrivateAttr(None)
     _artifacts: ArtifactBox = PrivateAttr(default_factory=lambda: ArtifactBox(**BOX_KWARGS[SEALED]))
+    _artifact_to_names: ArtifactToNames = PrivateAttr(default_factory=ArtifactToNames)
 
     def __enter__(self) -> Graph:
         if arti.context.graph is not None:
@@ -129,10 +131,17 @@ class Graph(Model):
     def _toggle(self, status: bool) -> None:
         self._status = status
         self._artifacts = ArtifactBox(self.artifacts, **BOX_KWARGS[status])
+        self._artifact_to_names = ArtifactToNames(
+            {artifact: names for names, artifact in self.artifacts.walk()}
+        )
 
     @property
     def artifacts(self) -> ArtifactBox:
         return self._artifacts
+
+    @property
+    def artifact_to_names(self) -> ArtifactToNames:
+        return self._artifact_to_names
 
     @requires_sealed
     def build(self, executor: Optional[Executor] = None) -> None:

@@ -36,6 +36,17 @@ def test_Graph(graph: Graph) -> None:
     assert isinstance(graph.artifacts.c.b, A4)
 
 
+def test_Graph_artifact_to_names(graph: Graph) -> None:
+    assert graph.artifact_to_names == frozendict(
+        {
+            graph.artifacts.a: ("a",),
+            graph.artifacts.b: ("b",),
+            graph.artifacts.c.a: ("c", "a"),
+            graph.artifacts.c.b: ("c", "b"),
+        }
+    )
+
+
 def test_Graph_build() -> None:
     side_effect = 0
 
