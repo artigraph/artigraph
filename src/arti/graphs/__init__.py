@@ -213,7 +213,7 @@ class Graph(Model):
         data: Any,
         *,
         artifact: Artifact,
-        input_fingerprint: Optional[Fingerprint] = None,
+        input_fingerprint: Fingerprint = Fingerprint.empty(),
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
     ) -> StoragePartition:

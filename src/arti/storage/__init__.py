@@ -88,11 +88,11 @@ class Storage(Model, Generic[_StoragePartition]):
     def generate_partition(
         self,
         keys: CompositeKey,
-        input_fingerprint: Optional[Fingerprint],
+        input_fingerprint: Fingerprint,
         with_fingerprint: bool = True,
     ) -> _StoragePartition:
         kwargs = dict[Any, Any](keys)
-        if input_fingerprint is not None:
+        if not input_fingerprint.is_empty:
             kwargs["input_fingerprint"] = str(input_fingerprint.key)
         field_values = {
             name: (
