@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 from contextlib import contextmanager
+from itertools import chain
 
 from pydantic import Field
 
@@ -21,6 +22,12 @@ class MemoryBackend(Backend):
         return self.artifact_partitions[artifact]
 
     def write_artifact_partitions(self, artifact: Artifact, partitions: StoragePartitions) -> None:
+        # NOTE: Be careful about deduping, otherwise we might have dup reads.
         self.artifact_partitions[artifact] = tuple(
-            set(self.artifact_partitions.get(artifact, ()) + partitions)
+            set(
+                chain(
+                    self.artifact_partitions.get(artifact, ()),
+                    (partition.with_fingerprint(keep_existing=True) for partition in partitions),
+                )
+            )
         )

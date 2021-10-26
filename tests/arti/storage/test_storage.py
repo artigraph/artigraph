@@ -33,9 +33,12 @@ class MockStorage(Storage[MockStoragePartition]):
 def test_StoragePartition_fingerprint() -> None:
     sp = MockStoragePartition(path="/tmp/test", keys={"key": Int8Key(key=5)})
     assert sp.fingerprint == Fingerprint.empty()
-    modified = sp.with_fingerprint()
+    populated = sp.with_fingerprint()
     assert sp.fingerprint == Fingerprint.empty()
-    assert modified.fingerprint == Fingerprint.from_string(sp.path)
+    assert populated.fingerprint == Fingerprint.from_string(sp.path)
+    assert populated.with_fingerprint(keep_existing=True) is populated
+    assert populated.with_fingerprint(keep_existing=False) == populated
+    assert populated.with_fingerprint(keep_existing=False) is not populated
 
 
 def test_Storage_init_subclass() -> None:

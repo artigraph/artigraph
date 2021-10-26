@@ -21,7 +21,9 @@ class StoragePartition(Model):
     keys: CompositeKey
     fingerprint: Fingerprint = Fingerprint.empty()
 
-    def with_fingerprint(self: _StoragePartition) -> _StoragePartition:
+    def with_fingerprint(self: _StoragePartition, keep_existing: bool = True) -> _StoragePartition:
+        if keep_existing and not self.fingerprint.is_empty:
+            return self
         return self.copy(update={"fingerprint": self.compute_fingerprint()})
 
     @abc.abstractmethod
