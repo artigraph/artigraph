@@ -1057,6 +1057,14 @@ optional = false
 python-versions = ">=3.5"
 
 [[package]]
+name = "pygraphviz"
+version = "1.7"
+description = "Python interface to Graphviz"
+category = "main"
+optional = false
+python-versions = ">=3.7"
+
+[[package]]
 name = "pylint"
 version = "2.11.1"
 description = "python code static checker"
@@ -1641,7 +1649,7 @@ python-versions = "*"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "0375f32cd4103bacbd9eea10efbdec6f1debbc0c6f5da503a0a5fa06a634a7aa"
+content-hash = "ce3df42dd1ca4100a71b74a91f5a3a07f0b4688f3034e3ba1be1da0220d363a9"
 
 [metadata.files]
 altair = [
@@ -2365,6 +2373,9 @@ pyflakes = [
 pygments = [
     {file = "Pygments-2.9.0-py3-none-any.whl", hash = "sha256:d66e804411278594d764fc69ec36ec13d9ae9147193a1740cd34d272ca383b8e"},
     {file = "Pygments-2.9.0.tar.gz", hash = "sha256:a18f47b506a429f6f4b9df81bb02beab9ca21d0a5fee38ed15aef65f0545519f"},
+]
+pygraphviz = [
+    {file = "pygraphviz-1.7.zip", hash = "sha256:a7bec6609f37cf1e64898c59f075afd659106cf9356c5f387cecaa2e0cdb2304"},
 ]
 pylint = [
     {file = "pylint-2.11.1-py3-none-any.whl", hash = "sha256:0f358e221c45cbd4dad2a1e4b883e75d28acdcccd29d40c76eb72b307269b126"},

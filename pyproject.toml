@@ -59,6 +59,7 @@ python-box = "^5.4.1"
 setuptools = "^58.2.0" # need find_namespace_packages, introduced in 40.1.0
 sgqlc = "^14.1"
 streamlit = "^1.0.0"
+pygraphviz = "^1.7"
 streamlit-agraph = "^0.0.35"
 
 [tool.poetry.dev-dependencies]
