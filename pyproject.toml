@@ -61,7 +61,7 @@ types-pyfarmhash = "^0.2.1"
 
 [tool.poetry.dev-dependencies]
 black = "21.9b0"
-coverage = {version = "^6.0", extras = ["toml"]} # pyproject.toml support
+coverage = {version = "^6.1", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
 ipdb = "^0.13.9"
 ipython = "^7.29.0"
