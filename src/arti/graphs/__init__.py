@@ -93,7 +93,7 @@ class ArtifactBox(TypedBox[str, Artifact]):
         return value
 
 
-ArtifactToNames = frozendict[Union[Artifact, Producer], str]
+ArtifactToNames = frozendict[Artifact, str]
 Node = Union[Artifact, Producer]
 NodeDependencies = frozendict[Node, frozenset[Node]]
 

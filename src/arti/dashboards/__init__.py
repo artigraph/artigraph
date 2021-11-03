@@ -2,13 +2,11 @@ from __future__ import annotations
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
-from datetime import datetime
-from typing import List, Union
+from typing import List
 
 import streamlit as st  # type: ignore
 from streamlit_agraph import Config, Edge, Node, agraph  # type: ignore
 
-from arti.artifacts import Artifact
 from arti.artifacts import Statistic as Statistic  # noqa: F401
 from arti.backends.memory import MemoryBackend
 from arti.graphs import Graph
@@ -67,7 +65,7 @@ class GraphDashboard(Model):
                 )
                 edges.extend(
                     Edge(
-                        source=self.graph.artifact_to_names[dep][0],
+                        source=self.graph.artifact_to_names[dep][0],  # type: ignore
                         target=node_id,
                         label=[name for name, artifact in node.inputs.items() if artifact == dep][
                             0
@@ -92,7 +90,7 @@ class GraphDashboard(Model):
                 if node.producer_output:
                     edges.extend(
                         Edge(
-                            source=self.producer_node_id(dep),
+                            source=self.producer_node_id(dep),  # type: ignore
                             target=node_id,
                             label=f"Output [{node.producer_output.position}]",
                             strokeWidth=2.5,
@@ -124,8 +122,9 @@ class GraphDashboard(Model):
         artifact_name_to_partitions = {}
         for artifact, names in self.graph.artifact_to_names.items():
             partitions = list(artifact.discover_storage_partitions())
+            # TODO - change .path to something generic to all partitions.
             artifact_name_to_partitions[names[0]] = {
-                partition.keys: partition.path for partition in partitions
+                partition.keys: partition.path for partition in partitions  # type: ignore
             }
         artifact_chosen = st.selectbox(
             "Select an Artifact:", list(artifact_name_to_partitions.keys())
@@ -143,7 +142,7 @@ class GraphDashboard(Model):
         )
 
     @staticmethod
-    def producer_node_id(producer: Union[Artifact, Producer]) -> str:
+    def producer_node_id(producer: Producer) -> str:
         """Unique identifier for Producers
 
         While the class name is an appropriate label, there might be duplicates, so it cannot be used for the ID.

@@ -50,6 +50,7 @@ def bootstrap_num(value: int, artifact: Artifact):
 
 with TemporaryDirectory() as _dir:
     dir = Path(_dir)
+    # Graph g - declaration
     with Graph(name="(a+b)*(c+d)") as g:
         # Input Artifacts - Nums
         g.artifacts.a = Num(storage=LocalFile(path=str(dir / "a.pkl")))
