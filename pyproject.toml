@@ -65,7 +65,7 @@ coverage = {version = "^6.1", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
 ipdb = "^0.13.9"
 ipython = "^7.29.0"
-isort = "5.10.0"
+isort = "5.10.1"
 mypy = "0.910"
 pre-commit = "2.15.0"
 pylint = "^2.11.1"
