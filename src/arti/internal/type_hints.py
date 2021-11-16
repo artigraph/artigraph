@@ -57,6 +57,7 @@ def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]
     if isinstance(class_or_tuple, tuple):
         return any(lenient_issubclass(klass, subtype) for subtype in class_or_tuple)
     check_type = class_or_tuple
+    # NOTE: py 3.10 supports issubclass with Unions (eg: `issubclass(str, str | int)`)
     if is_union_hint(check_type):
         return any(lenient_issubclass(klass, subtype) for subtype in get_args(check_type))
     return _check_issubclass(klass, check_type)
@@ -120,7 +121,7 @@ def signature(
 # Focusing on  3.9+ (for now)
 
 
-if sys.version_info < (3, 10):
+if sys.version_info < (3, 10):  # pragma: no cover
 
     def is_union(type_: Any) -> bool:
         return type_ is Union
