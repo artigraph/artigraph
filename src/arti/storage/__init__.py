@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 import abc
@@ -17,7 +15,7 @@ class StoragePartition(Model):
     keys: CompositeKey
     fingerprint: Optional[Fingerprint] = None
 
-    def with_fingerprint(self) -> StoragePartition:
+    def with_fingerprint(self) -> "StoragePartition":
         return self.copy(update={"fingerprint": self.compute_fingerprint()})
 
     @abc.abstractmethod

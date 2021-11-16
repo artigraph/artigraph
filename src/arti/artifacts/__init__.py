@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from itertools import chain
@@ -42,7 +40,7 @@ class BaseArtifact(Model):
     storage: Storage[Any]
 
     # Hide the producer to prevent showing the entire upstream graph
-    producer: Optional[Producer] = Field(None, repr=False)
+    producer: Optional["Producer"] = Field(None, repr=False)
 
     # TODO: Allow smarter type/format/storage merging w/ the default?
 
@@ -94,7 +92,7 @@ class Artifact(BaseArtifact):
         return tuple(chain(cls.__fields__[field.name].default, value))
 
     @classmethod
-    def cast(cls, value: Any) -> Artifact:
+    def cast(cls, value: Any) -> "Artifact":
         """Attempt to convert an arbitrary value to an appropriate Artifact instance.
 
         `Artifact.cast` is used to convert values assigned to an `Artifact.box` (such as
