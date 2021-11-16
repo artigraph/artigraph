@@ -1,7 +1,5 @@
 # NOTE: These stubs are partial
 
-from __future__ import annotations
-
 import re
 from typing import Literal, Optional, Union, overload
 

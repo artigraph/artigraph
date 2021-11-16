@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import math
 import operator as op
 import re
@@ -314,7 +312,7 @@ def test_TypedBox_bad_hint() -> None:
 def test_TypedBox_cast() -> None:
     class Coord(BaseCoord):
         @classmethod
-        def cast(cls, value: tuple[int, int]) -> Coord:
+        def cast(cls, value: tuple[int, int]) -> "Coord":
             return cls(*value)
 
     CoordBox = TypedBox[str, Coord]

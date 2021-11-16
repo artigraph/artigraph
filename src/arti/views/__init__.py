@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from typing import Any, ClassVar
@@ -16,7 +14,7 @@ class View(Model):
     """
 
     _abstract_ = True
-    _registry_: ClassVar[dict[type, type[View]]] = {}
+    _registry_: ClassVar[dict[type, type["View"]]] = {}
 
     priority: ClassVar[int] = 0  # Set priority of this view for its python_type. Higher is better.
     python_type: ClassVar[type]

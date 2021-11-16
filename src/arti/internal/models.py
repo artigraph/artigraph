@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 from collections.abc import Mapping, Sequence
 from functools import cached_property
 from typing import Annotated, Any, ClassVar, Literal, Optional, get_args, get_origin
@@ -145,8 +143,8 @@ class Model(BaseModel):
 
     @classmethod
     def _pydantic_type_system_post_field_conversion_hook_(
-        cls, type_: arti.types.Type, *, name: str, required: bool
-    ) -> arti.types.Type:
+        cls, type_: "arti.types.Type", *, name: str, required: bool
+    ) -> "arti.types.Type":
         return type_
 
 

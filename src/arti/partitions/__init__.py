@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 import abc
@@ -18,7 +16,7 @@ class key_component(property):
 
 class PartitionKey(Model):
     _abstract_ = True
-    _by_type_: ClassVar[dict[type[Type], type[PartitionKey]]] = {}
+    _by_type_: ClassVar[dict[type[Type], type["PartitionKey"]]] = {}
 
     matching_type: ClassVar[type[Type]]
 
@@ -40,15 +38,15 @@ class PartitionKey(Model):
 
     @classmethod
     @abc.abstractmethod
-    def from_key_components(cls, **key_components: str) -> PartitionKey:
+    def from_key_components(cls, **key_components: str) -> "PartitionKey":
         raise NotImplementedError(f"Unable to parse '{cls.__name__}' from: {key_components}")
 
     @classmethod
-    def key_type_for(cls, type_: Type) -> type[PartitionKey]:
+    def key_type_for(cls, type_: Type) -> type["PartitionKey"]:
         return cls._by_type_[type(type_)]
 
     @classmethod
-    def key_types_from(cls, type_: Type) -> frozendict[str, type[PartitionKey]]:
+    def key_types_from(cls, type_: Type) -> frozendict[str, type["PartitionKey"]]:
         if not isinstance(type_, Struct):
             return frozendict()
         return frozendict(

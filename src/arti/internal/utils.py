@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import inspect
 import os.path
 from collections.abc import Callable, Generator, MutableMapping
@@ -204,7 +202,7 @@ class _int(int):
 class int64(_int):
     _min, _max = -(2 ** 63), (2 ** 63) - 1
 
-    def __new__(cls, i: Union[int, int64, uint64]) -> int64:
+    def __new__(cls, i: Union[int, "int64", "uint64"]) -> "int64":
         if i > cls._max:
             if isinstance(i, uint64):
                 i = int(i) - uint64._max - 1
@@ -218,7 +216,7 @@ class int64(_int):
 class uint64(_int):
     _min, _max = 0, (2 ** 64) - 1
 
-    def __new__(cls, i: Union[int, int64, uint64]) -> uint64:
+    def __new__(cls, i: Union[int, int64, "uint64"]) -> "uint64":
         if i > cls._max:
             raise ValueError(f"{i} is too large for uint64.")
         if i < cls._min:

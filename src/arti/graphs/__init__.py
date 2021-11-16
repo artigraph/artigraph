@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from types import TracebackType
@@ -33,7 +31,7 @@ class Graph:
         # Seal the class and convert the Boxes
         self._toggle(sealed=True)
 
-    def __enter__(self) -> Graph:
+    def __enter__(self) -> "Graph":
         self._toggle(sealed=False)
         return self
 

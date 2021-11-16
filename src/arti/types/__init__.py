@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from collections.abc import Iterable, Iterator, Mapping
@@ -266,7 +264,7 @@ class _ScalarClassTypeAdapter(TypeAdapter):
         artigraph: type[Type],
         system: Any,
         priority: int = 0,
-        type_system: TypeSystem,
+        type_system: "TypeSystem",
         name: Optional[str] = None,
     ) -> type[TypeAdapter]:
         """Generate a _ScalarClassTypeAdapter subclass for the scalar system type."""

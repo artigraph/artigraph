@@ -1,5 +1,3 @@
-from __future__ import annotations
-
 import string
 from collections import defaultdict
 from collections.abc import Mapping
@@ -25,7 +23,7 @@ class WildcardPlaceholder:
                 f"'{self._name}' cannot be used directly in a partition path; access one of the key components (eg: '{self._name}.{example}')."
             )
 
-    def __getattr__(self, name: str) -> WildcardPlaceholder:
+    def __getattr__(self, name: str) -> "WildcardPlaceholder":
         if self._attribute is not None:
             raise ValueError(
                 f"'{self._name}.{self._attribute}.{name}' cannot be used in a partition path; only immediate '{self._name}' attributes (such as '{self._attribute}') can be used."
