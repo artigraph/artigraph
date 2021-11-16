@@ -4,7 +4,7 @@ import inspect
 import sys
 import types
 from collections.abc import Callable
-from typing import Any, Union, cast, get_args, get_origin, get_type_hints
+from typing import Any, Union, cast, get_args, get_origin, get_type_hints, no_type_check
 
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
@@ -128,9 +128,12 @@ if sys.version_info < (3, 10):
 
 else:  # pragma: no cover
 
+    # mypy doesn't know of types.UnionType yet, but `type: ignore` would be "unused"
+    # (and error) on other python versions.
+    @no_type_check
     def is_union(type_: Any) -> bool:
         # `Union[int, str]` or `int | str`
-        return type_ is Union or type_ is types.Union
+        return type_ is Union or type_ is types.UnionType  # noqa: E721
 
 
 def is_optional_hint(type_: Any) -> bool:
