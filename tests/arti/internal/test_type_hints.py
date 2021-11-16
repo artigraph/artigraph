@@ -79,7 +79,7 @@ def test_lenient_issubclass_false(
 
 def test_lenient_issubclass_error_cases() -> None:
     assert not lenient_issubclass(5, 5)  # type: ignore
-    with pytest.raises(TypeError, match="arg 2 must be a class or tuple of classes"):
+    with pytest.raises(TypeError, match="arg 2 must be a class"):
         lenient_issubclass(tuple, 5)  # type: ignore
 
 
