@@ -105,7 +105,10 @@ disable = """
 
 [tool.pytest.ini_options]
 addopts = "--black --cov --cov-report=term-missing --flake8 --isort --mypy --no-cov-on-fail "
-filterwarnings = ["error",]
+filterwarnings = [
+    "error",
+    "ignore:SelectableGroups dict interface is deprecated:DeprecationWarning:flake8"
+]
 testpaths = [
     "src/",
     "tests/",
