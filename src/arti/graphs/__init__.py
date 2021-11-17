@@ -22,9 +22,7 @@ from arti.producers import Producer
 from arti.storage import StoragePartition
 from arti.views import View
 
-if TYPE_CHECKING:
-    from arti.executors import Executor
-else:
+if not TYPE_CHECKING:
     from arti.internal.patches import patch_TopologicalSorter_class_getitem
 
     patch_TopologicalSorter_class_getitem()
@@ -47,7 +45,7 @@ _Return = TypeVar("_Return")
 
 def requires_sealed(fn: Callable[..., _Return]) -> Callable[..., _Return]:
     @wraps(fn)
-    def check_if_sealed(self: Graph, *args: Any, **kwargs: Any) -> _Return:
+    def check_if_sealed(self: "Graph", *args: Any, **kwargs: Any) -> _Return:
         if self._status is not SEALED:
             raise ValueError(f"{fn.__name__} cannot be used while the Graph is still being defined")
         return fn(self, *args, **kwargs)
@@ -133,7 +131,7 @@ class Graph(Model):
         return self._artifacts
 
     @requires_sealed
-    def build(self, executor: Optional[Executor] = None) -> None:
+    def build(self, executor: Optional["Executor"] = None) -> None:
         if executor is None:
             from arti.executors.local import LocalExecutor
 
@@ -236,3 +234,6 @@ class Graph(Model):
         with self.backend.connect() as backend:
             backend.write_artifact_partitions(artifact, (storage_partition,))
         return cast(StoragePartition, storage_partition)
+
+
+from arti.executors import Executor  # noqa: E402
