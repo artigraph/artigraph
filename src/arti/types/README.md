@@ -1,0 +1,3 @@
+# Type
+
+Artigraph will define a broad set of core scalar and container types, aiming to be a superset of other type systems, including extension types. External TypeSystems can then be defined with TypeAdaptors that support adapting the high specificity Artigraph types to other systems (note: not all conversions are information preserving). This model allows for a hub-and-spoke collection of types systems that can be dynamically converted. This structure will ensure users only have to work with one core type definition, rather than knowing how to define Pandas, Parquet, BigQuery, and other schema definitions.
