@@ -1,7 +1,7 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from itertools import chain
-from typing import TYPE_CHECKING, Any, ClassVar, Optional
+from typing import Any, ClassVar, Optional
 
 from pydantic import Field, validator
 from pydantic.fields import ModelField
@@ -13,9 +13,6 @@ from arti.internal.utils import classproperty
 from arti.partitions import CompositeKeyTypes, PartitionKey
 from arti.storage import InputFingerprints, Storage, StoragePartition
 from arti.types import Type
-
-if TYPE_CHECKING:
-    from arti.producers import ProducerOutput
 
 
 class BaseArtifact(Model):
@@ -165,4 +162,5 @@ class Artifact(BaseArtifact):
             f"Casting python objects ({value}) to Artifacts is not implemented yet!"
         )
 
-from arti.producers import ProducerOutput
+
+from arti.producers import ProducerOutput  # noqa: E402

@@ -25,11 +25,11 @@ class FormatPlaceholder(Placeholder):
             result += ":" + spec
         return "{" + result + "}"
 
-    def __getitem__(self, key: Any) -> FormatPlaceholder:
+    def __getitem__(self, key: Any) -> "FormatPlaceholder":
         self._key = f"{self._key}[{key}]"
         return self
 
-    def __getattr__(self, attr: str) -> FormatPlaceholder:
+    def __getattr__(self, attr: str) -> "FormatPlaceholder":
         self._key = f"{self._key}.{attr}"
         return self
 
@@ -37,7 +37,7 @@ class FormatPlaceholder(Placeholder):
 # Used to convert things like `/{date_key.Y[1970]` to `/{date_key.Y` so we can format in
 # *real* partition key values.
 class StripIndexPlaceholder(FormatPlaceholder):
-    def __getitem__(self, key: Any) -> StripIndexPlaceholder:
+    def __getitem__(self, key: Any) -> "StripIndexPlaceholder":
         return self
 
 
@@ -52,7 +52,7 @@ class WildcardPlaceholder(Placeholder):
     @classmethod
     def with_key_types(
         cls, key_types: Mapping[str, type[PartitionKey]]
-    ) -> Callable[[str], WildcardPlaceholder]:
+    ) -> Callable[[str], "WildcardPlaceholder"]:
         return partial(cls, key_types=key_types)
 
     def _err_if_no_attribute(self) -> None:

@@ -28,7 +28,7 @@ class View(Model):
             register(cls._by_python_type_, cls.python_type, cls, lambda x: x.priority)
 
     @classmethod
-    def get_class_for(cls, annotation: Any) -> type[View]:
+    def get_class_for(cls, annotation: Any) -> type["View"]:
         import_submodules(__path__, __name__)
 
         origin, args = get_origin(annotation), get_args(annotation)
