@@ -123,6 +123,7 @@ def test_List() -> None:
     assert lst.partition_by == ()
     assert lst.cluster_by == ()
     assert lst.partition_fields == frozendict()
+    assert lst.is_partitioned is False
 
 
 def test_List_partitioned() -> None:
@@ -132,6 +133,7 @@ def test_List_partitioned() -> None:
     assert lst.partition_by == ("x",)
     assert lst.cluster_by == ("y",)
     assert lst.partition_fields == frozendict({"x": fields["x"]})
+    assert lst.is_partitioned is True
 
     with pytest.raises(ValueError, match="requires element to be a Struct"):
         List(element=Int32(), partition_by=("x",))

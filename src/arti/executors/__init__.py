@@ -11,4 +11,4 @@ from arti.internal.models import Model
 class Executor(Model):
     @abc.abstractmethod
     def build(self, graph: Graph) -> None:
-        pass
+        raise NotImplementedError()
