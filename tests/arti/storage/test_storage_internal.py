@@ -15,6 +15,7 @@ from arti.storage._internal import (
     parse_spec,
     partial_format,
     spec_to_wildcard,
+    strip_partition_indexes,
 )
 
 PathPlaceholders = dict[str, tuple[Optional[Fingerprint], CompositeKey]]
@@ -155,6 +156,18 @@ def test_partial_format(spec: str, expected: str, kwargs: dict[str, str]) -> Non
 @pytest.mark.xfail(raises=IndexError)
 def test_partial_format_positional_args() -> None:
     partial_format("{}")
+
+
+@pytest.mark.parametrize(
+    ("spec", "expected"),
+    (
+        ("baseline", "baseline"),
+        ("{a}", "{a}"),
+        ("{a[b]}", "{a}"),
+    ),
+)
+def test_strip_partition_indexes(spec: str, expected: str) -> None:
+    assert strip_partition_indexes(spec) == expected
 
 
 def test_spec_to_wildcard(PKs: dict[str, type[PartitionKey]]) -> None:
