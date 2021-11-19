@@ -7,4 +7,4 @@ An Artifact is comprised of three key elements:
 - `format`: the data's serialized format, such as CSV, Parquet, database native, etc.
 - `storage`: the data's persistent storage system, such as blob storage, database native, etc.
 
-In addition to the core elements, an Artifact can be tagged with additional `annotations` (to associate it with human knowledge) and `statistics` (to track derived characteristics over time).
+In addition to the core elements, an Artifact can be tagged with additional `Annotations` (to associate it with human knowledge) and `Statistics` (to track derived characteristics over time).
