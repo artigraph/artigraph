@@ -59,7 +59,7 @@ def test_PartitionKey_subclass() -> None:
     with pytest.raises(TypeError, match="NoMatchingTypeKey must set `matching_type`"):
 
         class NoMatchingTypeKey(AbstractKey):
-            default_key_components = ("key",)
+            default_key_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
 
     with pytest.raises(
         TypeError,
@@ -69,11 +69,11 @@ def test_PartitionKey_subclass() -> None:
     ):
 
         class UnknownDefaultKey(AbstractKey):
-            default_key_components = ("junk",)
+            default_key_components: ClassVar[frozendict[str, str]] = frozendict(junk="junk")
             matching_type = Int8
 
     class SomeKey(AbstractKey):
-        default_key_components = ("key",)
+        default_key_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
         matching_type = Int8
 
     assert AbstractKey._by_type_ == {Int8: SomeKey}

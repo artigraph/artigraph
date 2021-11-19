@@ -143,11 +143,9 @@ class Storage(Model, Generic[_StoragePartition]):
 
     def resolve_partition_key_spec(self: _Storage, key_types: CompositeKeyTypes) -> _Storage:
         key_component_specs = {
-            f"{name}{self.partition_name_component_sep}{key_component}": (
-                "{" + f"{name}.{key_component}" + "}"
-            )
+            f"{name}{self.partition_name_component_sep}{component_name}": f"{{{name}.{component_spec}}}"
             for name, pk in key_types.items()
-            for key_component in pk.default_key_components
+            for component_name, component_spec in pk.default_key_components.items()
         }
         return self.resolve(
             partition_key_spec=self.segment_sep.join(
