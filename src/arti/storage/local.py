@@ -14,7 +14,7 @@ from arti.storage._internal import parse_spec, spec_to_wildcard
 class LocalFilePartition(StoragePartition):
     path: str
 
-    def compute_fingerprint(self, buffer_size: int = 1024 * 1024) -> Fingerprint:
+    def compute_content_fingerprint(self, buffer_size: int = 1024 * 1024) -> Fingerprint:
         with open(self.path, mode="rb") as f:
             sha = hashlib.sha1()
             data = f.read(buffer_size)
@@ -47,8 +47,9 @@ class LocalFile(Storage[LocalFilePartition]):
         )
         return tuple(
             self.storage_partition_type(
-                path=path,
+                input_fingerprint=input_fingerprint,
                 keys=keys,
+                path=path,
             )
             for path, (input_fingerprint, keys) in path_metadata.items()
         )

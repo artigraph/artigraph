@@ -27,7 +27,10 @@ class MemoryBackend(Backend):
             set(
                 chain(
                     self.artifact_partitions.get(artifact, ()),
-                    (partition.with_fingerprint(keep_existing=True) for partition in partitions),
+                    (
+                        partition.with_content_fingerprint(keep_existing=True)
+                        for partition in partitions
+                    ),
                 )
             )
         )
