@@ -19,16 +19,21 @@ _StoragePartition = TypeVar("_StoragePartition", bound="StoragePartition")
 
 class StoragePartition(Model):
     keys: CompositeKey
-    fingerprint: Fingerprint = Fingerprint.empty()
+    input_fingerprint: Fingerprint = Fingerprint.empty()
+    content_fingerprint: Fingerprint = Fingerprint.empty()
 
-    def with_fingerprint(self: _StoragePartition, keep_existing: bool = True) -> _StoragePartition:
-        if keep_existing and not self.fingerprint.is_empty:
+    def with_content_fingerprint(
+        self: _StoragePartition, keep_existing: bool = True
+    ) -> _StoragePartition:
+        if keep_existing and not self.content_fingerprint.is_empty:
             return self
-        return self.copy(update={"fingerprint": self.compute_fingerprint()})
+        return self.copy(update={"content_fingerprint": self.compute_content_fingerprint()})
 
     @abc.abstractmethod
-    def compute_fingerprint(self) -> Fingerprint:
-        raise NotImplementedError("{type(self).__name__}.compute_fingerprint is not implemented!")
+    def compute_content_fingerprint(self) -> Fingerprint:
+        raise NotImplementedError(
+            "{type(self).__name__}.compute_content_fingerprint is not implemented!"
+        )
 
 
 StoragePartitions = tuple[StoragePartition, ...]  # type: ignore
@@ -89,7 +94,7 @@ class Storage(Model, Generic[_StoragePartition]):
         self,
         keys: CompositeKey,
         input_fingerprint: Fingerprint,
-        with_fingerprint: bool = True,
+        with_content_fingerprint: bool = True,
     ) -> _StoragePartition:
         kwargs = dict[Any, Any](keys)
         if not input_fingerprint.is_empty:
@@ -103,9 +108,11 @@ class Storage(Model, Generic[_StoragePartition]):
             for name in self.__fields__
             if name in self.storage_partition_type.__fields__
         }
-        partition = self.storage_partition_type(keys=keys, **field_values)
-        if with_fingerprint:
-            partition = partition.with_fingerprint()
+        partition = self.storage_partition_type(
+            input_fingerprint=input_fingerprint, keys=keys, **field_values
+        )
+        if with_content_fingerprint:
+            partition = partition.with_content_fingerprint()
         return partition
 
     def _resolve_field(self, spec: str, placeholder_values: dict[str, str]) -> str:

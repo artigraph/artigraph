@@ -26,7 +26,7 @@ class DummyFormat(Format):
 class DummyPartition(StoragePartition):
     key: str = "test"
 
-    def compute_fingerprint(self) -> Fingerprint:
+    def compute_content_fingerprint(self) -> Fingerprint:
         return Fingerprint.from_string(self.key)
 
 

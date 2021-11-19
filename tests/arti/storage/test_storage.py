@@ -12,7 +12,7 @@ from arti.storage import InputFingerprints, Storage, StoragePartition
 class MockStoragePartition(StoragePartition):
     path: str
 
-    def compute_fingerprint(self) -> Fingerprint:
+    def compute_content_fingerprint(self) -> Fingerprint:
         return Fingerprint.from_string(self.path)
 
 
@@ -30,15 +30,15 @@ class MockStorage(Storage[MockStoragePartition]):
         )
 
 
-def test_StoragePartition_fingerprint() -> None:
+def test_StoragePartition_content_fingerprint() -> None:
     sp = MockStoragePartition(path="/tmp/test", keys={"key": Int8Key(key=5)})
-    assert sp.fingerprint == Fingerprint.empty()
-    populated = sp.with_fingerprint()
-    assert sp.fingerprint == Fingerprint.empty()
-    assert populated.fingerprint == Fingerprint.from_string(sp.path)
-    assert populated.with_fingerprint(keep_existing=True) is populated
-    assert populated.with_fingerprint(keep_existing=False) == populated
-    assert populated.with_fingerprint(keep_existing=False) is not populated
+    assert sp.content_fingerprint == Fingerprint.empty()
+    populated = sp.with_content_fingerprint()
+    assert sp.content_fingerprint == Fingerprint.empty()
+    assert populated.content_fingerprint == Fingerprint.from_string(sp.path)
+    assert populated.with_content_fingerprint(keep_existing=True) is populated
+    assert populated.with_content_fingerprint(keep_existing=False) == populated
+    assert populated.with_content_fingerprint(keep_existing=False) is not populated
 
 
 def test_Storage_init_subclass() -> None:
@@ -100,7 +100,7 @@ def test_Storage_resolve_partition_key_spec_extra() -> None:
         dataset: str
         name: str
 
-        def compute_fingerprint(self) -> Fingerprint:
+        def compute_content_fingerprint(self) -> Fingerprint:
             return Fingerprint.empty()
 
     class Table(Storage[TablePartition]):

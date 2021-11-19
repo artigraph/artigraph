@@ -2,7 +2,7 @@ import string
 from collections import defaultdict
 from collections.abc import Callable, Mapping
 from functools import partial
-from typing import Any, Iterable, Literal, Optional, overload
+from typing import Any, Iterable, Optional
 
 import parse
 
@@ -120,30 +120,6 @@ def spec_to_wildcard(spec: str, key_types: Mapping[str, type[PartitionKey]]) -> 
     )
 
 
-@overload
-def extract_placeholders(
-    *,
-    error_on_no_match: Literal[False],
-    key_types: Mapping[str, type[PartitionKey]],
-    parser: parse.Parser,
-    path: str,
-    spec: str,
-) -> tuple[Optional[Fingerprint], Optional[CompositeKey]]:
-    ...
-
-
-@overload
-def extract_placeholders(
-    *,
-    error_on_no_match: Literal[True] = True,
-    key_types: Mapping[str, type[PartitionKey]],
-    parser: parse.Parser,
-    path: str,
-    spec: str,
-) -> tuple[Optional[Fingerprint], CompositeKey]:
-    ...
-
-
 def extract_placeholders(
     *,
     error_on_no_match: bool = True,
@@ -151,13 +127,13 @@ def extract_placeholders(
     parser: parse.Parser,
     path: str,
     spec: str,
-) -> tuple[Optional[Fingerprint], Optional[CompositeKey]]:
+) -> tuple[Fingerprint, CompositeKey]:
     parsed_value = parser.parse(path)
     if parsed_value is None:
         if error_on_no_match:
             raise ValueError(f"Unable to parse '{path}' with '{spec}'.")
-        return None, None
-    input_fingerprint = None
+        return Fingerprint.empty(), CompositeKey()
+    input_fingerprint = Fingerprint.empty()
     key_components = defaultdict[str, dict[str, str]](dict)
     for k, v in parsed_value.named.items():
         if k == "input_fingerprint":
@@ -187,7 +163,7 @@ def parse_spec(
     input_fingerprints: InputFingerprints = InputFingerprints(),
     key_types: Mapping[str, type[PartitionKey]],
     spec: str,
-) -> Mapping[str, tuple[Optional[Fingerprint], CompositeKey]]:
+) -> Mapping[str, tuple[Fingerprint, CompositeKey]]:
     parser = parse.compile(spec, case_sensitive=True)
     return {
         path: (input_fingerprint, keys)
@@ -195,5 +171,5 @@ def parse_spec(
             (path, extract_placeholders(parser=parser, path=path, spec=spec, key_types=key_types))
             for path in paths
         )
-        if input_fingerprints.get(keys) == input_fingerprint
+        if input_fingerprints.get(keys, Fingerprint.empty()) == input_fingerprint
     }

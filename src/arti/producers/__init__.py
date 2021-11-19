@@ -273,7 +273,7 @@ class Producer(Model):
     ) -> Fingerprint:
         return self.fingerprint.combine(
             *(
-                partition.fingerprint
+                partition.content_fingerprint
                 for name, partitions in dependency_partitions.items()
                 for partition in partitions
             )

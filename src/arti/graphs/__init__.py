@@ -218,7 +218,7 @@ class Graph(Model):
         if view is None:
             view = View.get_class_for(type(data))()
         storage_partition = artifact.storage.generate_partition(
-            input_fingerprint=input_fingerprint, keys=keys, with_fingerprint=False
+            input_fingerprint=input_fingerprint, keys=keys, with_content_fingerprint=False
         )
         io.write(
             data,
@@ -227,7 +227,7 @@ class Graph(Model):
             storage_partition=storage_partition,
             view=view,
         )
-        storage_partition = storage_partition.with_fingerprint()
+        storage_partition = storage_partition.with_content_fingerprint()
         # TODO: Should we only do this in bulk? We might want the backends to
         # transparently batch requests, but that's not so friendly with the transient
         # ".connect".
