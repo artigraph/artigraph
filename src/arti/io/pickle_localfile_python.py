@@ -34,7 +34,8 @@ def _read_pickle_localfile_python(
             )
         )
     else:
-        assert len(storage_partitions) == 1
+        if len(storage_partitions) != 1:
+            raise ValueError(f"Multiple partitions can only be read into a list, not {view}")
         return _read_pickle_file(storage_partitions[0].path)
 
 
