@@ -18,7 +18,7 @@ class PartitionKey(Model):
     _abstract_ = True
     _by_type_: ClassVar[dict[type[Type], type["PartitionKey"]]] = {}
 
-    default_key_components: ClassVar[tuple[str, ...]]
+    default_key_components: ClassVar[frozendict[str, str]]
     matching_type: ClassVar[type[Type]]
 
     @classmethod
@@ -68,7 +68,7 @@ NotPartitioned = CompositeKey()
 
 
 class DateKey(PartitionKey):
-    default_key_components = ("Y", "m", "d")
+    default_key_components: ClassVar[frozendict[str, str]] = frozendict(Y="Y", m="m:02", d="d:02")
     matching_type = Date
 
     key: date
@@ -103,7 +103,7 @@ class DateKey(PartitionKey):
 
 class _IntKey(PartitionKey):
     _abstract_ = True
-    default_key_components = ("key",)
+    default_key_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
 
     key: int
 
@@ -138,7 +138,7 @@ class Int64Key(_IntKey):
 
 
 class NullKey(PartitionKey):
-    default_key_components = ("key",)
+    default_key_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
     matching_type = Null
 
     key: None = None

@@ -74,7 +74,7 @@ def test_Storage_init_subclass() -> None:
         ),
         (
             "/tmp/test/{partition_key_spec}",
-            "/tmp/test/date_Y={date.Y}/date_m={date.m}/date_d={date.d}",
+            "/tmp/test/date_Y={date.Y}/date_m={date.m:02}/date_d={date.d:02}",
             {"date": DateKey},
         ),
         (
