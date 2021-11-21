@@ -5,7 +5,8 @@ from typing import Optional
 import pytest
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import CompositeKeyTypes, DateKey, Int8Key
+from arti.internal.utils import frozendict
+from arti.partitions import CompositeKey, CompositeKeyTypes, DateKey, Int8Key
 from arti.storage import InputFingerprints, Storage, StoragePartition
 
 
@@ -17,7 +18,6 @@ class MockStoragePartition(StoragePartition):
 
 
 class MockStorage(Storage[MockStoragePartition]):
-    # TODO: Add default
     path: str
 
     def discover_partitions(
@@ -31,7 +31,7 @@ class MockStorage(Storage[MockStoragePartition]):
 
 
 def test_StoragePartition_content_fingerprint() -> None:
-    sp = MockStoragePartition(path="/tmp/test", keys={"key": Int8Key(key=5)})
+    sp = MockStoragePartition(path="/tmp/test", keys={})
     assert sp.content_fingerprint == Fingerprint.empty()
     populated = sp.with_content_fingerprint()
     assert sp.content_fingerprint == Fingerprint.empty()
@@ -62,6 +62,29 @@ def test_Storage_init_subclass() -> None:
 
     assert not hasattr(Storage, "storage_partition_type")
     assert S.storage_partition_type is MockStoragePartition  # type: ignore
+
+
+def test_Storage_resolve_extension() -> None:
+    s = MockStorage(path="{extension}")
+    assert s.resolve_extension("test") == MockStorage(path="test")
+    assert s.resolve_extension(None) == MockStorage(path="")
+
+
+def test_Storage_resolve_graph_name() -> None:
+    s = MockStorage(path="/{graph_name}/junk")
+    assert s.resolve_graph_name("test") == MockStorage(path="/test/junk")
+    # Confirm we strip trailing (ie: dup) separators when resolving an empty placeholder.
+    assert s.resolve_graph_name("") == MockStorage(path="/junk")
+
+
+def test_Storage_resolve_names() -> None:
+    s = MockStorage(path="/{names}")
+    assert s.resolve_names(("a", "b")) == MockStorage(path="/a/b")
+    assert s.resolve_names(()) == MockStorage(path="/")
+
+    s = MockStorage(path="/{names}/junk/{name}")
+    assert s.resolve_names(("a", "b")) == MockStorage(path="/a/b/junk/b")
+    assert s.resolve_names(()) == MockStorage(path="/junk/")
 
 
 @pytest.mark.parametrize(
@@ -123,6 +146,12 @@ def test_Storage_resolve_partition_key_spec_extra() -> None:
     assert t.name == "a_key_{a.key}__b_key_{b.key}"
 
 
+def test_Storage_resolve_path_tags() -> None:
+    s = MockStorage(path="{path_tags}")
+    assert s.resolve_path_tags(frozendict(a="b")) == MockStorage(path="a=b")
+    assert s.resolve_path_tags(frozendict()) == MockStorage(path="")
+
+
 def test_Storage_discover_partitions() -> None:
     s = MockStorage(path="/test/{i.key}/file")
     partitions = s.discover_partitions(CompositeKeyTypes(i=Int8Key))
@@ -130,3 +159,36 @@ def test_Storage_discover_partitions() -> None:
         assert sp.path == f"/test/{i}/file"
         assert isinstance(sp.keys["i"], Int8Key)
         assert sp.keys["i"].key == i
+
+
+def test_Storage_generate_partition() -> None:
+    keys = CompositeKey(i=Int8Key(key=5))
+    input_fingerprint = Fingerprint.from_int(10)
+    s = MockStorage(path="{i.key:02}/{input_fingerprint}")
+    expected_partition = MockStoragePartition(
+        input_fingerprint=input_fingerprint,
+        keys=keys,
+        path="05/10",
+    )
+
+    output = s.generate_partition(keys=keys, input_fingerprint=input_fingerprint)
+    assert output == expected_partition.with_content_fingerprint()
+
+    output = s.generate_partition(
+        keys=keys, input_fingerprint=input_fingerprint, with_content_fingerprint=True
+    )
+    assert output == expected_partition.with_content_fingerprint()
+
+    output = s.generate_partition(
+        keys=keys, input_fingerprint=input_fingerprint, with_content_fingerprint=False
+    )
+    assert output == expected_partition
+
+    # Check behavior when the Storage spec doesn't align with the passed in keys/fingerprint. We'll
+    # probably want nicer error messages for these eventually.
+    with pytest.raises(KeyError, match="i"):
+        s.generate_partition(
+            keys=CompositeKey(j=Int8Key(key=5)), input_fingerprint=input_fingerprint
+        )
+    with pytest.raises(KeyError, match="input_fingerprint"):  # empty fingerprints aren't filled in
+        s.generate_partition(keys=keys, input_fingerprint=Fingerprint.empty())
