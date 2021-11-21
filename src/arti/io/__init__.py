@@ -1,6 +1,6 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import partial
 from typing import Any, cast
 
@@ -22,7 +22,7 @@ _import_submodules = cast(Callable[[], None], partial(import_submodules, __path_
 
 @dispatch(once_before=_import_submodules)
 def read(
-    type: Type, format: Format, storage_partitions: tuple[StoragePartition, ...], view: View
+    type: Type, format: Format, storage_partitions: Sequence[StoragePartition], view: View
 ) -> Any:
     raise NotImplementedError(
         f"Read into {view} view from {format} format in {storage_partitions} storage not implemented."
