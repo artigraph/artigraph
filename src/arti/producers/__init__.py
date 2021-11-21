@@ -333,19 +333,24 @@ def producer(
     def decorate(build: BuildSig) -> type[Producer]:
         nonlocal name
         name = build.__name__ if name is None else name
-        input_artifacts = {}
+        __annotations__ = {}
         for param in signature(build).parameters.values():
             with wrap_exc(ValueError, prefix=f"{name} {param.name} param"):
-                input_artifacts[param.name] = Producer._get_artifact_from_annotation(
+                __annotations__[param.name] = Producer._get_artifact_from_annotation(
                     param.annotation
                 )
+        # If overriding, set an explicit "annotations" hint until [1] is released.
+        #
+        # 1: https://github.com/samuelcolvin/pydantic/pull/3018
+        if annotations:
+            __annotations__["annotations"] = tuple[Annotation, ...]  # type: ignore
         return type(
-            build.__name__,
+            name,
             (Producer,),
             {
                 k: v
                 for k, v in {
-                    "__annotations__": input_artifacts,
+                    "__annotations__": __annotations__,
                     "annotations": annotations,
                     "build": staticmethod(build),
                     "map": None if map is None else staticmethod(map),
