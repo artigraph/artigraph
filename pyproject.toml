@@ -12,6 +12,7 @@ target-version = ['py38']
 exclude_lines = [
     "@overload",
     "if TYPE_CHECKING:",
+    "if not TYPE_CHECKING:",
     "pragma: no cover",
     "raise NotImplemented",
     "raise NotImplementedError",

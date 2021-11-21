@@ -84,8 +84,7 @@ class ArtifactBox(TypedBox[str, Artifact]):
 
     def _Box__get_default(self, item: str, attr: bool = False) -> Any:
         value = super()._Box__get_default(item, attr=attr)  # type: ignore
-        if isinstance(value, ArtifactBox):
-            object.__setattr__(value, "_path", self._path + (item,))
+        object.__setattr__(value, "_path", self._path + (item,))
         return value
 
 

@@ -118,7 +118,7 @@ class Storage(Model, Generic[_StoragePartition]):
     def _resolve_field(self, spec: str, placeholder_values: dict[str, str]) -> str:
         for placeholder, value in placeholder_values.items():
             if not value:
-                # Strip placeholder *and* any trailing self.segment_sep
+                # Strip placeholder *and* any trailing self.segment_sep.
                 trim = "{" + placeholder + "}"
                 if f"{trim}{self.segment_sep}" in spec:
                     trim = f"{trim}{self.segment_sep}"
