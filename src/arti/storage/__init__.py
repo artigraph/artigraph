@@ -38,6 +38,9 @@ class StoragePartition(Model):
 
 StoragePartitions = tuple[StoragePartition, ...]  # type: ignore
 
+# mypy doesn't (yet?) support nested TypeVars[1], so mark internal as Any.
+#
+# 1: https://github.com/python/mypy/issues/2756
 _Storage = TypeVar("_Storage", bound="Storage[Any]")
 
 
