@@ -96,12 +96,12 @@ class Storage(Model, Generic[_StoragePartition]):
         input_fingerprint: Fingerprint,
         with_content_fingerprint: bool = True,
     ) -> _StoragePartition:
-        kwargs = dict[Any, Any](keys)
+        format_kwargs = dict[Any, Any](keys)
         if not input_fingerprint.is_empty:
-            kwargs["input_fingerprint"] = str(input_fingerprint.key)
+            format_kwargs["input_fingerprint"] = str(input_fingerprint.key)
         field_values = {
             name: (
-                strip_partition_indexes(original).format(**kwargs)
+                strip_partition_indexes(original).format(**format_kwargs)
                 if lenient_issubclass(type(original := getattr(self, name)), str)
                 else original
             )
@@ -139,14 +139,15 @@ class Storage(Model, Generic[_StoragePartition]):
 
     def resolve_extension(self: _Storage, extension: Optional[str]) -> _Storage:
         if extension is None:
-            return self
+            return self.resolve(extension="")
         return self.resolve(extension=extension)
 
     def resolve_graph_name(self: _Storage, graph_name: str) -> _Storage:
         return self.resolve(graph_name=graph_name)
 
     def resolve_names(self: _Storage, names: tuple[str, ...]) -> _Storage:
-        return self.resolve(names=self.segment_sep.join(names), name=names[-1])
+        name = names[-1] if names else ""
+        return self.resolve(names=self.segment_sep.join(names), name=name)
 
     def resolve_partition_key_spec(self: _Storage, key_types: CompositeKeyTypes) -> _Storage:
         key_component_specs = {
