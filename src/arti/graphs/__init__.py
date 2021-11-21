@@ -1,7 +1,7 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 from collections import defaultdict
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 from functools import cached_property, wraps
 from graphlib import TopologicalSorter
 from types import TracebackType
@@ -186,7 +186,7 @@ class Graph(Model):
         self,
         artifact: Artifact,
         *,
-        storage_partitions: Optional[tuple[StoragePartition, ...]] = None,
+        storage_partitions: Optional[Sequence[StoragePartition]] = None,
         annotation: Optional[Any] = None,
         view: Optional[View] = None,
     ) -> Any:

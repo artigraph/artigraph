@@ -1,4 +1,5 @@
 import json
+from collections.abc import Sequence
 from itertools import chain
 from pathlib import Path
 from typing import Any
@@ -22,7 +23,7 @@ def _read_json_file(path: str) -> Any:
 def _read_json_localfile_python(
     type: Type,
     format: JSON,
-    storage_partitions: tuple[LocalFilePartition, ...],
+    storage_partitions: Sequence[LocalFilePartition],
     view: PythonBuiltin,
 ) -> Any:
     if isinstance(type, List) and type.is_partitioned:
