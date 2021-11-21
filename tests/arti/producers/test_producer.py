@@ -3,13 +3,16 @@ from typing import Annotated, Optional
 
 import pytest
 
+from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import frozendict
 from arti.producers import PartitionDependencies, Producer
+from arti.producers import producer as producer_decorator  # Avoid shadowing
 from arti.storage import StoragePartitions
 from arti.types import Int64, List, Struct
+from arti.versions import String as StringVersion
 from arti.views import python as python_views
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 
@@ -38,6 +41,36 @@ def test_Producer() -> None:
     expected_output_classes = [A2, A3]
     for i, output in enumerate(producer):
         assert isinstance(output, expected_output_classes[i])
+
+
+def test_producer_decorator() -> None:
+    @producer_decorator()
+    def dummy_producer(a1: Annotated[dict, A1]) -> Annotated[dict, A2]:  # type: ignore
+        return {}
+
+    assert dummy_producer.__name__ == "dummy_producer"
+    assert dummy_producer._input_artifact_types_ == frozendict(a1=A1)
+    assert len(dummy_producer._output_metadata_) == 1
+    assert dummy_producer._output_metadata_[0][0] == A2
+    assert dummy_producer.version == Producer.version
+    assert dummy_producer(a1=A1()).annotations == ()
+
+    class MyAnnotation(Annotation):
+        pass
+
+    def mapper() -> PartitionDependencies:
+        return PartitionDependencies()
+
+    @producer_decorator(
+        annotations=(MyAnnotation(),), map=mapper, name="test", version=StringVersion(value="test")
+    )
+    def dummy_producer2(a1: Annotated[dict, A1]) -> Annotated[dict, A2]:  # type: ignore
+        return {}
+
+    assert dummy_producer2.__name__ == "test"
+    assert dummy_producer2.map == mapper
+    assert dummy_producer2.version == StringVersion(value="test")
+    assert dummy_producer2(a1=A1()).annotations == (MyAnnotation(),)
 
 
 def test_Producer_partitioned_input_validation() -> None:
@@ -222,6 +255,16 @@ def test_Producer_build_outputs_check() -> None:
                 @staticmethod
                 def build() -> tuple[first_output, Annotated[list[dict], D]]:  # type: ignore
                     pass
+
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.map - must be implemented when the `build` outputs are partitioned",
+    ):
+
+        class BadProducer(Producer):  # noqa: F811
+            @staticmethod
+            def build() -> Annotated[list[dict], C]:  # type: ignore
+                pass
 
 
 def test_Producer_bad_signature() -> None:  # noqa: C901
