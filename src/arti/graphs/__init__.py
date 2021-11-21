@@ -22,7 +22,9 @@ from arti.producers import Producer
 from arti.storage import StoragePartition
 from arti.views import View
 
-if not TYPE_CHECKING:
+if TYPE_CHECKING:
+    from arti.executors import Executor
+else:
     from arti.internal.patches import patch_TopologicalSorter_class_getitem
 
     patch_TopologicalSorter_class_getitem()
@@ -105,7 +107,7 @@ class Graph(Model):
 
     def __enter__(self) -> "Graph":
         if arti.context.graph is not None:
-            raise ValueError(f"Another graph is already in use: {arti.context.graph}")
+            raise ValueError(f"Another graph is being defined: {arti.context.graph}")
         arti.context.graph = self
         self._toggle(OPEN)
         return self
@@ -190,11 +192,12 @@ class Graph(Model):
         annotation: Optional[Any] = None,
         view: Optional[View] = None,
     ) -> Any:
-        if annotation is not None:
-            if view is not None:
-                raise ValueError("Only one of `annotation` or `view` may be set")
+        if annotation is None and view is None:
+            raise ValueError("Either `annotation` or `view` must be passed")
+        elif annotation is not None and view is not None:
+            raise ValueError("Only one of `annotation` or `view` may be passed")
+        elif annotation is not None:
             view = View.get_class_for(annotation)()
-        assert view is not None
         if storage_partitions is None:
             with self.backend.connect() as backend:
                 storage_partitions = backend.read_artifact_partitions(artifact)
@@ -233,6 +236,3 @@ class Graph(Model):
         with self.backend.connect() as backend:
             backend.write_artifact_partitions(artifact, (storage_partition,))
         return cast(StoragePartition, storage_partition)
-
-
-from arti.executors import Executor  # noqa: E402

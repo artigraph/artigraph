@@ -5,17 +5,25 @@ from typing import Annotated, cast
 import pytest
 from box import BoxError
 
-from arti import io
 from arti.artifacts import Artifact
-from arti.formats.pickle import Pickle
+from arti.executors.local import LocalExecutor
+from arti.fingerprints import Fingerprint
+from arti.formats.json import JSON
 from arti.graphs import Graph
 from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey
 from arti.producers import Producer
 from arti.storage.local import LocalFile, LocalFilePartition
 from arti.types import Int64
-from arti.views import View
+from arti.views import python as python_views
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
+
+
+class Num(Artifact):
+    type: Int64 = Int64()
+    format: JSON = JSON()
+    # Require callers to set the storage instance in a separate tempdir.
+    storage: LocalFile
 
 
 @pytest.fixture
@@ -39,11 +47,6 @@ def test_Graph(graph: Graph) -> None:
 def test_Graph_build() -> None:
     side_effect = 0
 
-    class Num(Artifact):
-        type: Int64 = Int64()
-        format: Pickle = Pickle()
-        storage: LocalFile
-
     class Increment(Producer):
         i: Num
 
@@ -56,30 +59,18 @@ def test_Graph_build() -> None:
     with TemporaryDirectory() as _dir:
         dir = Path(_dir)
         with Graph(name="test") as g:
-            g.artifacts.a = Num(storage=LocalFile(path=str(dir / "a.pkl")))
+            g.artifacts.a = Num(storage=LocalFile(path=str(dir / "a.json")))
             g.artifacts.b = Increment(i=g.artifacts.a).out(
-                Num(storage=LocalFile(path=str(dir / "b.pkl")))
+                Num(storage=LocalFile(path=str(dir / "b.json")))
             )
 
         a, b = g.artifacts.a, cast(A2, g.artifacts.b)
         # Bootstrap the initial artifact
-        view = View.get_class_for(int)()
-        io.write(
-            side_effect,
-            type=a.type,
-            format=a.format,
-            storage_partition=LocalFilePartition(keys=CompositeKey(), path=a.storage.path),
-            view=view,
-        )
+        g.write(side_effect, artifact=a)
         g.build()
         assert side_effect == 1
-        assert 1 == io.read(
-            type=a.type,
-            format=b.format,
-            storage_partitions=b.storage.discover_partitions(b.partition_key_types),
-            view=view,
-        )
-        g.build()
+        assert 1 == g.read(b, annotation=int)
+        g.build(executor=LocalExecutor())
         # Second build should no-op
         assert side_effect == 1
 
@@ -109,6 +100,11 @@ def test_Graph_errors() -> None:
     with pytest.raises(AttributeError, match="has no attribute"):
         graph.artifacts.z
 
+    with Graph(name="outer"):
+        with pytest.raises(ValueError, match="Another graph is being defined"):
+            with Graph(name="inner"):
+                pass
+
 
 def test_Graph_producers(graph: Graph) -> None:
     p1 = graph.artifacts.b.producer_output.producer
@@ -132,6 +128,30 @@ def test_Graph_producer_output(graph: Graph) -> None:
             match="producer_outputs cannot be used while the Graph is still being defined",
         ):
             g.producer_outputs
+
+
+def test_Graph_read_write() -> None:
+    with TemporaryDirectory() as _dir:
+        dir = Path(_dir)
+        with Graph(name="test") as g:
+            g.artifacts.i = Num(storage=LocalFile(path=str(dir / "i.json")))
+
+        i = g.artifacts.i
+        # Test write
+        storage_partition = g.write(5, artifact=i)
+        assert isinstance(storage_partition, LocalFilePartition)
+        assert storage_partition.content_fingerprint != Fingerprint.empty()
+        assert storage_partition.input_fingerprint == Fingerprint.empty()
+        assert storage_partition.keys == CompositeKey()
+        assert storage_partition.path.endswith(i.format.extension)
+        # Test read
+        assert g.read(i, annotation=int) == 5
+        assert g.read(i, view=python_views.Int()) == 5
+        assert g.read(i, annotation=int, storage_partitions=[storage_partition]) == 5
+        with pytest.raises(ValueError, match="Either `annotation` or `view` must be passed"):
+            g.read(i)
+        with pytest.raises(ValueError, match="Only one of `annotation` or `view` may be passed"):
+            g.read(i, annotation=int, view=python_views.Int())
 
 
 def test_Graph_references(graph: Graph) -> None:
