@@ -16,7 +16,7 @@ class key_component(property):
 
 class PartitionKey(Model):
     _abstract_ = True
-    _by_type_: ClassVar[dict[type[Type], type["PartitionKey"]]] = {}
+    _by_type_: "ClassVar[dict[type[Type], type[PartitionKey]]]" = {}
 
     default_key_components: ClassVar[frozendict[str, str]]
     matching_type: ClassVar[type[Type]]

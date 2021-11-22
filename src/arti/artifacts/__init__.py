@@ -36,8 +36,11 @@ class BaseArtifact(Model):
     format: Format
     storage: Storage[Any]
 
-    # Hide in repr to prevent showing the entire upstream graph
-    producer_output: Optional["ProducerOutput"] = Field(None, repr=False)
+    # Hide in repr to prevent showing the entire upstream graph.
+    #
+    # ProducerOutput is a ForwardRef/cyclic import. Quote the entire hint to force full resolution
+    # during `.update_forward_refs`, rather than `Optional[ForwardRef("ProducerOutput")]`.
+    producer_output: "Optional[ProducerOutput]" = Field(None, repr=False)
 
     # Class level alias for `type`, which must be set on (non-abstract) subclasses.
     #

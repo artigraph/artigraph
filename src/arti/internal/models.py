@@ -1,6 +1,6 @@
 from collections.abc import Mapping, Sequence
 from functools import cached_property
-from typing import Annotated, Any, ClassVar, Literal, Optional, get_args, get_origin
+from typing import Annotated, Any, ClassVar, Literal, Optional, TypeVar, get_args, get_origin
 
 from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField
@@ -60,6 +60,9 @@ def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
     if not lenient_issubclass(type(value), type_):
         raise mismatch_error
     return value
+
+
+_Model = TypeVar("_Model", bound="Model")
 
 
 class Model(BaseModel):
@@ -140,6 +143,14 @@ class Model(BaseModel):
         frozen = True
         keep_untouched = (cached_property, classproperty)
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
+
+    def copy(self: _Model, *, validate: bool = True, **kwargs: Any) -> _Model:
+        copy = super().copy(**kwargs)
+        if validate:
+            return copy.validate(
+                dict(copy._iter(to_dict=False, by_alias=False, exclude_unset=True))
+            )
+        return copy
 
     @classmethod
     def _pydantic_type_system_post_field_conversion_hook_(
