@@ -16,12 +16,27 @@ class Concrete(Model):
     pass
 
 
+class Sub(Model):
+    x: int
+
+
 def test_Model() -> None:
     obj = Concrete()
     assert str(obj) == repr(obj)
     for model in (Model, Abstract):
         with pytest.raises(ValidationError, match="cannot be instantiated directly"):
             model()
+
+
+def test_Model_copy_validation() -> None:
+    v = Sub(x=5)
+    v1 = v.copy(update={"x": 10})
+    assert v.x == 5
+    assert v1.x == 10
+    with pytest.raises(ValueError, match="expected an instance"):
+        v.copy(update={"x": "junk"})
+    v2 = v.copy(update={"x": "junk"}, validate=False)  # Skip validation for "trusted" data.
+    assert v2.x == "junk"  # type: ignore
 
 
 def test_Model_unknown_kwargs() -> None:
@@ -43,10 +58,6 @@ def test_Model_static_types() -> None:
         M(a=5, b=5, c=0)
     with pytest.raises(ValidationError, match=r"expected an instance of <class 'int'>, got"):
         M(a=5, b="b", c=0.0)
-
-
-class Sub(Model):
-    x: int
 
 
 @pytest.mark.parametrize(

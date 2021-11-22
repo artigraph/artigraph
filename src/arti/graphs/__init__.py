@@ -132,7 +132,7 @@ class Graph(Model):
         return self._artifacts
 
     @requires_sealed
-    def build(self, executor: Optional["Executor"] = None) -> None:
+    def build(self, executor: "Optional[Executor]" = None) -> None:
         if executor is None:
             from arti.executors.local import LocalExecutor
 
