@@ -99,6 +99,8 @@ class dispatch(multidispatch[RETURN]):
 # returns a typing._GenericAlias). The pydantic bug (which returns a dict instead of a frozendict)
 # is worked around in arti.internal.patches.patch_pydantic_ModelField__type_analysis.
 #
+# NOTE: The GenericAlias deepcopy issue has been resolved in 3.9.8 and 3.10.1.
+#
 # 1: https://github.com/samuelcolvin/pydantic/pull/3138
 # 2: https://github.com/Marco-Sulla/python-frozendict/issues/29
 # 3: https://bugs.python.org/issue45167
