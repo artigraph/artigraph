@@ -49,7 +49,7 @@ include = ["src/arti/py.typed"]
 
 [tool.poetry.dependencies]
 deprecation = "^2.1.0"
-frozendict = "^2.0.6"
+frozendict = "^2.1.0"
 multimethod = "^1.6"
 parse = "^1.19.0"
 pydantic = "^1.8.1"
