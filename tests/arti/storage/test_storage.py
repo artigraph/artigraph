@@ -77,6 +77,12 @@ def test_Storage_resolve_graph_name() -> None:
     assert s.resolve_graph_name("") == MockStorage(path="/junk")
 
 
+def test_Storage_resolve_input_fingerprint() -> None:
+    s = MockStorage(path="/{input_fingerprint}/junk")
+    assert s.resolve_input_fingerprint(Fingerprint.from_int(10)) == MockStorage(path="/10/junk")
+    assert s.resolve_input_fingerprint(Fingerprint.empty()) == MockStorage(path="/junk")
+
+
 def test_Storage_resolve_names() -> None:
     s = MockStorage(path="/{names}")
     assert s.resolve_names(("a", "b")) == MockStorage(path="/a/b")
@@ -190,5 +196,5 @@ def test_Storage_generate_partition() -> None:
         s.generate_partition(
             keys=CompositeKey(j=Int8Key(key=5)), input_fingerprint=input_fingerprint
         )
-    with pytest.raises(KeyError, match="input_fingerprint"):  # empty fingerprints aren't filled in
+    with pytest.raises(ValueError, match="requires an input_fingerprint, but none was provided"):
         s.generate_partition(keys=keys, input_fingerprint=Fingerprint.empty())

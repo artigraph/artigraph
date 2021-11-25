@@ -42,6 +42,10 @@ def test_Graph(graph: Graph) -> None:
     assert isinstance(graph.artifacts.b, A2)
     assert isinstance(graph.artifacts.c.a, A3)
     assert isinstance(graph.artifacts.c.b, A4)
+    assert not graph.artifacts.a.storage.includes_input_fingerprint_template
+    assert graph.artifacts.b.storage.includes_input_fingerprint_template
+    assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
+    assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
 
 
 def test_Graph_build() -> None:
@@ -61,7 +65,7 @@ def test_Graph_build() -> None:
         with Graph(name="test") as g:
             g.artifacts.a = Num(storage=LocalFile(path=str(dir / "a.json")))
             g.artifacts.b = Increment(i=g.artifacts.a).out(
-                Num(storage=LocalFile(path=str(dir / "b.json")))
+                Num(storage=LocalFile(path=str(dir / "b/{input_fingerprint}.json")))
             )
 
         a, b = g.artifacts.a, cast(A2, g.artifacts.b)
