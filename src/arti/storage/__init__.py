@@ -85,6 +85,16 @@ class Storage(Model, Generic[_StoragePartition]):
                 f"{cls.__name__} fields must match {cls.storage_partition_type.__name__} ({expected_field_types}), got: {fields}"
             )
 
+    @property
+    def _format_fields(self) -> frozendict[str, str]:
+        return frozendict(
+            {
+                name: value
+                for name in self.__fields__
+                if lenient_issubclass(type(value := getattr(self, name)), str)
+            }
+        )
+
     @abc.abstractmethod
     def discover_partitions(
         self,
@@ -100,7 +110,12 @@ class Storage(Model, Generic[_StoragePartition]):
         with_content_fingerprint: bool = True,
     ) -> _StoragePartition:
         format_kwargs = dict[Any, Any](keys)
-        if not input_fingerprint.is_empty:
+        if input_fingerprint.is_empty:
+            if self.includes_input_fingerprint_template:
+                raise ValueError(f"{self} requires an input_fingerprint, but none was provided")
+        else:
+            if not self.includes_input_fingerprint_template:
+                raise ValueError(f"{self} doesn't specify an {{input_fingerprint}}")
             format_kwargs["input_fingerprint"] = str(input_fingerprint.key)
         field_values = {
             name: (
@@ -118,6 +133,10 @@ class Storage(Model, Generic[_StoragePartition]):
             partition = partition.with_content_fingerprint()
         return partition
 
+    @property
+    def includes_input_fingerprint_template(self) -> bool:
+        return any("{input_fingerprint}" in val for val in self._format_fields.values())
+
     def _resolve_field(self, spec: str, placeholder_values: dict[str, str]) -> str:
         for placeholder, value in placeholder_values.items():
             if not value:
@@ -128,15 +147,15 @@ class Storage(Model, Generic[_StoragePartition]):
                 spec = spec.replace(trim, "")
         return partial_format(spec, **placeholder_values)
 
+    # TODO: Reconsider the `resolve_*` interfaces to reduce the number of copies if possible.
     def resolve(self: _Storage, **placeholder_values: str) -> _Storage:
         return self.copy(
             update={
                 name: updated_value
-                for name in self.__fields__
-                if lenient_issubclass(type(original := getattr(self, name)), str)
+                for name, original in self._format_fields.items()
                 # Avoid "setting" the value if not updated to reduce pydantic repr verbosity (which
                 # only shows "set" fields by default).
-                and (updated_value := self._resolve_field(original, placeholder_values)) != original
+                if (updated_value := self._resolve_field(original, placeholder_values)) != original
             }
         )
 
@@ -147,6 +166,12 @@ class Storage(Model, Generic[_StoragePartition]):
 
     def resolve_graph_name(self: _Storage, graph_name: str) -> _Storage:
         return self.resolve(graph_name=graph_name)
+
+    def resolve_input_fingerprint(self: _Storage, input_fingerprint: Fingerprint) -> _Storage:
+        val = str(input_fingerprint.key)
+        if input_fingerprint.is_empty:
+            val = ""
+        return self.resolve(input_fingerprint=val)
 
     def resolve_names(self: _Storage, names: tuple[str, ...]) -> _Storage:
         name = names[-1] if names else ""

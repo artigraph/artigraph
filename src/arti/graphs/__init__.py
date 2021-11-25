@@ -72,6 +72,21 @@ class ArtifactBox(TypedBox[str, Artifact]):
                     )
                 }
             )
+        # Require an {input_fingerprint} template in the Storage if this Artifact is being generated
+        # by a Producer. Otherwise, strip the {input_fingerprint} template (if set) for "raw"
+        # Artifacts.
+        #
+        # We can't validate this at Artifact instantiation because the Producer is tracked later (by
+        # copying the instance and setting the `producer_output` attribute). We won't know the
+        # "final" instance until assignment here to the Graph.
+        if artifact.producer_output is None:
+            artifact = artifact.copy(
+                update={"storage": artifact.storage.resolve_input_fingerprint(Fingerprint.empty())}
+            )
+        elif not artifact.storage.includes_input_fingerprint_template:
+            raise ValueError(
+                "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
+            )
         return cast(Artifact, artifact)
 
     def _Box__convert_and_store(self, item: str, value: Artifact) -> None:

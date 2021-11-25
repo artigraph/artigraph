@@ -31,7 +31,7 @@ class DummyPartition(StoragePartition):
 
 
 class DummyStorage(Storage[DummyPartition]):
-    key: str = "test"
+    key: str = "test-{graph_name}-{path_tags}-{names}-{partition_key_spec}-{input_fingerprint}-{name}.{extension}"
 
     def discover_partitions(
         self, key_types: CompositeKeyTypes, input_fingerprints: Optional[InputFingerprints] = None
