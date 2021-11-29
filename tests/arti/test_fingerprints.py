@@ -47,7 +47,13 @@ def test_Fingerprint_math() -> None:
     # empty cascades
     assert Fingerprint.empty().combine(f1).is_empty
     assert f1.combine(Fingerprint.empty()).is_empty
+    # bitwise operators
+    assert f2 & 15 == 1
+    assert f2 << 15 == 32768
+    assert f2 >> 15 == 0
+    assert f2 ^ 15 == 14
+    assert f2 | 15 == 15
 
-    for val in [None, 0, "a"]:
+    for val in [None, "a"]:
         with pytest.raises(TypeError):
             f1.combine(val)  # type: ignore

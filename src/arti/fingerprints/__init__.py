@@ -1,13 +1,29 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
+import operator
+from collections.abc import Callable
 from functools import reduce
-from operator import xor
-from typing import Optional
+from typing import Optional, Union
 
 import farmhash
 
 from arti.internal.models import Model
 from arti.internal.utils import int64, uint64
+
+
+def _gen_fingerprint_binop(
+    op: Callable[[int, int], int]
+) -> "Callable[[Fingerprint, Union[int, Fingerprint]], Fingerprint]":
+    def _fingerprint_binop(self: "Fingerprint", other: "Union[int, Fingerprint]") -> "Fingerprint":
+        if isinstance(other, int):
+            other = Fingerprint.from_int(other)
+        if isinstance(other, Fingerprint):
+            if self.key is None or other.key is None:
+                return Fingerprint.empty()
+            return Fingerprint(key=op(self.key, other.key))
+        return NotImplemented
+
+    return _fingerprint_binop
 
 
 class Fingerprint(Model):
@@ -28,7 +44,7 @@ class Fingerprint(Model):
     key: Optional[int64]
 
     def combine(self, *others: "Fingerprint") -> "Fingerprint":
-        return reduce(xor, others, self)
+        return reduce(operator.xor, others, self)
 
     @classmethod
     def empty(cls) -> "Fingerprint":
@@ -68,18 +84,15 @@ class Fingerprint(Model):
     def is_identity(self) -> bool:
         return self.key == 0
 
-    def __xor__(self, other: "Fingerprint") -> "Fingerprint":
-        if self.key is None:
-            return Fingerprint.empty()
-        if isinstance(other, Fingerprint):
-            if other.key is None:
-                return Fingerprint.empty()
-            return Fingerprint(key=self.key ^ other.key)
-        return NotImplemented
+    __and__ = _gen_fingerprint_binop(operator.__and__)
+    __lshift__ = _gen_fingerprint_binop(operator.__lshift__)
+    __or__ = _gen_fingerprint_binop(operator.__or__)
+    __rshift__ = _gen_fingerprint_binop(operator.__rshift__)
+    __xor__ = _gen_fingerprint_binop(operator.__xor__)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, int):
-            return self.key == other
+            other = Fingerprint.from_int(other)
         if isinstance(other, Fingerprint):
             return self.key == other.key
         return NotImplemented
