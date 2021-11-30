@@ -6,7 +6,7 @@ from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
-from arti.partitions import CompositeKeyTypes
+from arti.partitions import CompositeKey, CompositeKeyTypes
 from arti.producers import Producer
 from arti.statistics import Statistic
 from arti.storage import InputFingerprints, Storage, StoragePartition
@@ -36,7 +36,11 @@ class DummyStorage(Storage[DummyPartition]):
     def discover_partitions(
         self, key_types: CompositeKeyTypes, input_fingerprints: Optional[InputFingerprints] = None
     ) -> tuple[DummyPartition, ...]:
-        return (self.storage_partition_type(key=self.key),)
+        if key_types != CompositeKeyTypes():
+            raise NotImplementedError()
+        if input_fingerprints is not None and input_fingerprints != InputFingerprints():
+            raise NotImplementedError()
+        return (self.storage_partition_type(keys=CompositeKey(), key=self.key),)
 
 
 # NOTE: when using a subclass of the original type hint, we must override[1].
