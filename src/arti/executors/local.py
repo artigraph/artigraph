@@ -5,6 +5,7 @@ from itertools import chain
 from arti.artifacts import Artifact
 from arti.backends import BackendProtocol
 from arti.executors import Executor
+from arti.fingerprints import Fingerprint
 from arti.graphs import Graph
 from arti.producers import Producer
 from arti.storage import InputFingerprints
@@ -17,7 +18,13 @@ from arti.storage import InputFingerprints
 
 
 class LocalExecutor(Executor):
-    def _build_artifact(self, graph: Graph, backend: BackendProtocol, artifact: Artifact) -> None:
+    def _build_artifact(
+        self,
+        graph: Graph,
+        graph_id: Fingerprint,
+        backend: BackendProtocol,
+        artifact: Artifact,
+    ) -> None:
         # NOTE: Should we do different things for "raw" vs produced artifacts?
         #
         # Eg: for raw we discover partitions, but for generated we... just
@@ -30,8 +37,9 @@ class LocalExecutor(Executor):
         # We can only discover raw Artifacts - all produced ones should be written   his will fail for generated Artifacts (missing input_fingerprints). So,
         # maybe we only discover "if artifact.producer_output is None"
         if artifact.producer_output is None:
-            backend.write_artifact_partitions(
-                artifact,
+            backend.write_graph_partitions(
+                graph_id,
+                graph.artifact_to_key[artifact],
                 tuple(
                     partition
                     for partition in artifact.storage.discover_partitions(
@@ -44,9 +52,18 @@ class LocalExecutor(Executor):
 
     # NOTE: This should probably be broken up to separate the .map and .build (ie: so we
     # can map ahead of time and then parallelize build calls).
-    def _build_producer(self, graph: Graph, backend: BackendProtocol, producer: Producer) -> None:
+    #
+    # TODO: Split into "see what partitions need built" and "build partition" so we can implement
+    # "sync" / "dry run" sort of things?
+    def _build_producer(
+        self,
+        graph: Graph,
+        graph_id: Fingerprint,
+        backend: BackendProtocol,
+        producer: Producer,
+    ) -> None:
         input_partitions = {
-            name: backend.read_artifact_partitions(artifact)
+            name: backend.read_graph_partitions(graph_id, graph.artifact_to_key[artifact])
             for name, artifact in producer.inputs.items()
         }
         partition_dependencies = producer.map(
@@ -75,7 +92,7 @@ class LocalExecutor(Executor):
             for output in output_artifacts
         }
         for artifact, partitions in existing_output_partitions.items():
-            backend.write_artifact_partitions(artifact, partitions)
+            backend.write_graph_partitions(graph_id, graph.artifact_to_key[artifact], partitions)
         # TODO: Guarantee all outputs have the same set of identified partitions
         existing_output_keys = set(
             partition.keys for partition in chain.from_iterable(existing_output_partitions.values())
@@ -91,6 +108,7 @@ class LocalExecutor(Executor):
             arguments = {
                 name: graph.read(
                     artifact=producer.inputs[name],
+                    graph_id=graph_id,
                     storage_partitions=partition_dependencies[output_partition_key][name],
                     # TODO: We'll probably need to update Producer._build_input_views_
                     # to hold *instances* (either objects set in Annotated or init
@@ -106,6 +124,7 @@ class LocalExecutor(Executor):
                 graph.write(
                     output,
                     artifact=output_artifacts[i],
+                    graph_id=graph_id,
                     input_fingerprint=partition_input_fingerprints[output_partition_key],
                     keys=output_partition_key,
                     view=producer._output_metadata_[i][1](),
@@ -113,14 +132,15 @@ class LocalExecutor(Executor):
 
     # TODO: Support "dry_run"?
     def build(self, graph: Graph) -> None:
+        graph_id = graph.compute_id()
         with graph.backend.connect() as backend:
             for node in TopologicalSorter(graph.dependencies).static_order():
                 if isinstance(node, Artifact):
                     logging.info(f"Syncing {type(node).__name__}")
-                    self._build_artifact(graph, backend, node)
+                    self._build_artifact(graph, graph_id, backend, node)
                 elif isinstance(node, Producer):
                     logging.info(f"Building {type(node).__name__}")
-                    self._build_producer(graph, backend, node)
+                    self._build_producer(graph, graph_id, backend, node)
                 else:
                     raise NotImplementedError()
         logging.info("Build finished.")

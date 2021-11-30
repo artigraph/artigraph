@@ -1,32 +1,37 @@
 from __future__ import annotations
 
+from collections import defaultdict
 from collections.abc import Iterator
 from contextlib import contextmanager
 from itertools import chain
 
 from pydantic import Field
 
-from arti.artifacts import Artifact
 from arti.backends import Backend
+from arti.fingerprints import Fingerprint
 from arti.storage import StoragePartitions
 
 
 class MemoryBackend(Backend):
-    artifact_partitions: dict[Artifact, StoragePartitions] = Field(default_factory=dict, repr=False)
+    graph_partitions: dict[Fingerprint, dict[str, StoragePartitions]] = Field(
+        default_factory=lambda: defaultdict(lambda: defaultdict(StoragePartitions)), repr=False
+    )
 
     @contextmanager
     def connect(self) -> Iterator[MemoryBackend]:
         yield self
 
-    def read_artifact_partitions(self, artifact: Artifact) -> StoragePartitions:
-        return self.artifact_partitions[artifact]
+    def read_graph_partitions(self, graph_id: Fingerprint, name: str) -> StoragePartitions:
+        return self.graph_partitions[graph_id][name]
 
-    def write_artifact_partitions(self, artifact: Artifact, partitions: StoragePartitions) -> None:
+    def write_graph_partitions(
+        self, graph_id: Fingerprint, name: str, partitions: StoragePartitions
+    ) -> None:
         # NOTE: Be careful about deduping, otherwise we might have dup reads.
-        self.artifact_partitions[artifact] = tuple(
+        self.graph_partitions[graph_id][name] = StoragePartitions(
             set(
                 chain(
-                    self.artifact_partitions.get(artifact, ()),
+                    self.graph_partitions[graph_id][name],
                     (
                         partition.with_content_fingerprint(keep_existing=True)
                         for partition in partitions

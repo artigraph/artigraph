@@ -4,16 +4,24 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import Protocol
 
-from arti.artifacts import Artifact
+from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.storage import StoragePartitions
 
 
+# TODO: Consider adding CRUD methods for "everything"?
+#
+# Likely worth making a distinction between lower level ("CRUD") methods vs higher level ("RPC" or
+# "composing") methods. Executors should operate on the high level methods, but those may have
+# defaults simply calling the lower level methods. If high level methods can be optimized (eg: not a
+# bunch of low level calls, each own network call), Backend can override.
 class BackendProtocol(Protocol):
-    def read_artifact_partitions(self, artifact: Artifact) -> StoragePartitions:
+    def read_graph_partitions(self, graph_id: Fingerprint, name: str) -> StoragePartitions:
         raise NotImplementedError()
 
-    def write_artifact_partitions(self, artifact: Artifact, partitions: StoragePartitions) -> None:
+    def write_graph_partitions(
+        self, graph_id: Fingerprint, name: str, partitions: StoragePartitions
+    ) -> None:
         raise NotImplementedError()
 
 

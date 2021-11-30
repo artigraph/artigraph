@@ -12,7 +12,7 @@ from arti.formats.json import JSON
 from arti.graphs import Graph
 from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey
-from arti.producers import Producer
+from arti.producers import producer
 from arti.storage.local import LocalFile, LocalFilePartition
 from arti.types import Int64
 from arti.views import python as python_views
@@ -75,32 +75,40 @@ def test_Graph_compute_id() -> None:
 def test_Graph_build() -> None:
     side_effect = 0
 
-    class Increment(Producer):
-        i: Num
-
-        @staticmethod
-        def build(i: int) -> Annotated[int, Num]:
-            nonlocal side_effect
-            side_effect = i + 1
-            return side_effect
+    @producer()
+    def increment(i: Annotated[int, Num]) -> Annotated[int, Num]:
+        nonlocal side_effect
+        side_effect += 1
+        return i + 1
 
     with TemporaryDirectory() as _dir:
         dir = Path(_dir)
         with Graph(name="test") as g:
             g.artifacts.a = Num(storage=LocalFile(path=str(dir / "a.json")))
-            g.artifacts.b = Increment(i=g.artifacts.a).out(
+            g.artifacts.b = increment(i=g.artifacts.a).out(
                 Num(storage=LocalFile(path=str(dir / "b/{input_fingerprint}.json")))
             )
 
         a, b = g.artifacts.a, cast(A2, g.artifacts.b)
-        # Bootstrap the initial artifact
-        g.write(side_effect, artifact=a)
+        # Bootstrap the initial artifact and build
+        g.write(0, artifact=a)
         g.build()
         assert side_effect == 1
-        assert 1 == g.read(b, annotation=int)
+        assert g.read(b, annotation=int) == 1
+        # A second build should no-op
         g.build(executor=LocalExecutor())
-        # Second build should no-op
         assert side_effect == 1
+        assert g.read(b, annotation=int) == 1
+        # Changing the raw Artifact data should trigger a rerun
+        g.write(1, artifact=a)
+        g.build()
+        assert side_effect == 2
+        assert g.read(b, annotation=int) == 2
+        # Changing back to the original data should no-op
+        g.write(0, artifact=a)
+        g.build()
+        assert side_effect == 2
+        assert g.read(b, annotation=int) == 1
 
 
 def test_Graph_dependencies(graph: Graph) -> None:
