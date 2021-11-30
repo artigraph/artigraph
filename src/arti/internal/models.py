@@ -1,13 +1,28 @@
 from collections.abc import Mapping, Sequence
 from functools import cached_property
-from typing import Annotated, Any, ClassVar, Literal, Optional, TypeVar, get_args, get_origin
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    ClassVar,
+    Literal,
+    Optional,
+    TypeVar,
+    get_args,
+    get_origin,
+)
 
 from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField
+from pydantic.json import pydantic_encoder as pydantic_json_encoder
 
 from arti.internal.patches import patch_pydantic_ModelField__type_analysis
 from arti.internal.type_hints import is_union, lenient_issubclass
 from arti.internal.utils import class_name, classproperty, frozendict
+
+if TYPE_CHECKING:
+    from arti.fingerprints import Fingerprint
+    from arti.types import Type
 
 patch_pydantic_ModelField__type_analysis()
 
@@ -74,12 +89,23 @@ class Model(BaseModel):
     # 1: https://github.com/replicahq/artigraph/pull/60#discussion_r669089086
     _abstract_: ClassVar[bool] = True
     _class_key_: ClassVar[str] = class_name()
+    _fingerprint_excludes_: ClassVar[Optional[frozenset[str]]] = None
+    _fingerprint_includes_: ClassVar[Optional[frozenset[str]]] = None
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)  # type: ignore # https://github.com/python/mypy/issues/4660
         # Default _abstract_ to False if not set explicitly on the class. __dict__ is read-only.
         setattr(cls, "_abstract_", cls.__dict__.get("_abstract_", False))
+        field_names = set(cls.__fields__)
+        if cls._fingerprint_excludes_ and (
+            unknown_excludes := cls._fingerprint_excludes_ - field_names
+        ):
+            raise ValueError(f"Unknown `_fingerprint_excludes_` field(s): {unknown_excludes}")
+        if cls._fingerprint_includes_ and (
+            unknown_includes := cls._fingerprint_includes_ - field_names
+        ):
+            raise ValueError(f"Unknown `_fingerprint_includes_` field(s): {unknown_includes}")
 
     @root_validator(pre=True)
     @classmethod
@@ -152,11 +178,40 @@ class Model(BaseModel):
             )
         return copy
 
+    @staticmethod
+    def _fingerprint_json_encoder(obj: Any) -> Any:
+        from arti.fingerprints import Fingerprint
+
+        if isinstance(obj, Fingerprint):
+            return obj.key
+        if isinstance(obj, Model):
+            return obj.fingerprint
+        return pydantic_json_encoder(obj)
+
+    @property
+    def fingerprint(self) -> "Fingerprint":
+        from arti.fingerprints import Fingerprint
+
+        # `.json` cannot be used, even with a custom encoder, because it calls `.dict`, which
+        # converts the sub-models to dicts. Instead, we want to access `.fingerprint` (in the
+        # decoder).
+        data = dict(
+            sorted(  # Sort to ensure stability
+                self._iter(
+                    exclude=self._fingerprint_excludes_,  # type: ignore
+                    include=self._fingerprint_includes_,  # type: ignore
+                ),
+                key=lambda kv: kv[0],
+            )
+        )
+        json_repr = self.__config__.json_dumps(
+            data,
+            default=self._fingerprint_json_encoder,
+        )
+        return Fingerprint.from_string(f"{self._class_key_}:{json_repr}")
+
     @classmethod
     def _pydantic_type_system_post_field_conversion_hook_(
-        cls, type_: "arti.types.Type", *, name: str, required: bool
-    ) -> "arti.types.Type":
+        cls, type_: "Type", *, name: str, required: bool
+    ) -> "Type":
         return type_
-
-
-import arti.types  # noqa: E402 # # pylint: disable=wrong-import-position

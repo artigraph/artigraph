@@ -16,6 +16,9 @@ class Type(Model):
     """Type represents a data type."""
 
     _abstract_ = True
+    # NOTE: Exclude the description to minimize fingerprint changes (and thus rebuilds).
+    _fingerprint_excludes_ = frozenset(["description"])
+
     description: Optional[str]
     nullable: bool = False
 
@@ -151,8 +154,8 @@ class List(Type):
         return cluster_by
 
     @property
-    def is_partitioned(cls) -> bool:
-        return bool(cls.partition_fields)
+    def is_partitioned(self) -> bool:
+        return bool(self.partition_fields)
 
     @property
     def partition_fields(self) -> frozendict[str, Type]:

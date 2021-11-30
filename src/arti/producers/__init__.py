@@ -11,7 +11,7 @@ from arti.fingerprints import Fingerprint
 from arti.internal import wrap_exc
 from arti.internal.models import Model
 from arti.internal.type_hints import NoneType, lenient_issubclass, signature
-from arti.internal.utils import classproperty, frozendict, ordinal
+from arti.internal.utils import frozendict, ordinal
 from arti.partitions import CompositeKey, CompositeKeyTypes, NotPartitioned
 from arti.storage import StoragePartitions
 from arti.versions import SemVer, Version
@@ -45,7 +45,7 @@ class Producer(Model):
     # User fields/methods
 
     annotations: tuple[Annotation, ...] = ()
-    version: ClassVar[Version] = SemVer(major=0, minor=0, patch=1)
+    version: Version = SemVer(major=0, minor=0, patch=1)
 
     # build and map must be @classmethods or @staticmethods.
     build: ClassVar[BuildSig]
@@ -54,6 +54,8 @@ class Producer(Model):
     # Internal fields/methods
 
     _abstract_: ClassVar[bool] = True
+    _fingerprint_excludes_ = frozenset(["annotations"])
+
     # NOTE: The following are set in __init_subclass__
     _input_artifact_types_: ClassVar[frozendict[str, type[Artifact]]]
     _build_sig_: ClassVar[Signature]
@@ -256,18 +258,6 @@ class Producer(Model):
             ret = (ret,)
         return iter(ret)
 
-    @classproperty
-    @classmethod
-    def fingerprint(cls) -> Fingerprint:
-        """Return a Fingerprint of the Producer key + version.
-
-        The input and output Artifacts are ignored as the Producer instance may be used multiple
-        times to produce different output partitions. The "entropy mixing" will be performed for
-        *each* output with the static Producer.fingerprint + that output's specific input
-        partition dependencies.
-        """
-        return Fingerprint.from_string(cls._class_key_).combine(cls.version.fingerprint)
-
     def compute_input_fingerprint(
         self, dependency_partitions: frozendict[str, StoragePartitions]
     ) -> Fingerprint:
@@ -344,6 +334,8 @@ def producer(
         # 1: https://github.com/samuelcolvin/pydantic/pull/3018
         if annotations:
             __annotations__["annotations"] = tuple[Annotation, ...]  # type: ignore
+        if version:
+            __annotations__["version"] = Version  # type: ignore
         return type(
             name,
             (Producer,),

@@ -7,7 +7,7 @@ from arti.versions import GitCommit, SemVer, String, Timestamp, Version, _Source
 
 def test_GitCommit() -> None:
     assert GitCommit(sha="test").sha == "test"
-    assert GitCommit(sha="test").fingerprint == 8581389452482819506
+    assert GitCommit(sha="test").fingerprint == -4338587361150152260
     assert len(GitCommit().sha) == 40  # Length of git sha
 
 
@@ -37,8 +37,8 @@ def test__Source() -> None:
 
     assert isinstance(P.version, String)
     assert P.version.value == "    class P:\n        version: Version = _Source()\n"
-    assert P.version.fingerprint == -4528092110694557253
-    assert P().version.fingerprint == -4528092110694557253
+    assert P.version.fingerprint == -5384942283309384283
+    assert P().version.fingerprint == -5384942283309384283
 
     class P2:
         version = _Source()
@@ -47,7 +47,7 @@ def test__Source() -> None:
 
 
 def test_String() -> None:
-    assert String(value="ok").fingerprint == 5227454011934222951
+    assert String(value="ok").fingerprint == 5676437635634367418
 
 
 def test_Timestamp() -> None:
@@ -64,8 +64,5 @@ def test_Timestamp() -> None:
 
 def test_Version() -> None:
     # Version sets an @abstractmethod, so ABC catches it before our Model._abstract_ validator.
-    with pytest.raises(
-        TypeError,
-        match="Can't instantiate abstract class Version with abstract method fingerprint",
-    ):
-        Version()  # type: ignore
+    with pytest.raises(ValueError, match="cannot be instantiated directly"):
+        Version()

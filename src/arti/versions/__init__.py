@@ -2,7 +2,6 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
 import inspect
 import subprocess
-from abc import abstractmethod
 from collections.abc import Callable
 from datetime import datetime, timezone
 from typing import Any, cast
@@ -11,16 +10,10 @@ from pydantic import Field, validator
 
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
-from arti.internal.utils import qname
 
 
 class Version(Model):
     _abstract_ = True
-
-    @property
-    @abstractmethod
-    def fingerprint(self) -> Fingerprint:
-        raise NotImplementedError(f"{qname(self)}.fingerprint is not implemented!")
 
 
 class GitCommit(Version):
@@ -29,10 +22,6 @@ class GitCommit(Version):
             lambda: subprocess.check_output(["git", "rev-parse", "HEAD"]).decode().strip()
         )
     )
-
-    @property
-    def fingerprint(self) -> Fingerprint:
-        return Fingerprint.from_string(self.sha)
 
 
 class SemVer(Version):
@@ -56,10 +45,6 @@ class SemVer(Version):
 
 class String(Version):
     value: str
-
-    @property
-    def fingerprint(self) -> Fingerprint:
-        return Fingerprint.from_string(self.value)
 
 
 class _SourceDescriptor:  # Experimental :)
