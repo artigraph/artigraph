@@ -198,3 +198,7 @@ def test_Storage_generate_partition() -> None:
         )
     with pytest.raises(ValueError, match="requires an input_fingerprint, but none was provided"):
         s.generate_partition(keys=keys, input_fingerprint=Fingerprint.empty())
+    with pytest.raises(ValueError, match="does not specify a {input_fingerprint} template"):
+        MockStorage(path="hard coded").generate_partition(
+            keys=keys, input_fingerprint=Fingerprint.from_string("fake")
+        )

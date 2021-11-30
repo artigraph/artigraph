@@ -1,3 +1,4 @@
+import re
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Annotated, cast
@@ -19,11 +20,17 @@ from arti.views import python as python_views
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 
 
+# TODO: Add a test-scoped fixture to generate these (may need to be a func that can generate multiple).
 class Num(Artifact):
     type: Int64 = Int64()
     format: JSON = JSON()
     # Require callers to set the storage instance in a separate tempdir.
     storage: LocalFile
+
+
+@producer()
+def div(a: Annotated[int, Num], b: Annotated[int, Num]) -> Annotated[int, Num]:
+    return a // b
 
 
 @pytest.fixture
@@ -72,6 +79,36 @@ def test_Graph_compute_id() -> None:
     assert g.compute_id() == Fingerprint.combine(*reversed(id_components))
 
 
+def test_Graph_compute_id_missing_input_artifact() -> None:
+    with TemporaryDirectory() as _dir:
+        dir = Path(_dir)
+        with Graph(name="test") as g:
+            g.artifacts.a = Num(storage=LocalFile(path=str(dir / "a.json")))
+
+        with pytest.raises(ValueError, match=re.escape("No data (partitions) found for `a`")):
+            assert g.compute_id()
+
+
+def test_Graph_compute_id_producer_arg_order() -> None:
+    with TemporaryDirectory() as _dir:
+        dir = Path(_dir)
+        a = Num(storage=LocalFile(path=str(dir / "a.json")))
+        with open(a.storage.path, "w") as f:
+            f.write("10")
+        b = Num(storage=LocalFile(path=str(dir / "b.json")))
+        with open(b.storage.path, "w") as f:
+            f.write("5")
+        c = Num(storage=LocalFile(path=str(dir / "{input_fingerprint}/c.json")))
+
+        # Create two Graphs, varying only by the arg order to the Producer.
+        with Graph(name="test") as g_ab:
+            g_ab.artifacts.c = div(a=a, b=b).out(c)
+        with Graph(name="test") as g_ba:
+            g_ba.artifacts.c = div(a=b, b=a).out(c)
+
+        assert g_ab.compute_id() != g_ba.compute_id()
+
+
 def test_Graph_build() -> None:
     side_effect = 0
 
@@ -81,6 +118,10 @@ def test_Graph_build() -> None:
         side_effect += 1
         return i + 1
 
+    @producer()
+    def dup(i: Annotated[int, Num]) -> tuple[Annotated[int, Num], Annotated[int, Num]]:
+        return i, i
+
     with TemporaryDirectory() as _dir:
         dir = Path(_dir)
         with Graph(name="test") as g:
@@ -88,27 +129,41 @@ def test_Graph_build() -> None:
             g.artifacts.b = increment(i=g.artifacts.a).out(
                 Num(storage=LocalFile(path=str(dir / "b/{input_fingerprint}.json")))
             )
+            # Test multiple return values
+            g.artifacts.c, g.artifacts.d = dup(i=g.artifacts.a).out(
+                Num(storage=LocalFile(path=str(dir / "c/{input_fingerprint}.json"))),
+                Num(storage=LocalFile(path=str(dir / "d/{input_fingerprint}.json"))),
+            )
 
-        a, b = g.artifacts.a, cast(A2, g.artifacts.b)
+        a, b, c, d = (
+            g.artifacts.a,
+            cast(Num, g.artifacts.b),
+            cast(Num, g.artifacts.c),
+            cast(Num, g.artifacts.d),
+        )
         # Bootstrap the initial artifact and build
         g.write(0, artifact=a)
         g.build()
         assert side_effect == 1
         assert g.read(b, annotation=int) == 1
+        assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
         # A second build should no-op
         g.build(executor=LocalExecutor())
         assert side_effect == 1
         assert g.read(b, annotation=int) == 1
+        assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
         # Changing the raw Artifact data should trigger a rerun
         g.write(1, artifact=a)
         g.build()
         assert side_effect == 2
         assert g.read(b, annotation=int) == 2
+        assert g.read(c, annotation=int) == g.read(d, annotation=int) == 1
         # Changing back to the original data should no-op
         g.write(0, artifact=a)
         g.build()
         assert side_effect == 2
         assert g.read(b, annotation=int) == 1
+        assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
 
 
 def test_Graph_dependencies(graph: Graph) -> None:
@@ -180,6 +235,11 @@ def test_Graph_read_write() -> None:
         assert storage_partition.input_fingerprint == Fingerprint.empty()
         assert storage_partition.keys == CompositeKey()
         assert storage_partition.path.endswith(i.format.extension)
+        with pytest.raises(
+            ValueError,
+            match=re.escape("Writing to a raw Artifact (`i`) would cause a `graph_id` change."),
+        ):
+            g.write(10, artifact=i, graph_id=Fingerprint.from_string("junk"))
         # Test read
         assert g.read(i, annotation=int) == 5
         assert g.read(i, view=python_views.Int()) == 5
@@ -194,3 +254,25 @@ def test_Graph_references(graph: Graph) -> None:
     with Graph(name="test-2") as g2:
         g2.artifacts.upstream.a = graph.artifacts.a
     assert graph.artifacts.a == g2.artifacts.upstream.a
+
+
+def test_Graph_storage_resolution() -> None:
+    with Graph(name="test", path_tags={"tag": "value"}) as g:
+        g.artifacts.root.a = Num(storage=LocalFile())
+        g.artifacts.root.b = Num(storage=LocalFile())
+        g.artifacts.c = cast(
+            Num, div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(Num(storage=LocalFile()))
+        )
+        with pytest.raises(
+            ValueError,
+            match=re.escape(
+                "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
+            ),
+        ):
+            g.artifacts.d = div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(
+                Num(storage=LocalFile(path="junk"))
+            )
+
+    assert g.artifacts.root.a.storage.path.endswith("/test/tag=value/root/a/a.json")
+    assert g.artifacts.root.b.storage.path.endswith("/test/tag=value/root/b/b.json")
+    assert g.artifacts.c.storage.path.endswith("/test/tag=value/c/{input_fingerprint}/c.json")
