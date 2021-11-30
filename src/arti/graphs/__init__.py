@@ -246,10 +246,12 @@ class Graph(Model):
         self,
         artifact: Artifact,
         *,
-        storage_partitions: Optional[Sequence[StoragePartition]] = None,
         annotation: Optional[Any] = None,
+        graph_id: Optional[Fingerprint] = None,
+        storage_partitions: Optional[Sequence[StoragePartition]] = None,
         view: Optional[View] = None,
     ) -> Any:
+        key = self.artifact_to_key[artifact]
         if annotation is None and view is None:
             raise ValueError("Either `annotation` or `view` must be passed")
         elif annotation is not None and view is not None:
@@ -258,7 +260,9 @@ class Graph(Model):
             view = View.get_class_for(annotation)()
         if storage_partitions is None:
             with self.backend.connect() as backend:
-                storage_partitions = backend.read_artifact_partitions(artifact)
+                storage_partitions = backend.read_graph_partitions(
+                    graph_id or self.compute_id(), key
+                )
         return io.read(
             type=artifact.type,
             format=artifact.format,
@@ -271,10 +275,14 @@ class Graph(Model):
         data: Any,
         *,
         artifact: Artifact,
+        graph_id: Optional[Fingerprint] = None,
         input_fingerprint: Fingerprint = Fingerprint.empty(),
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
     ) -> StoragePartition:
+        key = self.artifact_to_key[artifact]
+        if graph_id is not None and artifact.producer_output is None:
+            raise ValueError()  # "root" Artifact changes would trigger a Graph ID change.
         if view is None:
             view = View.get_class_for(type(data))()
         storage_partition = artifact.storage.generate_partition(
@@ -292,5 +300,5 @@ class Graph(Model):
         # transparently batch requests, but that's not so friendly with the transient
         # ".connect".
         with self.backend.connect() as backend:
-            backend.write_artifact_partitions(artifact, (storage_partition,))
+            backend.write_graph_partitions(graph_id or self.compute_id(), key, (storage_partition,))
         return cast(StoragePartition, storage_partition)
