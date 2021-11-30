@@ -112,6 +112,8 @@ NodeDependencies = frozendict[Node, frozenset[Node]]
 class Graph(Model):
     """Graph stores a web of Artifacts connected by Producers."""
 
+    _fingerprint_excludes_ = frozenset(["backend"])
+
     name: str
     backend: Backend = Field(default_factory=MemoryBackend)
     path_tags: frozendict[str, str] = frozendict()
@@ -119,6 +121,7 @@ class Graph(Model):
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
     _status: Optional[bool] = PrivateAttr(None)
     _artifacts: ArtifactBox = PrivateAttr(default_factory=lambda: ArtifactBox(**BOX_KWARGS[SEALED]))
+    _artifact_to_key: frozendict[Artifact, str] = PrivateAttr(frozendict())
 
     def __enter__(self) -> "Graph":
         if arti.context.graph is not None:
@@ -141,10 +144,17 @@ class Graph(Model):
     def _toggle(self, status: bool) -> None:
         self._status = status
         self._artifacts = ArtifactBox(self.artifacts, **BOX_KWARGS[status])
+        self._artifact_to_key = frozendict(
+            {artifact: key for key, artifact in self.artifacts.walk()}
+        )
 
     @property
     def artifacts(self) -> ArtifactBox:
         return self._artifacts
+
+    @property
+    def artifact_to_key(self) -> frozendict[Artifact, str]:
+        return self._artifact_to_key
 
     @requires_sealed
     def build(self, executor: "Optional[Executor]" = None) -> None:
@@ -157,6 +167,39 @@ class Graph(Model):
         # Timestamp). Unbuilt Artifact (partitions) won't be fully resolved yet.
         return executor.build(self)
 
+    @requires_sealed
+    def compute_id(self) -> Fingerprint:
+        """Identify a "unique" ID for this Graph at this point in time.
+
+        The ID aims to encode the structure of the Graph plus a _snapshot_ of the raw Artifact data
+        (partition kinds and contents). Any change that would affect data should prompt an ID
+        change, however changes to this ID don't directly cause data to be reproduced.
+
+        NOTE: There is currently a gap (and thus race condition) between when the Graph ID is
+        computed and when we read raw Artifacts data during Producer builds.
+        """
+        id = self.fingerprint
+        for node, _ in self.dependencies.items():
+            id = id.combine(node.fingerprint)
+            if isinstance(node, Artifact):
+                key = self.artifact_to_key[node]
+                id = id.combine(Fingerprint.from_string(key))
+                # Include fingerprints (including content_fingerprint!) for all raw Artifact
+                # partitions, triggering a graph ID change if these artifacts change out-of-band.
+                if node.producer_output is None:
+                    partitions = [
+                        partition.with_content_fingerprint()
+                        for partition in node.discover_storage_partitions()
+                    ]
+                    if not partitions:
+                        raise ValueError(f"No data (partitions) found for {key}!")
+                    for partition in partitions:
+                        id = id.combine(partition.fingerprint)
+        if id.is_empty or id.is_identity:  # pragme: no cover
+            # NOTE: This shouldn't happen unless the logic above is faulty.
+            raise ValueError("Fingerprint is empty!")
+        return id
+
     @cached_property  # type: ignore # python/mypy#1362
     @requires_sealed
     def dependencies(self) -> NodeDependencies:
@@ -166,7 +209,7 @@ class Graph(Model):
                 if artifact.producer_output is not None
                 else frozenset()
             )
-            for key, artifact in self.artifacts.walk()
+            for _, artifact in self.artifacts.walk()
         }
         producer_deps = {
             # NOTE: multi-output Producers will appear multiple times (but be deduped)

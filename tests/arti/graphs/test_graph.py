@@ -48,6 +48,30 @@ def test_Graph(graph: Graph) -> None:
     assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
 
 
+def test_Graph_compute_id() -> None:
+    with Graph(name="test") as g:
+        g.artifacts.a = A1()
+        p1 = P1(a1=g.artifacts.a)
+        g.artifacts.b = cast(A2, p1.out())
+
+    id_components = [
+        g.fingerprint,
+        Fingerprint.from_string("a"),
+        Fingerprint.from_string("b"),
+        g.artifacts.a.fingerprint,
+        g.artifacts.b.fingerprint,
+        p1.fingerprint,
+        *(
+            storage_partition.with_content_fingerprint().fingerprint
+            for storage_partition in g.artifacts.a.discover_storage_partitions()
+        ),
+    ]
+
+    assert g.compute_id() == Fingerprint.combine(*id_components)
+    # Ensure order independence
+    assert g.compute_id() == Fingerprint.combine(*reversed(id_components))
+
+
 def test_Graph_build() -> None:
     side_effect = 0
 
