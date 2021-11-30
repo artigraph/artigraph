@@ -78,6 +78,16 @@ def test_Model_fingerprint() -> None:
             _fingerprint_includes_ = frozenset(["z"])
 
 
+def test_Model__iter() -> None:
+    class A(Model):
+        a: int
+
+    a = A(a=5)
+    assert dict(a._iter()) == {"a": 5}
+    a.__dict__["b"] = "junk"  # Shouldn't show up!
+    assert dict(a._iter()) == {"a": 5}
+
+
 def test_Model_unknown_kwargs() -> None:
     with pytest.raises(ValidationError, match="extra fields not permitted"):
         Concrete(junk=1)

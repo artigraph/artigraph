@@ -1,4 +1,4 @@
-from collections.abc import Mapping, Sequence
+from collections.abc import Generator, Mapping, Sequence
 from functools import cached_property
 from typing import (
     TYPE_CHECKING,
@@ -198,8 +198,8 @@ class Model(BaseModel):
         data = dict(
             sorted(  # Sort to ensure stability
                 self._iter(
-                    exclude=self._fingerprint_excludes_,  # type: ignore
-                    include=self._fingerprint_includes_,  # type: ignore
+                    exclude=self._fingerprint_excludes_,
+                    include=self._fingerprint_includes_,
                 ),
                 key=lambda kv: kv[0],
             )
@@ -209,6 +209,13 @@ class Model(BaseModel):
             default=self._fingerprint_json_encoder,
         )
         return Fingerprint.from_string(f"{self._class_key_}:{json_repr}")
+
+    # Filter out non-fields from ._iter (and thus .dict, .json, etc), such as `@cached_property`
+    # after access (which just gets cached in .__dict__).
+    def _iter(self, *args: Any, **kwargs: Any) -> Generator[tuple[str, Any], None, None]:
+        for key, value in super()._iter(*args, **kwargs):
+            if key in self.__fields__:
+                yield key, value
 
     @classmethod
     def _pydantic_type_system_post_field_conversion_hook_(
