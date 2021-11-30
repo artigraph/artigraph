@@ -1,9 +1,11 @@
+import re
 from contextlib import nullcontext
 from typing import Annotated, Any, ClassVar, Literal, Optional, Union
 
 import pytest
 from pydantic import ValidationError
 
+from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import frozendict
 
@@ -37,6 +39,43 @@ def test_Model_copy_validation() -> None:
         v.copy(update={"x": "junk"})
     v2 = v.copy(update={"x": "junk"}, validate=False)  # Skip validation for "trusted" data.
     assert v2.x == "junk"  # type: ignore
+
+
+def test_Model_fingerprint() -> None:
+    class A(Model):
+        a: int
+        b: str
+
+    a = A(a=1, b="b")
+    assert a.fingerprint == Fingerprint.from_string('A:{"a": 1, "b": "b"}')
+
+    class B(Model):
+        a: A
+        b: set[str]
+
+    assert B(a=a, b={"b"}).fingerprint == Fingerprint.from_string(
+        f'B:{{"a": {a.fingerprint.key}, "b": ["b"]}}'
+    )
+
+    class Excludes(A):
+        _fingerprint_excludes_ = frozenset(["a"])
+
+    assert Excludes(a=1, b="b").fingerprint == Fingerprint.from_string('Excludes:{"b": "b"}')
+
+    with pytest.raises(ValueError, match=re.escape("Unknown `_fingerprint_excludes_` field(s)")):
+
+        class BadExcludes(A):
+            _fingerprint_excludes_ = frozenset(["z"])
+
+    class Includes(A):
+        _fingerprint_includes_ = frozenset(["a"])
+
+    assert Includes(a=1, b="b").fingerprint == Fingerprint.from_string('Includes:{"a": 1}')
+
+    with pytest.raises(ValueError, match=re.escape("Unknown `_fingerprint_includes_` field(s)")):
+
+        class BadIncludes(A):
+            _fingerprint_includes_ = frozenset(["z"])
 
 
 def test_Model_unknown_kwargs() -> None:

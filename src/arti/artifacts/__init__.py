@@ -24,6 +24,12 @@ class BaseArtifact(Model):
     - storage: the data's persistent storage system, such as blob storage, database native, etc.
     """
 
+    # NOTE: Narrow the fields that affect the fingerprint to minimize changes (which trigger
+    # recompute). Importantly, avoid fingerprinting the `.producer_output` (ie: the *upstream*
+    # producer) to prevent cascading fingerprint changes (Producer.fingerprint accesses the *input*
+    # Artifact.fingerprints). Even so, this may still be quite sensitive.
+    _fingerprint_includes_ = frozenset(["type", "format", "storage"])
+
     # Type *must* be set on the class and be rather static - small additions may be necessary at
     # Graph level (eg: dynamic column additions), but these should be minor. We might allow Struct
     # Types to be "open" (partial type) or "closed".

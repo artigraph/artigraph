@@ -52,8 +52,8 @@ def test_producer_decorator() -> None:
     assert dummy_producer._input_artifact_types_ == frozendict(a1=A1)
     assert len(dummy_producer._output_metadata_) == 1
     assert dummy_producer._output_metadata_[0][0] == A2
-    assert dummy_producer.version == Producer.version
-    assert dummy_producer(a1=A1()).annotations == ()
+    assert dummy_producer(a1=A1()).annotations == Producer.__fields__["annotations"].default
+    assert dummy_producer(a1=A1()).version == Producer.__fields__["version"].default
 
     class MyAnnotation(Annotation):
         pass
@@ -69,8 +69,8 @@ def test_producer_decorator() -> None:
 
     assert dummy_producer2.__name__ == "test"
     assert dummy_producer2.map == mapper
-    assert dummy_producer2.version == StringVersion(value="test")
     assert dummy_producer2(a1=A1()).annotations == (MyAnnotation(),)
+    assert dummy_producer2(a1=A1()).version == StringVersion(value="test")
 
 
 def test_Producer_partitioned_input_validation() -> None:
@@ -160,7 +160,9 @@ def test_Producer_string_annotation() -> None:
 
 def test_Producer_fingerprint() -> None:
     p1 = P1(a1=A1())
-    assert p1.fingerprint == Fingerprint.from_string("P1") ^ p1.version.fingerprint
+    assert p1.fingerprint == Fingerprint.from_string(
+        f'P1:{{"a1": {p1.a1.fingerprint.key}, "version": {p1.version.fingerprint.key}}}'
+    )
 
 
 def test_Producer_out() -> None:
