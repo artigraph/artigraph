@@ -165,6 +165,27 @@ def test_Producer_fingerprint() -> None:
     )
 
 
+def test_Producer_compute_input_fingerprint() -> None:
+    p1 = P1(a1=A1())
+    assert p1.compute_input_fingerprint(
+        frozendict(a1=StoragePartitions())
+    ) == Fingerprint.from_string(p1._class_key_).combine(p1.version.fingerprint)
+
+    storage_partition = p1.a1.storage.storage_partition_type(
+        keys={}, content_fingerprint=Fingerprint.from_int(10)
+    )
+    assert p1.compute_input_fingerprint(
+        frozendict(a1=StoragePartitions([storage_partition]))
+    ) == Fingerprint.from_string(p1._class_key_).combine(
+        p1.version.fingerprint, storage_partition.content_fingerprint
+    )
+
+    with pytest.raises(
+        ValueError, match=re.escape("Mismatched dependency inputs; expected {'a1'}, got {'junk'}")
+    ):
+        p1.compute_input_fingerprint(frozendict(junk=StoragePartitions()))
+
+
 def test_Producer_out() -> None:
     a1, a2, a3, a4 = A1(), A2(), A3(), A4()
     # single return Producer
