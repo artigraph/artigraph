@@ -115,7 +115,7 @@ class Storage(Model, Generic[_StoragePartition]):
                 raise ValueError(f"{self} requires an input_fingerprint, but none was provided")
         else:
             if not self.includes_input_fingerprint_template:
-                raise ValueError(f"{self} doesn't specify an {{input_fingerprint}}")
+                raise ValueError(f"{self} does not specify a {{input_fingerprint}} template")
             format_kwargs["input_fingerprint"] = str(input_fingerprint.key)
         field_values = {
             name: (

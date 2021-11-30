@@ -186,16 +186,21 @@ class Graph(Model):
                 id = id.combine(Fingerprint.from_string(key))
                 # Include fingerprints (including content_fingerprint!) for all raw Artifact
                 # partitions, triggering a graph ID change if these artifacts change out-of-band.
+                #
+                # TODO: Should we *also* inspect Producer.inputs for Artifacts _not_ inside this
+                # Graph and inspect their contents too? I guess we'll have to handle things a bit
+                # differently depending on if the external Artifacts are Produced (in an upstream
+                # Graph) or not.
                 if node.producer_output is None:
                     partitions = [
                         partition.with_content_fingerprint()
                         for partition in node.discover_storage_partitions()
                     ]
                     if not partitions:
-                        raise ValueError(f"No data (partitions) found for {key}!")
+                        raise ValueError(f"No data (partitions) found for `{key}`!")
                     for partition in partitions:
                         id = id.combine(partition.fingerprint)
-        if id.is_empty or id.is_identity:  # pragme: no cover
+        if id.is_empty or id.is_identity:  # pragma: no cover
             # NOTE: This shouldn't happen unless the logic above is faulty.
             raise ValueError("Fingerprint is empty!")
         return id
@@ -282,7 +287,9 @@ class Graph(Model):
     ) -> StoragePartition:
         key = self.artifact_to_key[artifact]
         if graph_id is not None and artifact.producer_output is None:
-            raise ValueError()  # "root" Artifact changes would trigger a Graph ID change.
+            raise ValueError(
+                f"Writing to a raw Artifact (`{key}`) would cause a `graph_id` change."
+            )
         if view is None:
             view = View.get_class_for(type(data))()
         storage_partition = artifact.storage.generate_partition(
