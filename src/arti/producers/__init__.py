@@ -261,17 +261,22 @@ class Producer(Model):
     def compute_input_fingerprint(
         self, dependency_partitions: frozendict[str, StoragePartitions]
     ) -> Fingerprint:
-        return self.fingerprint.combine(
+        input_names = set(dependency_partitions)
+        expected_names = set(self._build_input_views_)
+        if input_names != expected_names:
+            raise ValueError(
+                f"Mismatched dependency inputs; expected {expected_names}, got {input_names}"
+            )
+        # We only care if the *code* or *input partition contents* changed, not if the input file
+        # paths changed (but have the same content as a prior run).
+        return Fingerprint.from_string(self._class_key_).combine(
+            self.version.fingerprint,
             *(
                 partition.content_fingerprint
                 for name, partitions in dependency_partitions.items()
                 for partition in partitions
-            )
+            ),
         )
-        # partition_input_fingerprints = {
-        #     composite_key:
-        #     for composite_key, dependency_partitions in partition_dependencies.items()
-        # }
 
     @property
     def inputs(self) -> dict[str, Artifact]:
