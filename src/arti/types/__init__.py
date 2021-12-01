@@ -123,7 +123,7 @@ class Int64(_Int):
     pass
 
 
-class List(Type):
+class List(Type, _NamedMixin):
     element: Type
     partition_by: tuple[str, ...] = ()
     cluster_by: tuple[str, ...] = ()
