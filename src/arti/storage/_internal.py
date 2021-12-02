@@ -127,12 +127,12 @@ def extract_placeholders(
     parser: parse.Parser,
     path: str,
     spec: str,
-) -> tuple[Fingerprint, CompositeKey]:
+) -> Optional[tuple[Fingerprint, CompositeKey]]:
     parsed_value = parser.parse(path)
     if parsed_value is None:
         if error_on_no_match:
             raise ValueError(f"Unable to parse '{path}' with '{spec}'.")
-        return Fingerprint.empty(), CompositeKey()
+        return None
     input_fingerprint = Fingerprint.empty()
     key_components = defaultdict[str, dict[str, str]](dict)
     for k, v in parsed_value.named.items():
@@ -165,11 +165,18 @@ def parse_spec(
     spec: str,
 ) -> Mapping[str, tuple[Fingerprint, CompositeKey]]:
     parser = parse.compile(spec, case_sensitive=True)
+    path_placeholders = (
+        (path, placeholders)
+        for path in paths
+        if (
+            placeholders := extract_placeholders(
+                parser=parser, path=path, spec=spec, key_types=key_types
+            )
+        )
+        is not None
+    )
     return {
         path: (input_fingerprint, keys)
-        for (path, (input_fingerprint, keys)) in (
-            (path, extract_placeholders(parser=parser, path=path, spec=spec, key_types=key_types))
-            for path in paths
-        )
+        for (path, (input_fingerprint, keys)) in path_placeholders
         if input_fingerprints.get(keys, Fingerprint.empty()) == input_fingerprint
     }

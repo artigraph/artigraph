@@ -210,7 +210,7 @@ def test_extract_placeholders(
             path="fake",
             spec=spec,
         )
-        == (Fingerprint.empty(), CompositeKey())
+        is None
     )
 
 
