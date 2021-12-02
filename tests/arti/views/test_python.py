@@ -35,7 +35,7 @@ def test_python_View() -> None:
 
             # read returns a list, matching the passed partitions
             data = read(
-                type=test_type,
+                type_=test_type,
                 format=test_format,
                 storage_partitions=(test_storage_partition,),
                 view=test_view,
@@ -45,7 +45,7 @@ def test_python_View() -> None:
             f.truncate()
             write(
                 data,
-                type=test_type,
+                type_=test_type,
                 format=test_format,
                 storage_partition=test_storage_partition,
                 view=test_view,

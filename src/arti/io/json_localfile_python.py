@@ -21,12 +21,12 @@ def _read_json_file(path: str) -> Any:
 
 @read.register
 def _read_json_localfile_python(
-    type: Type,
+    type_: Type,
     format: JSON,
     storage_partitions: Sequence[LocalFilePartition],
     view: PythonBuiltin,
 ) -> Any:
-    if isinstance(type, Collection) and type.is_partitioned:
+    if isinstance(type_, Collection) and type_.is_partitioned:
         return list(
             chain.from_iterable(
                 _read_json_file(storage_partition.path) for storage_partition in storage_partitions
@@ -40,7 +40,7 @@ def _read_json_localfile_python(
 
 @write.register
 def _write_json_localfile_python(
-    data: Any, type: Type, format: JSON, storage_partition: LocalFilePartition, view: PythonBuiltin
+    data: Any, type_: Type, format: JSON, storage_partition: LocalFilePartition, view: PythonBuiltin
 ) -> None:
     path = Path(storage_partition.path)
     path.parent.mkdir(exist_ok=True, parents=True)

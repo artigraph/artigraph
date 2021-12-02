@@ -270,7 +270,7 @@ class Graph(Model):
                     graph_id or self.compute_id(), key
                 )
         return io.read(
-            type=artifact.type,
+            type_=artifact.type,
             format=artifact.format,
             storage_partitions=storage_partitions,
             view=view,
@@ -298,7 +298,7 @@ class Graph(Model):
         )
         io.write(
             data,
-            type=artifact.type,
+            type_=artifact.type,
             format=artifact.format,
             storage_partition=storage_partition,
             view=view,

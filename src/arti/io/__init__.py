@@ -22,17 +22,17 @@ _import_submodules = cast(Callable[[], None], partial(import_submodules, __path_
 
 @dispatch(once_before=_import_submodules)
 def read(
-    type: Type, format: Format, storage_partitions: Sequence[StoragePartition], view: View
+    type_: Type, format: Format, storage_partitions: Sequence[StoragePartition], view: View
 ) -> Any:
     raise NotImplementedError(
-        f"Read into {view} view from {format} format in {storage_partitions} storage not implemented."
+        f"Reading {type(storage_partitions[0])} storage in {type(format)} format to {type(view)} view is not implemented."
     )
 
 
 @dispatch(once_before=_import_submodules)
 def write(
-    data: Any, type: Type, format: Format, storage_partition: StoragePartition, view: View
+    data: Any, type_: Type, format: Format, storage_partition: StoragePartition, view: View
 ) -> None:
     raise NotImplementedError(
-        f"Write from {view} view into {format} format in {storage_partition} storage not implemented."
+        f"Writing {type(view)} view into {type(format)} format in {type(storage_partition)} storage is not implemented."
     )

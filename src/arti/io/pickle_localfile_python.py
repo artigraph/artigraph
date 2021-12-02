@@ -21,12 +21,12 @@ def _read_pickle_file(path: str) -> Any:
 
 @read.register
 def _read_pickle_localfile_python(
-    type: Type,
+    type_: Type,
     format: Pickle,
     storage_partitions: Sequence[LocalFilePartition],
     view: PythonBuiltin,
 ) -> Any:
-    if isinstance(type, Collection) and type.is_partitioned:
+    if isinstance(type_, Collection) and type_.is_partitioned:
         return list(
             chain.from_iterable(
                 _read_pickle_file(storage_partition.path)
@@ -42,7 +42,7 @@ def _read_pickle_localfile_python(
 @write.register
 def _write_pickle_localfile_python(
     data: Any,
-    type: Type,
+    type_: Type,
     format: Pickle,
     storage_partition: LocalFilePartition,
     view: PythonBuiltin,
