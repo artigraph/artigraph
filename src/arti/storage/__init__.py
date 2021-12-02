@@ -137,7 +137,7 @@ class Storage(Model, Generic[_StoragePartition]):
     def includes_input_fingerprint_template(self) -> bool:
         return any("{input_fingerprint}" in val for val in self._format_fields.values())
 
-    def _resolve_field(self, spec: str, placeholder_values: dict[str, str]) -> str:
+    def _resolve_field(self, name: str, spec: str, placeholder_values: dict[str, str]) -> str:
         for placeholder, value in placeholder_values.items():
             if not value:
                 # Strip placeholder *and* any trailing self.segment_sep.
@@ -151,11 +151,11 @@ class Storage(Model, Generic[_StoragePartition]):
     def resolve(self: _Storage, **placeholder_values: str) -> _Storage:
         return self.copy(
             update={
-                name: updated_value
+                name: new
                 for name, original in self._format_fields.items()
                 # Avoid "setting" the value if not updated to reduce pydantic repr verbosity (which
                 # only shows "set" fields by default).
-                if (updated_value := self._resolve_field(original, placeholder_values)) != original
+                if (new := self._resolve_field(name, original, placeholder_values)) != original
             }
         )
 
