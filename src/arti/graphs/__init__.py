@@ -197,7 +197,8 @@ class Graph(Model):
                         for partition in node.discover_storage_partitions()
                     ]
                     if not partitions:
-                        raise ValueError(f"No data (partitions) found for `{key}`!")
+                        content_str = "partitions" if node.is_partitioned else "data"
+                        raise ValueError(f"No {content_str} found for `{key}`: {node}")
                     for partition in partitions:
                         id = id.combine(partition.fingerprint)
         if id.is_empty or id.is_identity:  # pragma: no cover

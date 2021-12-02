@@ -85,7 +85,7 @@ def test_Graph_compute_id_missing_input_artifact() -> None:
         with Graph(name="test") as g:
             g.artifacts.a = Num(storage=LocalFile(path=str(dir / "a.json")))
 
-        with pytest.raises(ValueError, match=re.escape("No data (partitions) found for `a`")):
+        with pytest.raises(ValueError, match=re.escape("No data found for `a`")):
             assert g.compute_id()
 
 
