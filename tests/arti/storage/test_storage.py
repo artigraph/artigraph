@@ -64,10 +64,16 @@ def test_Storage_init_subclass() -> None:
     assert S.storage_partition_type is MockStoragePartition  # type: ignore
 
 
+def test_Storage_resolve_empty_error() -> None:
+    s = MockStorage(path="/{name}")
+    with pytest.raises(ValueError, match=".path was empty after removing unused templates"):
+        s.resolve_names(())
+
+
 def test_Storage_resolve_extension() -> None:
-    s = MockStorage(path="{extension}")
-    assert s.resolve_extension("test") == MockStorage(path="test")
-    assert s.resolve_extension(None) == MockStorage(path="")
+    s = MockStorage(path="somefile{extension}")
+    assert s.resolve_extension(".test") == MockStorage(path="somefile.test")
+    assert s.resolve_extension(None) == MockStorage(path="somefile")
 
 
 def test_Storage_resolve_graph_name() -> None:
@@ -86,11 +92,10 @@ def test_Storage_resolve_input_fingerprint() -> None:
 def test_Storage_resolve_names() -> None:
     s = MockStorage(path="/{names}")
     assert s.resolve_names(("a", "b")) == MockStorage(path="/a/b")
-    assert s.resolve_names(()) == MockStorage(path="/")
 
     s = MockStorage(path="/{names}/junk/{name}")
     assert s.resolve_names(("a", "b")) == MockStorage(path="/a/b/junk/b")
-    assert s.resolve_names(()) == MockStorage(path="/junk/")
+    assert s.resolve_names(()) == MockStorage(path="/junk")
 
 
 @pytest.mark.parametrize(
@@ -98,7 +103,7 @@ def test_Storage_resolve_names() -> None:
     (
         (
             "/tmp/test/{partition_key_spec}",
-            "/tmp/test/",
+            "/tmp/test",
             {},
         ),
         (
@@ -155,7 +160,6 @@ def test_Storage_resolve_partition_key_spec_extra() -> None:
 def test_Storage_resolve_path_tags() -> None:
     s = MockStorage(path="{path_tags}")
     assert s.resolve_path_tags(frozendict(a="b")) == MockStorage(path="a=b")
-    assert s.resolve_path_tags(frozendict()) == MockStorage(path="")
 
 
 def test_Storage_discover_partitions() -> None:

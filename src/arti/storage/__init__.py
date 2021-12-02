@@ -144,7 +144,10 @@ class Storage(Model, Generic[_StoragePartition]):
                 trim = "{" + placeholder + "}"
                 if f"{trim}{self.segment_sep}" in spec:
                     trim = f"{trim}{self.segment_sep}"
-                spec = spec.replace(trim, "")
+                # Also strip any trailing separators, eg: if the placeholder was at the end.
+                spec = spec.replace(trim, "").rstrip(self.segment_sep)
+                if not spec:
+                    raise ValueError(f"{self}.{name} was empty after removing unused templates")
         return partial_format(spec, **placeholder_values)
 
     # TODO: Reconsider the `resolve_*` interfaces to reduce the number of copies if possible.
