@@ -46,7 +46,7 @@ def test_localfile_io(format: Format) -> None:
                 input_fingerprint=Fingerprint.empty(),
                 with_content_fingerprint=False,
             ),
-            view=View.get_class_for(int)(),
+            view=View.get_class_for(int, validation_type=a.type)(),
         )
         partitions = a.discover_storage_partitions()
         assert len(partitions) == 1
@@ -55,7 +55,7 @@ def test_localfile_io(format: Format) -> None:
                 a.type,
                 a.format,
                 partitions,
-                view=View.get_class_for(int)(),
+                view=View.get_class_for(int, validation_type=a.type)(),
             )
             == n
         )
@@ -64,7 +64,7 @@ def test_localfile_io(format: Format) -> None:
                 a.type,
                 a.format,
                 partitions * 2,
-                view=View.get_class_for(int)(),
+                view=View.get_class_for(int, validation_type=a.type)(),
             )
 
 
@@ -93,7 +93,7 @@ def test_localfile_io_partitioned(format: Format) -> None:
                 a.type,
                 a.format,
                 partition,
-                view=View.get_class_for(list)(),
+                view=View.get_class_for(list, validation_type=a.type)(),
             )
         assert set(data.values()) == set(a.discover_storage_partitions())
         for record, partition in data.items():
@@ -102,7 +102,7 @@ def test_localfile_io_partitioned(format: Format) -> None:
                     a.type,
                     a.format,
                     [partition],
-                    view=View.get_class_for(list)(),
+                    view=View.get_class_for(list, validation_type=a.type)(),
                 )
                 == [record]
             )

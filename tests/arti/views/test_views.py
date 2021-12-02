@@ -3,6 +3,7 @@ from typing import ClassVar
 import pytest
 from pydantic import ValidationError
 
+from arti import types
 from arti.types.python import python_type_system
 from arti.views import View
 
@@ -43,5 +44,13 @@ def test_View_get_class_for(MockView: type[View]) -> None:
     class List(MockView):  # type: ignore
         python_type = list
 
-    assert MockView.get_class_for(list) is List
-    assert MockView.get_class_for(list[int]) is List
+    for (annotation, validation_type) in [
+        (list, None),
+        (list, types.List(element=types.Int64())),
+        (list[int], None),
+        (list[int], types.List(element=types.Int64())),
+    ]:
+        assert MockView.get_class_for(annotation, validation_type=validation_type) is List
+
+    with pytest.raises(ValueError, match="list'> cannot be used to represent Float64"):
+        MockView.get_class_for(list, validation_type=types.Float64())

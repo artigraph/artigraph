@@ -226,7 +226,3 @@ def test_TypeSystem(
     dummy.register_adapter(Int32Adapter)
     assert isinstance(dummy.to_artigraph(MyInt, hints={}), Int32)
     assert dummy.to_system(Int32(), hints={}) is MyInt
-
-    dummy.check_similarity(arti=Int32(), python_type=MyInt)
-    with pytest.raises(ValueError, match="MyInt'> cannot be used to represent Float64"):
-        dummy.check_similarity(arti=Float64(), python_type=MyInt)

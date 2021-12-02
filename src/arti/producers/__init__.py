@@ -98,13 +98,11 @@ class Producer(Model):
 
     @classmethod
     def _get_view_from_annotation(cls, annotation: Any, artifact: type[Artifact]) -> type[View]:
-        view = View.get_class_for(annotation)
         wrap_msg = f"{artifact.__name__}"
         if artifact.is_partitioned:
             wrap_msg = f"partitions of {artifact.__name__}"
         with wrap_exc(ValueError, prefix=f" ({wrap_msg})"):
-            view.type_system.check_similarity(arti=artifact._type, python_type=annotation)
-        return view
+            return View.get_class_for(annotation, validation_type=artifact._type)
 
     @classmethod
     def _validate_fields(cls) -> frozendict[str, type[Artifact]]:

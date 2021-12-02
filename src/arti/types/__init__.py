@@ -306,8 +306,3 @@ class TypeSystem(Model):
             if adapter.matches_artigraph(type_, hints=hints):
                 return adapter.to_system(type_, hints=hints)
         raise NotImplementedError(f"No {self} adapter for Artigraph type: {type_}.")
-
-    def check_similarity(self, *, arti: Type, python_type: type) -> None:
-        system_type = self.to_system(arti, hints={})
-        if not lenient_issubclass(system_type, python_type):
-            raise ValueError(f"{python_type} cannot be used to represent {arti}")

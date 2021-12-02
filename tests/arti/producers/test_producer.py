@@ -120,7 +120,9 @@ def test_Producer_output_metadata() -> None:
 
     assert ExplicitView._output_metadata_ == ((A2, python_views.Dict),)
 
-    with pytest.raises(ValueError, match="DupView.build 1st return - multiple Views set"):
+    with pytest.raises(
+        ValueError, match=re.escape("DupView.build 1st return (A2) - multiple Views set")
+    ):
 
         class DupView(Producer):
             a1: A1
