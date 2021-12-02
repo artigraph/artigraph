@@ -6,6 +6,7 @@ from pydantic import ValidationError
 
 from arti.internal.utils import frozendict
 from arti.types import (
+    Collection,
     Enum,
     Float16,
     Float32,
@@ -120,46 +121,53 @@ def test_Enum_errors() -> None:
 def test_List() -> None:
     lst = List(element=Int32())
     assert lst.element == Int32()
-    assert lst.partition_by == ()
-    assert lst.cluster_by == ()
-    assert lst.partition_fields == frozendict()
-    assert lst.is_partitioned is False
 
 
-def test_List_partitioned() -> None:
+def test_Collection() -> None:
+    collection = Collection(element=Int32())
+    assert isinstance(collection, List)  # Confirm subclass
+    assert collection.cluster_by == ()
+    assert collection.element == Int32()
+    assert collection.is_partitioned is False
+    assert collection.name == "anon"
+    assert collection.partition_by == ()
+    assert collection.partition_fields == frozendict()
+
+
+def test_Collection_partitioned() -> None:
     fields = {"x": Int32(), "y": Int32()}
 
-    lst = List(element=Struct(fields=fields), partition_by=("x",), cluster_by=("y",))
-    assert lst.partition_by == ("x",)
-    assert lst.cluster_by == ("y",)
-    assert lst.partition_fields == frozendict({"x": fields["x"]})
-    assert lst.is_partitioned is True
+    collection = Collection(element=Struct(fields=fields), partition_by=("x",), cluster_by=("y",))
+    assert collection.partition_by == ("x",)
+    assert collection.cluster_by == ("y",)
+    assert collection.partition_fields == frozendict({"x": fields["x"]})
+    assert collection.is_partitioned is True
 
     with pytest.raises(ValueError, match="requires element to be a Struct"):
-        List(element=Int32(), partition_by=("x",))
+        Collection(element=Int32(), partition_by=("x",))
     with pytest.raises(ValueError, match="requires element to be a Struct"):
-        List(element=Int32(), cluster_by=("x",))
+        Collection(element=Int32(), cluster_by=("x",))
 
 
 @pytest.mark.parametrize(["param"], (("partition_by",), ("cluster_by",)))
-def test_List_field_references(param: str) -> None:
+def test_Collection_field_references(param: str) -> None:
     match = re.escape("unknown field(s): {'z'}")
 
     with pytest.raises(ValueError, match=match):
-        List(element=Struct(fields={"x": Int32(), "y": Int32()}), **{param: ("z",)})
+        Collection(element=Struct(fields={"x": Int32(), "y": Int32()}), **{param: ("z",)})
 
     # Test with a bad `fields` and confirm the error *does not* contain the "unknown field" error.
     with pytest.raises(ValueError, match="expected an instance of") as exc:
-        List(element="junk", **{param: ("z",)})
+        Collection(element="junk", **{param: ("z",)})
     with pytest.raises(AssertionError):
         exc.match(match)
 
 
-def test_List_partition_cluster_overlapping() -> None:
+def test_Collection_partition_cluster_overlapping() -> None:
     match = re.escape("clustering fields overlap with partition fields: {'x'}")
 
     with pytest.raises(ValueError, match=match):
-        List(
+        Collection(
             element=Struct(fields={"x": Int32(), "y": Int32()}),
             partition_by=("x",),
             cluster_by=("x",),
@@ -167,7 +175,7 @@ def test_List_partition_cluster_overlapping() -> None:
 
     # Test with a bad `partition_by` and confirm the error *does not* contain the "unknown field" error.
     with pytest.raises(ValueError, match="expected an instance of") as exc:
-        List(
+        Collection(
             element=Struct(fields={"x": Int32(), "y": Int32()}), partition_by="x", cluster_by=("y",)
         )
     with pytest.raises(AssertionError):

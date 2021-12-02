@@ -123,8 +123,16 @@ class Int64(_Int):
     pass
 
 
-class List(Type, _NamedMixin):
+class List(Type):
     element: Type
+
+
+class Collection(List, _NamedMixin):
+    """A collections of elements with partition and cluster metadata.
+
+    Collections should not be nested in other types.
+    """
+
     partition_by: tuple[str, ...] = ()
     cluster_by: tuple[str, ...] = ()
 

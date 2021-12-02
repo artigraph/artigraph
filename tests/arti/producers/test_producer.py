@@ -11,7 +11,7 @@ from arti.internal.utils import frozendict
 from arti.producers import PartitionDependencies, Producer
 from arti.producers import producer as producer_decorator  # Avoid shadowing
 from arti.storage import StoragePartitions
-from arti.types import Int64, List, Struct
+from arti.types import Collection, Int64, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
@@ -75,7 +75,7 @@ def test_producer_decorator() -> None:
 
 def test_Producer_partitioned_input_validation() -> None:
     class A(Artifact):
-        type: List = List(element=Struct(fields={"x": Int64()}), partition_by=("x",))
+        type: Collection = Collection(element=Struct(fields={"x": Int64()}), partition_by=("x",))
 
     class P(Producer):
         a: A
@@ -87,7 +87,7 @@ def test_Producer_partitioned_input_validation() -> None:
     assert P._input_artifact_types_ == frozendict(a=A)
     assert P._build_input_views_ == frozendict(a=python_views.List)
 
-    with pytest.raises(ValueError, match="dict.* cannot be used to represent List"):
+    with pytest.raises(ValueError, match="dict.* cannot be used to represent Collection"):
 
         class SingularInput(Producer):
             a: A
@@ -96,7 +96,9 @@ def test_Producer_partitioned_input_validation() -> None:
             def build(a: dict) -> Annotated[dict, A2]:  # type: ignore
                 pass
 
-    with pytest.raises(ValueError, match=re.escape("list[int] cannot be used to represent List")):
+    with pytest.raises(
+        ValueError, match=re.escape("list[int] cannot be used to represent Collection")
+    ):
 
         class IncompatibleInput(Producer):
             a: A
@@ -250,10 +252,12 @@ def test_Producer_build_outputs_check() -> None:
         type: Int64 = Int64()
 
     class C(Artifact):
-        type: List = List(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        type: Collection = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
 
     class D(Artifact):
-        type: List = List(element=Struct(fields={"a": Int64(), "b": Int64()}), partition_by=("b",))
+        type: Collection = Collection(
+            element=Struct(fields={"a": Int64(), "b": Int64()}), partition_by=("b",)
+        )
 
     class NoPartitioning(Producer):
         @staticmethod

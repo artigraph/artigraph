@@ -8,7 +8,7 @@ from arti.formats import Format
 from arti.partitions import CompositeKeyTypes, Int64Key
 from arti.statistics import Statistic
 from arti.storage import Storage
-from arti.types import Int64, List, Struct, Type
+from arti.types import Collection, Int64, Struct, Type
 from tests.arti.dummies import A1, A2, P1, P2, DummyFormat, DummyStatistic, DummyStorage
 
 
@@ -105,13 +105,13 @@ def test_instance_attr_merging() -> None:
 
 def test_Artifact_partition_key_types() -> None:
     class NonPartitioned(Artifact):
-        type: List = List(element=Struct(fields={"a": Int64()}))
+        type: Type = Collection(element=Struct(fields={"a": Int64()}))
 
     assert NonPartitioned.partition_key_types == CompositeKeyTypes()
     assert not NonPartitioned.is_partitioned
 
     class Partitioned(Artifact):
-        type: List = List(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        type: Type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
 
     assert Partitioned.partition_key_types == CompositeKeyTypes({"a": Int64Key})
     assert Partitioned.is_partitioned
@@ -122,7 +122,7 @@ def test_Artifact_storage_path_resolution() -> None:
         key = "test-{partition_key_spec}"
 
     class A(Artifact):
-        type: Type = List(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        type: Type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
         format: Format = DummyFormat()
         storage: S
 

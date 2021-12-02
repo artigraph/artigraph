@@ -16,7 +16,7 @@ from arti.partitions import (
     _IntKey,
     key_component,
 )
-from arti.types import Date, Int8, Int16, Int32, Int64, List, Struct, Type
+from arti.types import Collection, Date, Int8, Int16, Int32, Int64, Struct, Type
 
 
 def test_PartitionKey_key_components() -> None:
@@ -40,7 +40,7 @@ def test_PartitionKey_lookup_from_type() -> None:
     assert PartitionKey.types_from(Int8()) == frozendict()
     assert PartitionKey.types_from(Struct(fields={"date": Date(), "i": Int8()})) == frozendict()
     assert PartitionKey.types_from(
-        List(element=Struct(fields={"date": Date(), "i": Int8()}), partition_by=("date", "i"))
+        Collection(element=Struct(fields={"date": Date(), "i": Int8()}), partition_by=("date", "i"))
     ) == frozendict({"date": DateKey, "i": Int8Key})
 
 

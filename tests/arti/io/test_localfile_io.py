@@ -13,7 +13,7 @@ from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey, Int64Key
 from arti.storage import StoragePartition
 from arti.storage.local import LocalFile
-from arti.types import Int64, List, Struct
+from arti.types import Collection, Int64, Struct
 from arti.views import View
 
 
@@ -22,7 +22,7 @@ class Num(Artifact):
 
 
 class PartitionedNum(Artifact):
-    type: List = List(element=Struct(fields={"i": Int64()}), partition_by=("i",))
+    type: Collection = Collection(element=Struct(fields={"i": Int64()}), partition_by=("i",))
 
 
 @pytest.mark.parametrize(

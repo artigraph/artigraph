@@ -7,7 +7,7 @@ from typing import Any, ClassVar
 
 from arti.internal.models import Model
 from arti.internal.utils import classproperty, frozendict, register
-from arti.types import Date, Int8, Int16, Int32, Int64, List, Null, Type
+from arti.types import Collection, Date, Int8, Int16, Int32, Int64, Null, Type
 
 
 class key_component(property):
@@ -53,7 +53,7 @@ class PartitionKey(Model):
 
     @classmethod
     def types_from(cls, type_: Type) -> "CompositeKeyTypes":
-        if not isinstance(type_, List):
+        if not isinstance(type_, Collection):
             return frozendict()
         return frozendict(
             {name: cls.get_class_for(field) for name, field in type_.partition_fields.items()}

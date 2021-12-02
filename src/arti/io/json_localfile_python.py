@@ -7,7 +7,7 @@ from typing import Any
 from arti.formats.json import JSON
 from arti.io import read, write
 from arti.storage.local import LocalFilePartition
-from arti.types import List, Type
+from arti.types import Collection, Type
 from arti.views.python import PythonBuiltin
 
 # TODO: Do I need to inject the partition keys into the returned data? Likely useful...
@@ -26,7 +26,7 @@ def _read_json_localfile_python(
     storage_partitions: Sequence[LocalFilePartition],
     view: PythonBuiltin,
 ) -> Any:
-    if isinstance(type, List) and type.is_partitioned:
+    if isinstance(type, Collection) and type.is_partitioned:
         return list(
             chain.from_iterable(
                 _read_json_file(storage_partition.path) for storage_partition in storage_partitions

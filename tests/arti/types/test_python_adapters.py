@@ -7,6 +7,7 @@ import pytest
 from arti.internal.type_hints import NoneType
 from arti.types import (
     Boolean,
+    Collection,
     Date,
     Enum,
     Float16,
@@ -72,6 +73,8 @@ def test_python_list() -> None:
 
     assert python_type_system.to_system(a, hints={}) == p
     assert python_type_system.to_artigraph(p, hints={}) == a
+    # Confirm we can convert Collections to a list (NOTE: round trip still goes to List)
+    assert python_type_system.to_system(Collection(element=Int64()), hints={}) == p
 
 
 def test_python_literal() -> None:
@@ -175,6 +178,8 @@ def test_python_tuple() -> None:
     assert python_type_system.to_system(a, hints={}) == list[int]  # list has higher priority
     assert PyTuple.to_system(List(element=Int64()), hints={}) == p
     assert python_type_system.to_artigraph(p, hints={}) == a
+
+    assert PyTuple.to_system(Collection(element=Int64()), hints={}) == p
 
     # We don't (currently) support structure based tuples
     with pytest.raises(NotImplementedError):
