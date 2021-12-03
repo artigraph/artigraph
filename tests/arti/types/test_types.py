@@ -6,6 +6,7 @@ from pydantic import ValidationError
 
 from arti.internal.utils import frozendict
 from arti.types import (
+    DEFAULT_ANONYMOUS_NAME,
     Collection,
     Enum,
     Float16,
@@ -129,7 +130,7 @@ def test_Collection() -> None:
     assert collection.cluster_by == ()
     assert collection.element == Int32()
     assert collection.is_partitioned is False
-    assert collection.name == "anon"
+    assert collection.name == DEFAULT_ANONYMOUS_NAME
     assert collection.partition_by == ()
     assert collection.partition_fields == frozendict()
 

@@ -11,6 +11,8 @@ from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
 from arti.internal.utils import class_name, frozendict, register
 
+DEFAULT_ANONYMOUS_NAME = "anon"
+
 
 class Type(Model):
     """Type represents a data type."""
@@ -24,7 +26,7 @@ class Type(Model):
 
 
 class _NamedMixin(Model):
-    name: str = "anon"
+    name: str = DEFAULT_ANONYMOUS_NAME
 
     @classmethod
     def _pydantic_type_system_post_field_conversion_hook_(
