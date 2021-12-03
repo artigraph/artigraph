@@ -18,7 +18,7 @@ from arti.storage import InputFingerprints
 
 
 class LocalExecutor(Executor):
-    def _build_artifact(
+    def _sync_artifact(
         self,
         graph: Graph,
         graph_id: Fingerprint,
@@ -136,10 +136,10 @@ class LocalExecutor(Executor):
         with graph.backend.connect() as backend:
             for node in TopologicalSorter(graph.dependencies).static_order():
                 if isinstance(node, Artifact):
-                    logging.info(f"Syncing {type(node).__name__}")
-                    self._build_artifact(graph, graph_id, backend, node)
+                    logging.info(f"Syncing {node}...")
+                    self._sync_artifact(graph, graph_id, backend, node)
                 elif isinstance(node, Producer):
-                    logging.info(f"Building {type(node).__name__}")
+                    logging.info(f"Building {node}...")
                     self._build_producer(graph, graph_id, backend, node)
                 else:
                     raise NotImplementedError()
