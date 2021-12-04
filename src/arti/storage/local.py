@@ -4,6 +4,7 @@ import hashlib
 import tempfile
 from glob import glob
 from pathlib import Path
+from typing import Optional, Union
 
 from arti.fingerprints import Fingerprint
 from arti.partitions import CompositeKeyTypes
@@ -25,15 +26,19 @@ class LocalFilePartition(StoragePartition):
 
 
 class LocalFile(Storage[LocalFilePartition]):
-    path: str = str(
-        Path(tempfile.gettempdir())
-        / "{graph_name}"
+    # `_DEFAULT_PATH_TEMPLATE` and `rooted_at` ease testing, where we often want to just override
+    # the tempdir, but keep the rest of the template. Eventually, we should introduce Resources and
+    # implement a MockFS (to be used in `io.*`).
+    _DEFAULT_PATH_TEMPLATE = str(
+        Path("{graph_name}")
         / "{path_tags}"
         / "{names}"
         / "{partition_key_spec}"
         / "{input_fingerprint}"
         / "{name}.{extension}"
     )
+
+    path: str = str(Path(tempfile.gettempdir()) / _DEFAULT_PATH_TEMPLATE)
 
     def discover_partitions(
         self,
@@ -53,3 +58,8 @@ class LocalFile(Storage[LocalFilePartition]):
             )
             for path, (input_fingerprint, keys) in path_metadata.items()
         )
+
+    @classmethod
+    def rooted_at(cls, root: Union[str, Path], path: Optional[str] = None) -> "LocalFile":
+        path = path if path is not None else cls._DEFAULT_PATH_TEMPLATE
+        return cls(path=str(Path(root) / path))

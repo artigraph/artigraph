@@ -6,11 +6,26 @@ from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
+from arti.formats.json import JSON
 from arti.partitions import CompositeKey, CompositeKeyTypes
-from arti.producers import Producer
+from arti.producers import Producer, producer
 from arti.statistics import Statistic
 from arti.storage import InputFingerprints, Storage, StoragePartition
-from arti.types import Int32, Struct, TypeSystem
+from arti.storage.local import LocalFile
+from arti.types import Int32, Int64, Struct, Type, TypeSystem
+
+
+class Num(Artifact):
+    type: Type = Int64()
+    format: Format = JSON()
+    # Require callers to set the storage instance in a separate tempdir.
+    storage: LocalFile
+
+
+@producer()
+def div(a: Annotated[int, Num], b: Annotated[int, Num]) -> Annotated[int, Num]:
+    return a // b
+
 
 dummy_type_system = TypeSystem(key="dummy")
 
