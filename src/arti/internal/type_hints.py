@@ -75,6 +75,8 @@ def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]
     if isinstance(class_or_tuple, tuple):
         return any(lenient_issubclass(klass, subtype) for subtype in class_or_tuple)
     check_type = class_or_tuple
+    if check_type is Any:
+        return True
     # NOTE: py 3.10 supports issubclass with Unions (eg: `issubclass(str, str | int)`)
     if is_union_hint(check_type):
         return any(lenient_issubclass(klass, subtype) for subtype in get_args(check_type))
