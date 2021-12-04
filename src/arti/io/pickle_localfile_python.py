@@ -26,6 +26,8 @@ def _read_pickle_localfile_python(
     storage_partitions: Sequence[LocalFilePartition],
     view: PythonBuiltin,
 ) -> Any:
+    if not storage_partitions:
+        raise FileNotFoundError("No data")
     if isinstance(type_, Collection) and type_.is_partitioned:
         return list(
             chain.from_iterable(

@@ -9,7 +9,7 @@ from arti.formats.json import JSON
 from arti.formats.pickle import Pickle
 from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey, Int64Key
-from arti.storage import StoragePartition
+from arti.storage import StoragePartition, StoragePartitions
 from arti.storage.local import LocalFile
 from arti.types import Collection, Int64, Struct
 from arti.views import View
@@ -52,6 +52,13 @@ def test_localfile_io(tmp_path: Path, format: Format) -> None:
         )
         == n
     )
+    with pytest.raises(FileNotFoundError, match="No data"):
+        io.read(
+            a.type,
+            a.format,
+            StoragePartitions(),
+            view=View.get_class_for(int, validation_type=a.type)(),
+        )
     with pytest.raises(ValueError, match="Multiple partitions can only be read into a list"):
         io.read(
             a.type,
