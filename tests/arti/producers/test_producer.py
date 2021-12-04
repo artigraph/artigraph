@@ -1,5 +1,5 @@
 import re
-from typing import Annotated, Optional
+from typing import Annotated, Any, Optional
 
 import pytest
 
@@ -8,7 +8,7 @@ from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import frozendict
-from arti.producers import PartitionDependencies, Producer
+from arti.producers import PartitionDependencies, Producer, ValidateSig
 from arti.producers import producer as producer_decorator  # Avoid shadowing
 from arti.storage import StoragePartitions
 from arti.types import Collection, Int64, Struct
@@ -258,6 +258,75 @@ def test_Producer_validate_output() -> None:
 
     assert p.validate_outputs(p.build(1)) == positive
     assert p.validate_outputs(p.build(-1)) == negative
+
+
+def test_Producer_validate_output_hint_validation() -> None:
+    def validate_any(i: Any) -> tuple[bool, str]:
+        return bool(i), ""
+
+    def validate_vargs_any(*vals: Any) -> tuple[bool, str]:
+        return bool(vals), ""
+
+    def validate_int(i: int) -> tuple[bool, str]:
+        return bool(i), ""
+
+    for validate_outputs in list[ValidateSig](
+        [
+            lambda x: (True, ""),
+            validate_any,
+            validate_vargs_any,
+            validate_int,
+        ]
+    ):
+
+        @producer_decorator(validate_outputs=validate_outputs)
+        def single_return_build(x: Annotated[int, Num]) -> Annotated[int, Num]:
+            return x
+
+        assert single_return_build.validate_outputs(5)
+
+    with pytest.raises(ValueError, match="i param - type hint must be `Any` or "):
+
+        def accepts_vargs_float(*i: float) -> tuple[bool, str]:
+            return bool(i), ""
+
+        @producer_decorator(validate_outputs=accepts_vargs_float)
+        def bad_vargs(x: Annotated[int, Num]) -> Annotated[int, Num]:
+            return x
+
+    with pytest.raises(ValueError, match="validate_output - must match the `.build` return"):
+
+        @producer_decorator(validate_outputs=validate_int)
+        def too_few_arg(x: Annotated[int, Num]) -> tuple[Annotated[int, Num], Annotated[int, Num]]:
+            return x, x + 1
+
+    with pytest.raises(ValueError, match="validate_output i param - must not have a default."):
+
+        @producer_decorator(validate_outputs=lambda i=5: (True, ""))
+        def bad_default(x: Annotated[int, Num]) -> Annotated[int, Num]:
+            return x
+
+    with pytest.raises(
+        ValueError, match="validate_output i param - must be usable as a positional argument."
+    ):
+
+        def validate_kwarg(*, i: int) -> tuple[bool, str]:
+            return bool(i), ""
+
+        @producer_decorator(validate_outputs=validate_kwarg)
+        def kwarg_only(x: Annotated[int, Num]) -> Annotated[int, Num]:
+            return x
+
+    with pytest.raises(
+        ValueError, match="validate_output i param - type hint must match the 1st `.build` return"
+    ):
+
+        def accepts_float(i: float) -> tuple[bool, str]:
+            return bool(i), ""
+
+        @producer_decorator(validate_outputs=accepts_float)
+        def mismatched_hint(x: Annotated[int, Num]) -> Annotated[int, Num]:
+            return x
 
 
 def test_Producer_build_outputs_check() -> None:

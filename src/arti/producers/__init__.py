@@ -116,6 +116,8 @@ class Producer(Model):
                         cls._build_input_views_,
                         cls._output_metadata_,
                     ) = cls._validate_build_sig()
+                with wrap_exc(ValueError, prefix=".validate_output"):
+                    cls._validate_validate_output_sig()
                 with wrap_exc(ValueError, prefix=".map"):
                     cls._map_sig_, cls._map_input_metadata_ = cls._validate_map_sig()
                 cls._validate_no_unused_fields()
@@ -182,7 +184,7 @@ class Producer(Model):
 
     @classmethod
     def _validate_build_sig_return(cls, annotation: Any, *, i: int) -> ArtifactViewPair:
-        with wrap_exc(ValueError, prefix=f" {ordinal(i)} return"):
+        with wrap_exc(ValueError, prefix=f" {ordinal(i+1)} return"):
             artifact = cls._get_artifact_from_annotation(annotation)
             return artifact, cls._get_view_from_annotation(annotation, artifact)
 
@@ -215,7 +217,7 @@ class Producer(Model):
             raise ValueError("missing return signature")
         output_metadata = OutputMetadata(
             cls._validate_build_sig_return(annotation, i=i)
-            for i, annotation in enumerate(return_annotation, 1)
+            for i, annotation in enumerate(return_annotation)
         )
         # Validate all output Artifacts have equivalent partitioning schemes.
         #
@@ -230,6 +232,44 @@ class Producer(Model):
         # TODO: Save off output composite_key_types
 
         return build_sig, build_input_metadata, output_metadata
+
+    @classmethod
+    def _validate_validate_output_sig(cls) -> None:
+        build_output_types = [get_args(hint)[0] for hint in cls._build_sig_.return_annotation]
+        match_build_str = f"match the `.build` return (`{build_output_types}`)"
+        validate_parameters = signature(cls.validate_outputs).parameters
+
+        def param_matches(param: Parameter, build_return: type) -> bool:
+            # Skip checking non-hinted parameters to allow lambdas.
+            #
+            # NOTE: Parameter type hints are *contravariant* (you can't pass a "Manager" into a
+            # function expecting an "Employee"), hence the lenient_issubclass has build_return as
+            # the subtype and param.annotation as the supertype.
+            return param.annotation is param.empty or lenient_issubclass(
+                build_return, param.annotation
+            )
+
+        if (  # Allow `*args: Any` or `*args: T` for `build(...) -> tuple[T, ...]`
+            len(validate_parameters) == 1
+            and (param := tuple(validate_parameters.values())[0]).kind == param.VAR_POSITIONAL
+        ):
+            if not all(param_matches(param, output_type) for output_type in build_output_types):
+                with wrap_exc(ValueError, prefix=f" {param.name} param"):
+                    raise ValueError(f"type hint must be `Any` or {match_build_str}")
+        else:  # Otherwise, check pairwise
+            if len(validate_parameters) != len(build_output_types):
+                raise ValueError(f"must {match_build_str}")
+            for i, (name, param) in enumerate(validate_parameters.items()):
+                with wrap_exc(ValueError, prefix=f" {name} param"):
+                    if param.default is not param.empty:
+                        raise ValueError("must not have a default.")
+                    if param.kind not in (param.POSITIONAL_ONLY, param.POSITIONAL_OR_KEYWORD):
+                        raise ValueError("must be usable as a positional argument.")
+                    if not param_matches(param, (expected := build_output_types[i])):
+                        raise ValueError(
+                            f"type hint must match the {ordinal(i+1)} `.build` return (`{expected}`)"
+                        )
+        # TODO: Validate return signature?
 
     @classmethod
     def _validate_map_sig(cls) -> tuple[Signature, MapInputMetadata]:
