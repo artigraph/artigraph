@@ -3,7 +3,18 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator
 from inspect import Parameter, Signature, getattr_static
-from typing import Annotated, Any, ClassVar, Optional, TypeVar, Union, cast, get_args, get_origin
+from typing import (
+    TYPE_CHECKING,
+    Annotated,
+    Any,
+    ClassVar,
+    Optional,
+    TypeVar,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+)
 
 from arti.annotations import Annotation
 from arti.artifacts import Artifact, BaseArtifact, Statistic
@@ -33,8 +44,9 @@ OutputMetadata = tuple[ArtifactViewPair, ...]  # type: ignore
 
 PartitionDependencies = frozendict[CompositeKey, frozendict[str, StoragePartitions]]
 
-BuildSig = Callable[..., Any]
 MapSig = Callable[..., PartitionDependencies]
+BuildSig = Callable[..., Any]
+ValidateSig = Callable[..., tuple[bool, str]]
 
 _T = TypeVar("_T")
 
@@ -47,9 +59,37 @@ class Producer(Model):
     annotations: tuple[Annotation, ...] = ()
     version: Version = SemVer(major=0, minor=0, patch=1)
 
-    # build and map must be @classmethods or @staticmethods.
-    build: ClassVar[BuildSig]
+    # The map/build/validate_outputs parameters are intended to be dynamic and set by subclasses,
+    # however mypy doesn't like the "incompatible" signature on subclasses if actually defined here
+    # (nor support ParamSpec yet). `map` is generated during subclassing if not set, `build` is
+    # required, and `validate_outputs` defaults to no-op checks (hence is the only one with a
+    # provided method).
+    #
+    # These must be @classmethods or @staticmethods.
     map: ClassVar[MapSig]
+    build: ClassVar[BuildSig]
+    if TYPE_CHECKING:
+        validate_outputs: ClassVar[ValidateSig]
+    else:
+
+        @staticmethod
+        def validate_outputs(*outputs: Any) -> Union[bool, tuple[bool, str]]:
+            """Validate the `Producer.build` outputs, returning the status and a message.
+
+            The validation status is applied to all outputs. If validation does not pass, the
+            outputs will not be written to storage to prevent checkpointing the output. In the
+            future, we may still write the data to ease debugging, but track validation status in
+            the Backend (preventing downstream use).
+
+            The arguments must not be mutated.
+
+            The parameters must be usable with positional argument. The output of `build` will be
+            passed in as it was returned, for example: `def build(...): return 1, 2` will result in
+            `validate_outputs(1, 2)`.
+
+            NOTE: `validate_outputs` is a stopgap until Statistics and Thresholds are fully implemented.
+            """
+            return True, "No validation performed."
 
     # Internal fields/methods
 
@@ -321,6 +361,7 @@ def producer(
     annotations: Optional[tuple[Annotation, ...]] = None,
     map: Optional[MapSig] = None,
     name: Optional[str] = None,
+    validate_outputs: Optional[ValidateSig] = None,
     version: Optional[Version] = None,
 ) -> Callable[[BuildSig], type[Producer]]:
     def decorate(build: BuildSig) -> type[Producer]:
@@ -349,6 +390,9 @@ def producer(
                     "annotations": annotations,
                     "build": staticmethod(build),
                     "map": None if map is None else staticmethod(map),
+                    "validate_outputs": (
+                        None if validate_outputs is None else staticmethod(validate_outputs)
+                    ),
                     "version": version,
                 }.items()
                 if v is not None

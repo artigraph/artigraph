@@ -14,7 +14,7 @@ from arti.storage import StoragePartitions
 from arti.types import Collection, Int64, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views
-from tests.arti.dummies import A1, A2, A3, A4, P1, P2
+from tests.arti.dummies import A1, A2, A3, A4, P1, P2, Num
 
 
 class DummyProducer(Producer):
@@ -244,6 +244,20 @@ def test_Producer_map_artifacts() -> None:
             @staticmethod
             def map(a1: list) -> PartitionDependencies:  # type: ignore
                 pass
+
+
+def test_Producer_validate_output() -> None:
+    positive, negative = (True, "Positive"), (False, "Negative")
+
+    def is_positive(i: int) -> tuple[bool, str]:
+        return positive if i >= 0 else negative
+
+    @producer_decorator(validate_outputs=is_positive)
+    def p(x: Annotated[int, Num]) -> Annotated[int, Num]:
+        return x
+
+    assert p.validate_outputs(p.build(1)) == positive
+    assert p.validate_outputs(p.build(-1)) == negative
 
 
 def test_Producer_build_outputs_check() -> None:

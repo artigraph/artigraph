@@ -141,6 +141,25 @@ def test_Graph_build(tmp_path: Path) -> None:
     assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
 
 
+def test_Graph_build_failed_validation(tmp_path: Path) -> None:
+    failed_validation_msg = "This is junk data!"
+
+    @producer(validate_outputs=lambda i: (False, failed_validation_msg))
+    def angry_add(i: Annotated[int, Num]) -> Annotated[int, Num]:
+        return i + 1
+
+    num = Num(storage=LocalFile.rooted_at(tmp_path))  # Immutable, thus can reuse
+    with Graph(name="test") as g:
+        g.artifacts.a = num
+        g.artifacts.b = cast(Num, angry_add(i=g.artifacts.a).out(num))
+
+    g.write(0, artifact=g.artifacts.a)
+    with pytest.raises(ValueError, match=failed_validation_msg):
+        g.build()
+    with pytest.raises(FileNotFoundError, match="No data"):
+        g.read(g.artifacts.b, annotation=int)
+
+
 def test_Graph_dependencies(graph: Graph) -> None:
     p1 = graph.artifacts.b.producer_output.producer
     p2 = graph.artifacts.c.a.producer_output.producer

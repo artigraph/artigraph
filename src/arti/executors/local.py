@@ -120,6 +120,9 @@ class LocalExecutor(Executor):
             outputs = producer.build(**arguments)
             if len(producer._output_metadata_) == 1:
                 outputs = (outputs,)
+            validation_passed, validation_message = producer.validate_outputs(*outputs)
+            if not validation_passed:
+                raise ValueError(validation_message)
             for i, output in enumerate(outputs):
                 graph.write(
                     output,
