@@ -59,7 +59,9 @@ def test_localfile_io(tmp_path: Path, format: Format) -> None:
             StoragePartitions(),
             view=View.get_class_for(int, validation_type=a.type)(),
         )
-    with pytest.raises(ValueError, match="Multiple partitions can only be read into a list"):
+    with pytest.raises(
+        ValueError, match="Multiple partitions can only be read into a partitioned Collection, not"
+    ):
         io.read(
             a.type,
             a.format,

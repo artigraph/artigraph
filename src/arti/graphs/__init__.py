@@ -264,6 +264,7 @@ class Graph(Model):
             raise ValueError("Only one of `annotation` or `view` may be passed")
         elif annotation is not None:
             view = View.get_class_for(annotation, validation_type=artifact.type)()
+        assert view is not None  # mypy gets mixed up with ^
         if storage_partitions is None:
             with self.backend.connect() as backend:
                 storage_partitions = backend.read_graph_partitions(

@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from arti.formats.pickle import Pickle
-from arti.io import read, write
+from arti.io import register_reader, register_writer
 from arti.storage.local import LocalFilePartition
 from arti.types import Collection, Type
 from arti.views.python import PythonBuiltin
@@ -16,18 +16,13 @@ def _read_pickle_file(path: str) -> Any:
         return pickle.load(file)
 
 
-# TODO: Need to handle partitioned lists. Should I separate read and read_partitions?
-
-
-@read.register
+@register_reader
 def _read_pickle_localfile_python(
     type_: Type,
     format: Pickle,
     storage_partitions: Sequence[LocalFilePartition],
     view: PythonBuiltin,
 ) -> Any:
-    if not storage_partitions:
-        raise FileNotFoundError("No data")
     if isinstance(type_, Collection) and type_.is_partitioned:
         return list(
             chain.from_iterable(
@@ -36,12 +31,11 @@ def _read_pickle_localfile_python(
             )
         )
     else:
-        if len(storage_partitions) != 1:
-            raise ValueError(f"Multiple partitions can only be read into a list, not {view}")
+        assert len(storage_partitions) == 1  # Better error handled in base read
         return _read_pickle_file(storage_partitions[0].path)
 
 
-@write.register
+@register_writer
 def _write_pickle_localfile_python(
     data: Any,
     type_: Type,
