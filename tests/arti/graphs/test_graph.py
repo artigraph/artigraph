@@ -13,7 +13,13 @@ from arti.partitions import CompositeKey
 from arti.producers import producer
 from arti.storage.local import LocalFile, LocalFilePartition
 from arti.views import python as python_views
-from tests.arti.dummies import A1, A2, A3, A4, P1, P2, Num, div
+from tests.arti.dummies import A1, A2, A3, A4, P1, P2
+from tests.arti.dummies import Num as _Num
+from tests.arti.dummies import div
+
+
+class Num(_Num):
+    storage: LocalFile
 
 
 @pytest.fixture

@@ -11,15 +11,13 @@ from arti.partitions import CompositeKey, CompositeKeyTypes
 from arti.producers import Producer, producer
 from arti.statistics import Statistic
 from arti.storage import InputFingerprints, Storage, StoragePartition
-from arti.storage.local import LocalFile
 from arti.types import Int32, Int64, Struct, Type, TypeSystem
 
 
 class Num(Artifact):
     type: Type = Int64()
     format: Format = JSON()
-    # Require callers to set the storage instance in a separate tempdir.
-    storage: LocalFile
+    # Omit storage to require callers to set the instance in a separate tempdir.
 
 
 @producer()
