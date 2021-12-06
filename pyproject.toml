@@ -61,7 +61,7 @@ python-box = "^5.4.1"
 sgqlc = "^14.1"
 
 [tool.poetry.dev-dependencies]
-black = "21.11b1"
+black = "21.12b0"
 coverage = {version = "^6.2", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
 ipdb = "^0.13.9"
