@@ -178,7 +178,6 @@ if sys.version_info < (3, 10):  # pragma: no cover
 
         return isinstance(type_, _TypedDictMeta)
 
-
 else:  # pragma: no cover
     from typing import is_typeddict as is_typeddict  # noqa: F401
 
