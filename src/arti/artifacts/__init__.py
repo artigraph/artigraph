@@ -131,7 +131,7 @@ class Artifact(BaseArtifact):
 
     _abstract_ = True
     # The Artifact._by_type registry is used to track Artifact classes generated from literal python
-    # values. This is populated by Artifact.from_literal_type and used in Producer class validation
+    # values. This is populated by Artifact.from_type and used in Producer class validation
     # to find a default Artifact type for un-Annotated hints (eg: `def build(i: int)`).
     _by_type: "ClassVar[dict[Type, type[Artifact]]]" = {}
 
@@ -170,7 +170,20 @@ class Artifact(BaseArtifact):
             raise ValueError(
                 f"{type(value).__name__} produces {len(output_artifacts)} Artifacts. Try assigning each to a new name in the Graph!"
             )
-        return Artifact.from_literal(value)
+        return Artifact.for_literal(value)
+
+    @classmethod
+    def for_literal(cls, value: Any) -> "Artifact":
+        from arti.formats.json import JSON
+        from arti.storage.literal import StringLiteral
+        from arti.types.python import python_type_system
+
+        annotation = get_annotation_from_value(value)
+        klass = cls.from_type(python_type_system.to_artigraph(annotation, hints={}))
+        return klass(
+            format=JSON(),
+            storage=StringLiteral(value=json.dumps(value)),
+        )
 
     @classmethod
     def from_type(cls, type_: Type) -> "type[Artifact]":
@@ -184,19 +197,6 @@ class Artifact(BaseArtifact):
                 },
             )
         return cls._by_type[type_]
-
-    @classmethod
-    def from_literal(cls, value: Any) -> "Artifact":
-        from arti.formats.json import JSON
-        from arti.storage.literal import StringLiteral
-        from arti.types.python import python_type_system
-
-        annotation = get_annotation_from_value(value)
-        klass = cls.from_type(python_type_system.to_artigraph(annotation, hints={}))
-        return klass(
-            format=JSON(),
-            storage=StringLiteral(value=json.dumps(value)),
-        )
 
 
 from arti.producers import ProducerOutput  # noqa: E402
