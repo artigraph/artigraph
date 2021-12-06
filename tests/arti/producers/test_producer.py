@@ -213,14 +213,6 @@ def test_Producer_out() -> None:
     assert list(p2) == [a3_, a4_]
 
 
-@pytest.mark.xfail(raises=NotImplementedError)
-def test_Producer_map_defaults() -> None:
-    p1 = P1(a1=A1())
-    # We can make .map defaulting a bit smarter by inspecting how the input artifacts are
-    # partitioned (or not).
-    p1.map()  # ValueError
-
-
 def test_Producer_map_artifacts() -> None:
     class P(Producer):
         a1: A1

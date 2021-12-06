@@ -115,3 +115,4 @@ testpaths = [
     "src/",
     "tests/",
 ]
+xfail_strict=true
