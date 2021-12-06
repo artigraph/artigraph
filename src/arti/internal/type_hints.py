@@ -2,6 +2,7 @@ import inspect
 import sys
 import types
 from collections.abc import Callable
+from datetime import date, datetime
 from typing import _AnnotatedAlias  # type: ignore
 from typing import (
     TYPE_CHECKING,
@@ -67,6 +68,27 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
         raise TypeError(f"{klass.__name__} must subclass a subscripted Generic")
     assert lenient_issubclass(klass, base_origin)
     return get_args(base)
+
+
+def get_annotation_from_value(value: Any) -> Any:
+    if isinstance(value, (NoneType, bool, bytes, date, datetime, float, int, str)):
+        return type(value)
+    if isinstance(value, (tuple, list, set, frozenset)):
+        first, *tail = tuple(value)
+        first_type = type(first)
+        if all(isinstance(v, first_type) for v in tail):
+            if isinstance(value, tuple):
+                return tuple[first_type, ...]  # type: ignore
+            return type(value)[first_type]  # type: ignore
+    if isinstance(value, dict):
+        items = value.items()
+        first_key_type, first_value_type = [type(v) for v in tuple(items)[0]]
+        if all(
+            isinstance(k, first_key_type) and isinstance(v, first_value_type) for (k, v) in items
+        ):
+            return dict[first_key_type, first_value_type]  # type: ignore
+        # TODO: Implement with TypedDict to support Struct types...?
+    raise NotImplementedError(f"Unable to determine type of {value}")
 
 
 def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:

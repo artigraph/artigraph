@@ -1,3 +1,6 @@
+import json
+import re
+from datetime import date, datetime
 from typing import Any
 
 import pytest
@@ -5,10 +8,26 @@ import pytest
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.formats import Format
+from arti.formats.json import JSON
 from arti.partitions import CompositeKeyTypes, Int64Key
 from arti.statistics import Statistic
 from arti.storage import Storage
-from arti.types import Collection, Int64, Struct, Type
+from arti.storage.literal import StringLiteral
+from arti.types import (
+    Binary,
+    Boolean,
+    Collection,
+    Date,
+    Float64,
+    Int64,
+    List,
+    Map,
+    Null,
+    Set,
+    String,
+    Struct,
+    Type,
+)
 from tests.arti.dummies import A1, A2, P1, P2, DummyFormat, DummyStatistic, DummyStorage
 
 
@@ -19,11 +38,55 @@ def test_cast() -> None:
         Artifact.cast(P2(a2=A2()))
 
 
-@pytest.mark.xfail  # Artifact casting to python objects is not implemented yet.
-def test_cast_todo() -> None:
-    Artifact.cast(5)
-    Artifact.cast("hi")
-    Artifact.cast([1, 2, 3])
+@pytest.mark.parametrize(
+    ["value", "expected_type"],
+    [
+        ("hi", String()),
+        (5, Int64()),
+        (5.0, Float64()),
+        (None, Null()),
+        (True, Boolean()),
+        ((1, 2, 3), List(element=Int64())),
+        ([1, 2, 3], List(element=Int64())),
+        ({"a": 1, "b": 2}, Map(key=String(), value=Int64())),
+    ],
+)
+def test_cast_literals(value: Any, expected_type: Type) -> None:
+    artifact = Artifact.cast(value)
+    assert artifact.type == expected_type
+    assert artifact._class_key_ == f"{expected_type.friendly_key}Artifact"
+    assert isinstance(artifact.format, JSON)
+    assert artifact.storage == StringLiteral(value=json.dumps(value))
+    # Confirm the Artifact class is reused
+    assert type(Artifact.cast(value)) is type(artifact)
+
+
+@pytest.mark.xfail
+@pytest.mark.parametrize(
+    ["value", "expected_type"],
+    [
+        (b"hi", Binary()),
+        (date(1970, 1, 1), Date()),
+        (datetime(1970, 1, 1), Date()),
+        ({1, 2, 3}, Set(element=Int64())),
+    ],
+)
+def test_cast_literals_not_yet_implemented(value: Any, expected_type: Type) -> None:
+    test_cast_literals(value, expected_type)
+
+
+@pytest.mark.parametrize(
+    ["value"],
+    [
+        ((1, "a"),),
+        ({"a": "b", 1: 2},),
+    ],
+)
+def test_cast_literals_errors(value: Any) -> None:
+    with pytest.raises(
+        NotImplementedError, match=re.escape(f"Unable to determine type of {value}")
+    ):
+        Artifact.cast(value)
 
 
 def test_Artifact_validation() -> None:

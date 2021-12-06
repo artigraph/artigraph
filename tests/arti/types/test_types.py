@@ -14,6 +14,9 @@ from arti.types import (
     Float64,
     Int32,
     List,
+    Map,
+    Set,
+    String,
     Struct,
     Timestamp,
     Type,
@@ -92,6 +95,8 @@ def test_Enum() -> None:
     assert enum.items == items
     assert enum.name == "Rating"
     assert enum.type == float32
+    assert enum.friendly_key == "Rating"
+    assert Enum(type=float32, items=items).friendly_key == "Float32Enum"
 
     for other_items in (items, list(items), tuple(items)):
         other = Enum(name="Rating", type=float32, items=other_items)
@@ -122,6 +127,7 @@ def test_Enum_errors() -> None:
 def test_List() -> None:
     lst = List(element=Int32())
     assert lst.element == Int32()
+    assert lst.friendly_key == "Int32List"
 
 
 def test_Collection() -> None:
@@ -133,6 +139,7 @@ def test_Collection() -> None:
     assert collection.name == DEFAULT_ANONYMOUS_NAME
     assert collection.partition_by == ()
     assert collection.partition_fields == frozendict()
+    assert collection.friendly_key == "Int32Collection"
 
 
 def test_Collection_partitioned() -> None:
@@ -183,16 +190,33 @@ def test_Collection_partition_cluster_overlapping() -> None:
         exc.match(match)
 
 
+def test_Map() -> None:
+    map = Map(key=String(), value=Int32())
+    assert map.friendly_key == "StringToInt32"
+
+
+def test_Set() -> None:
+    assert Set(element=Int32()).friendly_key == "Int32Set"
+
+
 def test_Struct() -> None:
     fields = {"x": Int32(), "y": Int32()}
     s = Struct(fields=fields)
     assert isinstance(s.fields, frozendict)
     assert s.fields == frozendict(fields)
 
+    assert s.friendly_key == "CustomStruct"  # Struct name doesn't vary
+    assert Struct(name="test", fields=fields).friendly_key == "test"
+
 
 def test_Timestamp() -> None:
-    assert Timestamp(precision="second").precision == "second"
-    assert Timestamp(precision="millisecond").precision == "millisecond"
+    ts = Timestamp(precision="second")
+    assert ts.precision == "second"
+    assert ts.friendly_key == "SecondTimestamp"
+
+    ts = Timestamp(precision="millisecond")
+    assert ts.precision == "millisecond"
+    assert ts.friendly_key == "MillisecondTimestamp"
 
 
 def test_TypeSystem(

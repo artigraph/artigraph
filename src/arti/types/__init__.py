@@ -1,11 +1,11 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
+from abc import abstractmethod
 from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional
 
 from pydantic import PrivateAttr, validator
-from pydantic.fields import ModelField
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
@@ -24,6 +24,14 @@ class Type(Model):
     description: Optional[str]
     nullable: bool = False
 
+    @property
+    def friendly_key(self) -> str:
+        """A human-readable class-name like key representing this Type.
+
+        The key doesn't have to be unique, just a best effort, meaningful string.
+        """
+        return self._class_key_
+
 
 class _NamedMixin(Model):
     name: str = DEFAULT_ANONYMOUS_NAME
@@ -38,6 +46,15 @@ class _NamedMixin(Model):
         if "name" not in type_.__fields_set__:
             type_ = type_.copy(update={"name": name})
         return type_
+
+    @property
+    @abstractmethod
+    def _default_friendly_key(self) -> str:
+        raise NotImplementedError()
+
+    @property
+    def friendly_key(self) -> str:
+        return self._default_friendly_key if self.name == DEFAULT_ANONYMOUS_NAME else self.name
 
 
 ########################
@@ -69,7 +86,7 @@ class Date(Type):
     pass
 
 
-class Enum(Type, _NamedMixin):
+class Enum(_NamedMixin, Type):
     type: Type
     items: frozenset[Any]
 
@@ -95,6 +112,10 @@ class Enum(Type, _NamedMixin):
         if mismatched_items:
             raise ValueError(f"incompatible {arti_type} ({py_type}) item(s): {mismatched_items}")
         return items
+
+    @property
+    def _default_friendly_key(self) -> str:
+        return f"{self.type.friendly_key}{self._class_key_}"
 
 
 class Float16(_Float):
@@ -128,8 +149,12 @@ class Int64(_Int):
 class List(Type):
     element: Type
 
+    @property
+    def friendly_key(self) -> str:
+        return f"{self.element.friendly_key}{self._class_key_}"
 
-class Collection(List, _NamedMixin):
+
+class Collection(_NamedMixin, List):
     """A collections of elements with partition and cluster metadata.
 
     Collections should not be nested in other types.
@@ -141,7 +166,7 @@ class Collection(List, _NamedMixin):
     @validator("partition_by", "cluster_by")
     @classmethod
     def _validate_field_ref(
-        cls, references: tuple[str, ...], values: dict[str, Any], field: ModelField
+        cls, references: tuple[str, ...], values: dict[str, Any]
     ) -> tuple[str, ...]:
         if (element := values.get("element")) is None:
             return references
@@ -164,6 +189,10 @@ class Collection(List, _NamedMixin):
         return cluster_by
 
     @property
+    def _default_friendly_key(self) -> str:
+        return f"{self.element.friendly_key}{self._class_key_}"
+
+    @property
     def is_partitioned(self) -> bool:
         return bool(self.partition_fields)
 
@@ -178,6 +207,10 @@ class Map(Type):
     key: Type
     value: Type
 
+    @property
+    def friendly_key(self) -> str:
+        return f"{self.key.friendly_key}To{self.value.friendly_key}"
+
 
 class Null(Type):
     pass
@@ -186,19 +219,31 @@ class Null(Type):
 class Set(Type):
     element: Type
 
+    @property
+    def friendly_key(self) -> str:
+        return f"{self.element.friendly_key}{self._class_key_}"
+
 
 class String(Type):
     pass
 
 
-class Struct(Type, _NamedMixin):
+class Struct(_NamedMixin, Type):
     fields: frozendict[str, Type]
+
+    @property
+    def _default_friendly_key(self) -> str:
+        return f"Custom{self._class_key_}"  # :shrug:
 
 
 class Timestamp(Type):
     """UTC timestamp with configurable precision."""
 
     precision: Literal["second", "millisecond", "microsecond", "nanosecond"]
+
+    @property
+    def friendly_key(self) -> str:
+        return f"{self.precision.title()}{self._class_key_}"
 
 
 class UInt8(_Int):

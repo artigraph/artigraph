@@ -1,5 +1,6 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
+import json
 from itertools import chain
 from typing import Any, ClassVar, Optional
 
@@ -9,6 +10,7 @@ from pydantic.fields import ModelField
 from arti.annotations import Annotation
 from arti.formats import Format
 from arti.internal.models import Model
+from arti.internal.type_hints import get_annotation_from_value
 from arti.internal.utils import classproperty
 from arti.partitions import CompositeKeyTypes, PartitionKey
 from arti.storage import InputFingerprints, Storage, StoragePartition
@@ -128,6 +130,10 @@ class Artifact(BaseArtifact):
     """
 
     _abstract_ = True
+    # The Artifact._by_type registry is used to track Artifact classes generated from literal python
+    # values. This is populated by Artifact.from_literal_type and used in Producer class validation
+    # to find a default Artifact type for un-Annotated hints (eg: `def build(i: int)`).
+    _by_type: "ClassVar[dict[Type, type[Artifact]]]" = {}
 
     annotations: tuple[Annotation, ...] = ()
     statistics: tuple[Statistic, ...] = ()
@@ -150,8 +156,6 @@ class Artifact(BaseArtifact):
         """
         from arti.producers import Producer
 
-        # TODO: Leverage a TypeSystem("python") to cast to Artifact classes with "backend native"
-        # storage to support builtin assignment and custom type registration.
         if isinstance(value, Artifact):
             return value
         if isinstance(value, Producer):
@@ -166,9 +170,32 @@ class Artifact(BaseArtifact):
             raise ValueError(
                 f"{type(value).__name__} produces {len(output_artifacts)} Artifacts. Try assigning each to a new name in the Graph!"
             )
+        return Artifact.from_literal(value)
 
-        raise NotImplementedError(
-            f"Casting python objects ({value}) to Artifacts is not implemented yet!"
+    @classmethod
+    def from_type(cls, type_: Type) -> "type[Artifact]":
+        if type_ not in cls._by_type:
+            cls._by_type[type_] = type(
+                f"{type_.friendly_key}Artifact",
+                (Artifact,),
+                {
+                    "type": type_,
+                    "__annotations__": {"type": Type},
+                },
+            )
+        return cls._by_type[type_]
+
+    @classmethod
+    def from_literal(cls, value: Any) -> "Artifact":
+        from arti.formats.json import JSON
+        from arti.storage.literal import StringLiteral
+        from arti.types.python import python_type_system
+
+        annotation = get_annotation_from_value(value)
+        klass = cls.from_type(python_type_system.to_artigraph(annotation, hints={}))
+        return klass(
+            format=JSON(),
+            storage=StringLiteral(value=json.dumps(value)),
         )
 
 
