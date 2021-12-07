@@ -8,6 +8,7 @@ from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
+    TypeVar,
     Union,
     cast,
     get_args,
@@ -26,10 +27,20 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
     if klass_origin is Annotated:
         klass = klass_args[0]
         klass_origin, klass_args = get_origin(klass), get_args(klass)
+    if isinstance(klass, TypeVar):
+        klass = cast(type, Any) if klass.__bound__ is None else klass.__bound__
+        klass_origin, klass_args = get_origin(klass), get_args(klass)
     check_type_origin, check_type_args = get_origin(check_type), get_args(check_type)
     if check_type_origin is Annotated:
         check_type = check_type_args[0]
         check_type_origin, check_type_args = get_origin(check_type), get_args(check_type)
+    if isinstance(check_type, TypeVar):
+        check_type = cast(type, Any) if check_type.__bound__ is None else check_type.__bound__
+        check_type_origin, check_type_args = get_origin(check_type), get_args(check_type)
+    if klass is Any:
+        return check_type is Any
+    if check_type is Any:
+        return True
     # eg: issubclass(tuple, tuple)
     if klass_origin is None and check_type_origin is None:
         return issubclass(klass, check_type)
@@ -92,13 +103,11 @@ def get_annotation_from_value(value: Any) -> Any:
 
 
 def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:
-    if not (isinstance(klass, type) or is_Annotated(klass)):
+    if not (isinstance(klass, (type, TypeVar)) or is_Annotated(klass) or klass is Any):
         return False
     if isinstance(class_or_tuple, tuple):
         return any(lenient_issubclass(klass, subtype) for subtype in class_or_tuple)
     check_type = class_or_tuple
-    if check_type is Any:
-        return True
     # NOTE: py 3.10 supports issubclass with Unions (eg: `issubclass(str, str | int)`)
     if is_union_hint(check_type):
         return any(lenient_issubclass(klass, subtype) for subtype in get_args(check_type))

@@ -1,5 +1,5 @@
 from collections.abc import Mapping, Sequence
-from typing import Annotated, Any, Literal, Optional, Tuple, TypedDict, Union, get_origin
+from typing import Annotated, Any, Literal, Optional, Tuple, TypedDict, TypeVar, Union, get_origin
 
 import pytest
 
@@ -20,6 +20,11 @@ class MyTypedDict(TypedDict):
     a: int
 
 
+MyTupleVar = TypeVar("MyTupleVar", bound=MyTuple)
+TupleVar = TypeVar("TupleVar", bound=tuple)  # type: ignore
+UnboundVar = TypeVar("UnboundVar")
+
+
 @pytest.mark.parametrize(
     ("klass", "class_or_tuple"),
     (
@@ -29,10 +34,15 @@ class MyTypedDict(TypedDict):
         (Annotated[list[int], 5], Annotated[list[int], 5]),
         (Annotated[list[int], 5], list),
         (Annotated[list[int], 5], list[int]),
+        (Any, Any),
+        (Any, UnboundVar),
+        (MyTuple, TupleVar),
         (MyTuple, tuple),
+        (MyTupleVar, TupleVar),
         (MyTypedDict, dict),
         (NoneType, (int, NoneType)),
         (NoneType, Optional[int]),
+        (bool, Any),
         (dict[str, int], Any),
         (dict[str, int], Mapping),
         (dict[str, int], Mapping[str, int]),
@@ -47,6 +57,8 @@ class MyTypedDict(TypedDict):
         (str, Any),
         (str, Union[int, str]),
         (tuple, Tuple),
+        (tuple, TupleVar),
+        (tuple, UnboundVar),
         (tuple, tuple),
         (tuple[MyTuple[int]], tuple),  # type: ignore
         (tuple[MyTuple[int]], tuple[tuple[int]]),  # type: ignore
@@ -68,8 +80,11 @@ def test_lenient_issubclass_true(
 @pytest.mark.parametrize(
     ("klass", "class_or_tuple"),
     (
+        (Any, bool),
         (MyTypedDict, dict[str, int]),  # Might implement in the future
         (MyTypedDict, dict[str, str]),
+        (TupleVar, MyTupleVar),
+        (UnboundVar, bool),
         (dict, Mapping[str, int]),
         (dict, dict[str, int]),
         (dict[str, str], Mapping[str, int]),
@@ -77,6 +92,7 @@ def test_lenient_issubclass_true(
         (str, (int, float)),
         (str, Optional[int]),
         (str, Union[int, float]),
+        (tuple, MyTupleVar),
         (tuple, Sequence[int]),
         (tuple, tuple[MyTuple[int]]),  # type: ignore
         (tuple, tuple[int]),
