@@ -1,3 +1,5 @@
+import re
+
 import pytest
 
 from arti.fingerprints import Fingerprint
@@ -14,12 +16,18 @@ def test_StringLiteral() -> None:
     assert len(partitions) == 1
     partition = partitions[0]
     assert isinstance(partition, StringLiteralPartition)
+    assert partition.value is not None
     assert partition.value == literal.value
     assert partition.compute_content_fingerprint() == Fingerprint.from_string(partition.value)
+    # Confirm value=None returns no partitions
+    assert StringLiteral().discover_partitions(key_types=CompositeKeyTypes()) == ()
     # Confirm keys/input_fingerprint validators don't error for empty values
     assert partition == StringLiteralPartition(
         keys=CompositeKey(), input_fingerprint=Fingerprint.empty(), value="test"
     )
+    # Confirm empty value raises
+    with pytest.raises(FileNotFoundError, match=""):
+        StringLiteralPartition(keys=CompositeKey()).compute_content_fingerprint()
 
 
 def test_StringLiteral_errors() -> None:
@@ -43,11 +51,13 @@ def test_StringLiteral_errors() -> None:
     with pytest.raises(ValueError, match="Literal storage cannot be partitioned"):
         StringLiteralPartition(keys=keys, value=value)
 
-    with pytest.raises(ValueError, match="Literal storage cannot have an `input_fingerprint`"):
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "Literal storage cannot have a `value` preset (test) for a Producer output"
+        ),
+    ):
         literal.discover_partitions(
             key_types=CompositeKeyTypes(),
             input_fingerprints=InputFingerprints({keys: input_fingerprint}),
         )
-
-    with pytest.raises(ValueError, match="Literal storage cannot have an `input_fingerprint`"):
-        StringLiteralPartition(keys=keys, input_fingerprint=input_fingerprint, value=value)

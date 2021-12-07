@@ -40,12 +40,7 @@ class LocalExecutor(Executor):
             backend.write_graph_partitions(
                 graph_id,
                 graph.artifact_to_key[artifact],
-                tuple(
-                    partition
-                    for partition in artifact.storage.discover_partitions(
-                        artifact.partition_key_types
-                    )
-                ),
+                artifact.discover_storage_partitions(),
             )
         # TODO: Check any assumptions about what/how many should be in the db?
         # TODO: Calculate stats, run validation, etc...

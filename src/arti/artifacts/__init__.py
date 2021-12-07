@@ -187,13 +187,23 @@ class Artifact(BaseArtifact):
 
     @classmethod
     def from_type(cls, type_: Type) -> "type[Artifact]":
+        from arti.formats.json import JSON
+        from arti.storage.literal import StringLiteral
+
         if type_ not in cls._by_type:
+            defaults: dict[str, Any] = {
+                "type": type_,
+                "format": JSON(),
+                "storage": StringLiteral(),  # Set a default Storage instance to support easy `Producer.out` use.
+            }
             cls._by_type[type_] = type(
                 f"{type_.friendly_key}Artifact",
-                (Artifact,),
+                (cls,),
                 {
-                    "type": type_,
-                    "__annotations__": {"type": Type},
+                    "__annotations__": {  # Preserve the looser default type hints
+                        field: cls.__fields__[field].outer_type_ for field in defaults
+                    },
+                    **defaults,
                 },
             )
         return cls._by_type[type_]

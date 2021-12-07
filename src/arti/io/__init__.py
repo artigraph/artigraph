@@ -66,5 +66,5 @@ def write(
 ) -> _StoragePartition:
     _discover()
     if (updated := _write(data, type_, format, storage_partition, view)) is not None:
-        return updated  # pragma: no cover
+        return updated
     return storage_partition
