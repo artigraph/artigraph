@@ -14,8 +14,6 @@ from arti.storage._internal import InputFingerprints as InputFingerprints
 from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
 
-_StoragePartition = TypeVar("_StoragePartition", bound="StoragePartition")
-
 
 class StoragePartition(Model):
     keys: CompositeKey
@@ -23,8 +21,8 @@ class StoragePartition(Model):
     content_fingerprint: Fingerprint = Fingerprint.empty()
 
     def with_content_fingerprint(
-        self: _StoragePartition, keep_existing: bool = True
-    ) -> _StoragePartition:
+        self: "_StoragePartition", keep_existing: bool = True
+    ) -> "_StoragePartition":
         if keep_existing and not self.content_fingerprint.is_empty:
             return self
         return self.copy(update={"content_fingerprint": self.compute_content_fingerprint()})
@@ -36,12 +34,10 @@ class StoragePartition(Model):
         )
 
 
-StoragePartitions = tuple[StoragePartition, ...]  # type: ignore
+_StoragePartition = TypeVar("_StoragePartition", bound=StoragePartition)
 
-# mypy doesn't (yet?) support nested TypeVars[1], so mark internal as Any.
-#
-# 1: https://github.com/python/mypy/issues/2756
-_Storage = TypeVar("_Storage", bound="Storage[Any]")
+
+StoragePartitions = tuple[StoragePartition, ...]  # type: ignore
 
 
 class Storage(Model, Generic[_StoragePartition]):
@@ -151,7 +147,7 @@ class Storage(Model, Generic[_StoragePartition]):
         return partial_format(spec, **placeholder_values)
 
     # TODO: Reconsider the `resolve_*` interfaces to reduce the number of copies if possible.
-    def resolve(self: _Storage, **placeholder_values: str) -> _Storage:
+    def resolve(self: "_Storage", **placeholder_values: str) -> "_Storage":
         return self.copy(
             update={
                 name: new
@@ -162,25 +158,25 @@ class Storage(Model, Generic[_StoragePartition]):
             }
         )
 
-    def resolve_extension(self: _Storage, extension: Optional[str]) -> _Storage:
+    def resolve_extension(self: "_Storage", extension: Optional[str]) -> "_Storage":
         if extension is None:
             return self.resolve(extension="")
         return self.resolve(extension=extension)
 
-    def resolve_graph_name(self: _Storage, graph_name: str) -> _Storage:
+    def resolve_graph_name(self: "_Storage", graph_name: str) -> "_Storage":
         return self.resolve(graph_name=graph_name)
 
-    def resolve_input_fingerprint(self: _Storage, input_fingerprint: Fingerprint) -> _Storage:
+    def resolve_input_fingerprint(self: "_Storage", input_fingerprint: Fingerprint) -> "_Storage":
         val = str(input_fingerprint.key)
         if input_fingerprint.is_empty:
             val = ""
         return self.resolve(input_fingerprint=val)
 
-    def resolve_names(self: _Storage, names: tuple[str, ...]) -> _Storage:
+    def resolve_names(self: "_Storage", names: tuple[str, ...]) -> "_Storage":
         name = names[-1] if names else ""
         return self.resolve(names=self.segment_sep.join(names), name=name)
 
-    def resolve_partition_key_spec(self: _Storage, key_types: CompositeKeyTypes) -> _Storage:
+    def resolve_partition_key_spec(self: "_Storage", key_types: CompositeKeyTypes) -> "_Storage":
         key_component_specs = {
             f"{name}{self.partition_name_component_sep}{component_name}": f"{{{name}.{component_spec}}}"
             for name, pk in key_types.items()
@@ -192,14 +188,20 @@ class Storage(Model, Generic[_StoragePartition]):
             )
         )
 
-    def resolve_path_tags(self: _Storage, path_tags: frozendict[str, str]) -> _Storage:
+    def resolve_path_tags(self: "_Storage", path_tags: frozendict[str, str]) -> "_Storage":
         return self.resolve(
             path_tags=self.segment_sep.join(
                 f"{tag}{self.key_value_sep}{value}" for tag, value in path_tags.items()
             )
         )
 
-    def supports(self: _Storage, type_: Type, format: Format) -> None:
+    def supports(self: "_Storage", type_: Type, format: Format) -> None:
         # TODO: Ensure the storage supports all of the specified types and partitioning on the
         # specified field(s).
         pass
+
+
+# mypy doesn't (yet?) support nested TypeVars[1], so mark internal as Any.
+#
+# 1: https://github.com/python/mypy/issues/2756
+_Storage = TypeVar("_Storage", bound=Storage[Any])
