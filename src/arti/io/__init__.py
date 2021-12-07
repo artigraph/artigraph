@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from arti.formats import Format
 from arti.internal.utils import dispatch, import_submodules
-from arti.storage import StoragePartition
+from arti.storage import StoragePartition, _StoragePartition
 from arti.types import Collection, Type
 from arti.views import View
 
@@ -49,10 +49,10 @@ def read(
     return _read(type_, format, storage_partitions, view)
 
 
-@dispatch
+@dispatch  # type: ignore
 def _write(
-    data: Any, type_: Type, format: Format, storage_partition: StoragePartition, view: View
-) -> None:
+    data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
+) -> Optional[_StoragePartition]:
     raise NotImplementedError(
         f"Writing {type(view)} view into {type(format)} format in {type(storage_partition)} storage is not implemented."
     )
@@ -62,7 +62,9 @@ register_writer = _write.register
 
 
 def write(
-    data: Any, type_: Type, format: Format, storage_partition: StoragePartition, view: View
-) -> None:
+    data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
+) -> _StoragePartition:
     _discover()
-    return _write(data, type_, format, storage_partition, view)
+    if (updated := _write(data, type_, format, storage_partition, view)) is not None:
+        return updated  # pragma: no cover
+    return storage_partition

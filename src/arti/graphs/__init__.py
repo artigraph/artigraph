@@ -297,14 +297,13 @@ class Graph(Model):
         storage_partition = artifact.storage.generate_partition(
             input_fingerprint=input_fingerprint, keys=keys, with_content_fingerprint=False
         )
-        io.write(
+        storage_partition = io.write(
             data,
             type_=artifact.type,
             format=artifact.format,
             storage_partition=storage_partition,
             view=view,
-        )
-        storage_partition = storage_partition.with_content_fingerprint()
+        ).with_content_fingerprint()
         # TODO: Should we only do this in bulk? We might want the backends to
         # transparently batch requests, but that's not so friendly with the transient
         # ".connect".
