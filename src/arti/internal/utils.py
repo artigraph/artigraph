@@ -62,8 +62,6 @@ class dispatch(multidispatch[RETURN]):
     def __init__(self, func: Callable[..., RETURN]) -> None:
         super().__init__(func)
         self.clean_signature = tidy_signature(func, self.signature)
-        if self.clean_signature.return_annotation not in (Any, type(None)):
-            raise NotImplementedError("Return type checking is not implemented yet!")
 
     @overload
     def register(self, __func: REGISTERED) -> REGISTERED:
@@ -94,6 +92,10 @@ class dispatch(multidispatch[RETURN]):
                     raise TypeError(
                         f"Expected the `{func.__name__}.{name}` parameter to be a subclass of {spec_param.annotation}, got {sig_param.annotation}"
                     )
+            if not lenient_issubclass(sig.return_annotation, spec.return_annotation):
+                raise TypeError(
+                    f"Expected the `{func.__name__}` return to match {spec.return_annotation}, got {sig.return_annotation}"
+                )
         return super().register(*args)  # type: ignore
 
 

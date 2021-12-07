@@ -114,6 +114,19 @@ def test_dispatch() -> None:
         def bad_type(a: int, b: str) -> Any:
             return a, b
 
+    with pytest.raises(
+        TypeError,
+        match=re.escape("Expected the `bad` return to match"),
+    ):
+
+        @dispatch
+        def ok(a: A) -> str:
+            return "good_a_b"
+
+        @ok.register
+        def bad(a: A1) -> int:
+            return 5
+
     assert dispatch_test(A(), B()) == "good_a_b"
     assert dispatch_test(A(), B1()) == "good_a_b1"
     assert dispatch_test(A1(), B()) == "good_a1_b"
