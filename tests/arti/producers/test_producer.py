@@ -14,7 +14,9 @@ from arti.storage import StoragePartitions
 from arti.types import Collection, Int64, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views
-from tests.arti.dummies import A1, A2, A3, A4, P1, P2, Num
+from tests.arti.dummies import A1, A2, A3, A4, P1, P2
+
+Int64Artifact = Artifact.from_type(Int64())
 
 
 class DummyProducer(Producer):
@@ -71,6 +73,18 @@ def test_producer_decorator() -> None:
     assert dummy_producer2.map == mapper
     assert dummy_producer2(a1=A1()).annotations == (MyAnnotation(),)
     assert dummy_producer2(a1=A1()).version == StringVersion(value="test")
+
+
+def test_producer_input_metadata() -> None:
+    @producer_decorator()
+    def dummy_producer(
+        a1: Annotated[dict, A1], *, a: int, b: Annotated[int, "non-Artifact"]  # type: ignore
+    ) -> Annotated[dict, A2]:  # type: ignore
+        return {}
+
+    assert dummy_producer._input_artifact_types_ == frozendict(
+        a1=A1, a=Int64Artifact, b=Int64Artifact
+    )
 
 
 def test_Producer_partitioned_input_validation() -> None:
@@ -248,7 +262,7 @@ def test_Producer_validate_output() -> None:
         return positive if i >= 0 else negative
 
     @producer_decorator(validate_outputs=is_positive)
-    def p(x: Annotated[int, Num]) -> Annotated[int, Num]:
+    def p(x: int) -> int:
         return x
 
     assert p.validate_outputs(p.build(1)) == positive
@@ -275,7 +289,7 @@ def test_Producer_validate_output_hint_validation() -> None:
     ):
 
         @producer_decorator(validate_outputs=validate_outputs)
-        def single_return_build(x: Annotated[int, Num]) -> Annotated[int, Num]:
+        def single_return_build(x: int) -> int:
             return x
 
         assert single_return_build.validate_outputs(5)
@@ -286,19 +300,19 @@ def test_Producer_validate_output_hint_validation() -> None:
             return bool(i), ""
 
         @producer_decorator(validate_outputs=accepts_vargs_float)
-        def bad_vargs(x: Annotated[int, Num]) -> Annotated[int, Num]:
+        def bad_vargs(x: int) -> int:
             return x
 
     with pytest.raises(ValueError, match="validate_output - must match the `.build` return"):
 
         @producer_decorator(validate_outputs=validate_int)
-        def too_few_arg(x: Annotated[int, Num]) -> tuple[Annotated[int, Num], Annotated[int, Num]]:
+        def too_few_arg(x: int) -> tuple[int, int]:
             return x, x + 1
 
     with pytest.raises(ValueError, match="validate_output i param - must not have a default."):
 
         @producer_decorator(validate_outputs=lambda i=5: (True, ""))
-        def bad_default(x: Annotated[int, Num]) -> Annotated[int, Num]:
+        def bad_default(x: int) -> int:
             return x
 
     with pytest.raises(
@@ -309,7 +323,7 @@ def test_Producer_validate_output_hint_validation() -> None:
             return bool(i), ""
 
         @producer_decorator(validate_outputs=validate_kwarg)
-        def kwarg_only(x: Annotated[int, Num]) -> Annotated[int, Num]:
+        def kwarg_only(x: int) -> int:
             return x
 
     with pytest.raises(
@@ -320,7 +334,7 @@ def test_Producer_validate_output_hint_validation() -> None:
             return bool(i), ""
 
         @producer_decorator(validate_outputs=accepts_float)
-        def mismatched_hint(x: Annotated[int, Num]) -> Annotated[int, Num]:
+        def mismatched_hint(x: int) -> int:
             return x
 
 
