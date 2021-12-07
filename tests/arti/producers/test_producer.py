@@ -111,6 +111,18 @@ def test_Producer_partitioned_input_validation() -> None:
 def test_Producer_output_metadata() -> None:
     assert DummyProducer._output_metadata_ == ((A2, python_views.Dict), (A3, python_views.Dict))
 
+    class ImplicitArtifact(Producer):
+        a1: A1
+
+        @classmethod
+        def build(cls, a1: dict) -> tuple[int, Annotated[dict, A2]]:  # type: ignore
+            pass
+
+    assert ImplicitArtifact._output_metadata_ == (
+        (Artifact.from_type(Int64()), python_views.Int),
+        (A2, python_views.Dict),
+    )
+
     class ExplicitView(Producer):
         a1: A1
 
@@ -129,15 +141,6 @@ def test_Producer_output_metadata() -> None:
 
             @staticmethod
             def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore
-                pass
-
-    with pytest.raises(ValueError, match="NoArtifact.build 1st return - Artifact is not set "):
-
-        class NoArtifact(Producer):
-            a1: A1
-
-            @classmethod
-            def build(cls, a1: dict) -> Annotated[None, 5]:  # type: ignore
                 pass
 
     with pytest.raises(ValueError, match="DupArtifact.build 1st return - multiple Artifacts set"):
@@ -490,15 +493,6 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
             @classmethod
             def build(cls, a1: dict) -> None:  # type: ignore
-                pass
-
-    with pytest.raises(ValueError, match="2nd return - must be an Annotated hint"):
-
-        class BadProducer(Producer):  # type: ignore # noqa: F811
-            a1: A1
-
-            @classmethod
-            def build(cls, a1: dict) -> tuple[Annotated[dict, A2], str]:  # type: ignore
                 pass
 
     with pytest.raises(

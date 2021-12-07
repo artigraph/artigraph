@@ -124,16 +124,16 @@ class Producer(Model):
 
     @classmethod
     def _get_artifact_from_annotation(cls, annotation: Any) -> type[Artifact]:
-        hint_example = "eg: `Annotated[pd.DataFrame, MyArtifact]`"
+        # Avoid importing non-interface modules at root
+        from arti.types.python import python_type_system
+
         origin, args = get_origin(annotation), get_args(annotation)
         if origin is not Annotated:
-            raise ValueError(f"must be an Annotated hint ({hint_example})")
-        # We don't need the underlying type here - `_get_view_from_annotation` requires the entire
-        # (possibly Annotated) annotation in order to discover explicitly set Views.
-        _, *hints = args
+            return Artifact.from_type(python_type_system.to_artigraph(annotation, hints={}))
+        annotation, *hints = args
         artifacts = [hint for hint in hints if lenient_issubclass(hint, Artifact)]
         if len(artifacts) == 0:
-            raise ValueError(f"Artifact is not set ({hint_example})")
+            return Artifact.from_type(python_type_system.to_artigraph(annotation, hints={}))
         if len(artifacts) > 1:
             raise ValueError("multiple Artifacts set")
         return cast(type[Artifact], artifacts[0])
@@ -235,7 +235,10 @@ class Producer(Model):
 
     @classmethod
     def _validate_validate_output_sig(cls) -> None:
-        build_output_types = [get_args(hint)[0] for hint in cls._build_sig_.return_annotation]
+        build_output_types = [
+            get_args(hint)[0] if get_origin(hint) is Annotated else hint
+            for hint in cls._build_sig_.return_annotation
+        ]
         match_build_str = f"match the `.build` return (`{build_output_types}`)"
         validate_parameters = signature(cls.validate_outputs).parameters
 
