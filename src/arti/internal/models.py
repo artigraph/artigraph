@@ -1,4 +1,5 @@
 from collections.abc import Generator, Mapping, Sequence
+from copy import deepcopy
 from functools import cached_property
 from typing import (
     TYPE_CHECKING,
@@ -174,12 +175,22 @@ class Model(BaseModel):
         keep_untouched = (cached_property, classproperty)
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
 
-    def copy(self: _Model, *, validate: bool = True, **kwargs: Any) -> _Model:
+    def copy(
+        self: _Model,
+        *,
+        include_private_attributes: bool = True,
+        validate: bool = True,
+        **kwargs: Any,
+    ) -> _Model:
         copy = super().copy(**kwargs)
         if validate:
-            return copy.validate(
+            copy = copy.validate(
                 dict(copy._iter(to_dict=False, by_alias=False, exclude_unset=True))
             )
+        # This *must come last* - other pydantic operations would strip them back out.
+        if include_private_attributes:
+            for attr in self.__private_attributes__:
+                setattr(copy, attr, deepcopy(getattr(self, attr)))
         return copy
 
     @staticmethod

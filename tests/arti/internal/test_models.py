@@ -1,9 +1,10 @@
 import re
+from collections import defaultdict
 from contextlib import nullcontext
 from typing import Annotated, Any, ClassVar, Literal, Optional, Union
 
 import pytest
-from pydantic import ValidationError
+from pydantic import PrivateAttr, ValidationError
 
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
@@ -28,6 +29,27 @@ def test_Model() -> None:
     for model in (Model, Abstract):
         with pytest.raises(ValidationError, match="cannot be instantiated directly"):
             model()
+
+
+def test_Model_copy_private_attributes() -> None:
+    class Sneaky(Model):
+        x: int
+        _stuff = PrivateAttr(default_factory=lambda: defaultdict(list))
+
+    orig = Sneaky(x=1)
+    orig._stuff["a"].append("value")
+    assert orig._stuff == {"a": ["value"]}
+
+    for validate in [True, False]:
+        copy = orig.copy(validate=validate)
+        # Confirm private attributes are pulled over
+        assert orig._stuff == copy._stuff
+        # but as (deep)copies, not shared refs.
+        assert orig._stuff is not copy._stuff
+        assert orig._stuff["a"] is not copy._stuff["a"]
+
+    copy = orig.copy(include_private_attributes=False)
+    assert copy._stuff == {}
 
 
 def test_Model_copy_validation() -> None:
