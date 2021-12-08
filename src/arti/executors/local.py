@@ -5,7 +5,6 @@ from itertools import chain
 from arti.artifacts import Artifact
 from arti.backends import Backend
 from arti.executors import Executor
-from arti.fingerprints import Fingerprint
 from arti.graphs import Graph
 from arti.producers import Producer
 from arti.storage import InputFingerprints
@@ -18,45 +17,23 @@ from arti.storage import InputFingerprints
 
 
 class LocalExecutor(Executor):
-    def _sync_artifact(
-        self,
-        graph: Graph,
-        graph_id: Fingerprint,
-        backend: Backend,
-        artifact: Artifact,
-    ) -> None:
-        # NOTE: Should we do different things for "raw" vs produced artifacts?
-        #
-        # Eg: for raw we discover partitions, but for generated we... just
-        # lookup from the Backend somehow? For all, we should probably compute
-        # the statistics (or maybe compute should be part of the Producer step
-        # using the exiting Views?) and check thresholds. Threshold checking
-        # should apply for every run, but the statitics should no-op if already
-        # computed obviously.
-        #
-        # We can only discover raw Artifacts - all produced ones should be written after built.
-        if artifact.producer_output is None:
-            partitions = artifact.discover_storage_partitions()
-            backend.write_storage_partitions_and_link_to_graph(
-                artifact.storage, partitions, graph_id, graph.artifact_to_key[artifact]
-            )
-        # TODO: Check any assumptions about what/how many should be in the db?
-        # TODO: Calculate stats, run validation, etc...
-
-    # NOTE: This should probably be broken up to separate the .map and .build (ie: so we
-    # can map ahead of time and then parallelize build calls).
+    # TODO: Separate .map and .build steps so we can:
+    # - add "sync" / "dry run" sort of things
+    # - parallelize build
     #
-    # TODO: Split into "see what partitions need built" and "build partition" so we can implement
-    # "sync" / "dry run" sort of things?
+    # We may still want to repeat the .map phase in the future, if we wanted to support some sort of
+    # iterated or cyclic Producers (eg: first pass output feeds into second run - in that case,
+    # `.map` should describe how to "converge" by returning the same outputs as a prior call).
     def _build_producer(
         self,
         graph: Graph,
-        graph_id: Fingerprint,
         backend: Backend,
         producer: Producer,
     ) -> None:
         input_partitions = {
-            name: backend.read_graph_partitions(graph_id, graph.artifact_to_key[artifact])
+            name: backend.read_graph_partitions(
+                graph.get_snapshot_id(), graph.artifact_to_key[artifact]
+            )
             for name, artifact in producer.inputs.items()
         }
         partition_dependencies = producer.map(
@@ -77,16 +54,18 @@ class LocalExecutor(Executor):
             }
         )
         output_artifacts = graph.producer_outputs[producer]
-        # NOTE: The output partitions may be built, but not yet associated with this graph_id (eg:
-        # raw input data changed, but no changes trickled into this specific Producer). Hence we'll
-        # fetch all StoragePartitions for this Storage, filtered to the PKs and input_fingerprints
-        # we've computed *are* for this Graph - and then link them to the graph.
+        # NOTE: The output partitions may be built, but not yet associated with this snapshot_id
+        # (eg: raw input data changed, but no changes trickled into this specific Producer). Hence
+        # we'll fetch all StoragePartitions for this Storage, filtered to the PKs and
+        # input_fingerprints we've computed *are* for this Graph - and then link them to the graph.
         existing_output_partitions = {
             output: backend.read_storage_partitions(output.storage, partition_input_fingerprints)
             for output in output_artifacts
         }
         for artifact, partitions in existing_output_partitions.items():
-            backend.link_graph_partitions(graph_id, graph.artifact_to_key[artifact], partitions)
+            backend.link_graph_partitions(
+                graph.get_snapshot_id(), graph.artifact_to_key[artifact], partitions
+            )
         # TODO: Guarantee all outputs have the same set of identified partitions. Currently, this
         # pretends a partition is built for all outputs if _any_ are built for that partition.
         existing_output_keys = set(
@@ -103,7 +82,6 @@ class LocalExecutor(Executor):
             arguments = {
                 name: graph.read(
                     artifact=producer.inputs[name],
-                    graph_id=graph_id,
                     storage_partitions=partition_dependencies[output_partition_key][name],
                     # TODO: We'll probably need to update Producer._build_input_views_
                     # to hold *instances* (either objects set in Annotated or init
@@ -122,23 +100,24 @@ class LocalExecutor(Executor):
                 graph.write(
                     output,
                     artifact=output_artifacts[i],
-                    graph_id=graph_id,
                     input_fingerprint=partition_input_fingerprints[output_partition_key],
                     keys=output_partition_key,
                     view=producer._output_metadata_[i][1](),
                 )
 
-    # TODO: Support "dry_run"?
     def build(self, graph: Graph) -> None:
-        graph_id = graph.compute_id()
+        # NOTE: Raw Artifacts will already be discovered and linked in the backend to this graph
+        # snapshot.
+        assert graph.snapshot_id is not None
         with graph.backend.connect() as backend:
             for node in TopologicalSorter(graph.dependencies).static_order():
                 if isinstance(node, Artifact):
-                    logging.info(f"Syncing {node}...")
-                    self._sync_artifact(graph, graph_id, backend, node)
+                    # TODO: Compute Statistics (if not already computed for the partition) and check
+                    # Thresholds (every time, as they may be changed, dynamic, or overridden).
+                    pass
                 elif isinstance(node, Producer):
                     logging.info(f"Building {node}...")
-                    self._build_producer(graph, graph_id, backend, node)
+                    self._build_producer(graph, backend, node)
                 else:
                     raise NotImplementedError()
         logging.info("Build finished.")

@@ -19,7 +19,7 @@ from arti.internal.models import Model
 from arti.internal.utils import TypedBox, frozendict
 from arti.partitions import CompositeKey
 from arti.producers import Producer
-from arti.storage import StoragePartition
+from arti.storage import StoragePartition, StoragePartitions
 from arti.views import View
 
 if TYPE_CHECKING:
@@ -117,6 +117,7 @@ class Graph(Model):
     name: str
     backend: Backend = Field(default_factory=MemoryBackend)
     path_tags: frozendict[str, str] = frozendict()
+    snapshot_id: Optional[Fingerprint] = None
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
     _status: Optional[bool] = PrivateAttr(None)
@@ -157,18 +158,17 @@ class Graph(Model):
         return self._artifact_to_key
 
     @requires_sealed
-    def build(self, executor: "Optional[Executor]" = None) -> None:
+    def build(self, executor: "Optional[Executor]" = None) -> "Graph":
+        snapshot = self.snapshot()
         if executor is None:
             from arti.executors.local import LocalExecutor
 
             executor = LocalExecutor()
-        # TODO: Resolve and statically set all available fingerprints. Specifically, we
-        # should pin the Producer.fingerprint, which may by dynamic (eg: version is a
-        # Timestamp). Unbuilt Artifact (partitions) won't be fully resolved yet.
-        return executor.build(self)
+        executor.build(snapshot)
+        return snapshot
 
     @requires_sealed
-    def compute_id(self) -> Fingerprint:
+    def snapshot(self) -> "Graph":
         """Identify a "unique" ID for this Graph at this point in time.
 
         The ID aims to encode the structure of the Graph plus a _snapshot_ of the raw Artifact data
@@ -178,12 +178,17 @@ class Graph(Model):
         NOTE: There is currently a gap (and thus race condition) between when the Graph ID is
         computed and when we read raw Artifacts data during Producer builds.
         """
-        id = self.fingerprint
+        # TODO: Resolve and statically set all available fingerprints. Specifically, we
+        # should pin the Producer.fingerprint, which may by dynamic (eg: version is a
+        # Timestamp). Unbuilt Artifact (partitions) won't be fully resolved yet.
+        if self.snapshot_id:
+            return self
+        snapshot_id, known_artifact_partitions = self.fingerprint, dict[str, StoragePartitions]()
         for node, _ in self.dependencies.items():
-            id = id.combine(node.fingerprint)
+            snapshot_id = snapshot_id.combine(node.fingerprint)
             if isinstance(node, Artifact):
                 key = self.artifact_to_key[node]
-                id = id.combine(Fingerprint.from_string(key))
+                snapshot_id = snapshot_id.combine(Fingerprint.from_string(key))
                 # Include fingerprints (including content_fingerprint!) for all raw Artifact
                 # partitions, triggering a graph ID change if these artifacts change out-of-band.
                 #
@@ -192,19 +197,30 @@ class Graph(Model):
                 # differently depending on if the external Artifacts are Produced (in an upstream
                 # Graph) or not.
                 if node.producer_output is None:
-                    partitions = [
+                    known_artifact_partitions[key] = StoragePartitions(
                         partition.with_content_fingerprint()
                         for partition in node.discover_storage_partitions()
-                    ]
-                    if not partitions:
+                    )
+                    if not known_artifact_partitions[key]:
                         content_str = "partitions" if node.is_partitioned else "data"
                         raise ValueError(f"No {content_str} found for `{key}`: {node}")
-                    for partition in partitions:
-                        id = id.combine(partition.fingerprint)
-        if id.is_empty or id.is_identity:  # pragma: no cover
+                    snapshot_id = snapshot_id.combine(
+                        *[partition.fingerprint for partition in known_artifact_partitions[key]]
+                    )
+        if snapshot_id.is_empty or snapshot_id.is_identity:  # pragma: no cover
             # NOTE: This shouldn't happen unless the logic above is faulty.
             raise ValueError("Fingerprint is empty!")
-        return id
+        snapshot = self.copy(update={"snapshot_id": snapshot_id})
+        assert snapshot.snapshot_id is not None  # mypy
+        # Write the discovered partitions (if not already known) and link to this new snapshot.
+        for key, partitions in known_artifact_partitions.items():
+            snapshot.backend.write_storage_partitions_and_link_to_graph(
+                snapshot.artifacts[key].storage, partitions, snapshot.snapshot_id, key
+            )
+        return snapshot
+
+    def get_snapshot_id(self) -> Fingerprint:
+        return cast(Fingerprint, self.snapshot().snapshot_id)
 
     @cached_property  # type: ignore # python/mypy#1362
     @requires_sealed
@@ -253,7 +269,6 @@ class Graph(Model):
         artifact: Artifact,
         *,
         annotation: Optional[Any] = None,
-        graph_id: Optional[Fingerprint] = None,
         storage_partitions: Optional[Sequence[StoragePartition]] = None,
         view: Optional[View] = None,
     ) -> Any:
@@ -267,9 +282,7 @@ class Graph(Model):
         assert view is not None  # mypy gets mixed up with ^
         if storage_partitions is None:
             with self.backend.connect() as backend:
-                storage_partitions = backend.read_graph_partitions(
-                    graph_id or self.compute_id(), key
-                )
+                storage_partitions = backend.read_graph_partitions(self.get_snapshot_id(), key)
         return io.read(
             type_=artifact.type,
             format=artifact.format,
@@ -282,15 +295,14 @@ class Graph(Model):
         data: Any,
         *,
         artifact: Artifact,
-        graph_id: Optional[Fingerprint] = None,
         input_fingerprint: Fingerprint = Fingerprint.empty(),
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
     ) -> StoragePartition:
         key = self.artifact_to_key[artifact]
-        if graph_id is not None and artifact.producer_output is None:
+        if self.snapshot_id is not None and artifact.producer_output is None:
             raise ValueError(
-                f"Writing to a raw Artifact (`{key}`) would cause a `graph_id` change."
+                f"Writing to a raw Artifact (`{key}`) would cause a `snapshot_id` change."
             )
         if view is None:
             view = View.get_class_for(type(data), validation_type=artifact.type)()
@@ -309,6 +321,6 @@ class Graph(Model):
         # ".connect".
         with self.backend.connect() as backend:
             backend.write_storage_partitions_and_link_to_graph(
-                artifact.storage, (storage_partition,), graph_id or self.compute_id(), key
+                artifact.storage, (storage_partition,), self.get_snapshot_id(), key
             )
         return cast(StoragePartition, storage_partition)

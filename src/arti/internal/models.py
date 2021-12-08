@@ -96,6 +96,7 @@ class Model(BaseModel):
     _class_key_: ClassVar[str] = class_name()
     _fingerprint_excludes_: ClassVar[Optional[frozenset[str]]] = None
     _fingerprint_includes_: ClassVar[Optional[frozenset[str]]] = None
+    _share_private_attributes_across_copies_: ClassVar[bool] = False
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -184,13 +185,26 @@ class Model(BaseModel):
     ) -> _Model:
         copy = super().copy(**kwargs)
         if validate:
+            # NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as
+            # is normal `.copy` behavior). This is particularly important for default values with
+            # private attributes that we'd want copied (rather than getting a whole new default
+            # value).
+            #
+            # To reduce `repr` noise, we'll reset .__fields_set__ to those of the pre-validation copy
+            # (which includes those originally set + updated).
+            fields_set = copy.__fields_set__
             copy = copy.validate(
-                dict(copy._iter(to_dict=False, by_alias=False, exclude_unset=True))
+                dict(copy._iter(to_dict=False, by_alias=False, exclude_unset=False))
             )
+            # Use object.__setattr__ to bypass frozen model assignment errors
+            object.__setattr__(copy, "__fields_set__", set(fields_set))
         # This *must come last* - other pydantic operations would strip them back out.
         if include_private_attributes:
-            for attr in self.__private_attributes__:
-                setattr(copy, attr, deepcopy(getattr(self, attr)))
+            for name in self.__private_attributes__:
+                attr = getattr(self, name)
+                if not self._share_private_attributes_across_copies_:
+                    attr = deepcopy(attr)
+                setattr(copy, name, attr)
         return copy
 
     @staticmethod

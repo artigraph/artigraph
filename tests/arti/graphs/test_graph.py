@@ -60,10 +60,10 @@ def test_Graph_literals(tmp_path: Path) -> None:
         g.artifacts.x = 1
         g.artifacts.y = Num(storage=LocalFile(path=str(tmp_path / "y.json")))
         g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y).out()
-        # Changes to `phase` will cause a new graph_id. However, since `phase` isn't an input to
+        # Changes to `phase` will cause a new snapshot_id. However, since `phase` isn't an input to
         # `add`, we *shouldn't* have to recompute `z` - assuming the backend properly stores
         # storage->storage_partitions separate from the set of storage_partitions associated with a
-        # graph_id.
+        # snapshot_id.
         g.artifacts.phase = Num(storage=LocalFile(path=str(tmp_path / "phase.json")))
 
     Int64Artifact = Artifact.from_type(Int64())
@@ -86,13 +86,13 @@ def test_Graph_literals(tmp_path: Path) -> None:
     g.build()
     assert g.read(z, annotation=int) == 2
     assert n_add_runs == 1
-    assert len(g.backend.read_graph_partitions(g.compute_id(), "z")) == 1
+    assert len(g.backend.read_graph_partitions(g.get_snapshot_id(), "z")) == 1
     assert len(g.backend.read_storage_partitions(z.storage)) == 1
     # A subsequent build shouldn't require a rerun, ensuring we properly lookup existing literals.
     g.build()
     assert g.read(z, annotation=int) == 2
     assert n_add_runs == 1
-    assert len(g.backend.read_graph_partitions(g.compute_id(), "z")) == 1
+    assert len(g.backend.read_graph_partitions(g.get_snapshot_id(), "z")) == 1
     assert len(g.backend.read_storage_partitions(z.storage)) == 1
     # Changing an input should trigger a rerun. There will still only be 1 z literal for this graph,
     # but now 2 overall for the storage (with different `input_fingerprint`s).
@@ -100,20 +100,20 @@ def test_Graph_literals(tmp_path: Path) -> None:
     g.build()
     assert g.read(z, annotation=int) == 3
     assert n_add_runs == 2
-    assert len(g.backend.read_graph_partitions(g.compute_id(), "z")) == 1
+    assert len(g.backend.read_graph_partitions(g.get_snapshot_id(), "z")) == 1
     assert len(g.backend.read_storage_partitions(z.storage)) == 2
-    # After getting a new graph_id, but no changes to `add`s inputs, ensure we properly lookup
-    # existing literals - even though the graph_id will change, the input_fingerprint for `z` will
-    # not.
+    # After getting a new snapshot_id, but no changes to `add`s inputs, ensure we properly lookup
+    # existing literals - even though the snapshot_id will change, the input_fingerprint for `z`
+    # will not.
     g.write(2, artifact=phase)
     g.build()
     assert g.read(z, annotation=int) == 3
     assert n_add_runs == 2
-    assert len(g.backend.read_graph_partitions(g.compute_id(), "z")) == 1
+    assert len(g.backend.read_graph_partitions(g.get_snapshot_id(), "z")) == 1
     assert len(g.backend.read_storage_partitions(z.storage)) == 2
 
 
-def test_Graph_compute_id() -> None:
+def test_Graph_snapshot() -> None:
     with Graph(name="test") as g:
         g.artifacts.a = A1()
         p1 = P1(a1=g.artifacts.a)
@@ -132,20 +132,35 @@ def test_Graph_compute_id() -> None:
         ),
     ]
 
-    assert g.compute_id() == Fingerprint.combine(*id_components)
+    snapshot = g.snapshot()
+    assert snapshot.snapshot_id == Fingerprint.combine(*id_components)
     # Ensure order independence
-    assert g.compute_id() == Fingerprint.combine(*reversed(id_components))
+    assert snapshot.snapshot_id == Fingerprint.combine(*reversed(id_components))
+    # Ensure snapshot of a snapshot doesn't copy
+    assert snapshot.snapshot() is snapshot
 
 
-def test_Graph_compute_id_missing_input_artifact(tmp_path: Path) -> None:
+def test_Graph_get_snapshot_id(tmp_path: Path) -> None:
+    with Graph(name="test") as g:
+        g.artifacts.a = 5
+
+    assert g.snapshot_id is None
+    snapshot = g.snapshot()
+    assert snapshot.snapshot_id is not None
+    assert snapshot.snapshot_id == g.get_snapshot_id()
+    # Confirm snapshot_id is still unset on the original graph
+    assert g.snapshot_id is None
+
+
+def test_Graph_snapshot_missing_input_artifact(tmp_path: Path) -> None:
     with Graph(name="test") as g:
         g.artifacts.a = Num(storage=LocalFile(path=str(tmp_path / "a.json")))
 
     with pytest.raises(ValueError, match=re.escape("No data found for `a`")):
-        assert g.compute_id()
+        assert g.snapshot()
 
 
-def test_Graph_compute_id_producer_arg_order(tmp_path: Path) -> None:
+def test_Graph_snapshot_id_producer_arg_order(tmp_path: Path) -> None:
     a = Num(storage=LocalFile(path=str(tmp_path / "a.json")))
     with open(a.storage.path, "w") as f:
         f.write("10")
@@ -160,7 +175,7 @@ def test_Graph_compute_id_producer_arg_order(tmp_path: Path) -> None:
     with Graph(name="test") as g_ba:
         g_ba.artifacts.c = div(a=b, b=a).out(c)
 
-    assert g_ab.compute_id() != g_ba.compute_id()
+    assert g_ab.get_snapshot_id() != g_ba.get_snapshot_id()
 
 
 def test_Graph_build(tmp_path: Path) -> None:
@@ -302,11 +317,12 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     assert storage_partition.input_fingerprint == Fingerprint.empty()
     assert storage_partition.keys == CompositeKey()
     assert storage_partition.path.endswith(i.format.extension)
+    # Once snapshotted, writing to the raw Artifacts would result in a different snapshot.
     with pytest.raises(
         ValueError,
-        match=re.escape("Writing to a raw Artifact (`i`) would cause a `graph_id` change."),
+        match=re.escape("Writing to a raw Artifact (`i`) would cause a `snapshot_id` change."),
     ):
-        g.write(10, artifact=i, graph_id=Fingerprint.from_string("junk"))
+        g.snapshot().write(10, artifact=i)
     # Test read
     assert g.read(i, annotation=int) == 5
     assert g.read(i, view=python_views.Int()) == 5

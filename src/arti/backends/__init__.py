@@ -36,7 +36,7 @@ class Backend(Model):
         raise NotImplementedError()
 
     @abstractmethod
-    def read_graph_partitions(self, graph_id: Fingerprint, name: str) -> StoragePartitions:
+    def read_graph_partitions(self, snapshot_id: Fingerprint, name: str) -> StoragePartitions:
         """Read the known Partitions for the named Artifact in a specific Graph snapshot."""
         raise NotImplementedError()
 
@@ -55,7 +55,7 @@ class Backend(Model):
 
     @abstractmethod
     def link_graph_partitions(
-        self, graph_id: Fingerprint, name: str, partitions: StoragePartitions
+        self, snapshot_id: Fingerprint, name: str, partitions: StoragePartitions
     ) -> None:
         """Link the Partitions to the named Artifact in a specific Graph snapshot."""
         raise NotImplementedError()
@@ -66,7 +66,11 @@ class Backend(Model):
         raise NotImplementedError()
 
     def write_storage_partitions_and_link_to_graph(
-        self, storage: AnyStorage, partitions: StoragePartitions, graph_id: Fingerprint, name: str
+        self,
+        storage: AnyStorage,
+        partitions: StoragePartitions,
+        snapshot_id: Fingerprint,
+        name: str,
     ) -> None:
         self.write_storage_partitions(storage, partitions)
-        self.link_graph_partitions(graph_id, name, partitions)
+        self.link_graph_partitions(snapshot_id, name, partitions)
