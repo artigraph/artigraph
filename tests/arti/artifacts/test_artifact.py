@@ -56,7 +56,8 @@ def test_cast_literals(value: Any, expected_type: Type) -> None:
     assert artifact.type == expected_type
     assert artifact._class_key_ == f"{expected_type.friendly_key}Artifact"
     assert isinstance(artifact.format, JSON)
-    assert artifact.storage == StringLiteral(value=json.dumps(value))
+    assert isinstance(artifact.storage, StringLiteral)
+    assert artifact.storage.value == json.dumps(value)
     # Confirm the Artifact class is reused
     assert type(Artifact.cast(value)) is type(artifact)
 

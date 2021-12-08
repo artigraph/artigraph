@@ -5,13 +5,16 @@ from typing import Annotated, cast
 import pytest
 from box import BoxError
 
+from arti.artifacts import Artifact
 from arti.executors.local import LocalExecutor
 from arti.fingerprints import Fingerprint
 from arti.graphs import Graph
 from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey
 from arti.producers import producer
+from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
+from arti.types import Int64
 from arti.views import python as python_views
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 from tests.arti.dummies import Num as _Num
@@ -42,6 +45,72 @@ def test_Graph(graph: Graph) -> None:
     assert graph.artifacts.b.storage.includes_input_fingerprint_template
     assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
     assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
+
+
+def test_Graph_literals(tmp_path: Path) -> None:
+    n_add_runs = 0
+
+    @producer()
+    def add(x: int, y: Annotated[int, Num]) -> int:
+        nonlocal n_add_runs
+        n_add_runs += 1
+        return x + y
+
+    with Graph(name="Test") as g:
+        g.artifacts.x = 1
+        g.artifacts.y = Num(storage=LocalFile(path=str(tmp_path / "y.json")))
+        g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y).out()
+        # Changes to `phase` will cause a new graph_id. However, since `phase` isn't an input to
+        # `add`, we *shouldn't* have to recompute `z` - assuming the backend properly stores
+        # storage->storage_partitions separate from the set of storage_partitions associated with a
+        # graph_id.
+        g.artifacts.phase = Num(storage=LocalFile(path=str(tmp_path / "phase.json")))
+
+    Int64Artifact = Artifact.from_type(Int64())
+    x, y, z, phase = g.artifacts.x, g.artifacts.y, g.artifacts.z, g.artifacts.phase
+    assert isinstance(x, Int64Artifact)
+    assert isinstance(x.storage, StringLiteral)
+    assert x.storage.value == "1"
+    assert isinstance(z, Int64Artifact)
+    assert isinstance(z.storage, StringLiteral)
+    assert z.storage.value is None
+
+    with open(y.storage.path, "w") as f:
+        f.write("1")
+    with open(phase.storage.path, "w") as f:
+        f.write("1")
+    with pytest.raises(FileNotFoundError, match="No data"):
+        g.read(z, annotation=int)
+
+    # Run the initial build to compute z
+    g.build()
+    assert g.read(z, annotation=int) == 2
+    assert n_add_runs == 1
+    assert len(g.backend.read_graph_partitions(g.compute_id(), "z")) == 1
+    assert len(g.backend.read_storage_partitions(z.storage)) == 1
+    # A subsequent build shouldn't require a rerun, ensuring we properly lookup existing literals.
+    g.build()
+    assert g.read(z, annotation=int) == 2
+    assert n_add_runs == 1
+    assert len(g.backend.read_graph_partitions(g.compute_id(), "z")) == 1
+    assert len(g.backend.read_storage_partitions(z.storage)) == 1
+    # Changing an input should trigger a rerun. There will still only be 1 z literal for this graph,
+    # but now 2 overall for the storage (with different `input_fingerprint`s).
+    g.write(2, artifact=y)
+    g.build()
+    assert g.read(z, annotation=int) == 3
+    assert n_add_runs == 2
+    assert len(g.backend.read_graph_partitions(g.compute_id(), "z")) == 1
+    assert len(g.backend.read_storage_partitions(z.storage)) == 2
+    # After getting a new graph_id, but no changes to `add`s inputs, ensure we properly lookup
+    # existing literals - even though the graph_id will change, the input_fingerprint for `z` will
+    # not.
+    g.write(2, artifact=phase)
+    g.build()
+    assert g.read(z, annotation=int) == 3
+    assert n_add_runs == 2
+    assert len(g.backend.read_graph_partitions(g.compute_id(), "z")) == 1
+    assert len(g.backend.read_storage_partitions(z.storage)) == 2
 
 
 def test_Graph_compute_id() -> None:
@@ -95,12 +164,12 @@ def test_Graph_compute_id_producer_arg_order(tmp_path: Path) -> None:
 
 
 def test_Graph_build(tmp_path: Path) -> None:
-    side_effect = 0
+    n_builds = 0
 
     @producer()
     def increment(i: Annotated[int, Num]) -> Annotated[int, Num]:
-        nonlocal side_effect
-        side_effect += 1
+        nonlocal n_builds
+        n_builds += 1
         return i + 1
 
     @producer()
@@ -125,24 +194,24 @@ def test_Graph_build(tmp_path: Path) -> None:
     # Bootstrap the initial artifact and build
     g.write(0, artifact=a)
     g.build()
-    assert side_effect == 1
+    assert n_builds == 1
     assert g.read(b, annotation=int) == 1
     assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
     # A second build should no-op
     g.build(executor=LocalExecutor())
-    assert side_effect == 1
+    assert n_builds == 1
     assert g.read(b, annotation=int) == 1
     assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
     # Changing the raw Artifact data should trigger a rerun
     g.write(1, artifact=a)
     g.build()
-    assert side_effect == 2
+    assert n_builds == 2
     assert g.read(b, annotation=int) == 2
     assert g.read(c, annotation=int) == g.read(d, annotation=int) == 1
     # Changing back to the original data should no-op
     g.write(0, artifact=a)
     g.build()
-    assert side_effect == 2
+    assert n_builds == 2
     assert g.read(b, annotation=int) == 1
     assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
 

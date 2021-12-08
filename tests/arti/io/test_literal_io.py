@@ -17,25 +17,38 @@ class Num(_Num):
 
 def test_stringliteral_io() -> None:
     n = 5
-    a = Num(format=JSON(), storage=StringLiteral(value=json.dumps(n)))
+    a = Num(format=JSON(), storage=StringLiteral(id="test", value=json.dumps(n)))
 
     partitions = a.discover_storage_partitions()
     assert len(partitions) == 1
-    assert io.read(a.type, a.format, partitions, view=IntView()) == n
-    with pytest.raises(ValueError, match="Literal storage cannot be partitioned"):
-        io.read(
-            Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",)),
-            a.format,
-            partitions * 2,  # Pretend more partitions
-            view=IntView(),
-        )
-    with pytest.raises(FileNotFoundError, match="Literal has not been written yet"):
-        io.read(a.type, a.format, [StringLiteralPartition(keys=CompositeKey())], view=IntView())
-
-    # Test write
     partition = partitions[0]
     assert isinstance(partition, StringLiteralPartition)
     assert partition.value == json.dumps(n)
+
+    assert io.read(a.type, a.format, partitions, view=IntView()) == n
+    # Read "partitioned" literal
+    assert (
+        io.read(
+            Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",)),
+            a.format,
+            [
+                partition.copy(update={"value": '[{"a": 1}]'}),
+                partition.copy(update={"value": '[{"a": 2}]'}),
+            ],
+            view=IntView(),
+        )
+        == [{"a": 1}, {"a": 2}]
+    )
+    # Check that read with value=None fails
+    with pytest.raises(FileNotFoundError, match="Literal has not been written yet"):
+        io.read(
+            a.type,
+            a.format,
+            [StringLiteralPartition(id="junk", keys=CompositeKey())],
+            view=IntView(),
+        )
+
+    # Test write
     new = io.write(10, a.type, a.format, partition, view=IntView())
     assert isinstance(new, StringLiteralPartition)
     assert new.value == json.dumps(10)

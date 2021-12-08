@@ -201,7 +201,9 @@ class Storage(Model, Generic[_StoragePartition]):
         pass
 
 
+AnyStorage = Storage[Any]
+
 # mypy doesn't (yet?) support nested TypeVars[1], so mark internal as Any.
 #
 # 1: https://github.com/python/mypy/issues/2756
-_Storage = TypeVar("_Storage", bound=Storage[Any])
+_Storage = TypeVar("_Storage", bound=AnyStorage)

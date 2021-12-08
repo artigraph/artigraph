@@ -308,5 +308,7 @@ class Graph(Model):
         # transparently batch requests, but that's not so friendly with the transient
         # ".connect".
         with self.backend.connect() as backend:
-            backend.write_graph_partitions(graph_id or self.compute_id(), key, (storage_partition,))
+            backend.write_storage_partitions_and_link_to_graph(
+                artifact.storage, (storage_partition,), graph_id or self.compute_id(), key
+            )
         return cast(StoragePartition, storage_partition)

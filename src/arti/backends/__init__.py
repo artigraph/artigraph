@@ -1,13 +1,13 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
+from abc import abstractmethod
 from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Protocol
+from typing import TypeVar
 
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
-from arti.storage import StoragePartitions
-
+from arti.storage import AnyStorage, InputFingerprints, StoragePartitions
 
 # TODO: Consider adding CRUD methods for "everything"?
 #
@@ -15,14 +15,9 @@ from arti.storage import StoragePartitions
 # "composing") methods. Executors should operate on the high level methods, but those may have
 # defaults simply calling the lower level methods. If high level methods can be optimized (eg: not a
 # bunch of low level calls, each own network call), Backend can override.
-class BackendProtocol(Protocol):
-    def read_graph_partitions(self, graph_id: Fingerprint, name: str) -> StoragePartitions:
-        raise NotImplementedError()
 
-    def write_graph_partitions(
-        self, graph_id: Fingerprint, name: str, partitions: StoragePartitions
-    ) -> None:
-        raise NotImplementedError()
+
+_Backend = TypeVar("_Backend", bound="Backend")
 
 
 class Backend(Model):
@@ -37,5 +32,41 @@ class Backend(Model):
     """
 
     @contextmanager
-    def connect(self) -> Iterator[BackendProtocol]:
+    def connect(self: _Backend) -> Iterator[_Backend]:
         raise NotImplementedError()
+
+    @abstractmethod
+    def read_graph_partitions(self, graph_id: Fingerprint, name: str) -> StoragePartitions:
+        """Read the known Partitions for the named Artifact in a specific Graph snapshot."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def read_storage_partitions(
+        self, storage: AnyStorage, input_fingerprints: InputFingerprints = InputFingerprints()
+    ) -> StoragePartitions:
+        """Read all known Partitions for this Storage spec.
+
+        If `input_fingerprints` is provided, the returned partitions will be filtered accordingly.
+
+        NOTE: The returned partitions may not be associated with any particular Graph, unless
+        `input_fingerprints` is provided matching those for a Graph snapshot.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def link_graph_partitions(
+        self, graph_id: Fingerprint, name: str, partitions: StoragePartitions
+    ) -> None:
+        """Link the Partitions to the named Artifact in a specific Graph snapshot."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_storage_partitions(self, storage: AnyStorage, partitions: StoragePartitions) -> None:
+        """Add more partitions for a Storage spec."""
+        raise NotImplementedError()
+
+    def write_storage_partitions_and_link_to_graph(
+        self, storage: AnyStorage, partitions: StoragePartitions, graph_id: Fingerprint, name: str
+    ) -> None:
+        self.write_storage_partitions(storage, partitions)
+        self.link_graph_partitions(graph_id, name, partitions)

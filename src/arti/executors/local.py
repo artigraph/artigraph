@@ -3,7 +3,7 @@ from graphlib import TopologicalSorter
 from itertools import chain
 
 from arti.artifacts import Artifact
-from arti.backends import BackendProtocol
+from arti.backends import Backend
 from arti.executors import Executor
 from arti.fingerprints import Fingerprint
 from arti.graphs import Graph
@@ -22,7 +22,7 @@ class LocalExecutor(Executor):
         self,
         graph: Graph,
         graph_id: Fingerprint,
-        backend: BackendProtocol,
+        backend: Backend,
         artifact: Artifact,
     ) -> None:
         # NOTE: Should we do different things for "raw" vs produced artifacts?
@@ -34,13 +34,11 @@ class LocalExecutor(Executor):
         # should apply for every run, but the statitics should no-op if already
         # computed obviously.
         #
-        # We can only discover raw Artifacts - all produced ones should be written   his will fail for generated Artifacts (missing input_fingerprints). So,
-        # maybe we only discover "if artifact.producer_output is None"
+        # We can only discover raw Artifacts - all produced ones should be written after built.
         if artifact.producer_output is None:
-            backend.write_graph_partitions(
-                graph_id,
-                graph.artifact_to_key[artifact],
-                artifact.discover_storage_partitions(),
+            partitions = artifact.discover_storage_partitions()
+            backend.write_storage_partitions_and_link_to_graph(
+                artifact.storage, partitions, graph_id, graph.artifact_to_key[artifact]
             )
         # TODO: Check any assumptions about what/how many should be in the db?
         # TODO: Calculate stats, run validation, etc...
@@ -54,7 +52,7 @@ class LocalExecutor(Executor):
         self,
         graph: Graph,
         graph_id: Fingerprint,
-        backend: BackendProtocol,
+        backend: Backend,
         producer: Producer,
     ) -> None:
         input_partitions = {
@@ -79,16 +77,18 @@ class LocalExecutor(Executor):
             }
         )
         output_artifacts = graph.producer_outputs[producer]
+        # NOTE: The output partitions may be built, but not yet associated with this graph_id (eg:
+        # raw input data changed, but no changes trickled into this specific Producer). Hence we'll
+        # fetch all StoragePartitions for this Storage, filtered to the PKs and input_fingerprints
+        # we've computed *are* for this Graph - and then link them to the graph.
         existing_output_partitions = {
-            # NOTE: We'll append newly build partitions here as they are build.
-            output: output.discover_storage_partitions(
-                input_fingerprints=partition_input_fingerprints
-            )
+            output: backend.read_storage_partitions(output.storage, partition_input_fingerprints)
             for output in output_artifacts
         }
         for artifact, partitions in existing_output_partitions.items():
-            backend.write_graph_partitions(graph_id, graph.artifact_to_key[artifact], partitions)
-        # TODO: Guarantee all outputs have the same set of identified partitions
+            backend.link_graph_partitions(graph_id, graph.artifact_to_key[artifact], partitions)
+        # TODO: Guarantee all outputs have the same set of identified partitions. Currently, this
+        # pretends a partition is built for all outputs if _any_ are built for that partition.
         existing_output_keys = set(
             partition.keys for partition in chain.from_iterable(existing_output_partitions.values())
         )
