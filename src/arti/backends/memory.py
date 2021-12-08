@@ -3,18 +3,22 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterator
 from contextlib import contextmanager
-from itertools import chain
 
 from pydantic import Field
 
 from arti.backends import Backend
 from arti.fingerprints import Fingerprint
-from arti.storage import StoragePartitions
+from arti.storage import StoragePartition, StoragePartitions
+
+
+def ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePartition]:
+    for partition in partitions:
+        yield partition.with_content_fingerprint(keep_existing=True)
 
 
 class MemoryBackend(Backend):
-    graph_partitions: dict[Fingerprint, dict[str, StoragePartitions]] = Field(
-        default_factory=lambda: defaultdict(lambda: defaultdict(StoragePartitions)), repr=False
+    graph_partitions: dict[Fingerprint, dict[str, set[StoragePartition]]] = Field(
+        default_factory=lambda: defaultdict(lambda: defaultdict(set[StoragePartition])), repr=False
     )
 
     @contextmanager
@@ -22,20 +26,10 @@ class MemoryBackend(Backend):
         yield self
 
     def read_graph_partitions(self, graph_id: Fingerprint, name: str) -> StoragePartitions:
-        return self.graph_partitions[graph_id][name]
+        return tuple(self.graph_partitions[graph_id][name])
 
     def write_graph_partitions(
         self, graph_id: Fingerprint, name: str, partitions: StoragePartitions
     ) -> None:
         # NOTE: Be careful about deduping, otherwise we might have dup reads.
-        self.graph_partitions[graph_id][name] = StoragePartitions(
-            set(
-                chain(
-                    self.graph_partitions[graph_id][name],
-                    (
-                        partition.with_content_fingerprint(keep_existing=True)
-                        for partition in partitions
-                    ),
-                )
-            )
-        )
+        self.graph_partitions[graph_id][name].update(ensure_fingerprinted(partitions))
