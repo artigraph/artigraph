@@ -67,6 +67,10 @@ def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
                 for subvalue in value:
                     _check_types(subvalue, args[0])
                 return value
+        if issubclass(origin, type):
+            if not lenient_issubclass(value, args[0]):
+                raise ValueError(f"expected a subclass of {args[0]}, got: {value}")
+            return value
         if set(args) == {Any}:
             return _check_types(value, origin)
         raise NotImplementedError(f"Missing handler for {type_} with {value}!")

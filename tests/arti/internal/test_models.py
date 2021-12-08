@@ -99,14 +99,20 @@ def test_Model_static_types() -> None:
         b: Literal["b"]
         c: int
         d: frozendict[str, int]
+        e: type[int]
+
+    class MyInt(int):
+        pass
 
     # frozendict is special cased in the type conversions to automatically convert dicts.
-    m = M(a=5, b="b", c=0, d={"a": 1})
+    m = M(a=5, b="b", c=0, d={"a": 1}, e=MyInt)
     assert isinstance(m.d, frozendict)
     with pytest.raises(ValidationError, match="expected an instance of <class 'str'>, got"):
         M(a=5, b=5, c=0)
     with pytest.raises(ValidationError, match=r"expected an instance of <class 'int'>, got"):
         M(a=5, b="b", c=0.0)
+    with pytest.raises(ValidationError, match=r"expected a subclass of <class 'int'>, got"):
+        M(a=5, b="b", c=0, d={"a": 1}, e=str)
 
 
 @pytest.mark.parametrize(
