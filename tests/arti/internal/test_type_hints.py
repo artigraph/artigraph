@@ -1,10 +1,22 @@
 from collections.abc import Mapping, Sequence
-from typing import Annotated, Any, Literal, Optional, Tuple, TypedDict, TypeVar, Union, get_origin
+from typing import (
+    Annotated,
+    Any,
+    Generic,
+    Literal,
+    Optional,
+    Tuple,
+    TypedDict,
+    TypeVar,
+    Union,
+    get_origin,
+)
 
 import pytest
 
 from arti.internal.type_hints import (
     NoneType,
+    get_class_type_vars,
     is_optional_hint,
     is_union,
     is_union_hint,
@@ -23,6 +35,36 @@ class MyTypedDict(TypedDict):
 MyTupleVar = TypeVar("MyTupleVar", bound=MyTuple)
 TupleVar = TypeVar("TupleVar", bound=tuple)  # type: ignore
 UnboundVar = TypeVar("UnboundVar")
+
+
+def test_get_class_type_vars() -> None:
+    T1 = TypeVar("T1")
+    T2 = TypeVar("T2")
+
+    class Base(Generic[T1, T2]):
+        pass
+
+    # Test it works directly with GenericAlias
+    get_class_type_vars(Base[int, int]) == (int, int)
+
+    # Test it works with fully subscripted subclasses
+    class Sub(Base[int, int]):
+        pass
+
+    get_class_type_vars(Sub) == (int, int)
+
+    # Test it works with fully subscripted subclasses up the MRO
+    class Mixin:
+        pass
+
+    class SubWithMixin(Mixin, Sub):
+        pass
+
+    get_class_type_vars(SubWithMixin) == (int, int)
+
+    # And finally, check error cases
+    with pytest.raises(TypeError, match="Base must subclass a subscripted Generic"):
+        get_class_type_vars(Base)
 
 
 @pytest.mark.parametrize(

@@ -73,12 +73,23 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
 
 
 def get_class_type_vars(klass: type) -> tuple[type, ...]:
-    base = klass.__orig_bases__[0]  # type: ignore
-    base_origin = get_origin(base)
-    if base_origin is None:
-        raise TypeError(f"{klass.__name__} must subclass a subscripted Generic")
-    assert lenient_issubclass(klass, base_origin)
-    return get_args(base)
+    """Get the bound type variables from a class
+
+    NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.
+    """
+    if is_generic_alias(klass):
+        bases = (klass,)
+    else:
+        bases = klass.__orig_bases__  # type: ignore
+    for base in bases:
+        base_origin = get_origin(base)
+        if base_origin is None:
+            continue
+        args = get_args(base)
+        if any(isinstance(arg, TypeVar) for arg in args):
+            continue
+        return args
+    raise TypeError(f"{klass.__name__} must subclass a subscripted Generic")
 
 
 def get_annotation_from_value(value: Any) -> Any:
@@ -200,6 +211,12 @@ else:  # pragma: no cover
 
 def is_Annotated(type_: Any) -> bool:
     return isinstance(type_, _AnnotatedAlias)
+
+
+def is_generic_alias(type_: Any) -> bool:
+    from typing import _GenericAlias  # type: ignore
+
+    return isinstance(type_, _GenericAlias)
 
 
 def is_optional_hint(type_: Any) -> bool:
