@@ -193,6 +193,14 @@ class Collection(_NamedMixin, List):
         return f"{self.element.friendly_key}{self._class_key_}"
 
     @property
+    def fields(self) -> frozendict[str, Type]:
+        """Shorthand accessor to access Struct element fields.
+
+        If the element is not a Struct, an AttributeError will be raised.
+        """
+        return self.element.fields  # type: ignore # We want the standard AttributeError
+
+    @property
     def is_partitioned(self) -> bool:
         return bool(self.partition_fields)
 

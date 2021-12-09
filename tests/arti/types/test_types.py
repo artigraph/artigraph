@@ -140,6 +140,11 @@ def test_Collection() -> None:
     assert collection.partition_by == ()
     assert collection.partition_fields == frozendict()
     assert collection.friendly_key == "Int32Collection"
+    # Test fields accessor - it raises a standard AttributeError if the element doesn't contain a
+    # fields member.
+    with pytest.raises(AttributeError):
+        collection.fields
+    assert Collection(element=Struct(fields={"a": Int32()})).fields == frozendict(a=Int32())
 
 
 def test_Collection_partitioned() -> None:
