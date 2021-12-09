@@ -50,6 +50,12 @@ class MemoryBackend(Backend):
     def read_artifact_partitions(
         self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> StoragePartitions:
+        # The MemoryBackend is (obviously) not persistent, so there may be external data we don't
+        # know about. If we haven't seen this storage before, we'll attempt to "warm" the cache.
+        if artifact.storage not in self._storage_partitions:
+            self.write_artifact_partitions(
+                artifact, artifact.discover_storage_partitions(input_fingerprints)
+            )
         partitions = self._storage_partitions[artifact.storage]
         if input_fingerprints:
             partitions = {

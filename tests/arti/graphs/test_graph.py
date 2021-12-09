@@ -6,6 +6,7 @@ import pytest
 from box import BoxError
 
 from arti.artifacts import Artifact
+from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
 from arti.fingerprints import Fingerprint
 from arti.graphs import Graph
@@ -254,6 +255,21 @@ def test_Graph_build(tmp_path: Path) -> None:
     assert g.read(c, annotation=int) == g.read(d, annotation=int) == 1
     # Changing back to the original data should no-op
     g.write(0, artifact=a)
+    g.build()
+    assert n_builds == 2
+    assert g.read(b, annotation=int) == 1
+    assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
+
+    # Test that the MemoryBackend will discover existing StoragePartitions, even when empty. Other
+    # backends are persistent, so this isn't necessary. This is really a MemoryBackend test, but
+    # easiest to test in a Graph context.
+    #
+    # Running a build should no-op (ie: num_builds shouldn't increment), but we unfortunately can't
+    # read *immediately* because we won't know the input_fingerprints for all the generated
+    # Artifacts until build. Eventually, we need to allow the Artifact to access the backend
+    # directly and automatically compute the input_fingerprints (ie: sync on the fly), which would
+    # allow us to read automatically.
+    g = g.copy(update={"backend": MemoryBackend()})
     g.build()
     assert n_builds == 2
     assert g.read(b, annotation=int) == 1
