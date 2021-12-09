@@ -75,10 +75,8 @@ def test_Graph_literals(tmp_path: Path) -> None:
     assert isinstance(z.storage, StringLiteral)
     assert z.storage.value is None
 
-    with open(y.storage.path, "w") as f:
-        f.write("1")
-    with open(phase.storage.path, "w") as f:
-        f.write("1")
+    g.write(1, artifact=y)
+    g.write(1, artifact=phase)
     with pytest.raises(FileNotFoundError, match="No data"):
         g.read(z, annotation=int)
 
