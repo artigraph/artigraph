@@ -215,7 +215,7 @@ class Graph(Model):
         # Write the discovered partitions (if not already known) and link to this new snapshot.
         for key, partitions in known_artifact_partitions.items():
             snapshot.backend.write_storage_partitions_and_link_to_graph(
-                snapshot.artifacts[key].storage, partitions, snapshot.snapshot_id, key
+                snapshot.artifacts[key].storage, partitions, self.name, snapshot.snapshot_id, key
             )
         return snapshot
 
@@ -264,6 +264,7 @@ class Graph(Model):
     # else), eg: type ~= view. Doing validation on the data, etc. Should some of this
     # live on the View?
 
+    @requires_sealed
     def read(
         self,
         artifact: Artifact,
@@ -282,7 +283,9 @@ class Graph(Model):
         assert view is not None  # mypy gets mixed up with ^
         if storage_partitions is None:
             with self.backend.connect() as backend:
-                storage_partitions = backend.read_graph_partitions(self.get_snapshot_id(), key)
+                storage_partitions = backend.read_graph_partitions(
+                    self.name, self.get_snapshot_id(), key
+                )
         return io.read(
             type_=artifact.type,
             format=artifact.format,
@@ -290,6 +293,7 @@ class Graph(Model):
             view=view,
         )
 
+    @requires_sealed
     def write(
         self,
         data: Any,
@@ -321,6 +325,6 @@ class Graph(Model):
         # ".connect".
         with self.backend.connect() as backend:
             backend.write_storage_partitions_and_link_to_graph(
-                artifact.storage, (storage_partition,), self.get_snapshot_id(), key
+                artifact.storage, (storage_partition,), self.name, self.get_snapshot_id(), key
             )
         return cast(StoragePartition, storage_partition)

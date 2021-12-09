@@ -86,13 +86,13 @@ def test_Graph_literals(tmp_path: Path) -> None:
     g.build()
     assert g.read(z, annotation=int) == 2
     assert n_add_runs == 1
-    assert len(g.backend.read_graph_partitions(g.get_snapshot_id(), "z")) == 1
+    assert len(g.backend.read_graph_partitions(g.name, g.get_snapshot_id(), "z")) == 1
     assert len(g.backend.read_storage_partitions(z.storage)) == 1
     # A subsequent build shouldn't require a rerun, ensuring we properly lookup existing literals.
     g.build()
     assert g.read(z, annotation=int) == 2
     assert n_add_runs == 1
-    assert len(g.backend.read_graph_partitions(g.get_snapshot_id(), "z")) == 1
+    assert len(g.backend.read_graph_partitions(g.name, g.get_snapshot_id(), "z")) == 1
     assert len(g.backend.read_storage_partitions(z.storage)) == 1
     # Changing an input should trigger a rerun. There will still only be 1 z literal for this graph,
     # but now 2 overall for the storage (with different `input_fingerprint`s).
@@ -100,7 +100,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     g.build()
     assert g.read(z, annotation=int) == 3
     assert n_add_runs == 2
-    assert len(g.backend.read_graph_partitions(g.get_snapshot_id(), "z")) == 1
+    assert len(g.backend.read_graph_partitions(g.name, g.get_snapshot_id(), "z")) == 1
     assert len(g.backend.read_storage_partitions(z.storage)) == 2
     # After getting a new snapshot_id, but no changes to `add`s inputs, ensure we properly lookup
     # existing literals - even though the snapshot_id will change, the input_fingerprint for `z`
@@ -109,7 +109,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     g.build()
     assert g.read(z, annotation=int) == 3
     assert n_add_runs == 2
-    assert len(g.backend.read_graph_partitions(g.get_snapshot_id(), "z")) == 1
+    assert len(g.backend.read_graph_partitions(g.name, g.get_snapshot_id(), "z")) == 1
     assert len(g.backend.read_storage_partitions(z.storage)) == 2
 
 

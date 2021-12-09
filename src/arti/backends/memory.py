@@ -16,6 +16,10 @@ def ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StorageParti
         yield partition.with_content_fingerprint(keep_existing=True)
 
 
+_GraphSnapshotPartitions = dict[str, dict[Fingerprint, dict[str, set[StoragePartition]]]]
+_StoragePartitions = dict[AnyStorage, set[StoragePartition]]
+
+
 class MemoryBackend(Backend):
     # Share the backing dicts across copies. This aligns with other Backends that have true
     # persistence (a copy would still connect to the same underlying database). This is required
@@ -26,10 +30,12 @@ class MemoryBackend(Backend):
     # `_graph_snapshot_partitions` tracks all the partitions for a *specific* "run" of a graph.
     # `_storage_partitions` tracks all partitions, across all graphs. This separation is important
     # to allow for Literals to be used even after a snapshot_id change.
-    _graph_snapshot_partitions: dict[Fingerprint, dict[str, set[StoragePartition]]] = PrivateAttr(
-        default_factory=lambda: defaultdict(lambda: defaultdict(set[StoragePartition]))
+    _graph_snapshot_partitions: _GraphSnapshotPartitions = PrivateAttr(
+        default_factory=lambda: defaultdict(
+            lambda: defaultdict(lambda: defaultdict(set[StoragePartition]))
+        )
     )
-    _storage_partitions: dict[AnyStorage, set[StoragePartition]] = PrivateAttr(
+    _storage_partitions: _StoragePartitions = PrivateAttr(
         default_factory=lambda: defaultdict(set[StoragePartition])
     )
 
@@ -37,8 +43,10 @@ class MemoryBackend(Backend):
     def connect(self) -> Iterator[MemoryBackend]:
         yield self
 
-    def read_graph_partitions(self, snapshot_id: Fingerprint, name: str) -> StoragePartitions:
-        return tuple(self._graph_snapshot_partitions[snapshot_id][name])
+    def read_graph_partitions(
+        self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str
+    ) -> StoragePartitions:
+        return tuple(self._graph_snapshot_partitions[graph_name][graph_snapshot_id][artifact_key])
 
     def read_storage_partitions(
         self, storage: AnyStorage, input_fingerprints: InputFingerprints = InputFingerprints()
@@ -53,9 +61,15 @@ class MemoryBackend(Backend):
         return tuple(partitions)
 
     def link_graph_partitions(
-        self, snapshot_id: Fingerprint, name: str, partitions: StoragePartitions
+        self,
+        graph_name: str,
+        graph_snapshot_id: Fingerprint,
+        artifact_key: str,
+        partitions: StoragePartitions,
     ) -> None:
-        self._graph_snapshot_partitions[snapshot_id][name].update(ensure_fingerprinted(partitions))
+        self._graph_snapshot_partitions[graph_name][graph_snapshot_id][artifact_key].update(
+            ensure_fingerprinted(partitions)
+        )
 
     def write_storage_partitions(self, storage: AnyStorage, partitions: StoragePartitions) -> None:
         self._storage_partitions[storage].update(ensure_fingerprinted(partitions))

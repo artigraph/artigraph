@@ -32,7 +32,7 @@ class LocalExecutor(Executor):
     ) -> None:
         input_partitions = {
             name: backend.read_graph_partitions(
-                graph.get_snapshot_id(), graph.artifact_to_key[artifact]
+                graph.name, graph.get_snapshot_id(), graph.artifact_to_key[artifact]
             )
             for name, artifact in producer.inputs.items()
         }
@@ -64,7 +64,7 @@ class LocalExecutor(Executor):
         }
         for artifact, partitions in existing_output_partitions.items():
             backend.link_graph_partitions(
-                graph.get_snapshot_id(), graph.artifact_to_key[artifact], partitions
+                graph.name, graph.get_snapshot_id(), graph.artifact_to_key[artifact], partitions
             )
         # TODO: Guarantee all outputs have the same set of identified partitions. Currently, this
         # pretends a partition is built for all outputs if _any_ are built for that partition.
