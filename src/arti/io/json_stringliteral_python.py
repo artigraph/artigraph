@@ -42,4 +42,8 @@ def _write_json_stringliteral_python(
     storage_partition: StringLiteralPartition,
     view: PythonBuiltin,
 ) -> StringLiteralPartition:
+    if storage_partition.value is not None:
+        # We can't overwrite the original value stored in LiteralStorage - on subsequent
+        # `.discover_partitions`, a partition with the original value will still be used.
+        raise ValueError("Literals with a value already set cannot be written")
     return storage_partition.copy(update={"value": json.dumps(data)})

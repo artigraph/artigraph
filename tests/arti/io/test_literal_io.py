@@ -49,7 +49,10 @@ def test_stringliteral_io() -> None:
         )
 
     # Test write
-    new = io.write(10, a.type, a.format, partition, view=IntView())
+    unwritten = StringLiteralPartition(id="junk", keys=CompositeKey())
+    new = io.write(10, a.type, a.format, unwritten, view=IntView())
     assert isinstance(new, StringLiteralPartition)
     assert new.value == json.dumps(10)
     assert partition.value == json.dumps(n)  # Confirm no mutation
+    with pytest.raises(ValueError, match="Literals with a value already set cannot be written"):
+        io.write(10, a.type, a.format, new, view=IntView())
