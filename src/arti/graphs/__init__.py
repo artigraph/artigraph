@@ -260,6 +260,17 @@ class Graph(Model):
             for producer, artifacts_by_position in d.items()
         )
 
+    @requires_sealed
+    def tag(self, tag: str, overwrite: bool = False) -> "Graph":
+        snapshot = self.snapshot()
+        assert snapshot.snapshot_id is not None
+        snapshot.backend.write_graph_tag(snapshot.name, snapshot.snapshot_id, tag, overwrite)
+        return snapshot
+
+    @requires_sealed
+    def from_tag(self, tag: str) -> "Graph":
+        return self.copy(update={"snapshot_id": self.backend.read_graph_tag(self.name, tag)})
+
     # TODO: io.read/write probably need a bit of sanity checking (probably somewhere
     # else), eg: type ~= view. Doing validation on the data, etc. Should some of this
     # live on the View?

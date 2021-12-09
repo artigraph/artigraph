@@ -176,6 +176,37 @@ def test_Graph_snapshot_id_producer_arg_order(tmp_path: Path) -> None:
     assert g_ab.get_snapshot_id() != g_ba.get_snapshot_id()
 
 
+def test_Graph_tagging(tmp_path: Path) -> None:
+    @producer()
+    def plus1(x: Annotated[int, Num]) -> int:
+        return x + 1
+
+    with Graph(name="Test") as g:
+        g.artifacts.x = Num(storage=LocalFile(path=str(tmp_path / "x.json")))
+        g.artifacts.y = plus1(x=g.artifacts.x)
+
+    g.write(1, artifact=g.artifacts.x)
+    snapshot_1 = g.build()
+    assert snapshot_1.read(g.artifacts.y, annotation=int) == 2
+    snapshot_1.tag("prod")
+    assert g.from_tag("prod").read(g.artifacts.y, annotation=int) == 2
+
+    g.write(2, artifact=g.artifacts.x)
+    snapshot_2 = g.build()
+    assert snapshot_2.read(g.artifacts.y, annotation=int) == 3
+    assert snapshot_1.snapshot_id != snapshot_2.snapshot_id
+
+    assert g.read(g.artifacts.y, annotation=int) == 3
+    assert g.from_tag("prod").read(g.artifacts.y, annotation=int) == 2
+
+    with pytest.raises(
+        ValueError, match=re.escape("Existing `prod` tag for Graph `Test` points to Fingerprint")
+    ):
+        g.tag("prod")
+    with pytest.raises(ValueError, match=re.escape("No known `fake` tag for Graph `Test`")):
+        g.from_tag("fake")
+
+
 def test_Graph_build(tmp_path: Path) -> None:
     n_builds = 0
 

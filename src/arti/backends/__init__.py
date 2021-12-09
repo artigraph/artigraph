@@ -36,6 +36,18 @@ class Backend(Model):
         raise NotImplementedError()
 
     @abstractmethod
+    def read_graph_tag(self, graph_name: str, tag: str) -> Fingerprint:
+        """Fetch the Snapshot ID for the named tag."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_graph_tag(
+        self, graph_name: str, graph_snapshot_id: Fingerprint, tag: str, overwrite: bool = False
+    ) -> None:
+        """Tag a Graph Snapshot ID with an arbitrary name."""
+        raise NotImplementedError()
+
+    @abstractmethod
     def read_graph_partitions(
         self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str
     ) -> StoragePartitions:

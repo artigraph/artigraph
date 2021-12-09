@@ -35,6 +35,9 @@ class MemoryBackend(Backend):
             lambda: defaultdict(lambda: defaultdict(set[StoragePartition]))
         )
     )
+    _graph_tags: dict[str, dict[str, Fingerprint]] = PrivateAttr(
+        default_factory=lambda: defaultdict(dict)
+    )
     _storage_partitions: _StoragePartitions = PrivateAttr(
         default_factory=lambda: defaultdict(set[StoragePartition])
     )
@@ -42,6 +45,19 @@ class MemoryBackend(Backend):
     @contextmanager
     def connect(self) -> Iterator[MemoryBackend]:
         yield self
+
+    def read_graph_tag(self, graph_name: str, tag: str) -> Fingerprint:
+        if tag not in self._graph_tags[graph_name]:
+            raise ValueError(f"No known `{tag}` tag for Graph `{graph_name}`")
+        return self._graph_tags[graph_name][tag]
+
+    def write_graph_tag(
+        self, graph_name: str, graph_snapshot_id: Fingerprint, tag: str, overwrite: bool = False
+    ) -> None:
+        """Read the known Partitions for the named Artifact in a specific Graph snapshot."""
+        if (existing := self._graph_tags[graph_name].get(tag)) is not None and not overwrite:
+            raise ValueError(f"Existing `{tag}` tag for Graph `{graph_name}` points to {existing}")
+        self._graph_tags[graph_name][tag] = graph_snapshot_id
 
     def read_graph_partitions(
         self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str
