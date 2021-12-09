@@ -38,7 +38,7 @@ namespace_packages = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["sh", ]
+module = ["gcsfs", "sh", ]
 ignore_missing_imports = true
 
 
@@ -55,6 +55,7 @@ include = ["src/arti/py.typed"]
 
 [tool.poetry.dependencies]
 frozendict = "^2.1.0"
+gcsfs = "^2022.2.0"
 multimethod = "^1.6"
 parse = "^1.19.0"
 pydantic = "^1.9.0"
