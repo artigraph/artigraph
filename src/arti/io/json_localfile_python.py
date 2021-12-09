@@ -15,7 +15,7 @@ from arti.views.python import PythonBuiltin
 
 
 def _read_json_file(path: str) -> Any:
-    with open(path, "rb") as file:
+    with open(path, "r") as file:
         return json.load(file)
 
 
