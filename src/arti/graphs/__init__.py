@@ -214,8 +214,8 @@ class Graph(Model):
         assert snapshot.snapshot_id is not None  # mypy
         # Write the discovered partitions (if not already known) and link to this new snapshot.
         for key, partitions in known_artifact_partitions.items():
-            snapshot.backend.write_storage_partitions_and_link_to_graph(
-                snapshot.artifacts[key].storage, partitions, self.name, snapshot.snapshot_id, key
+            snapshot.backend.write_artifact_and_graph_partitions(
+                snapshot.artifacts[key], partitions, self.name, snapshot.snapshot_id, key
             )
         return snapshot
 
@@ -295,7 +295,7 @@ class Graph(Model):
         if storage_partitions is None:
             with self.backend.connect() as backend:
                 storage_partitions = backend.read_graph_partitions(
-                    self.name, self.get_snapshot_id(), key
+                    self.name, self.get_snapshot_id(), key, artifact
                 )
         return io.read(
             type_=artifact.type,
@@ -335,14 +335,14 @@ class Graph(Model):
         # transparently batch requests, but that's not so friendly with the transient
         # ".connect".
         with self.backend.connect() as backend:
-            backend.write_storage_partitions(artifact.storage, (storage_partition,))
+            backend.write_artifact_partitions(artifact, (storage_partition,))
             # Skip linking this partition to the snapshot if the id would change:
             # - If snapshot_id is already set, we'd link to the wrong snapshot (we guard against
             #   this above)
             # - If unset, we'd calculate the new id, but future `.snapshot` calls would handle too
             #   - Additionally, snapshotting may fail if not all other inputs are available now
             if artifact.producer_output is not None:
-                backend.link_graph_partitions(
-                    self.name, self.get_snapshot_id(), key, (storage_partition,)
+                backend.write_graph_partitions(
+                    self.name, self.get_snapshot_id(), key, artifact, (storage_partition,)
                 )
         return cast(StoragePartition, storage_partition)

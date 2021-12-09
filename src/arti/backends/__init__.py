@@ -5,9 +5,10 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from typing import TypeVar
 
+from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
-from arti.storage import AnyStorage, InputFingerprints, StoragePartitions
+from arti.storage import InputFingerprints, StoragePartitions
 
 # TODO: Consider adding CRUD methods for "everything"?
 #
@@ -35,28 +36,11 @@ class Backend(Model):
     def connect(self: _Backend) -> Iterator[_Backend]:
         raise NotImplementedError()
 
-    @abstractmethod
-    def read_graph_tag(self, graph_name: str, tag: str) -> Fingerprint:
-        """Fetch the Snapshot ID for the named tag."""
-        raise NotImplementedError()
+    # Artifact partitions - independent of a specific Graph (snapshot)
 
     @abstractmethod
-    def write_graph_tag(
-        self, graph_name: str, graph_snapshot_id: Fingerprint, tag: str, overwrite: bool = False
-    ) -> None:
-        """Tag a Graph Snapshot ID with an arbitrary name."""
-        raise NotImplementedError()
-
-    @abstractmethod
-    def read_graph_partitions(
-        self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str
-    ) -> StoragePartitions:
-        """Read the known Partitions for the named Artifact in a specific Graph snapshot."""
-        raise NotImplementedError()
-
-    @abstractmethod
-    def read_storage_partitions(
-        self, storage: AnyStorage, input_fingerprints: InputFingerprints = InputFingerprints()
+    def read_artifact_partitions(
+        self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> StoragePartitions:
         """Read all known Partitions for this Storage spec.
 
@@ -68,28 +52,54 @@ class Backend(Model):
         raise NotImplementedError()
 
     @abstractmethod
-    def link_graph_partitions(
+    def write_artifact_partitions(self, artifact: Artifact, partitions: StoragePartitions) -> None:
+        """Add more partitions for a Storage spec."""
+        raise NotImplementedError()
+
+    # Artifact partitions for a specific Graph (snapshot)
+
+    @abstractmethod
+    def read_graph_partitions(
+        self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str, artifact: Artifact
+    ) -> StoragePartitions:
+        """Read the known Partitions for the named Artifact in a specific Graph snapshot."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_graph_partitions(
         self,
         graph_name: str,
         graph_snapshot_id: Fingerprint,
         artifact_key: str,
+        artifact: Artifact,
         partitions: StoragePartitions,
     ) -> None:
         """Link the Partitions to the named Artifact in a specific Graph snapshot."""
         raise NotImplementedError()
 
-    @abstractmethod
-    def write_storage_partitions(self, storage: AnyStorage, partitions: StoragePartitions) -> None:
-        """Add more partitions for a Storage spec."""
-        raise NotImplementedError()
-
-    def write_storage_partitions_and_link_to_graph(
+    def write_artifact_and_graph_partitions(
         self,
-        storage: AnyStorage,
+        artifact: Artifact,
         partitions: StoragePartitions,
         graph_name: str,
         graph_snapshot_id: Fingerprint,
         artifact_key: str,
     ) -> None:
-        self.write_storage_partitions(storage, partitions)
-        self.link_graph_partitions(graph_name, graph_snapshot_id, artifact_key, partitions)
+        self.write_artifact_partitions(artifact, partitions)
+        self.write_graph_partitions(
+            graph_name, graph_snapshot_id, artifact_key, artifact, partitions
+        )
+
+    # Graph Snapshot Tagging
+
+    @abstractmethod
+    def read_graph_tag(self, graph_name: str, tag: str) -> Fingerprint:
+        """Fetch the Snapshot ID for the named tag."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_graph_tag(
+        self, graph_name: str, graph_snapshot_id: Fingerprint, tag: str, overwrite: bool = False
+    ) -> None:
+        """Tag a Graph Snapshot ID with an arbitrary name."""
+        raise NotImplementedError()

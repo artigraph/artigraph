@@ -32,7 +32,7 @@ class LocalExecutor(Executor):
     ) -> None:
         input_partitions = {
             name: backend.read_graph_partitions(
-                graph.name, graph.get_snapshot_id(), graph.artifact_to_key[artifact]
+                graph.name, graph.get_snapshot_id(), graph.artifact_to_key[artifact], artifact
             )
             for name, artifact in producer.inputs.items()
         }
@@ -59,12 +59,16 @@ class LocalExecutor(Executor):
         # we'll fetch all StoragePartitions for this Storage, filtered to the PKs and
         # input_fingerprints we've computed *are* for this Graph - and then link them to the graph.
         existing_output_partitions = {
-            output: backend.read_storage_partitions(output.storage, partition_input_fingerprints)
+            output: backend.read_artifact_partitions(output, partition_input_fingerprints)
             for output in output_artifacts
         }
         for artifact, partitions in existing_output_partitions.items():
-            backend.link_graph_partitions(
-                graph.name, graph.get_snapshot_id(), graph.artifact_to_key[artifact], partitions
+            backend.write_graph_partitions(
+                graph.name,
+                graph.get_snapshot_id(),
+                graph.artifact_to_key[artifact],
+                artifact,
+                partitions,
             )
         # TODO: Guarantee all outputs have the same set of identified partitions. Currently, this
         # pretends a partition is built for all outputs if _any_ are built for that partition.

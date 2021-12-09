@@ -6,6 +6,7 @@ from contextlib import contextmanager
 
 from pydantic import PrivateAttr
 
+from arti.artifacts import Artifact
 from arti.backends import Backend
 from arti.fingerprints import Fingerprint
 from arti.storage import AnyStorage, InputFingerprints, StoragePartition, StoragePartitions
@@ -46,6 +47,38 @@ class MemoryBackend(Backend):
     def connect(self) -> Iterator[MemoryBackend]:
         yield self
 
+    def read_artifact_partitions(
+        self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
+    ) -> StoragePartitions:
+        partitions = self._storage_partitions[artifact.storage]
+        if input_fingerprints:
+            partitions = {
+                partition
+                for partition in partitions
+                if input_fingerprints.get(partition.keys) == partition.input_fingerprint
+            }
+        return tuple(partitions)
+
+    def write_artifact_partitions(self, artifact: Artifact, partitions: StoragePartitions) -> None:
+        self._storage_partitions[artifact.storage].update(ensure_fingerprinted(partitions))
+
+    def read_graph_partitions(
+        self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str, artifact: Artifact
+    ) -> StoragePartitions:
+        return tuple(self._graph_snapshot_partitions[graph_name][graph_snapshot_id][artifact_key])
+
+    def write_graph_partitions(
+        self,
+        graph_name: str,
+        graph_snapshot_id: Fingerprint,
+        artifact_key: str,
+        artifact: Artifact,
+        partitions: StoragePartitions,
+    ) -> None:
+        self._graph_snapshot_partitions[graph_name][graph_snapshot_id][artifact_key].update(
+            ensure_fingerprinted(partitions)
+        )
+
     def read_graph_tag(self, graph_name: str, tag: str) -> Fingerprint:
         if tag not in self._graph_tags[graph_name]:
             raise ValueError(f"No known `{tag}` tag for Graph `{graph_name}`")
@@ -58,34 +91,3 @@ class MemoryBackend(Backend):
         if (existing := self._graph_tags[graph_name].get(tag)) is not None and not overwrite:
             raise ValueError(f"Existing `{tag}` tag for Graph `{graph_name}` points to {existing}")
         self._graph_tags[graph_name][tag] = graph_snapshot_id
-
-    def read_graph_partitions(
-        self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str
-    ) -> StoragePartitions:
-        return tuple(self._graph_snapshot_partitions[graph_name][graph_snapshot_id][artifact_key])
-
-    def read_storage_partitions(
-        self, storage: AnyStorage, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> StoragePartitions:
-        partitions = self._storage_partitions[storage]
-        if input_fingerprints:
-            partitions = {
-                partition
-                for partition in partitions
-                if input_fingerprints.get(partition.keys) == partition.input_fingerprint
-            }
-        return tuple(partitions)
-
-    def link_graph_partitions(
-        self,
-        graph_name: str,
-        graph_snapshot_id: Fingerprint,
-        artifact_key: str,
-        partitions: StoragePartitions,
-    ) -> None:
-        self._graph_snapshot_partitions[graph_name][graph_snapshot_id][artifact_key].update(
-            ensure_fingerprinted(partitions)
-        )
-
-    def write_storage_partitions(self, storage: AnyStorage, partitions: StoragePartitions) -> None:
-        self._storage_partitions[storage].update(ensure_fingerprinted(partitions))
