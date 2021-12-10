@@ -2,17 +2,13 @@ from pathlib import Path
 
 import pytest
 
-from arti import io
-from arti.fingerprints import Fingerprint
-from arti.formats import Format
+from arti import CompositeKey, Fingerprint, Format, StoragePartition, StoragePartitions, View, io
 from arti.formats.json import JSON
 from arti.formats.pickle import Pickle
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, Int64Key
-from arti.storage import StoragePartition, StoragePartitions
+from arti.partitions import Int64Key
 from arti.storage.local import LocalFile
 from arti.types import Collection, Int64, Struct
-from arti.views import View
 from tests.arti.dummies import Num
 
 

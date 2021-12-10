@@ -4,9 +4,9 @@ from typing import Optional
 import parse
 import pytest
 
-from arti.fingerprints import Fingerprint
+from arti import CompositeKey, CompositeKeyTypes, Fingerprint, PartitionKey
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, CompositeKeyTypes, Int8Key, PartitionKey
+from arti.partitions import Int8Key
 from arti.storage._internal import (
     FormatDict,
     FormatPlaceholder,

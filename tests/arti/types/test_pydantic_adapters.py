@@ -4,8 +4,9 @@ from typing import Literal, get_args, get_origin
 import pytest
 from pydantic import BaseModel
 
+from arti import Type
 from arti.internal.type_hints import lenient_issubclass
-from arti.types import Boolean, Enum, List, Map, String, Struct, Timestamp, Type, _Float, _Int
+from arti.types import Boolean, Enum, List, Map, String, Struct, Timestamp, _Float, _Int
 from arti.types.pydantic import get_post_field_conversion_hook, pydantic_type_system
 
 

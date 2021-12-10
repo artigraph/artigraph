@@ -4,6 +4,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
+from arti import Type, TypeAdapter, TypeSystem
 from arti.internal.utils import frozendict
 from arti.types import (
     DEFAULT_ANONYMOUS_NAME,
@@ -19,9 +20,6 @@ from arti.types import (
     String,
     Struct,
     Timestamp,
-    Type,
-    TypeAdapter,
-    TypeSystem,
 )
 
 

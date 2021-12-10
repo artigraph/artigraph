@@ -6,7 +6,7 @@ from typing import Annotated, Any, ClassVar, Literal, Optional, Union
 import pytest
 from pydantic import PrivateAttr, ValidationError
 
-from arti.fingerprints import Fingerprint
+from arti import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import frozendict
 

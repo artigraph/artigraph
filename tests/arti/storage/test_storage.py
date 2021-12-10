@@ -4,10 +4,16 @@ from typing import Optional
 
 import pytest
 
-from arti.fingerprints import Fingerprint
+from arti import (
+    CompositeKey,
+    CompositeKeyTypes,
+    Fingerprint,
+    InputFingerprints,
+    Storage,
+    StoragePartition,
+)
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, CompositeKeyTypes, DateKey, Int8Key
-from arti.storage import InputFingerprints, Storage, StoragePartition
+from arti.partitions import DateKey, Int8Key
 
 
 class MockStoragePartition(StoragePartition):

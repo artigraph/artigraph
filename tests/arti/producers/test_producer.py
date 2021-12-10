@@ -3,14 +3,18 @@ from typing import Annotated, Any, Optional
 
 import pytest
 
-from arti.annotations import Annotation
-from arti.artifacts import Artifact
-from arti.fingerprints import Fingerprint
+from arti import (
+    Annotation,
+    Artifact,
+    Fingerprint,
+    PartitionDependencies,
+    Producer,
+    StoragePartitions,
+)
+from arti import producer as producer_decorator  # Avoid shadowing
 from arti.internal.models import Model
 from arti.internal.utils import frozendict
-from arti.producers import PartitionDependencies, Producer, ValidateSig
-from arti.producers import producer as producer_decorator  # Avoid shadowing
-from arti.storage import StoragePartitions
+from arti.producers import ValidateSig
 from arti.types import Collection, Int64, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views

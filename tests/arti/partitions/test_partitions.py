@@ -4,6 +4,7 @@ from typing import ClassVar
 
 import pytest
 
+from arti import PartitionKey, Type
 from arti.internal.utils import frozendict
 from arti.partitions import (
     DateKey,
@@ -12,11 +13,10 @@ from arti.partitions import (
     Int32Key,
     Int64Key,
     NullKey,
-    PartitionKey,
     _IntKey,
     key_component,
 )
-from arti.types import Collection, Date, Int8, Int16, Int32, Int64, Struct, Type
+from arti.types import Collection, Date, Int8, Int16, Int32, Int64, Struct
 
 
 def test_PartitionKey_key_components() -> None:

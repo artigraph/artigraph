@@ -4,6 +4,7 @@ from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_type_
 
 import pytest
 
+from arti import Type
 from arti.internal.type_hints import NoneType
 from arti.types import (
     Boolean,
@@ -24,7 +25,6 @@ from arti.types import (
     String,
     Struct,
     Timestamp,
-    Type,
 )
 from arti.types.python import PyLiteral, PyOptional, PyTuple, python_type_system
 

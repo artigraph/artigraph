@@ -3,9 +3,8 @@ from typing import ClassVar
 import pytest
 from pydantic import ValidationError
 
-from arti import types
+from arti import View, types
 from arti.types.python import python_type_system
-from arti.views import View
 
 
 @pytest.fixture

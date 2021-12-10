@@ -1,12 +1,11 @@
 import pickle
 from datetime import date, datetime
 
+from arti import View, read, write
 from arti.formats.pickle import Pickle
 from arti.internal.type_hints import NoneType
 from arti.internal.utils import named_temporary_file
-from arti.io import read, write
 from arti.storage.local import LocalFilePartition
-from arti.views import View
 from arti.views.python import Date, Datetime, Dict, Float, Int, Null, Str
 
 

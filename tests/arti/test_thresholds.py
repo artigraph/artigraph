@@ -1,4 +1,4 @@
-from arti.thresholds import Threshold
+from arti import Threshold
 
 
 def test_Threshold() -> None:

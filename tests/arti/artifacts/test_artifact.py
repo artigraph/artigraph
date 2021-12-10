@@ -5,13 +5,9 @@ from typing import Any
 
 import pytest
 
-from arti.annotations import Annotation
-from arti.artifacts import Artifact
-from arti.formats import Format
+from arti import Annotation, Artifact, CompositeKeyTypes, Format, Statistic, Storage, Type
 from arti.formats.json import JSON
-from arti.partitions import CompositeKeyTypes, Int64Key
-from arti.statistics import Statistic
-from arti.storage import Storage
+from arti.partitions import Int64Key
 from arti.storage.literal import StringLiteral
 from arti.types import (
     Binary,
@@ -26,7 +22,6 @@ from arti.types import (
     Set,
     String,
     Struct,
-    Type,
 )
 from tests.arti.dummies import A1, A2, P1, P2, DummyFormat, DummyStatistic, DummyStorage
 

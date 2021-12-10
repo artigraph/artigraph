@@ -5,14 +5,10 @@ from typing import Annotated, cast
 import pytest
 from box import BoxError
 
-from arti.artifacts import Artifact
+from arti import Artifact, CompositeKey, Fingerprint, Graph, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
-from arti.fingerprints import Fingerprint
-from arti.graphs import Graph
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey
-from arti.producers import producer
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
 from arti.types import Int64

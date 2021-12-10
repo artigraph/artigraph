@@ -2,16 +2,24 @@ from __future__ import annotations
 
 from typing import Annotated, Optional
 
-from arti.annotations import Annotation
-from arti.artifacts import Artifact
-from arti.fingerprints import Fingerprint
-from arti.formats import Format
+from arti import (
+    Annotation,
+    Artifact,
+    CompositeKey,
+    CompositeKeyTypes,
+    Fingerprint,
+    Format,
+    InputFingerprints,
+    Producer,
+    Statistic,
+    Storage,
+    StoragePartition,
+    Type,
+    TypeSystem,
+    producer,
+)
 from arti.formats.json import JSON
-from arti.partitions import CompositeKey, CompositeKeyTypes
-from arti.producers import Producer, producer
-from arti.statistics import Statistic
-from arti.storage import InputFingerprints, Storage, StoragePartition
-from arti.types import Int32, Int64, Struct, Type, TypeSystem
+from arti.types import Int32, Int64, Struct
 
 
 class Num(Artifact):

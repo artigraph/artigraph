@@ -2,9 +2,8 @@ import re
 
 import pytest
 
-from arti.fingerprints import Fingerprint
-from arti.partitions import CompositeKey, CompositeKeyTypes, Int64Key
-from arti.storage import InputFingerprints
+from arti import CompositeKey, CompositeKeyTypes, Fingerprint, InputFingerprints
+from arti.partitions import Int64Key
 from arti.storage.literal import StringLiteral, StringLiteralPartition
 
 

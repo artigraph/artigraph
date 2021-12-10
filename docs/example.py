@@ -1,7 +1,4 @@
-from arti.annotations import Annotation
-from arti.artifacts import Artifact
-from arti.graphs import Graph
-from arti.producers import Producer
+from arti import Annotation, Artifact, Graph, Producer
 from arti.types import Date, Int32, Int64, String, Struct, Timestamp
 
 

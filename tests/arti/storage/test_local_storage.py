@@ -7,9 +7,8 @@ from typing import Any
 
 import pytest
 
-from arti.fingerprints import Fingerprint
-from arti.partitions import CompositeKey, CompositeKeyTypes, DateKey
-from arti.storage import InputFingerprints, Storage
+from arti import CompositeKey, CompositeKeyTypes, Fingerprint, InputFingerprints, Storage
+from arti.partitions import DateKey
 from arti.storage.local import LocalFile, LocalFilePartition
 
 

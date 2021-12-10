@@ -2,9 +2,8 @@ import json
 
 import pytest
 
-from arti import io
+from arti import CompositeKey, io
 from arti.formats.json import JSON
-from arti.partitions import CompositeKey
 from arti.storage.literal import StringLiteral, StringLiteralPartition
 from arti.types import Collection, Int64, Struct
 from arti.views.python import Int as IntView
