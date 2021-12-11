@@ -35,7 +35,7 @@ class LocalFile(Storage[LocalFilePartition]):
         / "{names}"
         / "{partition_key_spec}"
         / "{input_fingerprint}"
-        / "{name}.{extension}"
+        / "{name}{extension}"
     )
 
     path: str = str(Path(tempfile.gettempdir()) / _DEFAULT_PATH_TEMPLATE)

@@ -3,5 +3,5 @@ from arti.types.python import python_type_system
 
 
 class Pickle(Format):
-    extension = "pickle"
+    extension = ".pickle"
     type_system = python_type_system

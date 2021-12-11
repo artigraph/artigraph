@@ -20,7 +20,7 @@ class StringLiteralPartition(StoragePartition):
 class StringLiteral(Storage[StringLiteralPartition]):
     """StringLiteral stores a literal String value directly in the Backend."""
 
-    id: str = "{graph_name}/{path_tags}/{names}/{partition_key_spec}/{input_fingerprint}/{name}.{extension}"
+    id: str = "{graph_name}/{path_tags}/{names}/{partition_key_spec}/{input_fingerprint}/{name}{extension}"
     value: Optional[str]
 
     def discover_partitions(
