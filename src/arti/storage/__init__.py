@@ -4,12 +4,14 @@ import abc
 import os
 from typing import Any, ClassVar, Generic, Optional, TypeVar
 
+from pydantic import validator
+
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
 from arti.internal.models import Model
 from arti.internal.type_hints import get_class_type_vars, lenient_issubclass
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, CompositeKeyTypes
+from arti.partitions import CompositeKey, CompositeKeyTypes, PartitionKey
 from arti.storage._internal import InputFingerprints as InputFingerprints
 from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
@@ -60,6 +62,20 @@ class Storage(Model, Generic[_StoragePartition]):
 
     storage_partition_type: ClassVar[type[_StoragePartition]]
 
+    type: Optional[Type] = None
+    format: Optional[Format] = None
+
+    @validator("type")
+    @classmethod
+    def validate_type(cls, type_: Type) -> Type:
+        # TODO: Check support for the types and partitioning on the specified field(s).
+        return type_
+
+    @validator("format")
+    @classmethod
+    def validate_format(cls, format: Format) -> Format:
+        return format
+
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
@@ -93,9 +109,7 @@ class Storage(Model, Generic[_StoragePartition]):
 
     @abc.abstractmethod
     def discover_partitions(
-        self,
-        key_types: CompositeKeyTypes,
-        input_fingerprints: InputFingerprints = InputFingerprints(),
+        self, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> tuple[_StoragePartition, ...]:
         raise NotImplementedError()
 
@@ -133,6 +147,12 @@ class Storage(Model, Generic[_StoragePartition]):
     def includes_input_fingerprint_template(self) -> bool:
         return any("{input_fingerprint}" in val for val in self._format_fields.values())
 
+    @property
+    def key_types(self) -> CompositeKeyTypes:
+        if self.type is None:
+            raise ValueError(f"{self}.type is not set")
+        return PartitionKey.types_from(self.type)
+
     def _resolve_field(self, name: str, spec: str, placeholder_values: dict[str, str]) -> str:
         for placeholder, value in placeholder_values.items():
             if not value:
@@ -146,59 +166,48 @@ class Storage(Model, Generic[_StoragePartition]):
                     raise ValueError(f"{self}.{name} was empty after removing unused templates")
         return partial_format(spec, **placeholder_values)
 
-    # TODO: Reconsider the `resolve_*` interfaces to reduce the number of copies if possible.
-    def resolve(self: "_Storage", **placeholder_values: str) -> "_Storage":
+    def resolve_templates(
+        self: "_Storage",
+        graph_name: Optional[str] = None,
+        input_fingerprint: Optional[Fingerprint] = None,
+        names: Optional[tuple[str, ...]] = None,
+        path_tags: Optional[frozendict[str, str]] = None,
+    ) -> "_Storage":
+        values = {}
+        if graph_name is not None:
+            values["graph_name"] = graph_name
+        if input_fingerprint is not None:
+            input_fingerprint_key = str(input_fingerprint.key)
+            if input_fingerprint.is_empty:
+                input_fingerprint_key = ""
+            values["input_fingerprint"] = input_fingerprint_key
+        if names is not None:
+            values["name"] = names[-1] if names else ""
+            values["names"] = self.segment_sep.join(names)
+        if path_tags is not None:
+            values["path_tags"] = self.segment_sep.join(
+                f"{tag}{self.key_value_sep}{value}" for tag, value in path_tags.items()
+            )
+        if self.format is not None:
+            values["extension"] = self.format.extension
+        if self.type is not None:
+            key_component_specs = {
+                f"{name}{self.partition_name_component_sep}{component_name}": f"{{{name}.{component_spec}}}"
+                for name, pk in self.key_types.items()
+                for component_name, component_spec in pk.default_key_components.items()
+            }
+            values["partition_key_spec"] = self.segment_sep.join(
+                f"{name}{self.key_value_sep}{spec}" for name, spec in key_component_specs.items()
+            )
         return self.copy(
             update={
                 name: new
                 for name, original in self._format_fields.items()
                 # Avoid "setting" the value if not updated to reduce pydantic repr verbosity (which
                 # only shows "set" fields by default).
-                if (new := self._resolve_field(name, original, placeholder_values)) != original
+                if (new := self._resolve_field(name, original, values)) != original
             }
         )
-
-    def resolve_extension(self: "_Storage", extension: Optional[str]) -> "_Storage":
-        if extension is None:
-            return self.resolve(extension="")
-        return self.resolve(extension=extension)
-
-    def resolve_graph_name(self: "_Storage", graph_name: str) -> "_Storage":
-        return self.resolve(graph_name=graph_name)
-
-    def resolve_input_fingerprint(self: "_Storage", input_fingerprint: Fingerprint) -> "_Storage":
-        val = str(input_fingerprint.key)
-        if input_fingerprint.is_empty:
-            val = ""
-        return self.resolve(input_fingerprint=val)
-
-    def resolve_names(self: "_Storage", names: tuple[str, ...]) -> "_Storage":
-        name = names[-1] if names else ""
-        return self.resolve(names=self.segment_sep.join(names), name=name)
-
-    def resolve_partition_key_spec(self: "_Storage", key_types: CompositeKeyTypes) -> "_Storage":
-        key_component_specs = {
-            f"{name}{self.partition_name_component_sep}{component_name}": f"{{{name}.{component_spec}}}"
-            for name, pk in key_types.items()
-            for component_name, component_spec in pk.default_key_components.items()
-        }
-        return self.resolve(
-            partition_key_spec=self.segment_sep.join(
-                f"{name}{self.key_value_sep}{spec}" for name, spec in key_component_specs.items()
-            )
-        )
-
-    def resolve_path_tags(self: "_Storage", path_tags: frozendict[str, str]) -> "_Storage":
-        return self.resolve(
-            path_tags=self.segment_sep.join(
-                f"{tag}{self.key_value_sep}{value}" for tag, value in path_tags.items()
-            )
-        )
-
-    def supports(self: "_Storage", type_: Type, format: Format) -> None:
-        # TODO: Ensure the storage supports all of the specified types and partitioning on the
-        # specified field(s).
-        pass
 
 
 AnyStorage = Storage[Any]

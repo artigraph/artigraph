@@ -4,6 +4,7 @@ from datetime import date, datetime
 from typing import Any
 
 import pytest
+from pydantic import validator
 
 from arti import Annotation, Artifact, CompositeKeyTypes, Format, Statistic, Storage, Type
 from arti.formats.json import JSON
@@ -87,11 +88,20 @@ def test_cast_literals_errors(value: Any) -> None:
 
 def test_Artifact_validation() -> None:
     class BadFormat(DummyFormat):
-        def supports(self, type_: Type) -> None:
+        @validator("type")
+        @classmethod
+        def validate_type(cls, type_: Type) -> Type:
             raise ValueError("Format - Boo!")
 
     class BadStorage(DummyStorage):
-        def supports(self, type_: Type, format: Format) -> None:
+        @validator("type")
+        @classmethod
+        def validate_type(cls, type_: Type) -> Type:
+            raise ValueError("Storage - Boo!")
+
+        @validator("format")
+        @classmethod
+        def validate_format(cls, format: Format) -> Format:
             raise ValueError("Storage - Boo!")
 
     with pytest.raises(ValueError, match="MissingTypeArtifact must set `type`") as exc:

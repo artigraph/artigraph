@@ -1,6 +1,8 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
 
-from typing import ClassVar
+from typing import ClassVar, Optional
+
+from pydantic import validator
 
 from arti.internal.models import Model
 from arti.types import Type, TypeSystem
@@ -14,10 +16,14 @@ class Format(Model):
     """
 
     _abstract_ = True
-    extension: str = ""
     type_system: ClassVar[TypeSystem]
 
-    def supports(self, type_: Type) -> None:
+    extension: str = ""
+    type: Optional[Type] = None
+
+    @validator("type")
+    @classmethod
+    def validate_type(cls, type_: Type) -> Type:
         # TODO: Check self.type_system supports the type. We can likely add a TypeSystem method
         # that will check for matching TypeAdapters.
-        pass
+        return type_

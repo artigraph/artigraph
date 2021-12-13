@@ -7,7 +7,6 @@ from pathlib import Path
 from typing import Optional, Union
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import CompositeKeyTypes
 from arti.storage import InputFingerprints, Storage, StoragePartition
 from arti.storage._internal import parse_spec, spec_to_wildcard
 
@@ -41,14 +40,12 @@ class LocalFile(Storage[LocalFilePartition]):
     path: str = str(Path(tempfile.gettempdir()) / _DEFAULT_PATH_TEMPLATE)
 
     def discover_partitions(
-        self,
-        key_types: CompositeKeyTypes,
-        input_fingerprints: InputFingerprints = InputFingerprints(),
+        self, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> tuple[LocalFilePartition, ...]:
-        wildcard = spec_to_wildcard(self.path, key_types)
+        wildcard = spec_to_wildcard(self.path, self.key_types)
         paths = set(glob(wildcard))
         path_metadata = parse_spec(
-            paths, spec=self.path, key_types=key_types, input_fingerprints=input_fingerprints
+            paths, spec=self.path, key_types=self.key_types, input_fingerprints=input_fingerprints
         )
         return tuple(
             self.storage_partition_type(

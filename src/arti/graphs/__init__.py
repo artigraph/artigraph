@@ -62,14 +62,13 @@ class ArtifactBox(TypedBox[str, Artifact]):
 
     def _TypedBox__cast_value(self, item: str, artifact: Any) -> Artifact:
         artifact = super()._TypedBox__cast_value(item, artifact)  # type: ignore
+        storage_template_values = dict[str, Any]()
         if (graph := arti.context.graph) is not None:
-            artifact = artifact.copy(
-                update={
-                    "storage": (
-                        artifact.storage.resolve_graph_name(graph.name)
-                        .resolve_names(self._path + (item,))
-                        .resolve_path_tags(graph.path_tags)
-                    )
+            storage_template_values.update(
+                {
+                    "graph_name": graph.name,
+                    "names": (*self._path, item),
+                    "path_tags": graph.path_tags,
                 }
             )
         # Require an {input_fingerprint} template in the Storage if this Artifact is being generated
@@ -80,14 +79,17 @@ class ArtifactBox(TypedBox[str, Artifact]):
         # copying the instance and setting the `producer_output` attribute). We won't know the
         # "final" instance until assignment here to the Graph.
         if artifact.producer_output is None:
-            artifact = artifact.copy(
-                update={"storage": artifact.storage.resolve_input_fingerprint(Fingerprint.empty())}
-            )
+            storage_template_values["input_fingerprint"] = Fingerprint.empty()
         elif not artifact.storage.includes_input_fingerprint_template:
             raise ValueError(
                 "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
             )
-        return cast(Artifact, artifact)
+        return cast(
+            Artifact,
+            artifact.copy(
+                update={"storage": artifact.storage.resolve_templates(**storage_template_values)}
+            ),
+        )
 
     def _Box__convert_and_store(self, item: str, value: Artifact) -> None:
         if isinstance(value, dict):

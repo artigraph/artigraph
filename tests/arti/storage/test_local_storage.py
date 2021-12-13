@@ -7,9 +7,10 @@ from typing import Any
 
 import pytest
 
-from arti import CompositeKey, CompositeKeyTypes, Fingerprint, InputFingerprints, Storage
+from arti import CompositeKey, Fingerprint, InputFingerprints, Storage
 from arti.partitions import DateKey
 from arti.storage.local import LocalFile, LocalFilePartition
+from arti.types import Collection, Date, Struct
 
 
 @pytest.fixture()
@@ -36,11 +37,14 @@ def generate_partition_files(storage: Storage[Any], input_fingerprints: InputFin
 
 
 def test_local_partitioning(tmp_path: Path, date_keys: list[CompositeKey]) -> None:
-    storage = LocalFile(path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"))
+    storage = LocalFile(
+        path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"),
+        type=Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)),
+    )
     generate_partition_files(
         storage, InputFingerprints(zip(date_keys, repeat(Fingerprint.empty())))
     )
-    partitions = storage.discover_partitions(CompositeKeyTypes(date=DateKey))
+    partitions = storage.discover_partitions()
     assert len(partitions) > 0
     for partition in partitions:
         assert isinstance(partition, LocalFilePartition)
@@ -59,13 +63,14 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[CompositeKe
                 / "{date.m}"
                 / "{date.d}"
                 / "test"
-            )
+            ),
+            type=Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)),
         )
         # Generate files for *all* years - we want discover_partitions to do the filtering.
         generate_partition_files(
             storage, InputFingerprints(zip(date_keys, repeat(Fingerprint.empty())))
         )
-        partitions = storage.discover_partitions(CompositeKeyTypes(date=DateKey))
+        partitions = storage.discover_partitions()
         assert len(partitions) > 0
         for partition in partitions:
             assert isinstance(partition, LocalFilePartition)
@@ -79,12 +84,13 @@ def test_local_partitioning_with_input_fingerprints(
     tmp_path: Path, date_keys: list[CompositeKey]
 ) -> None:
     storage = LocalFile(
-        path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "{input_fingerprint}" / "test")
+        path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "{input_fingerprint}" / "test"),
+        type=Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)),
     )
     input_fingerprint = Fingerprint.from_int(42)
     input_fingerprints = InputFingerprints(zip(date_keys, repeat(input_fingerprint)))
     generate_partition_files(storage, input_fingerprints)
-    partitions = storage.discover_partitions(CompositeKeyTypes(date=DateKey), input_fingerprints)
+    partitions = storage.discover_partitions(input_fingerprints)
     assert len(partitions) > 0
     for partition in partitions:
         assert isinstance(partition, LocalFilePartition)
@@ -95,12 +101,15 @@ def test_local_partitioning_with_input_fingerprints(
 
 
 def test_local_partitioning_errors(tmp_path: Path) -> None:
-    storage = LocalFile(path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"))
+    storage = LocalFile(
+        path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"),
+        type=Collection(element=Struct(fields={"data_date": Date()}), partition_by=("data_date",)),
+    )
     with pytest.raises(
         ValueError,
         match=re.escape("No 'date' partition key found, expected one of ('data_date',)"),
     ):
-        storage.discover_partitions(CompositeKeyTypes(data_date=DateKey))
+        storage.discover_partitions()
 
 
 def test_local_file_partition_fingerprint(tmp_path: Path) -> None:

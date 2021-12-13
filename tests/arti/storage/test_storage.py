@@ -1,19 +1,12 @@
 from __future__ import annotations
 
-from typing import Optional
-
 import pytest
 
-from arti import (
-    CompositeKey,
-    CompositeKeyTypes,
-    Fingerprint,
-    InputFingerprints,
-    Storage,
-    StoragePartition,
-)
+from arti import CompositeKey, Fingerprint, InputFingerprints, Storage, StoragePartition, Type
+from arti.formats.json import JSON
 from arti.internal.utils import frozendict
-from arti.partitions import DateKey, Int8Key
+from arti.partitions import CompositeKeyTypes, Int8Key
+from arti.types import Collection, Date, Int8, Struct
 
 
 class MockStoragePartition(StoragePartition):
@@ -27,12 +20,12 @@ class MockStorage(Storage[MockStoragePartition]):
     path: str
 
     def discover_partitions(
-        self, key_types: CompositeKeyTypes, input_fingerprints: Optional[InputFingerprints] = None
+        self, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> tuple[MockStoragePartition, ...]:
-        assert all(v is Int8Key for v in key_types.values())  # Simplifies logic here...
+        assert all(v is Int8Key for v in self.key_types.values())  # Simplifies logic here...
         return tuple(
             self.storage_partition_type(path=self.path.format(**keys), keys=keys)
-            for keys in ({k: Int8Key(key=i) for k in key_types} for i in range(3))
+            for keys in ({k: Int8Key(key=i) for k in self.key_types} for i in range(3))
         )
 
 
@@ -73,66 +66,75 @@ def test_Storage_init_subclass() -> None:
 def test_Storage_resolve_empty_error() -> None:
     s = MockStorage(path="/{name}")
     with pytest.raises(ValueError, match=".path was empty after removing unused templates"):
-        s.resolve_names(())
+        s.resolve_templates(names=())
 
 
 def test_Storage_resolve_extension() -> None:
-    s = MockStorage(path="somefile{extension}")
-    assert s.resolve_extension(".test") == MockStorage(path="somefile.test")
-    assert s.resolve_extension(None) == MockStorage(path="somefile")
+    p = "somefile{extension}"
+    assert MockStorage(path=p, format=JSON()).resolve_templates().path == "somefile.json"
+    assert MockStorage(path=p, format=JSON(extension="")).resolve_templates().path == "somefile"
 
 
 def test_Storage_resolve_graph_name() -> None:
     s = MockStorage(path="/{graph_name}/junk")
-    assert s.resolve_graph_name("test") == MockStorage(path="/test/junk")
+    assert s.resolve_templates(graph_name="test") == MockStorage(path="/test/junk")
     # Confirm we strip trailing (ie: dup) separators when resolving an empty placeholder.
-    assert s.resolve_graph_name("") == MockStorage(path="/junk")
+    assert s.resolve_templates(graph_name="") == MockStorage(path="/junk")
 
 
 def test_Storage_resolve_input_fingerprint() -> None:
     s = MockStorage(path="/{input_fingerprint}/junk")
-    assert s.resolve_input_fingerprint(Fingerprint.from_int(10)) == MockStorage(path="/10/junk")
-    assert s.resolve_input_fingerprint(Fingerprint.empty()) == MockStorage(path="/junk")
+    assert s.resolve_templates(input_fingerprint=Fingerprint.from_int(10)) == MockStorage(
+        path="/10/junk"
+    )
+    assert s.resolve_templates(input_fingerprint=Fingerprint.empty()) == MockStorage(path="/junk")
 
 
 def test_Storage_resolve_names() -> None:
     s = MockStorage(path="/{names}")
-    assert s.resolve_names(("a", "b")) == MockStorage(path="/a/b")
+    assert s.resolve_templates(names=("a", "b")) == MockStorage(path="/a/b")
 
     s = MockStorage(path="/{names}/junk/{name}")
-    assert s.resolve_names(("a", "b")) == MockStorage(path="/a/b/junk/b")
-    assert s.resolve_names(()) == MockStorage(path="/junk")
+    assert s.resolve_templates(names=("a", "b")) == MockStorage(path="/a/b/junk/b")
+    assert s.resolve_templates(names=()) == MockStorage(path="/junk")
 
 
 @pytest.mark.parametrize(
-    ("spec", "expected", "key_types"),
+    ("spec", "expected", "type"),
     (
         (
             "/tmp/test/{partition_key_spec}",
             "/tmp/test",
-            {},
+            Collection(element=Struct(fields={"a": Int8()})),
         ),
         (
             "/tmp/test/{partition_key_spec}",
             "/tmp/test/date_Y={date.Y}/date_m={date.m:02}/date_d={date.d:02}",
-            {"date": DateKey},
+            Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)),
         ),
         (
             "/tmp/test/{partition_key_spec}",
             "/tmp/test/a_key={a.key}/b_key={b.key}",
-            {"a": Int8Key, "b": Int8Key},
+            Collection(element=Struct(fields={"a": Int8(), "b": Int8()}), partition_by=("a", "b")),
         ),
         (
             "/tmp/test/{tag}/{partition_key_spec}",
             "/tmp/test/{tag}/a_key={a.key}",
-            {"a": Int8Key},
+            Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",)),
         ),
     ),
 )
-def test_Storage_resolve_partition_key_spec(
-    spec: str, expected: str, key_types: CompositeKeyTypes
-) -> None:
-    assert MockStorage(path=spec).resolve_partition_key_spec(key_types).path == expected
+def test_Storage_resolve_partition_key_spec(spec: str, expected: str, type: Type) -> None:
+    assert MockStorage(path=spec, type=type).resolve_templates().path == expected
+
+
+def test_Storage_key_types() -> None:
+    assert MockStorage(
+        path="test", type=Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",))
+    ).key_types == CompositeKeyTypes(a=Int8Key)
+    assert MockStorage(path="test", type=Int8()).key_types == CompositeKeyTypes()
+    with pytest.raises(ValueError, match=".type is not set"):
+        assert MockStorage(path="test").key_types
 
 
 def test_Storage_resolve_partition_key_spec_extra() -> None:
@@ -152,25 +154,27 @@ def test_Storage_resolve_partition_key_spec_extra() -> None:
         name: str = "{partition_key_spec}"
 
         def discover_partitions(
-            self,
-            key_types: CompositeKeyTypes,
-            input_fingerprints: Optional[InputFingerprints] = None,
+            self, input_fingerprints: InputFingerprints = InputFingerprints()
         ) -> tuple[TablePartition, ...]:
             return ()
 
-    t = Table().resolve_partition_key_spec(CompositeKeyTypes(a=Int8Key, b=Int8Key))
+    type = Collection(element=Struct(fields={"a": Int8(), "b": Int8()}), partition_by=("a", "b"))
+    t = Table(type=type).resolve_templates()
     assert t.dataset == "s_{tag}"
     assert t.name == "a_key_{a.key}__b_key_{b.key}"
 
 
 def test_Storage_resolve_path_tags() -> None:
     s = MockStorage(path="{path_tags}")
-    assert s.resolve_path_tags(frozendict(a="b")) == MockStorage(path="a=b")
+    assert s.resolve_templates(path_tags=frozendict(a="b")) == MockStorage(path="a=b")
 
 
 def test_Storage_discover_partitions() -> None:
-    s = MockStorage(path="/test/{i.key}/file")
-    partitions = s.discover_partitions(CompositeKeyTypes(i=Int8Key))
+    s = MockStorage(
+        path="/test/{i.key}/file",
+        type=Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)),
+    )
+    partitions = s.discover_partitions()
     for i, sp in enumerate(sorted(partitions, key=lambda x: x.path)):
         assert sp.path == f"/test/{i}/file"
         assert isinstance(sp.keys["i"], Int8Key)

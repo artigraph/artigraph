@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Annotated, Optional
+from typing import Annotated
 
 from arti import (
     Annotation,
@@ -55,9 +55,9 @@ class DummyStorage(Storage[DummyPartition]):
     key: str = "test-{graph_name}-{path_tags}-{names}-{partition_key_spec}-{input_fingerprint}-{name}.{extension}"
 
     def discover_partitions(
-        self, key_types: CompositeKeyTypes, input_fingerprints: Optional[InputFingerprints] = None
+        self, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> tuple[DummyPartition, ...]:
-        if key_types != CompositeKeyTypes():
+        if self.key_types != CompositeKeyTypes():
             raise NotImplementedError()
         if input_fingerprints is not None and input_fingerprints != InputFingerprints():
             raise NotImplementedError()

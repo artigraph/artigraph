@@ -65,7 +65,7 @@ class BaseArtifact(Model):
 
     @validator("type", always=True)
     @classmethod
-    def _validate_type(cls, type_: Type) -> Type:
+    def validate_type(cls, type_: Type) -> Type:
         if type_ != cls._type:
             # NOTE: We do a lot of class level validation (particularly in Producer) that relies on
             # the *class* type, such as partition key validation. It's possible we could loosen this
@@ -76,20 +76,17 @@ class BaseArtifact(Model):
 
     @validator("format", always=True)
     @classmethod
-    def _validate_format(cls, format: Format, values: dict[str, Any]) -> Format:
+    def validate_format(cls, format: Format, values: dict[str, Any]) -> Format:
         if "type" in values:
-            format.supports(type_=values["type"])
+            return format.copy(update={"type": values["type"]})
         return format
 
     @validator("storage", always=True)
     @classmethod
-    def _validate_storage(cls, storage: Storage[Any], values: dict[str, Any]) -> Storage[Any]:
-        if "type" in values and "format" in values:
-            storage.supports(type_=values["type"], format=values["format"])
-            storage = storage.resolve_partition_key_spec(cls.partition_key_types).resolve_extension(
-                values["format"].extension
-            )
-        return storage
+    def validate_storage(cls, storage: Storage[Any], values: dict[str, Any]) -> Storage[Any]:
+        return storage.copy(
+            update={name: values[name] for name in ["type", "format"] if name in values}
+        ).resolve_templates()
 
     @classproperty
     @classmethod
@@ -105,7 +102,7 @@ class BaseArtifact(Model):
         self, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> tuple[StoragePartition, ...]:
         # TODO: Should we support calculating the input fingerprints if not passed?
-        return self.storage.discover_partitions(self.partition_key_types, input_fingerprints)
+        return self.storage.discover_partitions(input_fingerprints)
 
 
 class Statistic(BaseArtifact):
