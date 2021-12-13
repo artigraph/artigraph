@@ -18,7 +18,7 @@ from arti.producers import ValidateSig
 from arti.types import Collection, Int64, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views
-from tests.arti.dummies import A1, A2, A3, A4, P1, P2
+from tests.arti.dummies import A1, A2, A3, A4, P1, P2, DummyStorage
 
 Int64Artifact = Artifact.from_type(Int64())
 
@@ -191,13 +191,13 @@ def test_Producer_fingerprint() -> None:
 
 
 def test_Producer_compute_input_fingerprint() -> None:
-    p1 = P1(a1=A1())
+    p1 = P1(a1=A1(storage=DummyStorage(key="test")))
     assert p1.compute_input_fingerprint(
         frozendict(a1=StoragePartitions())
     ) == Fingerprint.from_string(p1._class_key_).combine(p1.version.fingerprint)
 
-    storage_partition = p1.a1.storage.storage_partition_type(
-        keys={}, content_fingerprint=Fingerprint.from_int(10)
+    storage_partition = p1.a1.storage.generate_partition().copy(
+        update={"content_fingerprint": Fingerprint.from_int(10)}
     )
     assert p1.compute_input_fingerprint(
         frozendict(a1=StoragePartitions([storage_partition]))

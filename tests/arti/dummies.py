@@ -5,7 +5,6 @@ from typing import Annotated
 from arti import (
     Annotation,
     Artifact,
-    CompositeKey,
     CompositeKeyTypes,
     Fingerprint,
     Format,
@@ -61,7 +60,7 @@ class DummyStorage(Storage[DummyPartition]):
             raise NotImplementedError()
         if input_fingerprints is not None and input_fingerprints != InputFingerprints():
             raise NotImplementedError()
-        return (self.storage_partition_type(keys=CompositeKey(), key=self.key),)
+        return (self.generate_partition(),)
 
 
 # NOTE: when using a subclass of the original type hint, we must override[1].

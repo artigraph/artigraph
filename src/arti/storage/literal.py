@@ -38,12 +38,7 @@ class StringLiteral(Storage[StringLiteralPartition]):
         if self.value is None:
             return ()
         return tuple(
-            StringLiteralPartition(
-                id=self.id.format(input_fingerprint=input_fingerprint, **keys),
-                input_fingerprint=input_fingerprint,
-                keys=keys,
-                value=self.value,
-            )
+            self.generate_partition(input_fingerprint=input_fingerprint, keys=keys)
             for keys, input_fingerprint in (
                 input_fingerprints or {CompositeKey(): Fingerprint.empty()}
             ).items()

@@ -2,10 +2,18 @@ from __future__ import annotations
 
 import pytest
 
-from arti import CompositeKey, Fingerprint, InputFingerprints, Storage, StoragePartition, Type
+from arti import (
+    CompositeKey,
+    CompositeKeyTypes,
+    Fingerprint,
+    InputFingerprints,
+    Storage,
+    StoragePartition,
+    Type,
+)
 from arti.formats.json import JSON
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKeyTypes, Int8Key
+from arti.partitions import Int8Key
 from arti.types import Collection, Date, Int8, Struct
 
 
@@ -24,8 +32,10 @@ class MockStorage(Storage[MockStoragePartition]):
     ) -> tuple[MockStoragePartition, ...]:
         assert all(v is Int8Key for v in self.key_types.values())  # Simplifies logic here...
         return tuple(
-            self.storage_partition_type(path=self.path.format(**keys), keys=keys)
-            for keys in ({k: Int8Key(key=i) for k in self.key_types} for i in range(3))
+            self.generate_partition(keys=keys)
+            for keys in (
+                CompositeKey({k: Int8Key(key=i) for k in self.key_types}) for i in range(3)
+            )
         )
 
 
@@ -184,7 +194,10 @@ def test_Storage_discover_partitions() -> None:
 def test_Storage_generate_partition() -> None:
     keys = CompositeKey(i=Int8Key(key=5))
     input_fingerprint = Fingerprint.from_int(10)
-    s = MockStorage(path="{i.key:02}/{input_fingerprint}")
+    s = MockStorage(
+        path="{i.key:02}/{input_fingerprint}",
+        type=Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)),
+    )
     expected_partition = MockStoragePartition(
         input_fingerprint=input_fingerprint,
         keys=keys,
@@ -212,7 +225,15 @@ def test_Storage_generate_partition() -> None:
         )
     with pytest.raises(ValueError, match="requires an input_fingerprint, but none was provided"):
         s.generate_partition(keys=keys, input_fingerprint=Fingerprint.empty())
+
+    with pytest.raises(ValueError, match="is not partitioned but keys were passed:"):
+        MockStorage(path="hard coded", type=Int8()).generate_partition(keys=keys)
+    with pytest.raises(ValueError, match="is partitioned but no keys were passed"):
+        MockStorage(
+            path="hard coded",
+            type=Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)),
+        ).generate_partition()
     with pytest.raises(ValueError, match="does not specify a {input_fingerprint} template"):
-        MockStorage(path="hard coded").generate_partition(
-            keys=keys, input_fingerprint=Fingerprint.from_string("fake")
+        MockStorage(path="hard coded", type=Int8()).generate_partition(
+            input_fingerprint=Fingerprint.from_string("fake")
         )

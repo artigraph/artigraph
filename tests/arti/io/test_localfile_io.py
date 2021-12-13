@@ -30,11 +30,7 @@ def test_localfile_io(tmp_path: Path, format: Format) -> None:
         n,
         a.type,
         a.format,
-        a.storage.generate_partition(
-            keys=CompositeKey(),
-            input_fingerprint=Fingerprint.empty(),
-            with_content_fingerprint=False,
-        ),
+        a.storage.generate_partition(with_content_fingerprint=False),
         view=View.get_class_for(int, validation_type=a.type)(),
     )
     partitions = a.discover_storage_partitions()
@@ -91,7 +87,9 @@ def test_localfile_io_partitioned(tmp_path: Path, format: Format) -> None:
             partition,
             view=View.get_class_for(list, validation_type=a.type)(),
         )
-    assert set(data.values()) == set(a.discover_storage_partitions())
+    assert set(p.with_content_fingerprint() for p in data.values()) == set(
+        a.discover_storage_partitions()
+    )
     for record, partition in data.items():
         assert (
             io.read(

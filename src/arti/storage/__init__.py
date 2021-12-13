@@ -18,7 +18,7 @@ from arti.types import Type
 
 
 class StoragePartition(Model):
-    keys: CompositeKey
+    keys: CompositeKey = CompositeKey()
     input_fingerprint: Fingerprint = Fingerprint.empty()
     content_fingerprint: Fingerprint = Fingerprint.empty()
 
@@ -115,10 +115,14 @@ class Storage(Model, Generic[_StoragePartition]):
 
     def generate_partition(
         self,
-        keys: CompositeKey,
-        input_fingerprint: Fingerprint,
+        keys: CompositeKey = CompositeKey(),
+        input_fingerprint: Fingerprint = Fingerprint.empty(),
         with_content_fingerprint: bool = True,
     ) -> _StoragePartition:
+        if self.key_types and not keys:
+            raise ValueError(f"{self} is partitioned but no keys were passed")
+        if keys and not self.key_types:
+            raise ValueError(f"{self} is not partitioned but keys were passed: {keys}")
         format_kwargs = dict[Any, Any](keys)
         if input_fingerprint.is_empty:
             if self.includes_input_fingerprint_template:

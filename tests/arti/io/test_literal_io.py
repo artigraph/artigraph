@@ -2,7 +2,7 @@ import json
 
 import pytest
 
-from arti import CompositeKey, io
+from arti import io
 from arti.formats.json import JSON
 from arti.storage.literal import StringLiteral, StringLiteralPartition
 from arti.types import Collection, Int64, Struct
@@ -43,12 +43,12 @@ def test_stringliteral_io() -> None:
         io.read(
             a.type,
             a.format,
-            [StringLiteralPartition(id="junk", keys=CompositeKey())],
+            [StringLiteralPartition(id="junk")],
             view=IntView(),
         )
 
     # Test write
-    unwritten = StringLiteralPartition(id="junk", keys=CompositeKey())
+    unwritten = StringLiteralPartition(id="junk")
     new = io.write(10, a.type, a.format, unwritten, view=IntView())
     assert isinstance(new, StringLiteralPartition)
     assert new.value == json.dumps(10)

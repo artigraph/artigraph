@@ -19,12 +19,10 @@ def test_StringLiteral() -> None:
     # Confirm value=None returns no partitions
     assert not StringLiteral(id="test", type=Int64()).discover_partitions()
     # Confirm keys/input_fingerprint validators don't error for empty values
-    assert partition == StringLiteralPartition(
-        id="test", input_fingerprint=Fingerprint.empty(), keys=CompositeKey(), value="test"
-    )
+    assert partition == StringLiteralPartition(id="test", value="test").with_content_fingerprint()
     # Confirm empty value raises
     with pytest.raises(FileNotFoundError, match="Literal has not been written yet"):
-        StringLiteralPartition(id="test", keys=CompositeKey()).compute_content_fingerprint()
+        StringLiteralPartition(id="test").compute_content_fingerprint()
 
 
 def test_StringLiteral_errors() -> None:

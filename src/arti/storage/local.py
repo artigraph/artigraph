@@ -48,11 +48,7 @@ class LocalFile(Storage[LocalFilePartition]):
             paths, spec=self.path, key_types=self.key_types, input_fingerprints=input_fingerprints
         )
         return tuple(
-            self.storage_partition_type(
-                input_fingerprint=input_fingerprint,
-                keys=keys,
-                path=path,
-            )
+            self.generate_partition(input_fingerprint=input_fingerprint, keys=keys)
             for path, (input_fingerprint, keys) in path_metadata.items()
         )
 
