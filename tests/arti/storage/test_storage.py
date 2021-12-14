@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import re
+
 import pytest
 
 from arti import (
@@ -15,6 +17,7 @@ from arti.formats.json import JSON
 from arti.internal.utils import frozendict
 from arti.partitions import Int8Key
 from arti.types import Collection, Date, Int8, Struct
+from tests.arti.dummies import DummyFormat
 
 
 class MockStoragePartition(StoragePartition):
@@ -39,8 +42,28 @@ class MockStorage(Storage[MockStoragePartition]):
         )
 
 
+def test_StoragePartition_validation() -> None:
+    with pytest.raises(ValueError) as err:
+        MockStoragePartition(keys=CompositeKey(i=Int8Key(key=5)), path="/tmp/test")
+    # Make sure keys validation is skipped since the type was missing
+    assert {e["loc"] for e in err.value.errors()} == {("format",), ("type",)}  # type: ignore
+    with pytest.raises(ValueError, match="Expected no partition keys but got"):
+        MockStoragePartition(
+            format=DummyFormat(), keys=CompositeKey(i=Int8Key(key=5)), path="/tmp/test", type=Int8()
+        )
+    with pytest.raises(
+        ValueError, match=re.escape("Expected partition keys ('i',) but none were passed")
+    ):
+        MockStoragePartition(
+            format=DummyFormat(),
+            keys=CompositeKey(),
+            path="/tmp/test",
+            type=Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)),
+        )
+
+
 def test_StoragePartition_content_fingerprint() -> None:
-    sp = MockStoragePartition(path="/tmp/test", keys={})
+    sp = MockStoragePartition(path="/tmp/test", keys={}, type=Int8(), format=DummyFormat())
     assert sp.content_fingerprint == Fingerprint.empty()
     populated = sp.with_content_fingerprint()
     assert sp.content_fingerprint == Fingerprint.empty()
@@ -181,6 +204,7 @@ def test_Storage_resolve_path_tags() -> None:
 
 def test_Storage_discover_partitions() -> None:
     s = MockStorage(
+        format=DummyFormat(),
         path="/test/{i.key}/file",
         type=Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)),
     )
@@ -194,14 +218,19 @@ def test_Storage_discover_partitions() -> None:
 def test_Storage_generate_partition() -> None:
     keys = CompositeKey(i=Int8Key(key=5))
     input_fingerprint = Fingerprint.from_int(10)
+    type = Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",))
+    format = DummyFormat()
     s = MockStorage(
+        format=format,
         path="{i.key:02}/{input_fingerprint}",
-        type=Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)),
+        type=type,
     )
     expected_partition = MockStoragePartition(
+        format=format,
         input_fingerprint=input_fingerprint,
         keys=keys,
         path="05/10",
+        type=type,
     )
 
     output = s.generate_partition(keys=keys, input_fingerprint=input_fingerprint)
@@ -226,9 +255,11 @@ def test_Storage_generate_partition() -> None:
     with pytest.raises(ValueError, match="requires an input_fingerprint, but none was provided"):
         s.generate_partition(keys=keys, input_fingerprint=Fingerprint.empty())
 
-    with pytest.raises(ValueError, match="is not partitioned but keys were passed:"):
+    with pytest.raises(ValueError, match="Expected no partition keys but got:"):
         MockStorage(path="hard coded", type=Int8()).generate_partition(keys=keys)
-    with pytest.raises(ValueError, match="is partitioned but no keys were passed"):
+    with pytest.raises(
+        ValueError, match=re.escape("Expected partition keys ('i',) but none were passed")
+    ):
         MockStorage(
             path="hard coded",
             type=Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)),

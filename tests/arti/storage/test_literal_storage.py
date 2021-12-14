@@ -5,10 +5,12 @@ import pytest
 from arti import CompositeKey, Fingerprint, InputFingerprints
 from arti.storage.literal import StringLiteral, StringLiteralPartition
 from arti.types import Collection, Int64, Struct
+from tests.arti.dummies import DummyFormat
 
 
 def test_StringLiteral() -> None:
-    literal = StringLiteral(id="test", value="test", type=Int64())
+    t, f = Int64(), DummyFormat()
+    literal = StringLiteral(id="test", value="test", type=t, format=f)
     partitions = literal.discover_partitions()
     assert len(partitions) == 1
     partition = partitions[0]
@@ -17,12 +19,17 @@ def test_StringLiteral() -> None:
     assert partition.value == literal.value
     assert partition.compute_content_fingerprint() == Fingerprint.from_string(partition.value)
     # Confirm value=None returns no partitions
-    assert not StringLiteral(id="test", type=Int64()).discover_partitions()
+    assert not StringLiteral(id="test", type=t, format=f).discover_partitions()
     # Confirm keys/input_fingerprint validators don't error for empty values
-    assert partition == StringLiteralPartition(id="test", value="test").with_content_fingerprint()
+    assert (
+        partition
+        == StringLiteralPartition(
+            id="test", value="test", type=t, format=f
+        ).with_content_fingerprint()
+    )
     # Confirm empty value raises
     with pytest.raises(FileNotFoundError, match="Literal has not been written yet"):
-        StringLiteralPartition(id="test").compute_content_fingerprint()
+        StringLiteralPartition(id="test", type=t, format=f).compute_content_fingerprint()
 
 
 def test_StringLiteral_errors() -> None:

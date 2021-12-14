@@ -17,10 +17,35 @@ from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
 
 
-class StoragePartition(Model):
+class _StorageMixin(Model):
+    @property
+    def key_types(self) -> CompositeKeyTypes:
+        if self.type is None:  # type: ignore
+            raise ValueError(f"{self}.type is not set")
+        return PartitionKey.types_from(self.type)  # type: ignore
+
+    @classmethod
+    def _check_keys(cls, key_types: CompositeKeyTypes, keys: CompositeKey) -> None:
+        # TODO: Confirm the key names and types align
+        if key_types and not keys:
+            raise ValueError(f"Expected partition keys {tuple(key_types)} but none were passed")
+        if keys and not key_types:
+            raise ValueError(f"Expected no partition keys but got: {keys}")
+
+
+class StoragePartition(_StorageMixin, Model):
+    type: Type
+    format: Format
     keys: CompositeKey = CompositeKey()
     input_fingerprint: Fingerprint = Fingerprint.empty()
     content_fingerprint: Fingerprint = Fingerprint.empty()
+
+    @validator("keys")
+    @classmethod
+    def validate_keys(cls, keys: CompositeKey, values: dict[str, Any]) -> CompositeKey:
+        if "type" in values:
+            cls._check_keys(PartitionKey.types_from(values["type"]), keys)
+        return keys
 
     def with_content_fingerprint(
         self: "_StoragePartition", keep_existing: bool = True
@@ -42,7 +67,7 @@ _StoragePartition = TypeVar("_StoragePartition", bound=StoragePartition)
 StoragePartitions = tuple[StoragePartition, ...]  # type: ignore
 
 
-class Storage(Model, Generic[_StoragePartition]):
+class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
     """Storage is a data reference identifying 1 or more partitions of data.
 
     Storage fields should have defaults set with placeholders for tags and partition
@@ -119,10 +144,7 @@ class Storage(Model, Generic[_StoragePartition]):
         input_fingerprint: Fingerprint = Fingerprint.empty(),
         with_content_fingerprint: bool = True,
     ) -> _StoragePartition:
-        if self.key_types and not keys:
-            raise ValueError(f"{self} is partitioned but no keys were passed")
-        if keys and not self.key_types:
-            raise ValueError(f"{self} is not partitioned but keys were passed: {keys}")
+        self._check_keys(self.key_types, keys)
         format_kwargs = dict[Any, Any](keys)
         if input_fingerprint.is_empty:
             if self.includes_input_fingerprint_template:
@@ -150,12 +172,6 @@ class Storage(Model, Generic[_StoragePartition]):
     @property
     def includes_input_fingerprint_template(self) -> bool:
         return any("{input_fingerprint}" in val for val in self._format_fields.values())
-
-    @property
-    def key_types(self) -> CompositeKeyTypes:
-        if self.type is None:
-            raise ValueError(f"{self}.type is not set")
-        return PartitionKey.types_from(self.type)
 
     def _resolve_field(self, name: str, spec: str, placeholder_values: dict[str, str]) -> str:
         for placeholder, value in placeholder_values.items():

@@ -43,12 +43,12 @@ def test_stringliteral_io() -> None:
         io.read(
             a.type,
             a.format,
-            [StringLiteralPartition(id="junk")],
+            [StringLiteralPartition(id="junk", format=a.format, type=a.type)],
             view=IntView(),
         )
 
     # Test write
-    unwritten = StringLiteralPartition(id="junk")
+    unwritten = StringLiteralPartition(id="junk", format=a.format, type=a.type)
     new = io.write(10, a.type, a.format, unwritten, view=IntView())
     assert isinstance(new, StringLiteralPartition)
     assert new.value == json.dumps(10)
