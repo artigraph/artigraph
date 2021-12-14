@@ -13,6 +13,8 @@ from arti.internal.utils import class_name, frozendict, register
 
 DEFAULT_ANONYMOUS_NAME = "anon"
 
+_TimePrecision = Literal["second", "millisecond", "microsecond", "nanosecond"]
+
 
 class Type(Model):
     """Type represents a data type."""
@@ -84,6 +86,12 @@ class Boolean(Type):
 
 class Date(Type):
     pass
+
+
+class DateTime(Type):
+    """A Date and Time as shown on a calendar and clock, independent of timezone."""
+
+    precision: _TimePrecision
 
 
 class Enum(_NamedMixin, Type):
@@ -244,10 +252,14 @@ class Struct(_NamedMixin, Type):
         return f"Custom{self._class_key_}"  # :shrug:
 
 
+class Time(Type):
+    precision: _TimePrecision
+
+
 class Timestamp(Type):
     """UTC timestamp with configurable precision."""
 
-    precision: Literal["second", "millisecond", "microsecond", "nanosecond"]
+    precision: _TimePrecision
 
     @property
     def friendly_key(self) -> str:
