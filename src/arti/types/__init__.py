@@ -163,7 +163,7 @@ class List(Type):
 
 
 class Collection(_NamedMixin, List):
-    """A collections of elements with partition and cluster metadata.
+    """A collection of elements with partition and cluster metadata.
 
     Collections should not be nested in other types.
     """
