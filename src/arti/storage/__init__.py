@@ -1,4 +1,4 @@
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
@@ -64,7 +64,7 @@ class StoragePartition(_StorageMixin, Model):
 _StoragePartition = TypeVar("_StoragePartition", bound=StoragePartition)
 
 
-StoragePartitions = tuple[StoragePartition, ...]  # type: ignore
+StoragePartitions = tuple[StoragePartition, ...]
 
 
 class Storage(_StorageMixin, Model, Generic[_StoragePartition]):

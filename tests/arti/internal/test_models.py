@@ -140,8 +140,6 @@ def test_Model_static_types() -> None:
 @pytest.mark.parametrize(
     ("hint", "value", "error_type"),
     [
-        # NOTE: mypy wrongly errors on `tuple[typ, ...]` hints with "Type application has too many
-        # types (1 expected)", even when that form is accepted as a var/attr hint.
         (Annotated[int, "blah"], 5, None),
         (Literal[5], 5, None),
         (Optional[int], None, None),
@@ -153,8 +151,8 @@ def test_Model_static_types() -> None:
         (int, 5, None),
         (str, "hi", None),
         (tuple, ("hi", "bye"), None),
-        (tuple[Optional[int], ...], (5, None), None),  # type: ignore
-        (tuple[int, ...], (1, 2), None),  # type: ignore
+        (tuple[Optional[int], ...], (5, None), None),
+        (tuple[int, ...], (1, 2), None),
         (tuple[int], (5,), None),
         (tuple[str, int], ("test", 5), None),  # type: ignore
         # Detected bad input:

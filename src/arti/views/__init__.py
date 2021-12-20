@@ -1,4 +1,4 @@
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from typing import Annotated, Any, ClassVar, Optional, get_args, get_origin
 
 from arti.internal.models import Model

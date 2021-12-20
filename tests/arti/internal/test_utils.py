@@ -169,8 +169,7 @@ def test_import_submodules() -> None:
 
     assert import_submodules_test_modules.entries == set()
     output = import_submodules(
-        import_submodules_test_modules.__path__,  # type: ignore
-        import_submodules_test_modules.__name__,
+        import_submodules_test_modules.__path__, import_submodules_test_modules.__name__
     )
     assert {
         name.replace(f"{import_submodules_test_modules.__name__}.", "") for name in output

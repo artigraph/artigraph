@@ -1,4 +1,4 @@
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Iterator
@@ -39,8 +39,7 @@ def _commas(vals: Iterable[Any]) -> str:
 ArtifactViewPair = tuple[type[Artifact], type[View]]
 BuildInputViews = frozendict[str, type[View]]
 MapInputMetadata = frozendict[str, type[Artifact]]
-# mypy doesn't yet support homogeneous tuple aliases: https://github.com/python/mypy/issues/9980
-OutputMetadata = tuple[ArtifactViewPair, ...]  # type: ignore
+OutputMetadata = tuple[ArtifactViewPair, ...]
 
 PartitionDependencies = frozendict[CompositeKey, frozendict[str, StoragePartitions]]
 

@@ -100,7 +100,7 @@ class Model(BaseModel):
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)  # type: ignore # https://github.com/python/mypy/issues/4660
+        super().__init_subclass__(**kwargs)
         # Default _abstract_ to False if not set explicitly on the class. __dict__ is read-only.
         setattr(cls, "_abstract_", cls.__dict__.get("_abstract_", False))
         field_names = set(cls.__fields__)

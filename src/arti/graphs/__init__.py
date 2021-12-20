@@ -1,4 +1,4 @@
-__path__ = __import__("pkgutil").extend_path(__path__, __name__)  # type: ignore
+__path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from collections import defaultdict
 from collections.abc import Callable, Sequence
@@ -241,7 +241,7 @@ class Graph(Model):
             for artifact in artifact_deps
             if (producer_output := artifact.producer_output) is not None
         }
-        return NodeDependencies(artifact_deps | producer_deps)  # type: ignore
+        return NodeDependencies(artifact_deps | producer_deps)
 
     @cached_property  # type: ignore # python/mypy#1362
     @requires_sealed
