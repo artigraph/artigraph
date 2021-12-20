@@ -173,7 +173,7 @@ def test_python_struct() -> None:
 def test_python_tuple() -> None:
     a = List(element=Int64())
     # mypy errors here for some reason...?
-    p = tuple[int, ...]  # type: ignore
+    p = tuple[int, ...]
 
     assert python_type_system.to_system(a, hints={}) == list[int]  # list has higher priority
     assert PyTuple.to_system(List(element=Int64()), hints={}) == p

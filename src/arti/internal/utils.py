@@ -7,7 +7,18 @@ from collections.abc import Callable, Generator, Iterator, MutableMapping
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
-from typing import IO, Any, ClassVar, Generic, Optional, TypeVar, Union, cast, overload
+from typing import (
+    IO,
+    Any,
+    ClassVar,
+    Generic,
+    Optional,
+    SupportsIndex,
+    TypeVar,
+    Union,
+    cast,
+    overload,
+)
 
 from box import Box
 from frozendict.core import frozendict as _frozendict
@@ -222,7 +233,7 @@ class _int(int):
     def __ror__(self: _int_sub, n: int) -> _int_sub:
         return type(self)(super().__ror__(n))
 
-    def __round__(self: _int_sub, ndigits: Optional[int] = 0) -> _int_sub:
+    def __round__(self: _int_sub, ndigits: SupportsIndex = 0) -> _int_sub:
         return type(self)(super().__round__(ndigits))
 
     def __rrshift__(self: _int_sub, n: int) -> _int_sub:
