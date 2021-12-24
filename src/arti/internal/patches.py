@@ -30,7 +30,7 @@ def patch_pydantic_ModelField__type_analysis() -> None:  # noqa # pragma: no cov
 
     from pydantic.version import VERSION
 
-    if tuple(int(i) for i in VERSION.split(".")) >= (1, 9):
+    if tuple(int(i) if i.isnumeric() else i for i in VERSION.split(".")) >= (1, 9):
         return
 
     from collections.abc import Hashable as CollectionsHashable
