@@ -22,12 +22,6 @@ _StoragePartitions = dict[AnyStorage, set[StoragePartition]]
 
 
 class MemoryBackend(Backend):
-    # Share the backing dicts across copies. This aligns with other Backends that have true
-    # persistence (a copy would still connect to the same underlying database). This is required
-    # because Graph.snapshot copies the Graph and thus the `.backend`, but we want the original
-    # Graph (pre-snapshot) to still be able to see the newly built partitions.
-    _share_private_attributes_across_copies_ = True
-
     # `_graph_snapshot_partitions` tracks all the partitions for a *specific* "run" of a graph.
     # `_storage_partitions` tracks all partitions, across all graphs. This separation is important
     # to allow for Literals to be used even after a snapshot_id change.

@@ -31,25 +31,42 @@ def test_Model() -> None:
             model()
 
 
-def test_Model_copy_private_attributes() -> None:
-    class Sneaky(Model):
-        x: int
-        _stuff = PrivateAttr(default_factory=lambda: defaultdict(list))
+class Sneaky(Model):
+    x: int
+    _stuff = PrivateAttr(default_factory=lambda: defaultdict(list))
+    _unset = PrivateAttr()
 
+
+def test_Model_copy_private_attributes() -> None:
     orig = Sneaky(x=1)
     orig._stuff["a"].append("value")
     assert orig._stuff == {"a": ["value"]}
 
-    for validate in [True, False]:
-        copy = orig.copy(validate=validate)
-        # Confirm private attributes are pulled over
-        assert orig._stuff == copy._stuff
-        # but as (deep)copies, not shared refs.
-        assert orig._stuff is not copy._stuff
-        assert orig._stuff["a"] is not copy._stuff["a"]
 
-    copy = orig.copy(include_private_attributes=False)
-    assert copy._stuff == {}
+@pytest.mark.parametrize(
+    ["validate"],
+    [
+        (False,),
+        (True,),
+    ],
+)
+def test_Model_copy_private_attributes_validation(validate: bool) -> None:
+    orig = Sneaky(x=1)
+    orig._stuff["a"].append("value")
+
+    copy = orig.copy(validate=validate)
+    # Confirm private attributes are pulled over
+    assert orig._stuff == copy._stuff
+    # as shared refs.
+    assert orig._stuff is copy._stuff
+    assert orig._stuff["a"] is copy._stuff["a"]
+
+    copy = orig.copy(deep=True, validate=validate)
+    # Confirm private attributes are pulled over
+    assert orig._stuff == copy._stuff
+    # but as deepcopies, not shared refs.
+    assert orig._stuff is not copy._stuff
+    assert orig._stuff["a"] is not copy._stuff["a"]
 
 
 def test_Model_copy_validation() -> None:

@@ -14,7 +14,7 @@ from typing import (
 )
 
 from pydantic import BaseModel, Extra, root_validator, validator
-from pydantic.fields import ModelField
+from pydantic.fields import ModelField, Undefined
 from pydantic.json import pydantic_encoder as pydantic_json_encoder
 
 from arti.internal.patches import patch_pydantic_ModelField__type_analysis
@@ -96,7 +96,6 @@ class Model(BaseModel):
     _class_key_: ClassVar[str] = class_name()
     _fingerprint_excludes_: ClassVar[Optional[frozenset[str]]] = None
     _fingerprint_includes_: ClassVar[Optional[frozenset[str]]] = None
-    _share_private_attributes_across_copies_: ClassVar[bool] = False
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -176,19 +175,11 @@ class Model(BaseModel):
         keep_untouched = (cached_property, classproperty)
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
 
-    def copy(
-        self: _Model,
-        *,
-        include_private_attributes: bool = True,
-        validate: bool = True,
-        **kwargs: Any,
-    ) -> _Model:
-        copy = super().copy(**kwargs)
+    def copy(self: _Model, *, deep: bool = False, validate: bool = True, **kwargs: Any) -> _Model:
+        copy = super().copy(deep=deep, **kwargs)
         if validate:
             # NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as
-            # is normal `.copy` behavior). This is particularly important for default values with
-            # private attributes that we'd want copied (rather than getting a whole new default
-            # value).
+            # is normal `.copy` behavior).
             #
             # To reduce `repr` noise, we'll reset .__fields_set__ to those of the pre-validation copy
             # (which includes those originally set + updated).
@@ -198,13 +189,13 @@ class Model(BaseModel):
             )
             # Use object.__setattr__ to bypass frozen model assignment errors
             object.__setattr__(copy, "__fields_set__", set(fields_set))
-        # This *must come last* - other pydantic operations would strip them back out.
-        if include_private_attributes:
+            # Copy over the private attributes, which are missing after validation (since we're only
+            # passing the fields).
             for name in self.__private_attributes__:
-                attr = getattr(self, name)
-                if not self._share_private_attributes_across_copies_:
-                    attr = deepcopy(attr)
-                setattr(copy, name, attr)
+                if (value := getattr(self, name, Undefined)) is not Undefined:
+                    if deep:
+                        value = deepcopy(value)
+                    object.__setattr__(copy, name, value)
         return copy
 
     @staticmethod
