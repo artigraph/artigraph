@@ -4,7 +4,7 @@ from contextlib import nullcontext
 from typing import Annotated, Any, ClassVar, Literal, Optional, Union
 
 import pytest
-from pydantic import PrivateAttr, ValidationError
+from pydantic import Field, PrivateAttr, ValidationError
 
 from arti import Fingerprint
 from arti.internal.models import Model
@@ -29,6 +29,14 @@ def test_Model() -> None:
     for model in (Model, Abstract):
         with pytest.raises(ValidationError, match="cannot be instantiated directly"):
             model()
+
+
+def test_Model_repr() -> None:
+    class M(Model):
+        i: int
+        j: int = Field(repr=False)
+
+    assert repr(M(i=1, j=1)) == "M(i=1)"
 
 
 class Sneaky(Model):
