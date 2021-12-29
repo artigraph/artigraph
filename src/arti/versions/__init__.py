@@ -49,7 +49,7 @@ class String(Version):
 
 class _SourceDescriptor:  # Experimental :)
     # Using AST rather than literal source will likely be less "noisy":
-    #     https://github.com/replicahq/artigraph/pull/36#issuecomment-824131156
+    #     https://github.com/artigraph/artigraph/pull/36#issuecomment-824131156
     def __get__(self, obj: Any, type_: type) -> String:
         return String(value=inspect.getsource(type_))
 

@@ -210,7 +210,7 @@ class Producer(Model):
         # Validate the return definition
         return_annotation = build_sig.return_annotation
         if return_annotation is build_sig.empty:
-            # TODO: "side effect" Producers: https://github.com/replicahq/artigraph/issues/11
+            # TODO: "side effect" Producers: https://github.com/artigraph/artigraph/issues/11
             raise ValueError("a return value must be set with the output Artifact(s).")
         if return_annotation == (NoneType,):
             raise ValueError("missing return signature")

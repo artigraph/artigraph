@@ -91,7 +91,7 @@ class Model(BaseModel):
     # have unknown fields (varying per subclass), we don't have targets to mark abstract with
     # abc.ABC nor typing.Protocol. See [1] for more context.
     #
-    # 1: https://github.com/replicahq/artigraph/pull/60#discussion_r669089086
+    # 1: https://github.com/artigraph/artigraph/pull/60#discussion_r669089086
     _abstract_: ClassVar[bool] = True
     _class_key_: ClassVar[str] = class_name()
     _fingerprint_excludes_: ClassVar[Optional[frozenset[str]]] = None
