@@ -46,7 +46,11 @@ strict = true
 name = "arti"
 version = "0.0.1"
 description = ""
-authors = ["Replica"]
+license = "Apache-2.0"
+authors = ["Jacob Hayes <jacob.r.hayes@gmail.com>"]
+readme = "README.md"
+homepage = "https://github.com/artigraph/artigraph"
+repository = "https://github.com/artigraph/artigraph"
 include = ["src/arti/py.typed"]
 
 [tool.poetry.dependencies]
