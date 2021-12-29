@@ -85,7 +85,7 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
     partition_name_component_sep: ClassVar[str] = "_"
     segment_sep: ClassVar[str] = os.sep
 
-    storage_partition_type: ClassVar[type[_StoragePartition]]
+    storage_partition_type: ClassVar[type[_StoragePartition]]  # type: ignore
 
     type: Optional[Type] = None
     format: Optional[Format] = None

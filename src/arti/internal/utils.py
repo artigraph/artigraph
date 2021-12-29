@@ -339,7 +339,7 @@ class TypedBox(Box, MutableMapping[_K_str, Union[_V, MutableMapping[_K_str, _V]]
     Subclasses must set the __target_type__ to a base class for the contained values.
     """
 
-    __target_type__: ClassVar[type[_V]]
+    __target_type__: ClassVar[type[_V]]  # type: ignore
 
     @classmethod
     def __class_getitem__(cls, item: tuple[type[_K_str], type[_V]]) -> GenericAlias:
