@@ -302,7 +302,7 @@ class Producer(Model):
                 ],
                 return_annotation=PartitionDependencies,
             )
-            cls.map = staticmethod(map)  # type: ignore
+            cls.map = cast(MapSig, staticmethod(map))
         if not isinstance(getattr_static(cls, "map"), (classmethod, staticmethod)):
             raise ValueError("must be a @classmethod or @staticmethod")
         map_sig = signature(cls.map)
@@ -409,7 +409,7 @@ def producer(
     def decorate(build: BuildSig) -> type[Producer]:
         nonlocal name
         name = build.__name__ if name is None else name
-        __annotations__ = {}
+        __annotations__: dict[str, Any] = {}
         for param in signature(build).parameters.values():
             with wrap_exc(ValueError, prefix=f"{name} {param.name} param"):
                 __annotations__[param.name] = Producer._get_artifact_from_annotation(
@@ -419,9 +419,9 @@ def producer(
         #
         # 1: https://github.com/samuelcolvin/pydantic/pull/3018
         if annotations:
-            __annotations__["annotations"] = tuple[Annotation, ...]  # type: ignore
+            __annotations__["annotations"] = tuple[Annotation, ...]
         if version:
-            __annotations__["version"] = Version  # type: ignore
+            __annotations__["version"] = Version
         return type(
             name,
             (Producer,),
