@@ -156,15 +156,7 @@ class Model(BaseModel):
 
     # Omitting unpassed args in repr by default
     def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
-        return [
-            (k, v)
-            for k, v in super().__repr_args__()
-            if k in self.__fields_set__
-            # NOTE: This check won't be necessary once [1] is released.
-            #
-            # 1: https://github.com/samuelcolvin/pydantic/pull/2593
-            and (True if k is None else self.__fields__[k].field_info.extra.get("repr", True))
-        ]
+        return [(k, v) for k, v in super().__repr_args__() if k in self.__fields_set__]
 
     def __str__(self) -> str:
         return repr(self)
