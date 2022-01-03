@@ -4,7 +4,7 @@ import abc
 import os
 from typing import Any, ClassVar, Generic, Optional, TypeVar
 
-from pydantic import validator
+from pydantic import Field, validator
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
@@ -34,8 +34,8 @@ class _StorageMixin(Model):
 
 
 class StoragePartition(_StorageMixin, Model):
-    type: Type
-    format: Format
+    type: Type = Field(repr=False)
+    format: Format = Field(repr=False)
     keys: CompositeKey = CompositeKey()
     input_fingerprint: Fingerprint = Fingerprint.empty()
     content_fingerprint: Fingerprint = Fingerprint.empty()
@@ -87,8 +87,8 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
 
     storage_partition_type: ClassVar[type[_StoragePartition]]  # type: ignore
 
-    type: Optional[Type] = None
-    format: Optional[Format] = None
+    type: Optional[Type] = Field(None, repr=False)
+    format: Optional[Format] = Field(None, repr=False)
 
     @validator("type")
     @classmethod
