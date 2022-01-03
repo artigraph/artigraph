@@ -515,7 +515,7 @@ email = ["email-validator (>=1.0.3)"]
 
 [[package]]
 name = "pyfarmhash"
-version = "0.2.2"
+version = "0.3.2"
 description = "Google FarmHash Bindings for Python"
 category = "main"
 optional = false
@@ -843,7 +843,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "e06103d6b29672409413000222b6e808f42fa473cc62926abcd747c3cfb608c9"
+content-hash = "c01e52b6a438296e5452a92b49cf0a6eccae8b179e321d80f5718bec95a743dc"
 
 [metadata.files]
 appnope = [
@@ -1131,7 +1131,10 @@ pydantic = [
     {file = "pydantic-1.8.2.tar.gz", hash = "sha256:26464e57ccaafe72b7ad156fdaa4e9b9ef051f69e175dbbb463283000c05ab7b"},
 ]
 pyfarmhash = [
-    {file = "pyfarmhash-0.2.2.tar.gz", hash = "sha256:6d076f744347beafd413f76c0e429b502cddd821231a6f150abdb14e35a7328c"},
+    {file = "pyfarmhash-0.3.2-cp37-cp37m-win_amd64.whl", hash = "sha256:ea0394094509eff756e093cd7a32d6c91d7e40afce941a00c3cf5980f2d9d0dd"},
+    {file = "pyfarmhash-0.3.2-cp38-cp38-win_amd64.whl", hash = "sha256:00eadc04a0a0595fbf05bf430bac3baf9788e00b3abcdd26cd478b4b3c244837"},
+    {file = "pyfarmhash-0.3.2-cp39-cp39-win_amd64.whl", hash = "sha256:9c125ffdf317672996e63e98bf1e84d0829fc2a85db3304ca62f873767bc0abf"},
+    {file = "pyfarmhash-0.3.2.tar.gz", hash = "sha256:4146308a0ed0b37d69003199c90fa59b155666c9deb0249b40e594cee10551ea"},
 ]
 pyflakes = [
     {file = "pyflakes-2.4.0-py2.py3-none-any.whl", hash = "sha256:3bb3a3f256f4b7968c9c788781e4ff07dce46bdf12339dcda61053375426ee2e"},
