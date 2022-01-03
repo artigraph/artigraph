@@ -171,6 +171,7 @@ def test_Model_static_types() -> None:
         (Sub, Sub(x=5), None),
         (Union[Literal[5], None], 5, None),
         (Union[int, str], 5, None),
+        (Union[str, int], 5, None),  # Using "smart_union" to avoid cast to str
         (dict[int, dict[int, Sub]], {5: {"5": Sub(x=5)}}, ValueError),
         (dict[int, str], {5: "hi"}, None),
         (int, 5, None),
@@ -189,8 +190,6 @@ def test_Model_static_types() -> None:
         (dict[str, int], {"hi": "5"}, ValueError),
         (int, None, ValueError),
         (tuple[str, int], ("test",), ValueError),  # type: ignore
-        # Known Union edge cases (more general type in front causes casting/parsing):
-        (Union[str, int], 5, AssertionError),
     ],
 )
 def test_Model_static_types_complex(

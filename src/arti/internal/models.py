@@ -126,15 +126,6 @@ class Model(BaseModel):
 
         Pydantic will attempt to *parse* values (eg: "5" -> 5), but we'd prefer stricter values for
         clarity and to avoid silent precision loss (eg: 5.3 -> 5).
-
-        NOTE: (at least) one edge case exists with `Union[str, float]` style annotations [1] that
-        causes a `5.0` input value to be output as `"5.0"`. This can be worked around by ordering
-        the types in the Union from most to least specific (eg: `Union[float, str]`). Alternatively,
-        there is an `each_item=True` arg to `@validator` that would let us validate/pick individual
-        Union member with `_check_types`, but this mode doesn't let us validate dictionary keys.
-        Giving priority to dicts in this case, as I expect they'll be more common.
-
-        1: https://github.com/samuelcolvin/pydantic/issues/1423
         """
         # `field.type_` points to the *inner* type (eg: `int`->`int`; `tuple[int, ...]` -> `int`)
         # while `field.outer_type_` will (mostly) include the full spec and match the `value` we
@@ -165,6 +156,7 @@ class Model(BaseModel):
         extra = Extra.forbid
         frozen = True
         keep_untouched = (cached_property, classproperty)
+        smart_union = True
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
 
     def copy(self: _Model, *, deep: bool = False, validate: bool = True, **kwargs: Any) -> _Model:
