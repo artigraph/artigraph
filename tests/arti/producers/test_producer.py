@@ -93,7 +93,7 @@ def test_producer_input_metadata() -> None:
 
 def test_Producer_partitioned_input_validation() -> None:
     class A(Artifact):
-        type: Collection = Collection(element=Struct(fields={"x": Int64()}), partition_by=("x",))
+        type = Collection(element=Struct(fields={"x": Int64()}), partition_by=("x",))
 
     class P(Producer):
         a: A
@@ -344,18 +344,16 @@ def test_Producer_validate_output_hint_validation() -> None:
 
 def test_Producer_build_outputs_check() -> None:
     class A(Artifact):
-        type: Int64 = Int64()
+        type = Int64()
 
     class B(Artifact):
-        type: Int64 = Int64()
+        type = Int64()
 
     class C(Artifact):
-        type: Collection = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
 
     class D(Artifact):
-        type: Collection = Collection(
-            element=Struct(fields={"a": Int64(), "b": Int64()}), partition_by=("b",)
-        )
+        type = Collection(element=Struct(fields={"a": Int64(), "b": Int64()}), partition_by=("b",))
 
     class NoPartitioning(Producer):
         @staticmethod

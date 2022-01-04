@@ -6,7 +6,7 @@ from typing import Any
 import pytest
 from pydantic import validator
 
-from arti import Annotation, Artifact, CompositeKeyTypes, Format, Statistic, Storage, Type
+from arti import Annotation, Artifact, CompositeKeyTypes, Format, Statistic, Type
 from arti.formats.json import JSON
 from arti.partitions import Int64Key
 from arti.storage.literal import StringLiteral
@@ -107,33 +107,33 @@ def test_Artifact_validation() -> None:
     with pytest.raises(ValueError, match="MissingTypeArtifact must set `type`") as exc:
 
         class MissingTypeArtifact(Artifact):
-            format: DummyFormat = DummyFormat()
-            storage: DummyStorage = DummyStorage()
+            format = DummyFormat()
+            storage = DummyStorage()
 
     with pytest.raises(ValueError, match="Format - Boo!"):
 
         class BadFormatArtifact(Artifact):
-            type: Int64 = Int64()
-            format: BadFormat = BadFormat()
-            storage: DummyStorage = DummyStorage()
+            type = Int64()
+            format = BadFormat()
+            storage = DummyStorage()
 
         BadFormatArtifact()
 
     with pytest.raises(ValueError, match="Storage - Boo!"):
 
         class BadStorageArtifact(Artifact):
-            type: Int64 = Int64()
-            format: DummyFormat = DummyFormat()
-            storage: BadStorage = BadStorage()
+            type = Int64()
+            format = DummyFormat()
+            storage = BadStorage()
 
         BadStorageArtifact()
 
     with pytest.raises(ValueError, match="overriding `type` is not supported") as exc:
 
         class OverrideTypeArtifact(Artifact):
-            type: Int64 = Int64()
-            format: DummyFormat = DummyFormat()
-            storage: DummyStorage = DummyStorage()
+            type = Int64()
+            format = DummyFormat()
+            storage = DummyStorage()
 
         OverrideTypeArtifact(type=Int64(nullable=True))
     # Confirm {Format,Storage}.support are not called
@@ -143,9 +143,9 @@ def test_Artifact_validation() -> None:
         exc.match("Storage - Boo!")
 
     class GoodArtifact(Artifact):
-        type: Type = Int64()
-        format: Format = DummyFormat()
-        storage: Storage[Any] = DummyStorage()
+        type = Int64()
+        format = DummyFormat()
+        storage = DummyStorage()
 
     GoodArtifact()
 
@@ -174,13 +174,13 @@ def test_instance_attr_merging() -> None:
 
 def test_Artifact_partition_key_types() -> None:
     class NonPartitioned(Artifact):
-        type: Type = Collection(element=Struct(fields={"a": Int64()}))
+        type = Collection(element=Struct(fields={"a": Int64()}))
 
     assert NonPartitioned.partition_key_types == CompositeKeyTypes()
     assert not NonPartitioned.is_partitioned
 
     class Partitioned(Artifact):
-        type: Type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
 
     assert Partitioned.partition_key_types == CompositeKeyTypes({"a": Int64Key})
     assert Partitioned.is_partitioned
@@ -191,8 +191,8 @@ def test_Artifact_storage_path_resolution() -> None:
         key = "test-{partition_key_spec}"
 
     class A(Artifact):
-        type: Type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
-        format: Format = DummyFormat()
+        type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        format = DummyFormat()
         storage: S
 
     assert A(storage=S()).storage.key == "test-a_key={a.key}"

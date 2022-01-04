@@ -22,7 +22,7 @@ from arti.types import Int32, Int64, Struct
 
 
 class Num(Artifact):
-    type: Type = Int64()
+    type: Type = Int64()  # https://github.com/python/mypy/issues/11897
     format: Format = JSON()
     # Omit storage to require callers to set the instance in a separate tempdir.
 
@@ -63,39 +63,34 @@ class DummyStorage(Storage[DummyPartition]):
         return (self.generate_partition(),)
 
 
-# NOTE: when using a subclass of the original type hint, we must override[1].
-#
-# 1: https://github.com/samuelcolvin/pydantic/pull/3018
-
-
 class DummyStatistic(Statistic):
-    type: Int32 = Int32()
-    format: DummyFormat = DummyFormat()
-    storage: DummyStorage = DummyStorage()
+    type = Int32()
+    format = DummyFormat()
+    storage = DummyStorage()
 
 
 class A1(Artifact):
-    type: Struct = Struct(fields={"a": Int32()})
-    format: DummyFormat = DummyFormat()
-    storage: DummyStorage = DummyStorage()
+    type = Struct(fields={"a": Int32()})
+    format = DummyFormat()
+    storage = DummyStorage()
 
 
 class A2(Artifact):
-    type: Struct = Struct(fields={"b": Int32()})
-    format: DummyFormat = DummyFormat()
-    storage: DummyStorage = DummyStorage()
+    type = Struct(fields={"b": Int32()})
+    format = DummyFormat()
+    storage = DummyStorage()
 
 
 class A3(Artifact):
-    type: Struct = Struct(fields={"c": Int32()})
-    format: DummyFormat = DummyFormat()
-    storage: DummyStorage = DummyStorage()
+    type = Struct(fields={"c": Int32()})
+    format = DummyFormat()
+    storage = DummyStorage()
 
 
 class A4(Artifact):
-    type: Struct = Struct(fields={"d": Int32()})
-    format: DummyFormat = DummyFormat()
-    storage: DummyStorage = DummyStorage()
+    type = Struct(fields={"d": Int32()})
+    format = DummyFormat()
+    storage = DummyStorage()
 
 
 class P1(Producer):

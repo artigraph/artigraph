@@ -13,7 +13,7 @@ from tests.arti.dummies import Num
 
 
 class PartitionedNum(Num):
-    type: Collection = Collection(element=Struct(fields={"i": Int64()}), partition_by=("i",))
+    type = Collection(element=Struct(fields={"i": Int64()}), partition_by=("i",))
 
 
 @pytest.mark.parametrize(
