@@ -178,14 +178,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "graphql-core"
-version = "3.1.6"
-description = "GraphQL implementation for Python, a port of GraphQL.js, the JavaScript reference implementation for GraphQL."
-category = "main"
-optional = false
-python-versions = ">=3.6,<4"
-
-[[package]]
 name = "identify"
 version = "2.3.6"
 description = "File identification library for Python"
@@ -695,22 +687,6 @@ optional = false
 python-versions = ">=3.6"
 
 [[package]]
-name = "sgqlc"
-version = "14.1"
-description = "Simple GraphQL Client"
-category = "main"
-optional = false
-python-versions = ">=3.6"
-
-[package.dependencies]
-graphql-core = "*"
-
-[package.extras]
-requests = ["requests"]
-sphinx = ["sphinx", "sphinx-argparse"]
-websocket = ["websocket-client"]
-
-[[package]]
 name = "sh"
 version = "1.14.2"
 description = "Python subprocess replacement"
@@ -832,7 +808,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "54a76b1f51824cc0bda3b0f248f08bc9aa4c7c83cfb41b363eb0a67b236c5eb7"
+content-hash = "a42f7bef373e1b768033be8c29b976aa214cfe9b0031c4f555185b00da788b04"
 
 [metadata.files]
 appnope = [
@@ -943,10 +919,6 @@ flake8 = [
 frozendict = [
     {file = "frozendict-2.1.3-py3-none-any.whl", hash = "sha256:cfa47860932d549947157d68f246898f60b05da392f67219a913b85d8c36b1b2"},
     {file = "frozendict-2.1.3.tar.gz", hash = "sha256:7a12336ba271066e1261a70d8ba97d5178392f3b317b31c6686e401423e70670"},
-]
-graphql-core = [
-    {file = "graphql-core-3.1.6.tar.gz", hash = "sha256:e65975b6a13878f9113a1fa5320760585b522d139944e005936b1b8358d0651a"},
-    {file = "graphql_core-3.1.6-py3-none-any.whl", hash = "sha256:c78d09596d347e1cffd266c5384abfedf43ed1eae08729773bebb3d527fe5a14"},
 ]
 identify = [
     {file = "identify-2.3.6-py2.py3-none-any.whl", hash = "sha256:8cb609a671d2f861ae7fe583711a43fd2faab0c892f39cbc4568b0c51b354238"},
@@ -1205,11 +1177,6 @@ pyyaml = [
     {file = "PyYAML-6.0-cp39-cp39-win32.whl", hash = "sha256:b5b9eccad747aabaaffbc6064800670f0c297e52c12754eb1d976c57e4f74dcb"},
     {file = "PyYAML-6.0-cp39-cp39-win_amd64.whl", hash = "sha256:b3d267842bf12586ba6c734f89d1f5b871df0273157918b0ccefa29deb05c21c"},
     {file = "PyYAML-6.0.tar.gz", hash = "sha256:68fb519c14306fec9720a2a5b45bc9f0c8d1b9c72adf45c37baedfcd949c35a2"},
-]
-sgqlc = [
-    {file = "sgqlc-14.1-py3-none-any.whl", hash = "sha256:a172b8489824ff026d3608fe348cb1d2507b656127800f2fbf24ee8acf535372"},
-    {file = "sgqlc-14.1-py3.9.egg", hash = "sha256:ccaaf960724792af6c6c9c46624876a50aceb305634a131a5ee9ec54d10ef42b"},
-    {file = "sgqlc-14.1.tar.gz", hash = "sha256:71364af1884cf7e402cfd35058dafbcddf825b986898f68e6dd5195e2cd0472d"},
 ]
 sh = [
     {file = "sh-1.14.2-py2.py3-none-any.whl", hash = "sha256:4921ac9c1a77ec8084bdfaf152fe14138e2b3557cc740002c1a97076321fce8a"},

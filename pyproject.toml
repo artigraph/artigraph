@@ -61,7 +61,6 @@ pydantic = "^1.8.1"
 pyfarmhash = ">=0.2.2,<0.4.0"
 python = "^3.9"
 python-box = "^5.4.1"
-sgqlc = "^14.1"
 
 [tool.poetry.dev-dependencies]
 black = "21.12b0"
