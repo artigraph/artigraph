@@ -218,16 +218,18 @@ def test_Graph_build(tmp_path: Path) -> None:
         return i, i
 
     with Graph(name="test") as g:
-        g.artifacts.a = Num(storage=LocalFile(path=str(tmp_path / "a.json")))
-        g.artifacts.b = increment(i=g.artifacts.a).out(Num(storage=LocalFile.rooted_at(tmp_path)))
+        g.artifacts.root.a = Num(storage=LocalFile(path=str(tmp_path / "a.json")))
+        g.artifacts.b = increment(i=g.artifacts.root.a).out(
+            Num(storage=LocalFile.rooted_at(tmp_path))
+        )
         # Test multiple return values
-        g.artifacts.c, g.artifacts.d = dup(i=g.artifacts.a).out(
+        g.artifacts.c, g.artifacts.d = dup(i=g.artifacts.root.a).out(
             Num(storage=LocalFile.rooted_at(tmp_path)),
             Num(storage=LocalFile.rooted_at(tmp_path)),
         )
 
     a, b, c, d = (
-        g.artifacts.a,
+        g.artifacts.root.a,
         cast(Num, g.artifacts.b),
         cast(Num, g.artifacts.c),
         cast(Num, g.artifacts.d),

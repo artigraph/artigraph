@@ -36,6 +36,7 @@ SEALED: Literal[True] = True
 OPEN: Literal[False] = False
 BOX_KWARGS = {
     status: {
+        "box_dots": True,
         "default_box": status is OPEN,
         "frozen_box": status is SEALED,
     }
