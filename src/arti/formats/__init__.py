@@ -2,7 +2,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from typing import ClassVar, Optional
 
-from pydantic import validator
+from pydantic import Field, validator
 
 from arti.internal.models import Model
 from arti.types import Type, TypeSystem
@@ -19,7 +19,7 @@ class Format(Model):
     type_system: ClassVar[TypeSystem]
 
     extension: str = ""
-    type: Optional[Type] = None
+    type: Optional[Type] = Field(None, repr=False)
 
     @validator("type")
     @classmethod
