@@ -57,7 +57,7 @@ include = ["src/arti/py.typed"]
 frozendict = "^2.1.0"
 multimethod = "^1.6"
 parse = "^1.19.0"
-pydantic = "^1.8.1"
+pydantic = "^1.9.0"
 pyfarmhash = ">=0.2.2,<0.4.0"
 python = "^3.9"
 python-box = "^5.4.1"

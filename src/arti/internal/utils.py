@@ -111,16 +111,13 @@ class dispatch(multidispatch[RETURN]):
 
 
 # frozendict is useful for models to preserve hashability (eg: key in a dict). Unfortunately, there
-# is 1 small pydantic issue[1] and an upstream issue with types.GenericAlias + deepcopy[2,3]. We can
-# work around the blocking deepcopy issue by replacing types.GenericAlias with typing.Generic (which
-# returns a typing._GenericAlias). The pydantic bug (which returns a dict instead of a frozendict)
-# is worked around in arti.internal.patches.patch_pydantic_ModelField__type_analysis.
+# are issues deepcopying types.GenericAlias[1,2] (eg: using in a pydantic model). We can work around
+# this by replacing types.GenericAlias with typing.Generic (which returns a typing._GenericAlias).
 #
 # NOTE: The GenericAlias deepcopy issue has been resolved in 3.9.8 and 3.10.1.
 #
-# 1: https://github.com/samuelcolvin/pydantic/pull/3138
-# 2: https://github.com/Marco-Sulla/python-frozendict/issues/29
-# 3: https://bugs.python.org/issue45167
+# 1: https://github.com/Marco-Sulla/python-frozendict/issues/29
+# 2: https://bugs.python.org/issue45167
 class frozendict(Generic[_K, _V], _frozendict[_K, _V]):
     pass
 

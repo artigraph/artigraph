@@ -4,7 +4,7 @@ from contextlib import nullcontext
 from typing import Annotated, Any, ClassVar, Literal, Optional, Union
 
 import pytest
-from pydantic import PrivateAttr, ValidationError
+from pydantic import Field, PrivateAttr, ValidationError
 
 from arti import Fingerprint
 from arti.internal.models import Model
@@ -31,25 +31,50 @@ def test_Model() -> None:
             model()
 
 
-def test_Model_copy_private_attributes() -> None:
-    class Sneaky(Model):
-        x: int
-        _stuff = PrivateAttr(default_factory=lambda: defaultdict(list))
+def test_Model_repr() -> None:
+    class M(Model):
+        i: int
+        j: int = Field(repr=False)
 
+    assert repr(M(i=1, j=1)) == "M(i=1)"
+
+
+class Sneaky(Model):
+    x: int
+    _stuff = PrivateAttr(default_factory=lambda: defaultdict(list))
+    _unset = PrivateAttr()
+
+
+def test_Model_copy_private_attributes() -> None:
     orig = Sneaky(x=1)
     orig._stuff["a"].append("value")
     assert orig._stuff == {"a": ["value"]}
 
-    for validate in [True, False]:
-        copy = orig.copy(validate=validate)
-        # Confirm private attributes are pulled over
-        assert orig._stuff == copy._stuff
-        # but as (deep)copies, not shared refs.
-        assert orig._stuff is not copy._stuff
-        assert orig._stuff["a"] is not copy._stuff["a"]
 
-    copy = orig.copy(include_private_attributes=False)
-    assert copy._stuff == {}
+@pytest.mark.parametrize(
+    ["validate"],
+    [
+        (False,),
+        (True,),
+    ],
+)
+def test_Model_copy_private_attributes_validation(validate: bool) -> None:
+    orig = Sneaky(x=1)
+    orig._stuff["a"].append("value")
+
+    copy = orig.copy(validate=validate)
+    # Confirm private attributes are pulled over
+    assert orig._stuff == copy._stuff
+    # as shared refs.
+    assert orig._stuff is copy._stuff
+    assert orig._stuff["a"] is copy._stuff["a"]
+
+    copy = orig.copy(deep=True, validate=validate)
+    # Confirm private attributes are pulled over
+    assert orig._stuff == copy._stuff
+    # but as deepcopies, not shared refs.
+    assert orig._stuff is not copy._stuff
+    assert orig._stuff["a"] is not copy._stuff["a"]
 
 
 def test_Model_copy_validation() -> None:
@@ -146,6 +171,7 @@ def test_Model_static_types() -> None:
         (Sub, Sub(x=5), None),
         (Union[Literal[5], None], 5, None),
         (Union[int, str], 5, None),
+        (Union[str, int], 5, None),  # Using "smart_union" to avoid cast to str
         (dict[int, dict[int, Sub]], {5: {"5": Sub(x=5)}}, ValueError),
         (dict[int, str], {5: "hi"}, None),
         (int, 5, None),
@@ -164,8 +190,6 @@ def test_Model_static_types() -> None:
         (dict[str, int], {"hi": "5"}, ValueError),
         (int, None, ValueError),
         (tuple[str, int], ("test",), ValueError),  # type: ignore
-        # Known Union edge cases (more general type in front causes casting/parsing):
-        (Union[str, int], 5, AssertionError),
     ],
 )
 def test_Model_static_types_complex(

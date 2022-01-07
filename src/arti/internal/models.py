@@ -14,18 +14,15 @@ from typing import (
 )
 
 from pydantic import BaseModel, Extra, root_validator, validator
-from pydantic.fields import ModelField
+from pydantic.fields import ModelField, Undefined
 from pydantic.json import pydantic_encoder as pydantic_json_encoder
 
-from arti.internal.patches import patch_pydantic_ModelField__type_analysis
 from arti.internal.type_hints import is_union, lenient_issubclass
 from arti.internal.utils import class_name, classproperty, frozendict
 
 if TYPE_CHECKING:
     from arti.fingerprints import Fingerprint
     from arti.types import Type
-
-patch_pydantic_ModelField__type_analysis()
 
 
 def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
@@ -96,7 +93,6 @@ class Model(BaseModel):
     _class_key_: ClassVar[str] = class_name()
     _fingerprint_excludes_: ClassVar[Optional[frozenset[str]]] = None
     _fingerprint_includes_: ClassVar[Optional[frozenset[str]]] = None
-    _share_private_attributes_across_copies_: ClassVar[bool] = False
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -127,15 +123,6 @@ class Model(BaseModel):
 
         Pydantic will attempt to *parse* values (eg: "5" -> 5), but we'd prefer stricter values for
         clarity and to avoid silent precision loss (eg: 5.3 -> 5).
-
-        NOTE: (at least) one edge case exists with `Union[str, float]` style annotations [1] that
-        causes a `5.0` input value to be output as `"5.0"`. This can be worked around by ordering
-        the types in the Union from most to least specific (eg: `Union[float, str]`). Alternatively,
-        there is an `each_item=True` arg to `@validator` that would let us validate/pick individual
-        Union member with `_check_types`, but this mode doesn't let us validate dictionary keys.
-        Giving priority to dicts in this case, as I expect they'll be more common.
-
-        1: https://github.com/samuelcolvin/pydantic/issues/1423
         """
         # `field.type_` points to the *inner* type (eg: `int`->`int`; `tuple[int, ...]` -> `int`)
         # while `field.outer_type_` will (mostly) include the full spec and match the `value` we
@@ -157,15 +144,7 @@ class Model(BaseModel):
 
     # Omitting unpassed args in repr by default
     def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
-        return [
-            (k, v)
-            for k, v in super().__repr_args__()
-            if k in self.__fields_set__
-            # NOTE: This check won't be necessary once [1] is released.
-            #
-            # 1: https://github.com/samuelcolvin/pydantic/pull/2593
-            and (True if k is None else self.__fields__[k].field_info.extra.get("repr", True))
-        ]
+        return [(k, v) for k, v in super().__repr_args__() if k in self.__fields_set__]
 
     def __str__(self) -> str:
         return repr(self)
@@ -174,21 +153,14 @@ class Model(BaseModel):
         extra = Extra.forbid
         frozen = True
         keep_untouched = (cached_property, classproperty)
+        smart_union = True
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
 
-    def copy(
-        self: _Model,
-        *,
-        include_private_attributes: bool = True,
-        validate: bool = True,
-        **kwargs: Any,
-    ) -> _Model:
-        copy = super().copy(**kwargs)
+    def copy(self: _Model, *, deep: bool = False, validate: bool = True, **kwargs: Any) -> _Model:
+        copy = super().copy(deep=deep, **kwargs)
         if validate:
             # NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as
-            # is normal `.copy` behavior). This is particularly important for default values with
-            # private attributes that we'd want copied (rather than getting a whole new default
-            # value).
+            # is normal `.copy` behavior).
             #
             # To reduce `repr` noise, we'll reset .__fields_set__ to those of the pre-validation copy
             # (which includes those originally set + updated).
@@ -198,13 +170,13 @@ class Model(BaseModel):
             )
             # Use object.__setattr__ to bypass frozen model assignment errors
             object.__setattr__(copy, "__fields_set__", set(fields_set))
-        # This *must come last* - other pydantic operations would strip them back out.
-        if include_private_attributes:
+            # Copy over the private attributes, which are missing after validation (since we're only
+            # passing the fields).
             for name in self.__private_attributes__:
-                attr = getattr(self, name)
-                if not self._share_private_attributes_across_copies_:
-                    attr = deepcopy(attr)
-                setattr(copy, name, attr)
+                if (value := getattr(self, name, Undefined)) is not Undefined:
+                    if deep:
+                        value = deepcopy(value)
+                    object.__setattr__(copy, name, value)
         return copy
 
     @staticmethod
