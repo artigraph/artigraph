@@ -17,15 +17,12 @@ from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField, Undefined
 from pydantic.json import pydantic_encoder as pydantic_json_encoder
 
-from arti.internal.patches import patch_pydantic_ModelField__type_analysis
 from arti.internal.type_hints import is_union, lenient_issubclass
 from arti.internal.utils import class_name, classproperty, frozendict
 
 if TYPE_CHECKING:
     from arti.fingerprints import Fingerprint
     from arti.types import Type
-
-patch_pydantic_ModelField__type_analysis()
 
 
 def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
