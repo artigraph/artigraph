@@ -161,7 +161,7 @@ class Artifact(BaseArtifact):
                 return output_artifacts
             n_outputs = len(output_artifacts)
             if n_outputs == 0:  # pragma: no cover
-                # TODO: "side effect" Producers: https://github.com/replicahq/artigraph/issues/11
+                # TODO: "side effect" Producers: https://github.com/artigraph/artigraph/issues/11
                 raise ValueError(f"{type(value).__name__} doesn't produce any Artifacts!")
             assert n_outputs > 1
             raise ValueError(
