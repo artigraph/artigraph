@@ -1,28 +1,11 @@
-# artigraph
-
-[![pypi](https://img.shields.io/pypi/v/arti.svg)](https://pypi.python.org/pypi/arti)
-[![downloads](https://pepy.tech/badge/arti/month)](https://pepy.tech/project/arti)
-[![versions](https://img.shields.io/pypi/pyversions/arti.svg)](https://github.com/artigraph/artigraph)
-[![license](https://img.shields.io/github/license/artigraph/artigraph.svg)](https://github.com/artigraph/artigraph/blob/golden/LICENSE)
-[![CI](https://github.com/artigraph/artigraph/actions/workflows/ci.yaml/badge.svg)](https://github.com/artigraph/artigraph/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/artigraph/artigraph/branch/golden/graph/badge.svg?token=6LUCpjcGdN)](https://codecov.io/gh/artigraph/artigraph)
-
-Declarative Data Production
-
-## Installation
-
-Artigraph can be installed from PyPI on python 3.9+ with `pip install arti`.
-
-## Example
-
-This [simple example](docs/examples/spend/demo.py) takes a series of purchase transactions and computes the total amount spent:
-
-```python
+import logging
+from datetime import date
 from pathlib import Path
 from typing import Annotated
 
 from arti import Annotation, Artifact, Graph, producer
 from arti.formats.json import JSON
+from arti.partitions import DateKey
 from arti.storage.local import LocalFile
 from arti.types import Collection, Date, Float64, Int64, Struct
 from arti.versions import SemVer
@@ -65,6 +48,31 @@ with Graph(name="test") as g:
         storage=LocalFile(path=str(DIR / "transactions" / "{date.iso}.json")),
     )
     g.artifacts.spend = aggregate_transactions(transactions=g.artifacts.vendor.transactions)
-```
 
-This example can be run easily with `docker run --rm artigraph/example-spend`.
+
+if __name__ == "__main__":
+    logging.getLogger().setLevel(logging.INFO)
+
+    def print_partition_info(artifact: Artifact, annotation) -> None:
+        with g.backend.connect() as backend:
+            for partition in backend.read_artifact_partitions(artifact):
+                contents = g.read(artifact, annotation=annotation, storage_partitions=(partition,))
+                print(f"\t{partition.path}: {contents}")
+
+    logging.info("Writing mock Transactions data:")
+    g.write(
+        [{"id": 1, "amount": 9.95}, {"id": 2, "amount": 7.5}],
+        artifact=g.artifacts.vendor.transactions,
+        keys={"date": DateKey(key=date(2021, 10, 1))},
+    )
+    g.write(
+        [{"id": 3, "amount": 5.0}, {"id": 4, "amount": 12.0}, {"id": 4, "amount": 7.55}],
+        artifact=g.artifacts.vendor.transactions,
+        keys={"date": DateKey(key=date(2021, 10, 2))},
+    )
+    print_partition_info(g.artifacts.vendor.transactions, annotation=list)
+
+    g.build()
+
+    logging.info("Final Spend data:")
+    print_partition_info(g.artifacts.spend, annotation=float)
