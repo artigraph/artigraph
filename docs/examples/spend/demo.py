@@ -57,7 +57,7 @@ if __name__ == "__main__":
         with g.backend.connect() as backend:
             for partition in backend.read_artifact_partitions(artifact):
                 contents = g.read(artifact, annotation=annotation, storage_partitions=(partition,))
-                print(f"\t{partition.path}: {contents}")
+                logging.info(f"\t{partition.path}: {contents}")
 
     logging.info("Writing mock Transactions data:")
     g.write(
