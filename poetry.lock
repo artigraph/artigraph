@@ -756,7 +756,7 @@ test = ["shellingham (>=1.3.0,<2.0.0)", "pytest (>=4.4.0,<5.4.0)", "pytest-cov (
 
 [[package]]
 name = "types-pyfarmhash"
-version = "0.2.2"
+version = "0.2.3"
 description = "Typing stubs for pyfarmhash"
 category = "dev"
 optional = false
@@ -808,7 +808,7 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,!=3.3.*,!=3.4.*,>=2.7"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "63c5ead6aa2d5dc3ee9dd5ecb54251b5fe8114a318fb9d86cf1472bf4ba8f7b9"
+content-hash = "2e4e69f0cb98dcb21c75805c5e4edb9c35654965e81fcaa06444bb27674bf895"
 
 [metadata.files]
 appnope = [
@@ -1219,8 +1219,8 @@ typer = [
     {file = "typer-0.4.0.tar.gz", hash = "sha256:63c3aeab0549750ffe40da79a1b524f60e08a2cbc3126c520ebf2eeaf507f5dd"},
 ]
 types-pyfarmhash = [
-    {file = "types-pyfarmhash-0.2.2.tar.gz", hash = "sha256:96ee1dce4a87627454fe27e7e05badf4d76e64e8d591c3cb81b2b66edd5cfd9c"},
-    {file = "types_pyfarmhash-0.2.2-py3-none-any.whl", hash = "sha256:df95b8738af3230b8f6bd26e9688881d243ae785ac8cea9e4ba4147c4bf152e6"},
+    {file = "types-pyfarmhash-0.2.3.tar.gz", hash = "sha256:85fd960e1434eaa21729834d82493905a69f65bcdd1e3d6f7fc35f03d8f0cfbb"},
+    {file = "types_pyfarmhash-0.2.3-py3-none-any.whl", hash = "sha256:f06536503329a15bf983e43e12d75d75dda200274de12c313286b6d7518f5aad"},
 ]
 typing-extensions = [
     {file = "typing_extensions-4.0.0-py3-none-any.whl", hash = "sha256:829704698b22e13ec9eaf959122315eabb370b0884400e9818334d8b677023d9"},

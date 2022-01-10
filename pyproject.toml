@@ -82,7 +82,7 @@ pytest-mypy = "0.8.1"
 pytest-sugar = "0.9.4"
 sh = "^1.14.2"
 typer = "^0.4.0"
-types-pyfarmhash = "^0.2.1"
+types-pyfarmhash = "^0.2.3"
 
 
 [tool.pylint.format]
