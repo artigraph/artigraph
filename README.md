@@ -64,7 +64,9 @@ with Graph(name="test") as g:
         format=JSON(),
         storage=LocalFile(path=str(DIR / "transactions" / "{date.iso}.json")),
     )
-    g.artifacts.spend = aggregate_transactions(transactions=g.artifacts.vendor.transactions)
+    g.artifacts.spend = aggregate_transactions(
+        transactions=g.artifacts.vendor.transactions
+    )
 ```
 
 This example can be run easily with `docker run --rm artigraph/example-spend`.
