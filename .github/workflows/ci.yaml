@@ -36,10 +36,10 @@ jobs:
         poetry install
     - name: code-checkers
       run: |
-        bandit -ll -r src/
-        blacken-docs "{**/,}*.{md,py}"
-        pyupgrade --keep-runtime-typing --py39-plus "{**/,}*.py"
-        trufflehog --exclude_paths .trufflehog_ignore.txt --regex .
+        poetry run bandit -ll -r src/
+        poetry run blacken-docs "{**/,}*.{md,py}"
+        poetry run pyupgrade --keep-runtime-typing --py39-plus "{**/,}*.py"
+        poetry run trufflehog --exclude_paths .trufflehog_ignore.txt --regex .
     - name: pytest
       run: |
         poetry run pytest --cov-report="xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml"
