@@ -126,5 +126,5 @@ def test_local_file_partition_fingerprint(tmp_path: Path) -> None:
         keys={}, path=str(path), type=String(), format=DummyFormat()
     ).with_content_fingerprint()
     assert partition.content_fingerprint == Fingerprint.from_string(
-        hashlib.sha1(text.encode()).hexdigest()
+        hashlib.sha256(text.encode()).hexdigest()
     )
