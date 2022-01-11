@@ -36,6 +36,7 @@ jobs:
         poetry install
     - name: code-checkers
       run: |
+        shopt -s nullglob # Ignore no glob matches below
         poetry run bandit -ll -r src/
         poetry run blacken-docs {**/,}*.{md,py}
         poetry run pyupgrade --keep-runtime-typing --py39-plus {**/,}*.py
