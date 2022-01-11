@@ -72,9 +72,9 @@ class LocalExecutor(Executor):
             )
         # TODO: Guarantee all outputs have the same set of identified partitions. Currently, this
         # pretends a partition is built for all outputs if _any_ are built for that partition.
-        existing_output_keys = set(
+        existing_output_keys = {
             partition.keys for partition in chain.from_iterable(existing_output_partitions.values())
-        )
+        }
         for output_partition_key, dependencies in partition_dependencies.items():
             if output_partition_key in existing_output_keys:
                 pk_str = f" for: {dict(output_partition_key)}" if output_partition_key else "."

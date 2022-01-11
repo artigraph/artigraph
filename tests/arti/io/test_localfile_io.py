@@ -87,7 +87,7 @@ def test_localfile_io_partitioned(tmp_path: Path, format: Format) -> None:
             partition,
             view=View.get_class_for(list, validation_type=a.type)(),
         )
-    assert set(p.with_content_fingerprint() for p in data.values()) == set(
+    assert {p.with_content_fingerprint() for p in data.values()} == set(
         a.discover_storage_partitions()
     )
     for record, partition in data.items():

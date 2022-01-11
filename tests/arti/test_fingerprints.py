@@ -32,7 +32,7 @@ def test_Fingerprint() -> None:
 
 
 def test_Fingerprint_math() -> None:
-    f1, f2, f3, f4, f5 = [Fingerprint(key=int64(i)) for i in range(5)]
+    f1, f2, f3, f4, f5 = (Fingerprint(key=int64(i)) for i in range(5))
     # associative
     assert f1.combine(f2.combine(f3)) == f3.combine(f1.combine(f2))
     # commutative

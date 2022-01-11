@@ -53,6 +53,6 @@ class LocalFile(Storage[LocalFilePartition]):
         )
 
     @classmethod
-    def rooted_at(cls, root: Union[str, Path], path: Optional[str] = None) -> "LocalFile":
+    def rooted_at(cls, root: Union[str, Path], path: Optional[str] = None) -> LocalFile:
         path = path if path is not None else cls._DEFAULT_PATH_TEMPLATE
         return cls(path=str(Path(root) / path))

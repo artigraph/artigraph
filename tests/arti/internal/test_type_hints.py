@@ -1,16 +1,6 @@
+import typing
 from collections.abc import Mapping, Sequence
-from typing import (
-    Annotated,
-    Any,
-    Generic,
-    Literal,
-    Optional,
-    Tuple,
-    TypedDict,
-    TypeVar,
-    Union,
-    get_origin,
-)
+from typing import Annotated, Any, Generic, Literal, Optional, TypedDict, TypeVar, Union, get_origin
 
 import pytest
 
@@ -22,6 +12,8 @@ from arti.internal.type_hints import (
     is_union_hint,
     lenient_issubclass,
 )
+
+Tuple = getattr(typing, "Tuple")  # Work around https://github.com/asottile/pyupgrade/issues/574
 
 
 class MyTuple(tuple):  # type: ignore
