@@ -1,6 +1,6 @@
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v3.4.0
+    rev: v4.1.0
     hooks:
       - id: check-merge-conflict
       - id: debug-statements
@@ -10,26 +10,47 @@ repos:
       - id: pretty-format-json
         args: [--autofix]
       - id: trailing-whitespace
-  - repo: local
+  - repo: local  # Prefer local tools to streamline version management with poetry
     hooks:
-      # Use local isort/black to match pyproject.toml version
+      - id: bandit
+        name: bandit
+        entry: bandit -ll -r
+        files: '^src/'
+        language: system
+        types: [python]
+      - id: blacken-docs
+        name: blacken-docs
+        entry: blacken-docs
+        language: system
+        types_or: [markdown, python]
+      - id: pyupgrade
+        name: pyupgrade
+        entry: pyupgrade --keep-runtime-typing --py39-plus
+        language: system
+        types: [python]
       - id: isort
         name: isort
-        entry: /usr/bin/env isort
-        language: script
-        pass_filenames: true
+        entry: isort
+        language: system
         types: [python]
       - id: black
         name: black
-        entry: /usr/bin/env black
-        language: script
-        pass_filenames: true
+        entry: black
+        language: system
         types: [python]
       - id: pytest
         name: pytest
         # If tests become too slow, mark slow ones and omit. We'll add a little coverage buffer for working commits,
         # though CI/PRs will still enforce 100%.
-        entry: /usr/bin/env pytest --cov-fail-under=90
-        language: script
+        entry: pytest --cov-fail-under=90
+        language: system
         pass_filenames: false
         types: [python]
+      # trufflehog only works against commits (not the index), which prevents use in the pre-commit hook. It could run
+      # as post-commit, but that introduces a lot of noise. Instead, we'll just run before push.
+      - id: trufflehog
+        name: trufflehog
+        entry: trufflehog --exclude_paths .trufflehog_ignore.txt --regex .
+        language: system
+        pass_filenames: false
+        stages: [push]
