@@ -63,7 +63,9 @@ python = "^3.9"
 python-box = "^5.4.1"
 
 [tool.poetry.dev-dependencies]
+bandit = "^1.7.1"
 black = "21.12b0"
+blacken-docs = "^1.12.0"
 coverage = {version = "^6.2", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
 ipdb = "^0.13.9"
@@ -80,7 +82,9 @@ pytest-flake8 = "1.0.7"
 pytest-isort = "2.0.0"
 pytest-mypy = "0.8.1"
 pytest-sugar = "0.9.4"
+pyupgrade = "^2.31.0"
 sh = "^1.14.2"
+truffleHog = "^2.2.1"
 typer = "^0.4.0"
 types-pyfarmhash = "^0.2.3"
 

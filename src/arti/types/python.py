@@ -138,7 +138,7 @@ class PyLiteral(TypeAdapter):
         assert isinstance(items, tuple)
         if len(items) == 0:
             raise NotImplementedError(f"Invalid Literal with no values: {type_}")
-        py_type, *other_types = [type(v) for v in items]
+        py_type, *other_types = (type(v) for v in items)
         if not all(t is py_type for t in other_types):
             raise ValueError("All Literals must be the same type, got: {(py_type, *other_types)}")
         return cls.artigraph(

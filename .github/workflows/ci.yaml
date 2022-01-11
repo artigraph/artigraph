@@ -34,6 +34,13 @@ jobs:
       run: |
         python -m pip install --upgrade poetry
         poetry install
+    - name: code-checkers
+      run: |
+        shopt -s nullglob # Ignore no glob matches below
+        poetry run bandit -ll -r src/
+        poetry run blacken-docs {**/,}*.{md,py}
+        poetry run pyupgrade --keep-runtime-typing --py39-plus {**/,}*.py
+        poetry run trufflehog --exclude_paths .trufflehog_ignore.txt --regex .
     - name: pytest
       run: |
         poetry run pytest --cov-report="xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml"
