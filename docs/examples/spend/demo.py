@@ -41,7 +41,7 @@ def aggregate_transactions(
     return sum(txn["amount"] for txn in transactions)
 
 
-with Graph(name="test") as g:
+with Graph(name="test-graph") as g:
     g.artifacts.vendor.transactions = Transactions(
         annotations=[Vendor(name="Acme")],
         format=JSON(),

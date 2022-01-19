@@ -15,7 +15,7 @@ Artigraph can be installed from PyPI on python 3.9+ with `pip install arti`.
 
 ## Example
 
-This [simple example](docs/examples/spend/demo.py) takes a series of purchase transactions and computes the total amount spent:
+This sample from the [spend example](docs/examples/spend/demo.py) highlights computing the total amount spent from a series of purchase transactions:
 
 ```python
 from pathlib import Path
@@ -58,7 +58,7 @@ def aggregate_transactions(
     return sum(txn["amount"] for txn in transactions)
 
 
-with Graph(name="test") as g:
+with Graph(name="test-graph") as g:
     g.artifacts.vendor.transactions = Transactions(
         annotations=[Vendor(name="Acme")],
         format=JSON(),
@@ -69,4 +69,13 @@ with Graph(name="test") as g:
     )
 ```
 
-This example can be run easily with `docker run --rm artigraph/example-spend`.
+The full example can be run easily with `docker run --rm artigraph/example-spend`:
+```
+INFO:root:Writing mock Transactions data:
+INFO:root:      /usr/src/app/transactions/2021-10-01.json: [{'id': 1, 'amount': 9.95}, {'id': 2, 'amount': 7.5}]
+INFO:root:      /usr/src/app/transactions/2021-10-02.json: [{'id': 3, 'amount': 5.0}, {'id': 4, 'amount': 12.0}, {'id': 4, 'amount': 7.55}]
+INFO:root:Building aggregate_transactions(transactions=Transactions(format=JSON(), storage=LocalFile(path='/usr/src/app/transactions/{date.iso}.json'), annotations=(Vendor(name='Acme'),)))...
+INFO:root:Build finished.
+INFO:root:Final Spend data:
+INFO:root:      /tmp/test-graph/spend/7564053533177891797/spend.json: 42.0
+```
