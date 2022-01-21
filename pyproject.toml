@@ -69,7 +69,7 @@ blacken-docs = "^1.12.0"
 coverage = {version = "^6.2", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
 ipdb = "^0.13.9"
-ipython = "^8.0.0"
+ipython = "^8.0.1"
 isort = "5.10.1"
 mypy = "0.931"
 pre-commit = "2.16.0"
