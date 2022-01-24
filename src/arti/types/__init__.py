@@ -138,6 +138,11 @@ class Float64(_Float):
     pass
 
 
+class Geography(Type):
+    format: Optional[str]  # "WKB", "WKT", etc
+    srid: Optional[str]
+
+
 class Int8(_Int):
     pass
 
