@@ -9,6 +9,8 @@
 
 Declarative Data Production
 
+Artigraph is a tool to improve the authorship, management, and quality of data. It emphasizes that the core deliverable of a data pipeline or workflow is the data, not the tasks.
+
 ## Installation
 
 Artigraph can be installed from PyPI on python 3.9+ with `pip install arti`.
