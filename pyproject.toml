@@ -66,7 +66,7 @@ python-box = "^5.4.1"
 bandit = "^1.7.2"
 black = "21.12b0"
 blacken-docs = "^1.12.1"
-coverage = {version = "^6.2", extras = ["toml"]} # pyproject.toml support
+coverage = {version = "^6.3", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
 ipdb = "^0.13.9"
 ipython = "^8.0.1"
