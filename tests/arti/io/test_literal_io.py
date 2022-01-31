@@ -26,18 +26,15 @@ def test_stringliteral_io() -> None:
 
     assert io.read(a.type, a.format, partitions, view=IntView()) == n
     # Read "partitioned" literal
-    assert (
-        io.read(
-            Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",)),
-            a.format,
-            [
-                partition.copy(update={"value": '[{"a": 1}]'}),
-                partition.copy(update={"value": '[{"a": 2}]'}),
-            ],
-            view=IntView(),
-        )
-        == [{"a": 1}, {"a": 2}]
-    )
+    assert io.read(
+        Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",)),
+        a.format,
+        [
+            partition.copy(update={"value": '[{"a": 1}]'}),
+            partition.copy(update={"value": '[{"a": 2}]'}),
+        ],
+        view=IntView(),
+    ) == [{"a": 1}, {"a": 2}]
     # Check that read with value=None fails
     with pytest.raises(FileNotFoundError, match="Literal has not been written yet"):
         io.read(

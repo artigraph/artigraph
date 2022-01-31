@@ -91,12 +91,9 @@ def test_localfile_io_partitioned(tmp_path: Path, format: Format) -> None:
         a.discover_storage_partitions()
     )
     for record, partition in data.items():
-        assert (
-            io.read(
-                a.type,
-                a.format,
-                [partition],
-                view=View.get_class_for(list, validation_type=a.type)(),
-            )
-            == [record]
-        )
+        assert io.read(
+            a.type,
+            a.format,
+            [partition],
+            view=View.get_class_for(list, validation_type=a.type)(),
+        ) == [record]

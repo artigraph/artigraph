@@ -256,7 +256,7 @@ class _int(int):
 
 
 class int64(_int):
-    _min, _max = -(2 ** 63), (2 ** 63) - 1
+    _min, _max = -(2**63), (2**63) - 1
 
     def __new__(cls, i: Union[int, "int64", "uint64"]) -> "int64":
         if i > cls._max:
@@ -270,7 +270,7 @@ class int64(_int):
 
 
 class uint64(_int):
-    _min, _max = 0, (2 ** 64) - 1
+    _min, _max = 0, (2**64) - 1
 
     def __new__(cls, i: Union[int, int64, "uint64"]) -> "uint64":
         if i > cls._max:
