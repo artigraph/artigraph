@@ -382,7 +382,7 @@ python-versions = "*"
 
 [[package]]
 name = "multimethod"
-version = "1.6"
+version = "1.7"
 description = "Multiple argument dispatching."
 category = "main"
 optional = false
@@ -1179,8 +1179,8 @@ mccabe = [
     {file = "mccabe-0.6.1.tar.gz", hash = "sha256:dd8d182285a0fe56bace7f45b5e7d1a6ebcbf524e8f3bd87eb0f125271b8831f"},
 ]
 multimethod = [
-    {file = "multimethod-1.6-py3-none-any.whl", hash = "sha256:24cf77b560266869d489c150d36d9242d66d4adc360df4548d09ee976c735d1e"},
-    {file = "multimethod-1.6.tar.gz", hash = "sha256:ed78cd3237c59652b226d571209d934860b99240c62935a706a9b3d0bce6ebb3"},
+    {file = "multimethod-1.7-py3-none-any.whl", hash = "sha256:c9ed3841ddb5ca314ad12ca88d64e4a75d283e98f16622b580bb90fe72f79231"},
+    {file = "multimethod-1.7.tar.gz", hash = "sha256:7b8a16c03f4968e1daea7e4d48cbe78cc9b4b085fb1088931d19778b914f9891"},
 ]
 mypy = [
     {file = "mypy-0.931-cp310-cp310-macosx_10_9_x86_64.whl", hash = "sha256:3c5b42d0815e15518b1f0990cff7a705805961613e701db60387e6fb663fe78a"},
