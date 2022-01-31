@@ -81,3 +81,7 @@ INFO:root:Build finished.
 INFO:root:Final Spend data:
 INFO:root:      /tmp/test-graph/spend/7564053533177891797/spend.json: 42.0
 ```
+
+## Presentations
+
+- 2022-01-27: Requesting Sandbox Incubation with [LF AI & Data](https://lfaidata.foundation/) ([deck](https://docs.google.com/presentation/d/1KLM9r0L5sTbpb_UPR5nx4fil-7fO-UnmhTeatSiaN3Y))
