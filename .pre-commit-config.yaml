@@ -1,4 +1,12 @@
+default_stages: [commit, push, manual]
 repos:
+  - repo: local
+    hooks:
+      - id: dco-sign-off
+        name: DCO Sign-off
+        entry: sh bin/add-dco-signoff.sh
+        stages: [prepare-commit-msg]
+        language: system
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.1.0
     hooks:
