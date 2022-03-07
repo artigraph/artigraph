@@ -6,10 +6,13 @@
 [![license](https://img.shields.io/github/license/artigraph/artigraph.svg)](https://github.com/artigraph/artigraph/blob/golden/LICENSE)
 [![CI](https://github.com/artigraph/artigraph/actions/workflows/ci.yaml/badge.svg)](https://github.com/artigraph/artigraph/actions/workflows/ci.yaml)
 [![codecov](https://codecov.io/gh/artigraph/artigraph/branch/golden/graph/badge.svg?token=6LUCpjcGdN)](https://codecov.io/gh/artigraph/artigraph)
+[![CII Best Practices](https://bestpractices.coreinfrastructure.org/projects/5561/badge)](https://bestpractices.coreinfrastructure.org/projects/5561)
 
 Declarative Data Production
 
 Artigraph is a tool to improve the authorship, management, and quality of data. It emphasizes that the core deliverable of a data pipeline or workflow is the data, not the tasks.
+
+Artigraph is hosted by the [LF AI and Data Foundation](https://lfaidata.foundation) as a Sandbox project.
 
 ## Installation
 
@@ -81,6 +84,20 @@ INFO:root:Build finished.
 INFO:root:Final Spend data:
 INFO:root:      /tmp/test-graph/spend/7564053533177891797/spend.json: 42.0
 ```
+
+## Community
+
+### Contributing
+
+Anyone can contribute - learn more at [CONTRIBUTING.md](CONTRIBUTING.md).
+
+### Discussions
+
+Join the community and ask questions on the [Discussions page](https://github.com/artigraph/artigraph/discussions).
+
+### Issues and Requests
+
+Report any issues or feature requests on the [Issues page](https://github.com/lfai/artigraph/issues). For security related issues, please review our [security policy](SECURITY.md) and email artigraph-security@lists.lfaidata.foundation.
 
 ## Presentations
 
