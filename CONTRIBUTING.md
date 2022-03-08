@@ -2,17 +2,7 @@
 
 Thank you for your interest in contributing to Artigraph! This document explains our contribution process and procedures.
 
-## How to Ask for Help
-
-If you have trouble installing, building, or using Artigraph, but there's not yet reason to suspect you've encountered a genuine bug, start a [Discussions](https://github.com/artigraph/artigraph/discussions). This is a great place for questions such has "How do I...".
-
-## How to Report a Bug or Request an Enhancement
-
-Artigraph manages bug and enhancements via [Issues](https://github.com/lfai/artigraph/issues). The issue template will guide you on making an effective report.
-
-## How to Report a Security Vulnerability
-
-If you think you've found a potential vulnerability in Artigraph, follow the steps in the [SECURITY.md](SECURITY.md) to responsibly disclose it.
+If you just need help or have a question, refer to [SUPPORT.md](SUPPORT.md).
 
 ## How to Contribute a Bug Fix or Enhancement
 
@@ -25,15 +15,15 @@ Contributions can be submitted via [Pull Requests](https://github.com/lfai/artig
 
 Project committers will review the contribution in a timely manner and advise of any changes needed to merge the request.
 
-### Coding Style
+## Coding Style
 
 Code is formatted with [`black`](https://black.readthedocs.io/en/stable/) and [`isort`](https://pycqa.github.io/isort/). Docstring style is not yet standardized, but they should generally follow [PEP257](https://www.python.org/dev/peps/pep-0257/).
 
-### Development Workflow
+## Development Workflow
 
 The default branch is `golden` (poking fun at "golden data"). The project is managed using [`poetry`](https://python-poetry.org/). We use [`pre-commit`](https://pre-commit.com/) to automate rapid feedback via git hooks.
 
-#### Environment Setup
+### Environment Setup
 
 If you work on macOS, the `.envrc` script (used by [`direnv`](https://direnv.net/)) in the repo root can automate project and environment setup for both Intel and M1 computers. Run `bash .envrc` to:
 - install [`brew`](https://brew.sh/) (if necessary)
