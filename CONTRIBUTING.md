@@ -6,7 +6,7 @@ Thank you for your interest in contributing to Artigraph. This document explains
 - [Contributing a Bug Fix or Change](#Contributing-a-Bug-Fix-or-Change)
 - [Development Workflow](#Development-Workflow)
 
-For a description of the roles and responsibilities of the various members of the Artigraph community, see the [governance policies](GOVERNANCE.md) and [Technical Charter](tsc/CHARTER.md). Briefly, Contributors are anyone who submits content to the project, Committers review and approve such submissions, and the Technical Steering Committee provides general project oversight.
+For a description of the roles and responsibilities of the various members of the Artigraph community, see the [governance policies](GOVERNANCE.md) and [Technical Charter](tsc/CHARTER.pdf). Briefly, Contributors are anyone who submits content to the project, Committers review and approve such submissions, and the Technical Steering Committee provides general project oversight.
 
 If you just need help or have a question, refer to [SUPPORT.md](SUPPORT.md).
 
