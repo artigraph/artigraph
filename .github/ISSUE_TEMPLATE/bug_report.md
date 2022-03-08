@@ -18,7 +18,7 @@ Steps to reproduce the behavior:
 A clear and concise description of what you expected to happen:
 
 **Additional context**
-Artigraph version: <!-- python3 -c "import arti.internal; print(arti.internal.version)" -->
-Python version: <!-- python3 --version -->
+python3 --version:
+python3 -c "import arti.internal; print(arti.internal.version)":
 
 Add any other context about the problem here:
