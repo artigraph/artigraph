@@ -1,22 +1,22 @@
 # Contributing to Artigraph
 
-Thank you for your interest in contributing to Artigraph. This document explains our contribution process and procedures:
+Thank you for your interest in contributing to Artigraph! This document explains our contribution process and procedures.
 
-- [Coding Style](#Coding-Style)
-- [Contributing a Bug Fix or Change](#Contributing-a-Bug-Fix-or-Change)
-- [Development Workflow](#Development-Workflow)
+## How to Ask for Help
 
-For a description of the roles and responsibilities of the various members of the Artigraph community, see the [governance policies](GOVERNANCE.md) and [Technical Charter](tsc/CHARTER.pdf). Briefly, Contributors are anyone who submits content to the project, Committers review and approve such submissions, and the Technical Steering Committee provides general project oversight.
+If you have trouble installing, building, or using Artigraph, but there's not yet reason to suspect you've encountered a genuine bug, start a [Discussions](https://github.com/artigraph/artigraph/discussions). This is a great place for questions such has "How do I...".
 
-If you just need help or have a question, refer to [SUPPORT.md](SUPPORT.md).
+## How to Report a Bug or Request an Enhancement
 
-## Coding Style
+Artigraph manages bug and enhancements via [Issues](https://github.com/lfai/artigraph/issues). The issue template will guide you on making an effective report.
 
-Code is formatted with [`black`](https://black.readthedocs.io/en/stable/) and [`isort`](https://pycqa.github.io/isort/). Docstring style is not yet standardized, but they should generally follow [PEP257](https://www.python.org/dev/peps/pep-0257/).
+## How to Report a Security Vulnerability
 
-## Contributing a Bug Fix or Change
+If you think you've found a potential vulnerability in Artigraph, follow the steps in the [SECURITY.md](SECURITY.md) to responsibly disclose it.
 
-Contributions can be submitted via pull requests to the `golden` branch and must:
+## How to Contribute a Bug Fix or Enhancement
+
+Contributions can be submitted via [Pull Requests](https://github.com/lfai/artigraph/issues) to the `golden` branch and must:
 
 - be submitted under the Apache 2.0 license.
 - include a [Developer Certificate of Origin signoff](https://wiki.linuxfoundation.org/dco) (`git commit -s`)
@@ -25,11 +25,15 @@ Contributions can be submitted via pull requests to the `golden` branch and must
 
 Project committers will review the contribution in a timely manner and advise of any changes needed to merge the request.
 
-## Development Workflow
+### Coding Style
+
+Code is formatted with [`black`](https://black.readthedocs.io/en/stable/) and [`isort`](https://pycqa.github.io/isort/). Docstring style is not yet standardized, but they should generally follow [PEP257](https://www.python.org/dev/peps/pep-0257/).
+
+### Development Workflow
 
 The default branch is `golden` (poking fun at "golden data"). The project is managed using [`poetry`](https://python-poetry.org/). We use [`pre-commit`](https://pre-commit.com/) to automate rapid feedback via git hooks.
 
-### Environment Setup
+#### Environment Setup
 
 If you work on macOS, the `.envrc` script (used by [`direnv`](https://direnv.net/)) in the repo root can automate project and environment setup for both Intel and M1 computers. Run `bash .envrc` to:
 - install [`brew`](https://brew.sh/) (if necessary)

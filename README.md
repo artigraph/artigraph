@@ -87,17 +87,7 @@ INFO:root:      /tmp/test-graph/spend/7564053533177891797/spend.json: 42.0
 
 ## Community
 
-### Contributing
-
-Anyone can contribute - learn more at [CONTRIBUTING.md](CONTRIBUTING.md).
-
-### Discussions
-
-Join the community and ask questions on the [Discussions page](https://github.com/artigraph/artigraph/discussions).
-
-### Issues and Requests
-
-Report any issues or feature requests on the [Issues page](https://github.com/lfai/artigraph/issues). For security related issues, please review our [security policy](SECURITY.md) and email artigraph-security@lists.lfaidata.foundation.
+Everyone is welcome to join the community - learn more in [CONTRIBUTING.md](CONTRIBUTING.md)!
 
 ## Presentations
 
