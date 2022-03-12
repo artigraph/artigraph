@@ -1,0 +1,2248 @@
+
+<!doctype html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      
+      
+      
+      
+      <link rel="icon" href="../../../../assets/images/favicon.png">
+      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.0">
+    
+    
+      
+        <title>Type Hints - starter-docs</title>
+      
+    
+    
+      <link rel="stylesheet" href="../../../../assets/stylesheets/main.8b42a75e.min.css">
+      
+        
+        <link rel="stylesheet" href="../../../../assets/stylesheets/palette.3f5d1f46.min.css">
+        
+          
+          
+          <meta name="theme-color" content="#4cae4f">
+        
+      
+    
+    
+    
+      
+        
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700%7CRoboto+Mono&display=fallback">
+        <style>:root{--md-text-font-family:"Roboto";--md-code-font-family:"Roboto Mono"}</style>
+      
+    
+    
+    
+    
+      
+
+
+    
+    
+  </head>
+  
+  
+    
+    
+    
+    
+    
+    <body dir="ltr" data-md-color-scheme="" data-md-color-primary="green" data-md-color-accent="lightgreen">
+  
+    
+    <script>function __prefix(e){return new URL("../../../..",location).pathname+"."+e}function __get(e,t=localStorage){return JSON.parse(t.getItem(__prefix(e)))}</script>
+    
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="__drawer" autocomplete="off">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="__search" autocomplete="off">
+    <label class="md-overlay" for="__drawer"></label>
+    <div data-md-component="skip">
+      
+        
+        <a href="#module-artiinternaltype_hints" class="md-skip">
+          Skip to content
+        </a>
+      
+    </div>
+    <div data-md-component="announce">
+      
+    </div>
+    
+      
+
+<header class="md-header" data-md-component="header">
+  <nav class="md-header__inner md-grid" aria-label="Header">
+    <a href="../../../.." title="starter-docs" class="md-header__button md-logo" aria-label="starter-docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    <label class="md-header__button md-icon" for="__drawer">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M3 6h18v2H3V6m0 5h18v2H3v-2m0 5h18v2H3v-2z"/></svg>
+    </label>
+    <div class="md-header__title" data-md-component="header-title">
+      <div class="md-header__ellipsis">
+        <div class="md-header__topic">
+          <span class="md-ellipsis">
+            starter-docs
+          </span>
+        </div>
+        <div class="md-header__topic" data-md-component="header-topic">
+          <span class="md-ellipsis">
+            
+              Type Hints
+            
+          </span>
+        </div>
+      </div>
+    </div>
+    
+    
+    
+      <label class="md-header__button md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+      </label>
+      
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="__search"></label>
+  <div class="md-search__inner" role="search">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" aria-label="Search" placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="search-query" required>
+      <label class="md-search__icon md-icon" for="__search">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M9.5 3A6.5 6.5 0 0 1 16 9.5c0 1.61-.59 3.09-1.56 4.23l.27.27h.79l5 5-1.5 1.5-5-5v-.79l-.27-.27A6.516 6.516 0 0 1 9.5 16 6.5 6.5 0 0 1 3 9.5 6.5 6.5 0 0 1 9.5 3m0 2C7 5 5 7 5 9.5S7 14 9.5 14 14 12 14 9.5 12 5 9.5 5z"/></svg>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20 11v2H8l5.5 5.5-1.42 1.42L4.16 12l7.92-7.92L13.5 5.5 8 11h12z"/></svg>
+      </label>
+      <nav class="md-search__options" aria-label="Search">
+        
+        <button type="reset" class="md-search__icon md-icon" aria-label="Clear" tabindex="-1">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/></svg>
+        </button>
+      </nav>
+      
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="search-result">
+          <div class="md-search-result__meta">
+            Initializing search
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+    
+    
+      <div class="md-header__source">
+        
+<a href="https://github.com/artigraph/artigraph/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    artigraph
+  </div>
+</a>
+      </div>
+    
+  </nav>
+  
+</header>
+    
+    <div class="md-container" data-md-component="container">
+      
+      
+        
+          
+        
+      
+      <main class="md-main" data-md-component="main">
+        <div class="md-main__inner md-grid">
+          
+            
+              
+              <div class="md-sidebar md-sidebar--primary" data-md-component="sidebar" data-md-type="navigation" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+
+
+<nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
+  <label class="md-nav__title" for="__drawer">
+    <a href="../../../.." title="starter-docs" class="md-nav__button md-logo" aria-label="starter-docs" data-md-component="logo">
+      
+  
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
+
+    </a>
+    starter-docs
+  </label>
+  
+    <div class="md-nav__source">
+      
+<a href="https://github.com/artigraph/artigraph/" title="Go to repository" class="md-source" data-md-component="source">
+  <div class="md-source__icon md-icon">
+    
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 448 512"><path d="M439.55 236.05 244 40.45a28.87 28.87 0 0 0-40.81 0l-40.66 40.63 51.52 51.52c27.06-9.14 52.68 16.77 43.39 43.68l49.66 49.66c34.23-11.8 61.18 31 35.47 56.69-26.49 26.49-70.21-2.87-56-37.34L240.22 199v121.85c25.3 12.54 22.26 41.85 9.08 55a34.34 34.34 0 0 1-48.55 0c-17.57-17.6-11.07-46.91 11.25-56v-123c-20.8-8.51-24.6-30.74-18.64-45L142.57 101 8.45 235.14a28.86 28.86 0 0 0 0 40.81l195.61 195.6a28.86 28.86 0 0 0 40.8 0l194.69-194.69a28.86 28.86 0 0 0 0-40.81z"/></svg>
+  </div>
+  <div class="md-source__repository">
+    artigraph
+  </div>
+</a>
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../.." class="md-nav__link">
+        Home
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../CHANGELOG/" class="md-nav__link">
+        Changelog
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../CODE_OF_CONDUCT/" class="md-nav__link">
+        Code Of Conduct
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../CONTRIBUTING/" class="md-nav__link">
+        Contributing
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../GOVERNANCE/" class="md-nav__link">
+        Governance
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../SECURITY/" class="md-nav__link">
+        Security
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../../../SUPPORT/" class="md-nav__link">
+        Support
+      </a>
+    </li>
+  
+
+    
+      
+      
+      
+
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8" type="checkbox" id="__nav_8" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8">
+          Reference
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Reference" data-md-level="1">
+        <label class="md-nav__title" for="__nav_8">
+          <span class="md-nav__icon md-icon"></span>
+          Reference
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1" type="checkbox" id="__nav_8_1" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1">
+          Arti
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Arti" data-md-level="2">
+        <label class="md-nav__title" for="__nav_8_1">
+          <span class="md-nav__icon md-icon"></span>
+          Arti
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../annotations/" class="md-nav__link">
+        Annotations
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../artifacts/" class="md-nav__link">
+        Artifacts
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../fingerprints/" class="md-nav__link">
+        Fingerprints
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../graphs/" class="md-nav__link">
+        Graphs
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../partitions/" class="md-nav__link">
+        Partitions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../producers/" class="md-nav__link">
+        Producers
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../statistics/" class="md-nav__link">
+        Statistics
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../thresholds/" class="md-nav__link">
+        Thresholds
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../versions/" class="md-nav__link">
+        Versions
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1_11" type="checkbox" id="__nav_8_1_11" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1_11">
+          Backends
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Backends" data-md-level="3">
+        <label class="md-nav__title" for="__nav_8_1_11">
+          <span class="md-nav__icon md-icon"></span>
+          Backends
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backends/" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../backends/memory/" class="md-nav__link">
+        Memory
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1_12" type="checkbox" id="__nav_8_1_12" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1_12">
+          Executors
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Executors" data-md-level="3">
+        <label class="md-nav__title" for="__nav_8_1_12">
+          <span class="md-nav__icon md-icon"></span>
+          Executors
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../executors/" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../executors/local/" class="md-nav__link">
+        Local
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1_13" type="checkbox" id="__nav_8_1_13" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1_13">
+          Formats
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Formats" data-md-level="3">
+        <label class="md-nav__title" for="__nav_8_1_13">
+          <span class="md-nav__icon md-icon"></span>
+          Formats
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../formats/" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../formats/json/" class="md-nav__link">
+        Json
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../formats/pickle/" class="md-nav__link">
+        Pickle
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    
+    <li class="md-nav__item md-nav__item--active md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1_14" type="checkbox" id="__nav_8_1_14" checked>
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1_14">
+          Internal
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Internal" data-md-level="3">
+        <label class="md-nav__title" for="__nav_8_1_14">
+          <span class="md-nav__icon md-icon"></span>
+          Internal
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../models/" class="md-nav__link">
+        Models
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../patches/" class="md-nav__link">
+        Patches
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+    
+  
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Type Hints
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
+        Type Hints
+      </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    Variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_annotation_from_value" class="md-nav__link">
+    get_annotation_from_value
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_class_type_vars" class="md-nav__link">
+    get_class_type_vars
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_annotated" class="md-nav__link">
+    is_Annotated
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_generic_alias" class="md-nav__link">
+    is_generic_alias
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_optional_hint" class="md-nav__link">
+    is_optional_hint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_typeddict" class="md-nav__link">
+    is_typeddict
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_union" class="md-nav__link">
+    is_union
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_union_hint" class="md-nav__link">
+    is_union_hint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lenient_issubclass" class="md-nav__link">
+    lenient_issubclass
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signature" class="md-nav__link">
+    signature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tidy_signature" class="md-nav__link">
+    tidy_signature
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#classes" class="md-nav__link">
+    Classes
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nonetype" class="md-nav__link">
+    NoneType
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../utils/" class="md-nav__link">
+        Utils
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1_15" type="checkbox" id="__nav_8_1_15" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1_15">
+          Io
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Io" data-md-level="3">
+        <label class="md-nav__title" for="__nav_8_1_15">
+          <span class="md-nav__icon md-icon"></span>
+          Io
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../io/" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../io/json_localfile_python/" class="md-nav__link">
+        Json Localfile Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../io/json_stringliteral_python/" class="md-nav__link">
+        Json Stringliteral Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../io/pickle_localfile_python/" class="md-nav__link">
+        Pickle Localfile Python
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1_16" type="checkbox" id="__nav_8_1_16" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1_16">
+          Storage
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Storage" data-md-level="3">
+        <label class="md-nav__title" for="__nav_8_1_16">
+          <span class="md-nav__icon md-icon"></span>
+          Storage
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/literal/" class="md-nav__link">
+        Literal
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../storage/local/" class="md-nav__link">
+        Local
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1_17" type="checkbox" id="__nav_8_1_17" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1_17">
+          Types
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Types" data-md-level="3">
+        <label class="md-nav__title" for="__nav_8_1_17">
+          <span class="md-nav__icon md-icon"></span>
+          Types
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/pydantic/" class="md-nav__link">
+        Pydantic
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/python/" class="md-nav__link">
+        Python
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    
+    <li class="md-nav__item md-nav__item--nested">
+      
+      
+        <input class="md-nav__toggle md-toggle" data-md-toggle="__nav_8_1_18" type="checkbox" id="__nav_8_1_18" >
+      
+      
+      
+      
+        <label class="md-nav__link" for="__nav_8_1_18">
+          Views
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <nav class="md-nav" aria-label="Views" data-md-level="3">
+        <label class="md-nav__title" for="__nav_8_1_18">
+          <span class="md-nav__icon md-icon"></span>
+          Views
+        </label>
+        <ul class="md-nav__list" data-md-scrollfix>
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../views/" class="md-nav__link">
+        Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../views/python/" class="md-nav__link">
+        Python
+      </a>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+            
+          
+        </ul>
+      </nav>
+    </li>
+  
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="sidebar" data-md-type="toc" >
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    Variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_annotation_from_value" class="md-nav__link">
+    get_annotation_from_value
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_class_type_vars" class="md-nav__link">
+    get_class_type_vars
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_annotated" class="md-nav__link">
+    is_Annotated
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_generic_alias" class="md-nav__link">
+    is_generic_alias
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_optional_hint" class="md-nav__link">
+    is_optional_hint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_typeddict" class="md-nav__link">
+    is_typeddict
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_union" class="md-nav__link">
+    is_union
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#is_union_hint" class="md-nav__link">
+    is_union_hint
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#lenient_issubclass" class="md-nav__link">
+    lenient_issubclass
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#signature" class="md-nav__link">
+    signature
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#tidy_signature" class="md-nav__link">
+    tidy_signature
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#classes" class="md-nav__link">
+    Classes
+  </a>
+  
+    <nav class="md-nav" aria-label="Classes">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#nonetype" class="md-nav__link">
+    NoneType
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content" data-md-component="content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                  <a href="https://github.com/artigraph/artigraph/edit/main/reference/arti/internal/type_hints.md" title="Edit this page" class="md-content__button md-icon">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
+                  </a>
+                
+                
+                <h1 id="module-artiinternaltype_hints">Module arti.internal.type_hints</h1>
+<p>None</p>
+<p>None</p>
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">inspect</span>
+
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="kn">import</span> <span class="nn">types</span>
+
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
+
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_AnnotatedAlias</span>  <span class="c1"># type: ignore</span>
+
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
+
+    <span class="n">TYPE_CHECKING</span><span class="p">,</span>
+
+    <span class="n">Annotated</span><span class="p">,</span>
+
+    <span class="n">Any</span><span class="p">,</span>
+
+    <span class="n">TypeVar</span><span class="p">,</span>
+
+    <span class="n">Union</span><span class="p">,</span>
+
+    <span class="n">cast</span><span class="p">,</span>
+
+    <span class="n">get_args</span><span class="p">,</span>
+
+    <span class="n">get_origin</span><span class="p">,</span>
+
+    <span class="n">get_type_hints</span><span class="p">,</span>
+
+    <span class="n">no_type_check</span><span class="p">,</span>
+
+<span class="p">)</span>
+
+<span class="n">NoneType</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>  <span class="c1"># mypy otherwise treats type(None) as an object</span>
+
+<span class="k">def</span> <span class="nf">_check_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">check_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+    <span class="c1"># If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the</span>
+
+    <span class="c1"># annotations.</span>
+
+    <span class="n">klass_origin</span><span class="p">,</span> <span class="n">klass_args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">klass</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">klass_origin</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+
+        <span class="n">klass</span> <span class="o">=</span> <span class="n">klass_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">klass_origin</span><span class="p">,</span> <span class="n">klass_args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">klass</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
+
+        <span class="n">klass</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">Any</span><span class="p">)</span> <span class="k">if</span> <span class="n">klass</span><span class="o">.</span><span class="n">__bound__</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">klass</span><span class="o">.</span><span class="n">__bound__</span>
+
+        <span class="n">klass_origin</span><span class="p">,</span> <span class="n">klass_args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">klass</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+
+    <span class="n">check_type_origin</span><span class="p">,</span> <span class="n">check_type_args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">check_type</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">check_type</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">check_type_origin</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+
+        <span class="n">check_type</span> <span class="o">=</span> <span class="n">check_type_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">check_type_origin</span><span class="p">,</span> <span class="n">check_type_args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">check_type</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">check_type</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">check_type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
+
+        <span class="n">check_type</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">Any</span><span class="p">)</span> <span class="k">if</span> <span class="n">check_type</span><span class="o">.</span><span class="n">__bound__</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">check_type</span><span class="o">.</span><span class="n">__bound__</span>
+
+        <span class="n">check_type_origin</span><span class="p">,</span> <span class="n">check_type_args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">check_type</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">check_type</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">klass</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="n">check_type</span> <span class="ow">is</span> <span class="n">Any</span>
+
+    <span class="k">if</span> <span class="n">check_type</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="c1"># eg: issubclass(tuple, tuple)</span>
+
+    <span class="k">if</span> <span class="n">klass_origin</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">check_type_origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">check_type</span><span class="p">)</span>
+
+    <span class="c1"># eg: issubclass(tuple[int], tuple)</span>
+
+    <span class="k">if</span> <span class="n">klass_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">check_type_origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">klass_origin</span><span class="p">,</span> <span class="n">check_type</span><span class="p">)</span>
+
+    <span class="c1"># eg: issubclass(tuple, tuple[int])</span>
+
+    <span class="k">if</span> <span class="n">klass_origin</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">check_type_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">check_type_origin</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">check_type_args</span>
+
+    <span class="c1"># eg: issubclass(tuple[int], tuple[int])</span>
+
+    <span class="k">if</span> <span class="n">klass_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">check_type_origin</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="c1"># NOTE: Considering all container types covariant for simplicity (mypy may be more strict).</span>
+
+        <span class="c1">#</span>
+
+        <span class="c1"># The builtin mutable containers (list, dict, etc) are invariant (klass_args ==</span>
+
+        <span class="c1"># check_type_args), but the interfaces (Mapping, Sequence, etc) and immutable containers are</span>
+
+        <span class="c1"># covariant.</span>
+
+        <span class="k">if</span> <span class="n">check_type_args</span><span class="p">:</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+
+                <span class="nb">len</span><span class="p">(</span><span class="n">klass_args</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">check_type_args</span><span class="p">)</span>
+
+                <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span>
+
+                    <span class="c1"># check subclass OR things like &quot;...&quot;</span>
+
+                    <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass_arg</span><span class="p">,</span> <span class="n">check_type_arg</span><span class="p">)</span> <span class="ow">or</span> <span class="n">klass_arg</span> <span class="ow">is</span> <span class="n">check_type_arg</span>
+
+                    <span class="k">for</span> <span class="p">(</span><span class="n">klass_arg</span><span class="p">,</span> <span class="n">check_type_arg</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">klass_args</span><span class="p">,</span> <span class="n">check_type_args</span><span class="p">)</span>
+
+                <span class="p">)</span>
+
+            <span class="p">):</span>
+
+                <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass_origin</span><span class="p">,</span> <span class="n">check_type_origin</span><span class="p">)</span>
+
+    <span class="c1"># Shouldn&#39;t happen, but need to explicitly say &quot;x is not None&quot; to narrow mypy types.</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;The origin conditions don&#39;t cover all cases!&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_class_type_vars</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+
+    <span class="sd">&quot;&quot;&quot;Get the bound type variables from a class</span>
+
+<span class="sd">    NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">is_generic_alias</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
+
+        <span class="n">bases</span> <span class="o">=</span> <span class="p">(</span><span class="n">klass</span><span class="p">,)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">bases</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">__orig_bases__</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+
+        <span class="n">base_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">base_origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">continue</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">):</span>
+
+            <span class="k">continue</span>
+
+        <span class="k">return</span> <span class="n">args</span>
+
+    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">klass</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> must subclass a subscripted Generic&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">get_annotation_from_value</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">NoneType</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
+
+        <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">tuple</span><span class="p">,</span> <span class="nb">list</span><span class="p">,</span> <span class="nb">set</span><span class="p">,</span> <span class="nb">frozenset</span><span class="p">)):</span>
+
+        <span class="n">first</span><span class="p">,</span> <span class="o">*</span><span class="n">tail</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+        <span class="n">first_type</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">first</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">first_type</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">tail</span><span class="p">):</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+
+                <span class="k">return</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">first_type</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="n">first_type</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+
+        <span class="n">items</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+        <span class="n">first_key_type</span><span class="p">,</span> <span class="n">first_value_type</span> <span class="o">=</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span>
+
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">first_key_type</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">first_value_type</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="ow">in</span> <span class="n">items</span>
+
+        <span class="p">):</span>
+
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">[</span><span class="n">first_key_type</span><span class="p">,</span> <span class="n">first_value_type</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+
+        <span class="c1"># TODO: Implement with TypedDict to support Struct types...?</span>
+
+    <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unable to determine type of </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">class_or_tuple</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">))</span> <span class="ow">or</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span> <span class="ow">or</span> <span class="n">klass</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">class_or_tuple</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">subtype</span><span class="p">)</span> <span class="k">for</span> <span class="n">subtype</span> <span class="ow">in</span> <span class="n">class_or_tuple</span><span class="p">)</span>
+
+    <span class="n">check_type</span> <span class="o">=</span> <span class="n">class_or_tuple</span>
+
+    <span class="c1"># NOTE: py 3.10 supports issubclass with Unions (eg: `issubclass(str, str | int)`)</span>
+
+    <span class="k">if</span> <span class="n">is_union_hint</span><span class="p">(</span><span class="n">check_type</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">subtype</span><span class="p">)</span> <span class="k">for</span> <span class="n">subtype</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">check_type</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">_check_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">check_type</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_tidy_return</span><span class="p">(</span><span class="n">return_annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">force_tuple_return</span><span class="p">:</span> <span class="nb">bool</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">force_tuple_return</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="n">return_annotation</span>
+
+    <span class="k">if</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">return_annotation</span><span class="p">),</span> <span class="nb">tuple</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">get_args</span><span class="p">(</span><span class="n">return_annotation</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="p">(</span><span class="n">return_annotation</span><span class="p">,)</span>
+
+<span class="k">def</span> <span class="nf">tidy_signature</span><span class="p">(</span>
+
+    <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+
+    <span class="n">sig</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Signature</span><span class="p">,</span>
+
+    <span class="o">*</span><span class="p">,</span>
+
+    <span class="n">force_tuple_return</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+
+    <span class="n">remove_owner</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Signature</span><span class="p">:</span>
+
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">return_annotation</span><span class="o">=</span><span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;return&quot;</span><span class="p">,</span> <span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">))</span>
+
+    <span class="k">return</span> <span class="n">sig</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+
+        <span class="n">parameters</span><span class="o">=</span><span class="p">[</span>
+
+            <span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">annotation</span><span class="o">=</span><span class="n">type_hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">annotation</span><span class="p">))</span>
+
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
+
+            <span class="k">if</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;cls&quot;</span><span class="p">,</span> <span class="s2">&quot;self&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">remove_owner</span> <span class="k">else</span> <span class="kc">True</span><span class="p">)</span>
+
+        <span class="p">],</span>
+
+        <span class="n">return_annotation</span><span class="o">=</span><span class="p">(</span>
+
+            <span class="n">sig</span><span class="o">.</span><span class="n">empty</span>
+
+            <span class="k">if</span> <span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span> <span class="ow">is</span> <span class="n">sig</span><span class="o">.</span><span class="n">empty</span>
+
+            <span class="k">else</span> <span class="n">_tidy_return</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">,</span> <span class="n">force_tuple_return</span><span class="o">=</span><span class="n">force_tuple_return</span><span class="p">)</span>
+
+        <span class="p">),</span>
+
+    <span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">signature</span><span class="p">(</span>
+
+    <span class="n">fn</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+
+    <span class="o">*</span><span class="p">,</span>
+
+    <span class="n">follow_wrapped</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+
+    <span class="n">force_tuple_return</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+
+    <span class="n">remove_owner</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Signature</span><span class="p">:</span>
+
+    <span class="sd">&quot;&quot;&quot;Convenience wrapper around `inspect.signature`.</span>
+
+<span class="sd">    The returned Signature will have `cls`/`self` parameters removed if `remove_owner` is `True` and</span>
+
+<span class="sd">    `tuple[...]` converted to `tuple(...)` in the `return_annotation`.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">return</span> <span class="n">tidy_signature</span><span class="p">(</span>
+
+        <span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span>
+
+        <span class="n">sig</span><span class="o">=</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">follow_wrapped</span><span class="o">=</span><span class="n">follow_wrapped</span><span class="p">),</span>
+
+        <span class="n">force_tuple_return</span><span class="o">=</span><span class="n">force_tuple_return</span><span class="p">,</span>
+
+        <span class="n">remove_owner</span><span class="o">=</span><span class="n">remove_owner</span><span class="p">,</span>
+
+    <span class="p">)</span>
+
+<span class="c1">#############################################</span>
+
+<span class="c1"># Helpers for typing across python versions #</span>
+
+<span class="c1">#############################################</span>
+
+<span class="c1">#</span>
+
+<span class="c1"># Focusing on  3.9+ (for now)</span>
+
+<span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="k">def</span> <span class="nf">is_union</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="n">type_</span> <span class="ow">is</span> <span class="n">Union</span>
+
+    <span class="k">def</span> <span class="nf">is_typeddict</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+        <span class="c1"># mypy doesn&#39;t know of typing._TypedDictMeta, but `type: ignore` would be &quot;unused&quot; (and error)</span>
+
+        <span class="c1"># on other python versions.</span>
+
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_TypedDict</span> <span class="k">as</span> <span class="n">_TypedDictMeta</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_TypedDictMeta</span>
+
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_TypedDictMeta</span><span class="p">)</span>
+
+<span class="k">else</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">is_typeddict</span> <span class="k">as</span> <span class="n">is_typeddict</span>  <span class="c1"># noqa: F401</span>
+
+    <span class="c1"># mypy doesn&#39;t know of types.UnionType yet, but `type: ignore` would be &quot;unused&quot;</span>
+
+    <span class="c1"># (and error) on other python versions.</span>
+
+    <span class="nd">@no_type_check</span>
+
+    <span class="k">def</span> <span class="nf">is_union</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+        <span class="c1"># `Union[int, str]` or `int | str`</span>
+
+        <span class="k">return</span> <span class="n">type_</span> <span class="ow">is</span> <span class="n">Union</span> <span class="ow">or</span> <span class="n">type_</span> <span class="ow">is</span> <span class="n">types</span><span class="o">.</span><span class="n">UnionType</span>  <span class="c1"># noqa: E721</span>
+
+<span class="k">def</span> <span class="nf">is_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_AnnotatedAlias</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">is_generic_alias</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_GenericAlias</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_GenericAlias</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">is_optional_hint</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+    <span class="c1"># Optional[x] is represented as Union[x, NoneType]</span>
+
+    <span class="k">return</span> <span class="n">is_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">))</span> <span class="ow">and</span> <span class="n">NoneType</span> <span class="ow">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">is_union_hint</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+    <span class="k">return</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Union</span>
+</code></pre></div>
+
+</details>
+<h2 id="variables">Variables</h2>
+<div class="codehilite"><pre><span></span><code><span class="n">TYPE_CHECKING</span>
+</code></pre></div>
+
+<h2 id="functions">Functions</h2>
+<h3 id="get_annotation_from_value">get_annotation_from_value</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_annotation_from_value</span><span class="p">(</span>
+    <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">get_annotation_from_value</span><span class="p">(</span><span class="k">value</span><span class="err">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ow">Any</span><span class="err">:</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">NoneType</span><span class="p">,</span><span class="w"> </span><span class="n">bool</span><span class="p">,</span><span class="w"> </span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="nc">date</span><span class="p">,</span><span class="w"> </span><span class="nc">datetime</span><span class="p">,</span><span class="w"> </span><span class="nc">float</span><span class="p">,</span><span class="w"> </span><span class="nc">int</span><span class="p">,</span><span class="w"> </span><span class="nf">str</span><span class="p">))</span><span class="err">:</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">value</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span><span class="w"> </span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="k">set</span><span class="p">,</span><span class="w"> </span><span class="n">frozenset</span><span class="p">))</span><span class="err">:</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">first</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="k">value</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">first_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">first</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">all</span><span class="p">(</span><span class="n">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">first_type</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">tail</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="n">tuple</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">tuple</span><span class="o">[</span><span class="n">first_type, ...</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">value</span><span class="p">)</span><span class="o">[</span><span class="n">first_type</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="n">dict</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">items</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">value</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="w"></span>
+
+<span class="w">        </span><span class="n">first_key_type</span><span class="p">,</span><span class="w"> </span><span class="n">first_value_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="p">)</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">all</span><span class="p">(</span><span class="w"></span>
+
+<span class="w">            </span><span class="n">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">first_key_type</span><span class="p">)</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">first_value_type</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">items</span><span class="w"></span>
+
+<span class="w">        </span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">dict</span><span class="o">[</span><span class="n">first_key_type, first_value_type</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="w"></span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Implement</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">TypedDict</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="n">Struct</span><span class="w"> </span><span class="n">types</span><span class="p">...</span><span class="vm">?</span><span class="w"></span>
+
+<span class="w">    </span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Unable to determine type of {value}&quot;</span><span class="p">)</span><span class="w"></span>
+</code></pre></div>
+
+</details>
+<h3 id="get_class_type_vars">get_class_type_vars</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_type_vars</span><span class="p">(</span>
+    <span class="n">klass</span><span class="p">:</span> <span class="nb">type</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span>
+</code></pre></div>
+
+<p>Get the bound type variables from a class</p>
+<p>NOTE: Only vars from the <em>first</em> Generic in the mro <em>with all variables bound</em> will be returned.</p>
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">get_class_type_vars</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="n">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tuple</span><span class="p">[</span><span class="n">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+
+    <span class="sd">&quot;&quot;&quot;Get the bound type variables from a class</span>
+
+<span class="sd">    NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="n">is_generic_alias</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
+
+        <span class="n">bases</span> <span class="o">=</span> <span class="p">(</span><span class="n">klass</span><span class="p">,)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="n">bases</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">__orig_bases__</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+
+        <span class="n">base_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">base_origin</span> <span class="k">is</span> <span class="n">None</span><span class="p">:</span>
+
+            <span class="k">continue</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">any</span><span class="p">(</span><span class="n">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">):</span>
+
+            <span class="k">continue</span>
+
+        <span class="k">return</span> <span class="n">args</span>
+
+    <span class="n">raise</span> <span class="n">TypeError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{klass.__name__} must subclass a subscripted Generic&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h3 id="is_annotated">is_Annotated</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_Annotated</span><span class="p">(</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span> <span class="kr">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">bool</span><span class="o">:</span>
+
+    <span class="kr">return</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_AnnotatedAlias</span><span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h3 id="is_generic_alias">is_generic_alias</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_generic_alias</span><span class="p">(</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_generic_alias</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_GenericAlias</span>  <span class="c1"># type: ignore</span>
+
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_GenericAlias</span><span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h3 id="is_optional_hint">is_optional_hint</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_optional_hint</span><span class="p">(</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">is_optional_hint</span><span class="p">(</span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">bool</span><span class="p">:</span><span class="w"></span>
+
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">x</span><span class="o">]</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">represented</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ow">Union</span><span class="o">[</span><span class="n">x, NoneType</span><span class="o">]</span><span class="w"></span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">is_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">))</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">NoneType</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span><span class="w"></span>
+</code></pre></div>
+
+</details>
+<h3 id="is_typeddict">is_typeddict</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_typeddict</span><span class="p">(</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">is_typeddict</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+        <span class="c1"># mypy doesn&#39;t know of typing._TypedDictMeta, but `type: ignore` would be &quot;unused&quot; (and error)</span>
+
+        <span class="c1"># on other python versions.</span>
+
+        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_TypedDict</span> <span class="k">as</span> <span class="n">_TypedDictMeta</span>
+
+        <span class="k">else</span><span class="p">:</span>
+
+            <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_TypedDictMeta</span>
+
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_TypedDictMeta</span><span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h3 id="is_union">is_union</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_union</span><span class="p">(</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code>    <span class="n">def</span> <span class="n">is_union</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span> <span class="kr">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">bool</span><span class="o">:</span>
+
+        <span class="kr">return</span> <span class="n">type_</span> <span class="n">is</span> <span class="n">Union</span>
+</code></pre></div>
+
+</details>
+<h3 id="is_union_hint">is_union_hint</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_union_hint</span><span class="p">(</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">is_union_hint</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span> <span class="kr">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">bool</span><span class="o">:</span>
+
+    <span class="kr">return</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span> <span class="n">is</span> <span class="n">Union</span>
+</code></pre></div>
+
+</details>
+<h3 id="lenient_issubclass">lenient_issubclass</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">lenient_issubclass</span><span class="p">(</span>
+    <span class="n">klass</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">class_or_tuple</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="o">:</span> <span class="kr">Any</span><span class="p">,</span> <span class="n">class_or_tuple</span><span class="o">:</span> <span class="n">Union</span><span class="p">[</span><span class="kr">type</span><span class="p">,</span> <span class="n">tuple</span><span class="p">[</span><span class="kr">type</span><span class="p">,</span> <span class="p">...]])</span> <span class="o">-&gt;</span> <span class="n">bool</span><span class="o">:</span>
+
+    <span class="nf">if</span> <span class="kr">not</span> <span class="p">(</span><span class="n">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="p">(</span><span class="kr">type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">))</span> <span class="kr">or</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span> <span class="kr">or</span> <span class="n">klass</span> <span class="n">is</span> <span class="kr">Any</span><span class="p">)</span><span class="o">:</span>
+
+        <span class="kr">return</span> <span class="kr">False</span>
+
+    <span class="nf">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">class_or_tuple</span><span class="p">,</span> <span class="n">tuple</span><span class="p">)</span><span class="o">:</span>
+
+        <span class="kr">return</span> <span class="kr">any</span><span class="p">(</span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">subtype</span><span class="p">)</span> <span class="n">for</span> <span class="n">subtype</span> <span class="kr">in</span> <span class="n">class_or_tuple</span><span class="p">)</span>
+
+    <span class="n">check_type</span> <span class="o">=</span> <span class="n">class_or_tuple</span>
+
+    <span class="err">#</span> <span class="n">NOTE</span><span class="o">:</span> <span class="n">py</span> <span class="mf">3.10</span> <span class="n">supports</span> <span class="n">issubclass</span> <span class="n">with</span> <span class="n">Unions</span> <span class="p">(</span><span class="n">eg</span><span class="o">:</span> <span class="err">`</span><span class="n">issubclass</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">str</span> <span class="o">|</span> <span class="n">int</span><span class="p">)</span><span class="err">`</span><span class="p">)</span>
+
+    <span class="nf">if</span> <span class="n">is_union_hint</span><span class="p">(</span><span class="n">check_type</span><span class="p">)</span><span class="o">:</span>
+
+        <span class="kr">return</span> <span class="kr">any</span><span class="p">(</span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">subtype</span><span class="p">)</span> <span class="n">for</span> <span class="n">subtype</span> <span class="kr">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">check_type</span><span class="p">))</span>
+
+    <span class="kr">return</span> <span class="n">_check_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">check_type</span><span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h3 id="signature">signature</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">signature</span><span class="p">(</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">follow_wrapped</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">force_tuple_return</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">remove_owner</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Signature</span>
+</code></pre></div>
+
+<p>Convenience wrapper around <code>inspect.signature</code>.</p>
+<p>The returned Signature will have <code>cls</code>/<code>self</code> parameters removed if <code>remove_owner</code> is <code>True</code> and
+<code>tuple[...]</code> converted to <code>tuple(...)</code> in the <code>return_annotation</code>.</p>
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">signature</span><span class="p">(</span>
+
+    <span class="n">fn</span><span class="o">:</span> <span class="n">Callable</span><span class="err">[</span><span class="p">...,</span> <span class="k">Any</span><span class="err">]</span><span class="p">,</span>
+
+    <span class="o">*</span><span class="p">,</span>
+
+    <span class="n">follow_wrapped</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">True</span><span class="p">,</span>
+
+    <span class="n">force_tuple_return</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">False</span><span class="p">,</span>
+
+    <span class="n">remove_owner</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">True</span><span class="p">,</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="o">:</span>
+
+    <span class="s2">&quot;</span><span class="se">&quot;&quot;</span><span class="s2">Convenience wrapper around `inspect.signature`.</span>
+
+<span class="s2">    The returned Signature will have `cls`/`self` parameters removed if `remove_owner` is `True` and</span>
+
+<span class="s2">    `tuple[...]` converted to `tuple(...)` in the `return_annotation`.</span>
+
+<span class="s2">    </span><span class="se">&quot;&quot;</span><span class="s2">&quot;</span>
+
+    <span class="k">return</span> <span class="n">tidy_signature</span><span class="p">(</span>
+
+        <span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span>
+
+        <span class="n">sig</span><span class="o">=</span><span class="n">inspect</span><span class="p">.</span><span class="n">signature</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">follow_wrapped</span><span class="o">=</span><span class="n">follow_wrapped</span><span class="p">),</span>
+
+        <span class="n">force_tuple_return</span><span class="o">=</span><span class="n">force_tuple_return</span><span class="p">,</span>
+
+        <span class="n">remove_owner</span><span class="o">=</span><span class="n">remove_owner</span><span class="p">,</span>
+
+    <span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h3 id="tidy_signature">tidy_signature</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">tidy_signature</span><span class="p">(</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
+    <span class="n">sig</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Signature</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">force_tuple_return</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">remove_owner</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Signature</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">tidy_signature</span><span class="p">(</span>
+
+    <span class="n">fn</span><span class="o">:</span> <span class="n">Callable</span><span class="p">[...,</span> <span class="kr">Any</span><span class="p">],</span>
+
+    <span class="n">sig</span><span class="o">:</span> <span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="p">,</span>
+
+    <span class="o">*</span><span class="p">,</span>
+
+    <span class="n">force_tuple_return</span><span class="o">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kr">False</span><span class="p">,</span>
+
+    <span class="n">remove_owner</span><span class="o">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kr">False</span><span class="p">,</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="o">:</span>
+
+    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kr">True</span><span class="p">)</span>
+
+    <span class="n">sig</span> <span class="o">=</span> <span class="n">sig</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">return_annotation</span><span class="o">=</span><span class="n">type_hints</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;return&quot;</span><span class="p">,</span> <span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span><span class="p">))</span>
+
+    <span class="kr">return</span> <span class="n">sig</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span>
+
+        <span class="n">parameters</span><span class="o">=</span><span class="p">[</span>
+
+            <span class="n">p</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">annotation</span><span class="o">=</span><span class="n">type_hints</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">.</span><span class="n">annotation</span><span class="p">))</span>
+
+            <span class="n">for</span> <span class="n">p</span> <span class="kr">in</span> <span class="n">sig</span><span class="p">.</span><span class="n">parameters</span><span class="p">.</span><span class="n">values</span><span class="p">()</span>
+
+            <span class="nf">if</span> <span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">name</span> <span class="kr">not</span> <span class="kr">in</span> <span class="p">(</span><span class="s">&quot;cls&quot;</span><span class="p">,</span> <span class="s">&quot;self&quot;</span><span class="p">)</span> <span class="nf">if</span> <span class="n">remove_owner</span> <span class="n">else</span> <span class="kr">True</span><span class="p">)</span>
+
+        <span class="p">],</span>
+
+        <span class="n">return_annotation</span><span class="o">=</span><span class="p">(</span>
+
+            <span class="n">sig</span><span class="p">.</span><span class="n">empty</span>
+
+            <span class="nf">if</span> <span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span> <span class="n">is</span> <span class="n">sig</span><span class="p">.</span><span class="n">empty</span>
+
+            <span class="n">else</span> <span class="n">_tidy_return</span><span class="p">(</span><span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span><span class="p">,</span> <span class="n">force_tuple_return</span><span class="o">=</span><span class="n">force_tuple_return</span><span class="p">)</span>
+
+        <span class="p">),</span>
+
+    <span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h2 id="classes">Classes</h2>
+<h3 id="nonetype">NoneType</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">NoneType</span><span class="p">(</span>
+    <span class="o">/</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span>
+</code></pre></div>
+                
+              
+              
+                
+
+
+              
+            </article>
+          </div>
+        </div>
+        
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../patches/" title="Patches" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Patches
+              </span>
+            </div>
+          </a>
+        
+        
+          <a href="../utils/" title="Utils" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Next
+                </span>
+                Utils
+              </span>
+            </div>
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-forward md-footer-nav__button"></i>
+            </div>
+          </a>
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        Powered by
+        <a href="http://timothycrosley.github.io/portray">portray.</a>
+        You too can
+        <a href="http://timothycrosley.github.io/portray">
+          portray</a>
+        your Python project well using automatic documentation.
+      </div>
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    <div class="md-dialog" data-md-component="dialog">
+      <div class="md-dialog__inner md-typeset"></div>
+    </div>
+    <script id="__config" type="application/json">{"base": "../../../..", "features": [], "translations": {"clipboard.copy": "Copy to clipboard", "clipboard.copied": "Copied to clipboard", "search.config.lang": "en", "search.config.pipeline": "trimmer, stopWordFilter", "search.config.separator": "[\\s\\-]+", "search.placeholder": "Search", "search.result.placeholder": "Type to start searching", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.term.missing": "Missing", "select.version.title": "Select version"}, "search": "../../../../assets/javascripts/workers/search.f8263e09.min.js", "version": null}</script>
+    
+    
+      <script src="../../../../assets/javascripts/bundle.4fc53ad4.min.js"></script>
+      
+    
+  </body>
+</html>
