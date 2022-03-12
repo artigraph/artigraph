@@ -11,7 +11,7 @@ Contributions can be submitted via [Pull Requests](https://github.com/lfai/artig
 - be submitted under the Apache 2.0 license.
 - include a [Developer Certificate of Origin signoff](https://wiki.linuxfoundation.org/dco) (`git commit -s`)
 - include tests and documentation
-- match the [Coding Style](#Coding-Style)
+- match the [Coding Style](#coding-style)
 
 Project committers will review the contribution in a timely manner and advise of any changes needed to merge the request.
 
