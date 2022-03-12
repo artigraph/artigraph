@@ -2,7 +2,7 @@
 
 Thank you for your interest in contributing to Artigraph! This document explains our contribution process and procedures.
 
-If you just need help or have a question, refer to [SUPPORT.md](SUPPORT.md).
+If you just need help or have a question, refer to our [support page](SUPPORT.md).
 
 ## How to Contribute a Bug Fix or Enhancement
 
