@@ -10,8 +10,8 @@ Artigraph manages bug and enhancements via [Issues](https://github.com/lfai/arti
 
 ## How to Report a Security Vulnerability
 
-If you think you've found a potential vulnerability in Artigraph, follow the steps in the [SECURITY.md](SECURITY.md) to responsibly disclose it.
+If you think you've found a potential vulnerability in Artigraph, follow the steps in the [security policy](SECURITY.md) to responsibly disclose it.
 
 ## How to Contribute
 
-Please refer to [CONTRIBUTING.md](CONTRIBUTING.md) to make a project contribution.
+We'd love to have your contribution - please refer to our [contributing page](CONTRIBUTING.md) for direction!

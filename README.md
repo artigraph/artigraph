@@ -87,7 +87,7 @@ INFO:root:      /tmp/test-graph/spend/7564053533177891797/spend.json: 42.0
 
 ## Community
 
-Everyone is welcome to join the community - learn more in [SUPPORT.md](SUPPORT.md) and [CONTRIBUTING.md](CONTRIBUTING.md)!
+Everyone is welcome to join the community - learn more in out [support](SUPPORT.md) and [contributing](CONTRIBUTING.md) pages!
 
 ## Presentations
 
