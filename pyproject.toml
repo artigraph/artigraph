@@ -91,6 +91,10 @@ typer = "^0.4.0"
 types-pyfarmhash = "^0.2.3"
 
 
+[tool.portray.mkdocs]
+edit_uri = 'edit/golden/'
+
+
 [tool.pylint.format]
 max-line-length = "100"
 

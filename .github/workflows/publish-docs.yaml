@@ -14,7 +14,10 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade poetry
-        poetry install --dev
+        poetry install
     - name: Publish with Portray
       run: |
+        # Fetch the gh-pages branch so portray commits on top of existing commits.
+        git fetch origin gh-pages
+        git branch gh-pages origin/gh-pages
         poetry run portray on_github_pages
