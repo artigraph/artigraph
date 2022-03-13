@@ -14,7 +14,7 @@
     
     
       
-        <title>Type Hints - starter-docs</title>
+        <title>Type Hints - artigraph</title>
       
     
     
@@ -78,7 +78,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="starter-docs" class="md-header__button md-logo" aria-label="starter-docs" data-md-component="logo">
+    <a href="../../../.." title="artigraph" class="md-header__button md-logo" aria-label="artigraph" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -91,7 +91,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            starter-docs
+            artigraph
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +178,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="starter-docs" class="md-nav__button md-logo" aria-label="starter-docs" data-md-component="logo">
+    <a href="../../../.." title="artigraph" class="md-nav__button md-logo" aria-label="artigraph" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    starter-docs
+    artigraph
   </label>
   
     <div class="md-nav__source">
@@ -861,13 +861,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#is_typeddict" class="md-nav__link">
-    is_typeddict
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#is_union" class="md-nav__link">
     is_union
   </a>
@@ -1341,13 +1334,6 @@
           <li class="md-nav__item">
   <a href="#is_optional_hint" class="md-nav__link">
     is_optional_hint
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#is_typeddict" class="md-nav__link">
-    is_typeddict
   </a>
   
 </li>
@@ -1878,7 +1864,7 @@
 <h3 id="get_class_type_vars">get_class_type_vars</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_type_vars</span><span class="p">(</span>
     <span class="n">klass</span><span class="p">:</span> <span class="nb">type</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Get the bound type variables from a class</p>
@@ -1967,32 +1953,6 @@
 </code></pre></div>
 
 </details>
-<h3 id="is_typeddict">is_typeddict</h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_typeddict</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
-</code></pre></div>
-
-<details class="example">
-<summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code>    <span class="k">def</span> <span class="nf">is_typeddict</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-
-        <span class="c1"># mypy doesn&#39;t know of typing._TypedDictMeta, but `type: ignore` would be &quot;unused&quot; (and error)</span>
-
-        <span class="c1"># on other python versions.</span>
-
-        <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-
-            <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_TypedDict</span> <span class="k">as</span> <span class="n">_TypedDictMeta</span>
-
-        <span class="k">else</span><span class="p">:</span>
-
-            <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_TypedDictMeta</span>
-
-        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_TypedDictMeta</span><span class="p">)</span>
-</code></pre></div>
-
-</details>
 <h3 id="is_union">is_union</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_union</span><span class="p">(</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
@@ -2001,9 +1961,13 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code>    <span class="n">def</span> <span class="n">is_union</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span> <span class="kr">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">bool</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@no_type_check</span><span class="w"></span>
 
-        <span class="kr">return</span> <span class="n">type_</span> <span class="n">is</span> <span class="n">Union</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">is_union</span><span class="p">(</span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">bool</span><span class="p">:</span><span class="w"></span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="err">`</span><span class="ow">Union</span><span class="o">[</span><span class="n">int, str</span><span class="o">]</span><span class="err">`</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="err">`</span><span class="nc">int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">str</span><span class="err">`</span><span class="w"></span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type_</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">Union</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">type_</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">types</span><span class="p">.</span><span class="n">UnionType</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">noqa</span><span class="p">:</span><span class="w"> </span><span class="n">E721</span><span class="w"></span>
 </code></pre></div>
 
 </details>
@@ -2054,7 +2018,7 @@
 </details>
 <h3 id="signature">signature</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">signature</span><span class="p">(</span>
-    <span class="n">fn</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">follow_wrapped</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">force_tuple_return</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -2105,7 +2069,7 @@
 </details>
 <h3 id="tidy_signature">tidy_signature</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">tidy_signature</span><span class="p">(</span>
-    <span class="n">fn</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">,</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
     <span class="n">sig</span><span class="p">:</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Signature</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">force_tuple_return</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>

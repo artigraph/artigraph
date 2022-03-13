@@ -14,7 +14,7 @@
     
     
       
-        <title>Graphs - starter-docs</title>
+        <title>Graphs - artigraph</title>
       
     
     
@@ -78,7 +78,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../.." title="starter-docs" class="md-header__button md-logo" aria-label="starter-docs" data-md-component="logo">
+    <a href="../../.." title="artigraph" class="md-header__button md-logo" aria-label="artigraph" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -91,7 +91,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            starter-docs
+            artigraph
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +178,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../.." title="starter-docs" class="md-nav__button md-logo" aria-label="starter-docs" data-md-component="logo">
+    <a href="../../.." title="artigraph" class="md-nav__button md-logo" aria-label="artigraph" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    starter-docs
+    artigraph
   </label>
   
     <div class="md-nav__source">
@@ -2698,8 +2698,8 @@
 <h2 id="functions">Functions</h2>
 <h3 id="requires_sealed">requires_sealed</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">requires_sealed</span><span class="p">(</span>
-    <span class="n">fn</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
+    <span class="n">fn</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">~</span><span class="n">_Return</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">~</span><span class="n">_Return</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">
@@ -3303,7 +3303,7 @@
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">key</span><span class="p">,</span>
-    <span class="n">default</span><span class="o">=&lt;</span><span class="nb">object</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x104700b00</span><span class="o">&gt;</span>
+    <span class="n">default</span><span class="o">=&lt;</span><span class="nb">object</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7efeed0bfed0</span><span class="o">&gt;</span>
 <span class="p">)</span>
 </code></pre></div>
 
@@ -3497,7 +3497,8 @@
 </code></pre></div>
 
 <p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value.</p>
-<p>If key is not found, default is returned if given, otherwise KeyError is raised</p>
+<p>If the key is not found, return the default if given; otherwise,
+raise a KeyError.</p>
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">pop</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
@@ -4022,8 +4023,8 @@ In either case, this is followed by: for k in F:  D[k] = F[k]</p>
 <h4 id="walk">walk</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">walk</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">root</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">()</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterator</span>
+    <span class="n">root</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="o">~</span><span class="n">_K_str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="o">~</span><span class="n">_K_str</span><span class="p">,</span> <span class="o">~</span><span class="n">_V</span><span class="p">]]</span>
 </code></pre></div>
 
 <details class="example">

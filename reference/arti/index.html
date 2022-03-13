@@ -14,7 +14,7 @@
     
     
       
-        <title>Index - starter-docs</title>
+        <title>Index - artigraph</title>
       
     
     
@@ -78,7 +78,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../.." title="starter-docs" class="md-header__button md-logo" aria-label="starter-docs" data-md-component="logo">
+    <a href="../.." title="artigraph" class="md-header__button md-logo" aria-label="artigraph" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -91,7 +91,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            starter-docs
+            artigraph
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +178,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../.." title="starter-docs" class="md-nav__button md-logo" aria-label="starter-docs" data-md-component="logo">
+    <a href="../.." title="artigraph" class="md-nav__button md-logo" aria-label="artigraph" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    starter-docs
+    artigraph
   </label>
   
     <div class="md-nav__source">
@@ -6912,7 +6912,7 @@
     <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">validate_outputs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">version</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">versions</span><span class="o">.</span><span class="n">Version</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]],</span> <span class="nb">type</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">producers</span><span class="o">.</span><span class="n">Producer</span><span class="p">]]</span>
 </code></pre></div>
 
 <details class="example">
@@ -7009,7 +7009,7 @@
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
     <span class="nb">format</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span><span class="p">,</span>
-    <span class="n">storage_partitions</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">storage_partitions</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">],</span>
     <span class="n">view</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">View</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
 </code></pre></div>
@@ -7053,7 +7053,7 @@
 <h3 id="register_reader">register_reader</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">register_reader</span><span class="p">(</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="o">~</span><span class="n">REGISTERED</span><span class="p">],</span> <span class="o">~</span><span class="n">REGISTERED</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Decorator for registering a function.</p>
@@ -7117,7 +7117,7 @@
 <h3 id="register_writer">register_writer</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">register_writer</span><span class="p">(</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="o">~</span><span class="n">REGISTERED</span><span class="p">],</span> <span class="o">~</span><span class="n">REGISTERED</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Decorator for registering a function.</p>
@@ -7882,7 +7882,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="validate_format">validate_format</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_format</span><span class="p">(</span>
     <span class="nb">format</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span><span class="p">,</span>
-    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span>
 </code></pre></div>
 
@@ -7905,7 +7905,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="validate_storage">validate_storage</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_storage</span><span class="p">(</span>
     <span class="n">storage</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">Storage</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">Storage</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 </code></pre></div>
 
@@ -8096,7 +8096,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">discover_storage_partitions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">input_fingerprints</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">],</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="n">frozendict</span><span class="p">({})</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">
@@ -8376,7 +8376,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="connect">connect</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Backend</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterator</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="o">~</span><span class="n">_Backend</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">
@@ -8545,7 +8545,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span><span class="p">,</span>
     <span class="n">input_fingerprints</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">],</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="n">frozendict</span><span class="p">({})</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Read all known Partitions for this Storage spec.</p>
@@ -8583,7 +8583,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
     <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">,</span>
     <span class="n">artifact_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Read the known Partitions for the named Artifact in a specific Graph snapshot.</p>
@@ -8628,7 +8628,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_artifact_and_graph_partitions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span><span class="p">,</span>
-    <span class="n">partitions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">,</span>
+    <span class="n">partitions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
     <span class="n">graph_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">,</span>
     <span class="n">artifact_key</span><span class="p">:</span> <span class="nb">str</span>
@@ -8667,7 +8667,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_artifact_partitions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span><span class="p">,</span>
-    <span class="n">partitions</span><span class="p">:</span> <span class="nb">tuple</span>
+    <span class="n">partitions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -8691,7 +8691,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
     <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">,</span>
     <span class="n">artifact_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span><span class="p">,</span>
-    <span class="n">partitions</span><span class="p">:</span> <span class="nb">tuple</span>
+    <span class="n">partitions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
@@ -11054,7 +11054,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="get_class_for">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;PartitionKey&#39;</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">
@@ -12465,7 +12465,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="validate_format_1">validate_format</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_format</span><span class="p">(</span>
     <span class="nb">format</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span><span class="p">,</span>
-    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span>
 </code></pre></div>
 
@@ -12488,7 +12488,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="validate_storage_1">validate_storage</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_storage</span><span class="p">(</span>
     <span class="n">storage</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">Storage</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">Storage</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 </code></pre></div>
 
@@ -12679,7 +12679,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">discover_storage_partitions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">input_fingerprints</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">],</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="n">frozendict</span><span class="p">({})</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">
@@ -13306,7 +13306,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">discover_partitions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">input_fingerprints</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">],</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="n">frozendict</span><span class="p">({})</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="o">~</span><span class="n">_StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">
@@ -13664,7 +13664,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="validate_keys">validate_keys</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_keys</span><span class="p">(</span>
     <span class="n">keys</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">],</span>
-    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">]</span>
 </code></pre></div>
 
@@ -14329,7 +14329,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
 </code></pre></div>
 
@@ -14347,7 +14347,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_system</span><span class="p">(</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
 </code></pre></div>
 
@@ -14365,7 +14365,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_artigraph</span><span class="p">(</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
 </code></pre></div>
 
@@ -14383,7 +14383,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_system</span><span class="p">(</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
 </code></pre></div>
 
@@ -14688,8 +14688,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="register_adapter">register_adapter</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">register_adapter</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">adapter</span><span class="p">:</span> <span class="nb">type</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span>
+    <span class="n">adapter</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeAdapter</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeAdapter</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">
@@ -14705,7 +14705,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
 </code></pre></div>
 
@@ -14728,7 +14728,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
 </code></pre></div>
 
@@ -15186,7 +15186,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
     <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
     <span class="n">validation_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">

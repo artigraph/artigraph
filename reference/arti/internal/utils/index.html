@@ -14,7 +14,7 @@
     
     
       
-        <title>Utils - starter-docs</title>
+        <title>Utils - artigraph</title>
       
     
     
@@ -78,7 +78,7 @@
 
 <header class="md-header" data-md-component="header">
   <nav class="md-header__inner md-grid" aria-label="Header">
-    <a href="../../../.." title="starter-docs" class="md-header__button md-logo" aria-label="starter-docs" data-md-component="logo">
+    <a href="../../../.." title="artigraph" class="md-header__button md-logo" aria-label="artigraph" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
@@ -91,7 +91,7 @@
       <div class="md-header__ellipsis">
         <div class="md-header__topic">
           <span class="md-ellipsis">
-            starter-docs
+            artigraph
           </span>
         </div>
         <div class="md-header__topic" data-md-component="header-topic">
@@ -178,13 +178,13 @@
 
 <nav class="md-nav md-nav--primary" aria-label="Navigation" data-md-level="0">
   <label class="md-nav__title" for="__drawer">
-    <a href="../../../.." title="starter-docs" class="md-nav__button md-logo" aria-label="starter-docs" data-md-component="logo">
+    <a href="../../../.." title="artigraph" class="md-nav__button md-logo" aria-label="artigraph" data-md-component="logo">
       
   
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M12 8a3 3 0 0 0 3-3 3 3 0 0 0-3-3 3 3 0 0 0-3 3 3 3 0 0 0 3 3m0 3.54C9.64 9.35 6.5 8 3 8v11c3.5 0 6.64 1.35 9 3.54 2.36-2.19 5.5-3.54 9-3.54V8c-3.5 0-6.64 1.35-9 3.54z"/></svg>
 
     </a>
-    starter-docs
+    artigraph
   </label>
   
     <div class="md-nav__source">
@@ -1403,6 +1403,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#bit_count" class="md-nav__link">
+    bit_count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#bit_length" class="md-nav__link">
     bit_length
   </a>
@@ -1467,6 +1474,13 @@
           <li class="md-nav__item">
   <a href="#as_integer_ratio_1" class="md-nav__link">
     as_integer_ratio
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bit_count_1" class="md-nav__link">
+    bit_count
   </a>
   
 </li>
@@ -2442,6 +2456,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#bit_count" class="md-nav__link">
+    bit_count
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#bit_length" class="md-nav__link">
     bit_length
   </a>
@@ -2506,6 +2527,13 @@
           <li class="md-nav__item">
   <a href="#as_integer_ratio_1" class="md-nav__link">
     as_integer_ratio
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#bit_count_1" class="md-nav__link">
+    bit_count
   </a>
   
 </li>
@@ -3197,11 +3225,11 @@
 <h2 id="functions">Functions</h2>
 <h3 id="import_submodules">import_submodules</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">import_submodules</span><span class="p">(</span>
-    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span>
+    <span class="n">path</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">lock</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">built</span><span class="o">-</span><span class="ow">in</span> <span class="n">function</span> <span class="n">allocate_lock</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">unlocked</span> <span class="n">_thread</span><span class="o">.</span><span class="n">lock</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x10509cfc0</span><span class="o">&gt;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span>
+    <span class="n">lock</span><span class="p">:</span> <span class="o">&lt;</span><span class="n">built</span><span class="o">-</span><span class="ow">in</span> <span class="n">function</span> <span class="n">allocate_lock</span><span class="o">&gt;</span> <span class="o">=</span> <span class="o">&lt;</span><span class="n">unlocked</span> <span class="n">_thread</span><span class="o">.</span><span class="n">lock</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7efeeb27ff80</span><span class="o">&gt;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">module</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Recursively import submodules.</p>
@@ -3280,7 +3308,7 @@ cycles. To reduce these issues, avoid calling during module definition.</p>
 <h3 id="named_temporary_file">named_temporary_file</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">named_temporary_file</span><span class="p">(</span>
     <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;w+b&#39;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Generator</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Generator</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">IO</span><span class="p">[</span><span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Minimal alternative to tempfile.NamedTemporaryFile that can be re-opened on Windows.</p>
@@ -3345,7 +3373,7 @@ cycles. To reduce these issues, avoid calling during module definition.</p>
 </details>
 <h3 id="register">register</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">register</span><span class="p">(</span>
-    <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+    <span class="n">registry</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="o">~</span><span class="n">_K</span><span class="p">,</span> <span class="o">~</span><span class="n">_V</span><span class="p">],</span>
     <span class="n">key</span><span class="p">:</span> <span class="o">~</span><span class="n">_K</span><span class="p">,</span>
     <span class="n">value</span><span class="p">:</span> <span class="o">~</span><span class="n">_V</span><span class="p">,</span>
     <span class="n">get_priority</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="o">~</span><span class="n">_V</span><span class="p">],</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -3418,7 +3446,7 @@ cycles. To reduce these issues, avoid calling during module definition.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">TypedBox</span><span class="p">(</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
     <span class="n">default_box</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">default_box_attr</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="o">&lt;</span><span class="nb">object</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x104700b00</span><span class="o">&gt;</span><span class="p">,</span>
+    <span class="n">default_box_attr</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="o">&lt;</span><span class="nb">object</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7efeed0bfed0</span><span class="o">&gt;</span><span class="p">,</span>
     <span class="n">default_box_none_transform</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">frozen_box</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">camel_killer_box</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
@@ -4029,7 +4057,7 @@ cycles. To reduce these issues, avoid calling during module definition.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="n">key</span><span class="p">,</span>
-    <span class="n">default</span><span class="o">=&lt;</span><span class="nb">object</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x104700b00</span><span class="o">&gt;</span>
+    <span class="n">default</span><span class="o">=&lt;</span><span class="nb">object</span> <span class="nb">object</span> <span class="n">at</span> <span class="mh">0x7efeed0bfed0</span><span class="o">&gt;</span>
 <span class="p">)</span>
 </code></pre></div>
 
@@ -4223,7 +4251,8 @@ cycles. To reduce these issues, avoid calling during module definition.</p>
 </code></pre></div>
 
 <p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value.</p>
-<p>If key is not found, default is returned if given, otherwise KeyError is raised</p>
+<p>If the key is not found, return the default if given; otherwise,
+raise a KeyError.</p>
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">pop</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">key</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">args</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
@@ -4748,8 +4777,8 @@ In either case, this is followed by: for k in F:  D[k] = F[k]</p>
 <h4 id="walk">walk</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">walk</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">root</span><span class="p">:</span> <span class="nb">tuple</span> <span class="o">=</span> <span class="p">()</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterator</span>
+    <span class="n">root</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="o">~</span><span class="n">_K_str</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="o">~</span><span class="n">_K_str</span><span class="p">,</span> <span class="o">~</span><span class="n">_V</span><span class="p">]]</span>
 </code></pre></div>
 
 <details class="example">
@@ -4791,7 +4820,7 @@ In either case, this is followed by: for k in F:  D[k] = F[k]</p>
 <hr />
 <h3 id="classproperty">classproperty</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">classproperty</span><span class="p">(</span>
-    <span class="n">f</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
+    <span class="n">f</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">~</span><span class="n">PropReturn</span><span class="p">]</span>
 <span class="p">)</span>
 </code></pre></div>
 
@@ -4826,7 +4855,7 @@ In either case, this is followed by: for k in F:  D[k] = F[k]</p>
 </ul>
 <h3 id="dispatch">dispatch</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">dispatch</span><span class="p">(</span>
-    <span class="n">func</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
+    <span class="n">func</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">~</span><span class="n">RETURN</span><span class="p">]</span>
 <span class="p">)</span>
 </code></pre></div>
 
@@ -5066,7 +5095,8 @@ otherwise cache misses will evaluate.</p>
 </code></pre></div>
 
 <p>D.pop(k[,d]) -&gt; v, remove specified key and return the corresponding value.</p>
-<p>If key is not found, default is returned if given, otherwise KeyError is raised</p>
+<p>If the key is not found, return the default if given; otherwise,
+raise a KeyError.</p>
 <h4 id="popitem_1">popitem</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">popitem</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
@@ -5081,7 +5111,7 @@ Raises KeyError if the dict is empty.</p>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">register</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="o">~</span><span class="n">REGISTERED</span><span class="p">],</span> <span class="o">~</span><span class="n">REGISTERED</span><span class="p">]</span>
 </code></pre></div>
 
 <p>Decorator for registering a function.</p>
@@ -5461,6 +5491,25 @@ and with a positive denominator.</p>
 </blockquote>
 </blockquote>
 </blockquote>
+<h4 id="bit_count">bit_count</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">bit_count</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="o">/</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p>Number of ones in the binary representation of the absolute value of self.</p>
+<p>Also known as the population count.</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>bin(13)
+'0b1101'
+(13).bit_count()
+3</p>
+</blockquote>
+</blockquote>
+</blockquote>
 <h4 id="bit_length">bit_length</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">bit_length</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
@@ -5607,6 +5656,25 @@ and with a positive denominator.</p>
 (-10, 1)
 (0).as_integer_ratio()
 (0, 1)</p>
+</blockquote>
+</blockquote>
+</blockquote>
+<h4 id="bit_count_1">bit_count</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">bit_count</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="o">/</span>
+<span class="p">)</span>
+</code></pre></div>
+
+<p>Number of ones in the binary representation of the absolute value of self.</p>
+<p>Also known as the population count.</p>
+<blockquote>
+<blockquote>
+<blockquote>
+<p>bin(13)
+'0b1101'
+(13).bit_count()
+3</p>
 </blockquote>
 </blockquote>
 </blockquote>
