@@ -54,11 +54,3 @@ repos:
         language: system
         pass_filenames: false
         types: [python]
-      # trufflehog only works against commits (not the index), which prevents use in the pre-commit hook. It could run
-      # as post-commit, but that introduces a lot of noise. Instead, we'll just run before push.
-      - id: trufflehog
-        name: trufflehog
-        entry: trufflehog --exclude_paths .trufflehog_ignore.txt --regex .
-        language: system
-        pass_filenames: false
-        stages: [push]
