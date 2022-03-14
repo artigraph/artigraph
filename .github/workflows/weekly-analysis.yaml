@@ -1,0 +1,38 @@
+name: Weekly Analysis
+on:
+  schedule:
+    - cron: '00 08 * * 1'
+  workflow_dispatch:
+
+jobs:
+  repolinter:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16.x'
+      - name: Install dependencies
+        run: npm install -g repolinter
+      - name: Run repolinter
+        run: repolinter lint --dryRun -g $GITHUB_SERVER_URL/$GITHUB_REPOSITORY
+  trufflehog:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+      with:
+        fetch-depth: 0
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: 3.10.2
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade poetry
+        poetry install --dev
+    - name: Run trufflehog
+      run: |
+        poetry run trufflehog --exclude_paths .trufflehog_ignore.txt --regex .
