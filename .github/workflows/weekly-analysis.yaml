@@ -32,7 +32,7 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade poetry
-        poetry install --dev
+        poetry install
     - name: Run trufflehog
       run: |
         poetry run trufflehog --exclude_paths .trufflehog_ignore.txt --regex .
