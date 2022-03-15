@@ -38,7 +38,7 @@ namespace_packages = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["gcsfs", "sh", ]
+module = ["gcp_storage_emulator.*", "gcsfs", "sh", ]
 ignore_missing_imports = true
 
 
@@ -62,7 +62,6 @@ pydantic = "^1.9.0"
 pyfarmhash = ">=0.2.2,<0.4.0"
 python = "^3.9"
 python-box = "^5.4.1"
-requests = "^2.27.1"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.4"
@@ -70,6 +69,7 @@ black = "22.1.0"
 blacken-docs = "^1.12.1"
 coverage = {version = "^6.3", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
+gcp-storage-emulator = {git = "https://github.com/oittaa/gcp-storage-emulator.git", rev = "main"} # Waiting for next release to fix https://github.com/oittaa/gcp-storage-emulator/issues/147
 ipdb = "^0.13.9"
 ipython = "^8.1.1"
 isort = "5.10.1"
@@ -91,7 +91,6 @@ sh = "^1.14.2"
 truffleHog = "^2.2.1"
 typer = "^0.4.0"
 types-pyfarmhash = "^0.2.3"
-types-requests = "^2.27.12"
 
 
 [tool.portray.mkdocs]
