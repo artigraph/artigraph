@@ -37,6 +37,10 @@ mypy_path = "$MYPY_CONFIG_FILE_DIR/src,$MYPY_CONFIG_FILE_DIR/stubs"
 namespace_packages = true
 strict = true
 
+[[tool.mypy.overrides]]
+module = ["sh", ]
+ignore_missing_imports = true
+
 
 [tool.poetry]
 name = "arti"
@@ -111,6 +115,9 @@ disable = """
     too-few-public-methods,
     unsubscriptable-object,
 """
+
+[tool.pylint.TYPECHECK]
+generated-members="sh"
 
 
 [tool.pytest.ini_options]
