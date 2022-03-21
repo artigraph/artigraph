@@ -1343,7 +1343,7 @@ termcolor = ">=1.1.0"
 
 [[package]]
 name = "python-box"
-version = "5.4.1"
+version = "6.0.1"
 description = "Advanced Python dictionaries with dot notation access"
 category = "main"
 optional = false
@@ -1351,11 +1351,11 @@ python-versions = ">=3.6"
 
 [package.extras]
 pyyaml = ["pyyaml"]
-all = ["ruamel.yaml", "toml", "msgpack"]
+all = ["ruamel.yaml (>=0.17)", "toml", "msgpack"]
 msgpack = ["msgpack"]
-"ruamel.yaml" = ["ruamel.yaml"]
+"ruamel.yaml" = ["ruamel.yaml (>=0.17)"]
 toml = ["toml"]
-yaml = ["ruamel.yaml"]
+yaml = ["ruamel.yaml (>=0.17)"]
 
 [[package]]
 name = "python-dateutil"
@@ -1699,7 +1699,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "4dbe5eb6da4e40fb69b757e8901160f86adf7195187c52ed277b5ebeb87c4c13"
+content-hash = "9d3659e633ecdc787b1263a304e323a87cc9cf068c88f45f27ae1dd2125a5a1d"
 
 [metadata.files]
 aiohttp = [
@@ -2583,8 +2583,20 @@ pytest-sugar = [
     {file = "pytest-sugar-0.9.4.tar.gz", hash = "sha256:b1b2186b0a72aada6859bea2a5764145e3aaa2c1cfbb23c3a19b5f7b697563d3"},
 ]
 python-box = [
-    {file = "python-box-5.4.1.tar.gz", hash = "sha256:b68e0f8abc86f3deda751b3390f64df64a0989459de51ba4db949662a7b4d8ac"},
-    {file = "python_box-5.4.1-py3-none-any.whl", hash = "sha256:60ae9156de34cf92b899bd099580950df70a5b0813e67a3310a1cdd1976457fa"},
+    {file = "python-box-6.0.1.tar.gz", hash = "sha256:3f394c69e1c484eb18a1a1d6e969428ec9cc70b5f47b921da798c2e41b15d1f7"},
+    {file = "python_box-6.0.1-cp310-cp310-macosx_10_15_x86_64.whl", hash = "sha256:214bb6c1305ec937a8f30f01fe76eeff6307bb783c1ee38979ae433514eed9cf"},
+    {file = "python_box-6.0.1-cp310-cp310-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:bcd881fedb11f55ce1ec59889e2dc3da98b3cd54126f12c4a3b2e0cb3e1dc1e5"},
+    {file = "python_box-6.0.1-cp310-cp310-win_amd64.whl", hash = "sha256:15419a9b1883f3360f8ad8dd767e8ce20f2006e156012126d208c00fcc7fc6db"},
+    {file = "python_box-6.0.1-cp37-cp37m-macosx_10_14_x86_64.whl", hash = "sha256:6793311354ba11c9bdc4a1d40752bcc23a5ba8687c8929dba150e11af592de5e"},
+    {file = "python_box-6.0.1-cp37-cp37m-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:3f26c67d1ca48b96097d73b42b66187e0b11e954f61234784f3619a969a8b2bb"},
+    {file = "python_box-6.0.1-cp37-cp37m-win_amd64.whl", hash = "sha256:802d79fdec6bafc0936ca2a59a3478e9ae95f786e68cc23dcd98a4ad44933c00"},
+    {file = "python_box-6.0.1-cp38-cp38-macosx_10_14_x86_64.whl", hash = "sha256:681f0d05a5db3385ae1b949035a57dd4462aa58f1f7a21df2eb29227f265e002"},
+    {file = "python_box-6.0.1-cp38-cp38-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5ed78335f808162798370949026494da4aeb1530d630a2d98801e107a3a791d3"},
+    {file = "python_box-6.0.1-cp38-cp38-win_amd64.whl", hash = "sha256:a4be4ea156fa9167fef5218ecaa53270ee60aa933fc7e3cc0864675a39b3ae5d"},
+    {file = "python_box-6.0.1-cp39-cp39-macosx_10_15_x86_64.whl", hash = "sha256:4f4a7aa7d57ec7b4182d35e275e9d2ee097e3541030e7bcdd15713404713017d"},
+    {file = "python_box-6.0.1-cp39-cp39-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:234e47576882ddc7df17d7fdbdacaa0e831738fb6619499ec84905f3504c6cdf"},
+    {file = "python_box-6.0.1-cp39-cp39-win_amd64.whl", hash = "sha256:0e37f753bf7031bf25fcf22107a4faa64230dcb81de602f79d9bf5b599f9ef5c"},
+    {file = "python_box-6.0.1-py3-none-any.whl", hash = "sha256:2966c58b7c47770a06ce4bed240556ac2f3f76f68c2ecb6db46123676a8cc8a0"},
 ]
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
