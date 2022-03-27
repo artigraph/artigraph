@@ -24,6 +24,10 @@ class BaseArtifact(Model):
     - type: spec of the data's structure, such as data types, nullable, etc.
     - format: the data's serialized format, such as CSV, Parquet, database native, etc.
     - storage: the data's persistent storage system, such as blob storage, database native, etc.
+
+    ```python
+    x=5#junk
+    ```
     """
 
     # NOTE: Narrow the fields that affect the fingerprint to minimize changes (which trigger
