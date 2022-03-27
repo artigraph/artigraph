@@ -1,7 +1,7 @@
 import logging
 from datetime import date
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 from arti import Annotation, Artifact, Graph, producer
 from arti.formats.json import JSON
@@ -36,7 +36,7 @@ class TotalSpend(Artifact):
 
 @producer(version=SemVer(major=1, minor=0, patch=0))
 def aggregate_transactions(
-    transactions: Annotated[list[dict], Transactions]
+    transactions: Annotated[list[dict], Transactions]  # type: ignore
 ) -> Annotated[float, TotalSpend]:
     return sum(txn["amount"] for txn in transactions)
 
@@ -53,11 +53,11 @@ with Graph(name="test-graph") as g:
 if __name__ == "__main__":
     logging.getLogger().setLevel(logging.INFO)
 
-    def print_partition_info(artifact: Artifact, annotation) -> None:
+    def print_partition_info(artifact: Artifact, annotation: Any) -> None:
         with g.backend.connect() as backend:
             for partition in backend.read_artifact_partitions(artifact):
                 contents = g.read(artifact, annotation=annotation, storage_partitions=(partition,))
-                logging.info(f"\t{partition.path}: {contents}")
+                logging.info(f"\t{partition.path}: {contents}")  # type: ignore
 
     logging.info("Writing mock Transactions data:")
     g.write(
@@ -75,4 +75,4 @@ if __name__ == "__main__":
     g.build()
 
     logging.info("Final Spend data:")
-    print_partition_info(g.artifacts.spend, annotation=float)
+    print_partition_info(g.artifacts.spend, annotation=float)  # type: ignore

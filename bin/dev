@@ -17,7 +17,7 @@ app.add_typer(worktree)
 def worktree_add(
     branch: str,
     create: bool = typer.Option(False, "-c", help="Create a new branch from this branch"),
-):
+) -> None:
     """Add a new worktree with a separate direnv environment."""
     if create:
         typer.secho(f"Creating `{branch}` branch...", fg="green")

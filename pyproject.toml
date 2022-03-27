@@ -33,7 +33,7 @@ profile = "black"
 
 [tool.mypy]
 explicit_package_bases = true
-files = "src/,tests/"
+files = "docs/,src/,tests/"
 mypy_path = "$MYPY_CONFIG_FILE_DIR/src,$MYPY_CONFIG_FILE_DIR/stubs"
 namespace_packages = true
 strict = true
