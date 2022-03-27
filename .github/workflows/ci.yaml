@@ -36,10 +36,12 @@ jobs:
         poetry install
     - name: code-checkers
       run: |
-        shopt -s nullglob # Ignore no glob matches below
-        poetry run bandit -ll -r src/
-        poetry run blacken-docs {**/,}*.{md,py}
-        poetry run pyupgrade --keep-runtime-typing --py39-plus {**/,}*.py
+        # Skip:
+        # - no-commit-to-branch since this will run on merged commits too
+        # - pytest so that we can run below with specific flags
+        SKIP=no-commit-to-branch,pytest poetry run pre-commit run -a
+        # We don't run trufflehog in pre-commit due to issues with new branches:
+        #   https://github.com/artigraph/artigraph/issues/188
         poetry run trufflehog --exclude_paths .trufflehog_ignore.txt --regex .
     - name: pytest
       run: |

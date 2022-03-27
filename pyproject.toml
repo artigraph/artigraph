@@ -80,10 +80,8 @@ pre-commit = "2.17.0"
 pylint = "^2.12.2"
 pytest = "6.2.5"
 pytest-benchmark = "3.4.1"
-pytest-black = "0.3.12"
 pytest-cov = "3.0.0"
 pytest-flake8 = "1.1.0"
-pytest-isort = "3.0.0"
 pytest-mypy = "0.9.1"
 pytest-sugar = "0.9.4"
 pyupgrade = "^2.31.1"
@@ -123,7 +121,7 @@ generated-members="sh"
 
 
 [tool.pytest.ini_options]
-addopts = "--black --cov --cov-report=term-missing --flake8 --isort --mypy --no-cov-on-fail "
+addopts = "--cov --cov-report=term-missing --flake8 --mypy --no-cov-on-fail "
 filterwarnings = [
     "error",
     # Filter flake8<->importlib-metadata deprecation
