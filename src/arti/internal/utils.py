@@ -3,12 +3,13 @@ import inspect
 import os.path
 import pkgutil
 import threading
-from collections.abc import Callable, Generator, Iterator, MutableMapping
+from collections.abc import Callable, Generator, Iterator, Mapping, MutableMapping
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
 from typing import (
     IO,
+    TYPE_CHECKING,
     Any,
     ClassVar,
     Generic,
@@ -20,8 +21,8 @@ from typing import (
     overload,
 )
 
+import frozendict.core as _frozendict_core
 from box import Box
-from frozendict.core import frozendict as _frozendict
 from multimethod import multidispatch
 
 from arti.internal.type_hints import lenient_issubclass, tidy_signature
@@ -110,16 +111,47 @@ class dispatch(multidispatch[RETURN]):
         return super().register(*args)  # type: ignore
 
 
-# frozendict is useful for models to preserve hashability (eg: key in a dict). Unfortunately, there
-# are issues deepcopying types.GenericAlias[1,2] (eg: using in a pydantic model). We can work around
-# this by replacing types.GenericAlias with typing.Generic (which returns a typing._GenericAlias).
+# frozendict is useful for models to preserve hashability (eg: key in a dict). However there are a
+# couple issues:
 #
-# NOTE: The GenericAlias deepcopy issue has been resolved in 3.9.8 and 3.10.1.
+# - In python <3.9.8 and <3.10.1, there are issues deepcopying types.GenericAlias[1,2] (eg: using
+# in a pydantic model). We can work around this by replacing types.GenericAlias with typing.Generic
+# (which returns a typing._GenericAlias).
+#
+# - There's an optimized C version, but it doesn't support json.dump[3] and has various other
+# slight incompatibilities (eg: exception messages differ, causing test annoyance). We work around
+# this by forcing the python version (from "frozendict.core").
+#
+# - It is marked with a py.typed file, but it certainly is not typed internally and mypy doesn't
+# recognize the wildcard imports (to pick C or py version) nor identify that it's a Generic. To work
+# around this, we explicitly have this `if TYPE_CHECKING` block to "trick" mypy.
+#
+# NOTE: This lib has has required an outsized maintenance burden given what it provides - we may
+# consider removing it completely and just "vendoring" a minimized version (eg: our own Mapping
+# subclass + __hash__ override) - we don't particularly care about incredible performance.
 #
 # 1: https://github.com/Marco-Sulla/python-frozendict/issues/29
 # 2: https://bugs.python.org/issue45167
-class frozendict(Generic[_K, _V], _frozendict[_K, _V]):
-    pass
+# 3: https://github.com/Marco-Sulla/python-frozendict/issues/47
+if TYPE_CHECKING:
+
+    class frozendict(Mapping[_K, _V]):
+        def __init__(self, *args: Any, **kwargs: Any) -> None:
+            ...
+
+        def __getitem__(self, key: _K) -> _V:
+            ...
+
+        def __iter__(self) -> Iterator[_K]:
+            ...
+
+        def __len__(self) -> int:
+            ...
+
+else:
+
+    class frozendict(Generic[_K, _V], _frozendict_core.frozendict[_K, _V]):
+        pass
 
 
 def import_submodules(
