@@ -288,7 +288,11 @@ class Producer(Model):
 
                 def map(**kwargs: StoragePartitions) -> PartitionDependencies:
                     return PartitionDependencies(
-                        {NotPartitioned: {name: partitions for name, partitions in kwargs.items()}}
+                        {
+                            NotPartitioned: frozendict(
+                                {name: partitions for name, partitions in kwargs.items()}
+                            )
+                        }
                     )
 
             # Narrow the map signature, which is validated below and used at graph build

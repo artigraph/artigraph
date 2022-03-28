@@ -1,15 +1,16 @@
+from __future__ import annotations
+
 import importlib
 import inspect
 import os.path
 import pkgutil
 import threading
-from collections.abc import Callable, Generator, Iterator, Mapping, MutableMapping
+from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, MutableMapping
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
 from typing import (
     IO,
-    TYPE_CHECKING,
     Any,
     ClassVar,
     Generic,
@@ -21,7 +22,6 @@ from typing import (
     overload,
 )
 
-import frozendict.core as _frozendict_core
 from box import Box
 from multimethod import multidispatch
 
@@ -111,47 +111,31 @@ class dispatch(multidispatch[RETURN]):
         return super().register(*args)  # type: ignore
 
 
-# frozendict is useful for models to preserve hashability (eg: key in a dict). However there are a
-# couple issues:
-#
-# - In python <3.9.8 and <3.10.1, there are issues deepcopying types.GenericAlias[1,2] (eg: using
-# in a pydantic model). We can work around this by replacing types.GenericAlias with typing.Generic
-# (which returns a typing._GenericAlias).
-#
-# - There's an optimized C version, but it doesn't support json.dump[3] and has various other
-# slight incompatibilities (eg: exception messages differ, causing test annoyance). We work around
-# this by forcing the python version (from "frozendict.core").
-#
-# - It is marked with a py.typed file, but it certainly is not typed internally and mypy doesn't
-# recognize the wildcard imports (to pick C or py version) nor identify that it's a Generic. To work
-# around this, we explicitly have this `if TYPE_CHECKING` block to "trick" mypy.
-#
-# NOTE: This lib has has required an outsized maintenance burden given what it provides - we may
-# consider removing it completely and just "vendoring" a minimized version (eg: our own Mapping
-# subclass + __hash__ override) - we don't particularly care about incredible performance.
-#
-# 1: https://github.com/Marco-Sulla/python-frozendict/issues/29
-# 2: https://bugs.python.org/issue45167
-# 3: https://github.com/Marco-Sulla/python-frozendict/issues/47
-if TYPE_CHECKING:
+class frozendict(Mapping[_K, _V]):
+    def __init__(
+        self, arg: Union[Mapping[_K, _V], Iterable[tuple[_K, _V]]] = (), **kwargs: _V
+    ) -> None:
+        self._data = dict[_K, _V](arg, **kwargs)
+        # Eagerly evaluate the hash to confirm elements are also frozen (via frozenset) at
+        # creation time, not just when hashed.
+        self._hash = hash(frozenset(self._data.items()))
 
-    class frozendict(Mapping[_K, _V]):
-        def __init__(self, *args: Any, **kwargs: Any) -> None:
-            ...
+    def __getitem__(self, key: _K) -> _V:
+        return self._data[key]
 
-        def __getitem__(self, key: _K) -> _V:
-            ...
+    def __hash__(self) -> int:
+        return self._hash
 
-        def __iter__(self) -> Iterator[_K]:
-            ...
+    def __iter__(self) -> Iterator[_K]:
+        return iter(self._data)
 
-        def __len__(self) -> int:
-            ...
+    def __len__(self) -> int:
+        return len(self._data)
 
-else:
+    def __or__(self, other: Mapping[_K, _V]) -> frozendict[_K, _V]:
+        return type(self)({**self, **other})
 
-    class frozendict(Generic[_K, _V], _frozendict_core.frozendict[_K, _V]):
-        pass
+    __ror__ = __or__
 
 
 def import_submodules(
@@ -290,7 +274,7 @@ class _int(int):
 class int64(_int):
     _min, _max = -(2**63), (2**63) - 1
 
-    def __new__(cls, i: Union[int, "int64", "uint64"]) -> "int64":
+    def __new__(cls, i: Union[int, int64, uint64]) -> int64:
         if i > cls._max:
             if isinstance(i, uint64):
                 i = int(i) - uint64._max - 1
@@ -304,7 +288,7 @@ class int64(_int):
 class uint64(_int):
     _min, _max = 0, (2**64) - 1
 
-    def __new__(cls, i: Union[int, int64, "uint64"]) -> "uint64":
+    def __new__(cls, i: Union[int, int64, uint64]) -> uint64:
         if i > cls._max:
             raise ValueError(f"{i} is too large for uint64.")
         if i < cls._min:
