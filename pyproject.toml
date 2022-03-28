@@ -87,6 +87,7 @@ pyupgrade = "^2.31.1"
 sh = "^1.14.2"
 truffleHog = "^2.2.1"
 typer = "^0.4.0"
+types-frozendict = "^2.0.7"
 types-pyfarmhash = "^0.2.3"
 
 
