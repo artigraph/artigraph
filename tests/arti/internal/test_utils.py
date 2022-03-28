@@ -137,23 +137,45 @@ def test_dispatch() -> None:
 
 
 def test_frozendict() -> None:
-    for klass in (
-        frozendict,
-        frozendict[str, int],
-    ):
+    # Test input variations
+    assert frozendict([("a", 5)])
+    assert frozendict([("a", 5)], b=10)
+    assert frozendict(a=5)
+    assert frozendict(a=5, b=10)
+    assert frozendict(a=5, b=frozendict(b=10))
+    assert frozendict(dict(a=5))
+    assert frozendict(dict(a=5), b=10)
+    with pytest.raises(TypeError, match="unhashable type: 'dict'"):
+        frozendict(a=5, b=dict(b=10))
+
+
+def test_frozendict_immutability() -> None:
+    val = frozendict({"x": 5})
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        val["x"] = 10  # type: ignore
+    with pytest.raises(TypeError, match="does not support item assignment"):
+        val["y"] = 10  # type: ignore
+    with pytest.raises(TypeError, match="does not support item deletion"):
+        del val["x"]  # type: ignore
+
+
+def test_frozendict_hash() -> None:
+    assert hash(frozendict(a=5)) == hash(frozenset((("a", 5),)))
+
+
+def test_frozendict_union() -> None:
+    assert dict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore
+    assert frozendict(a=5) | dict(b=10) == frozendict(a=5, b=10)  # type: ignore
+    assert frozendict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)
+
+
+def test_frozendict_typing() -> None:
+    assert get_origin(frozendict[str, int]) is frozendict
+    assert get_args(frozendict[str, int]) == (str, int)
+    for klass in (frozendict, frozendict[str, int]):
         # Confirm deepcopying the class works:
         #     https://bugs.python.org/issue45167
         assert deepcopy(klass) == klass
-        val = klass(x=5)
-        assert isinstance(val, frozendict)
-        assert val == {"x": 5}  # type: ignore
-        with pytest.raises(TypeError, match="doesn't support item assignment"):
-            val["x"] = 10  # type: ignore
-        with pytest.raises(TypeError, match="doesn't support item assignment"):
-            val["y"] = 10  # type: ignore
-
-    assert get_origin(frozendict[str, int]) is frozendict
-    assert get_args(frozendict[str, int]) == (str, int)
 
 
 # NOTE: We don't test the thread safety here

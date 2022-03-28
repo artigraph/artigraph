@@ -1,6 +1,6 @@
 from collections.abc import Generator, Mapping, Sequence
 from copy import deepcopy
-from functools import cached_property
+from functools import cached_property, partial
 from typing import (
     TYPE_CHECKING,
     Annotated,
@@ -72,8 +72,11 @@ def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
         if set(args) == {Any}:
             return _check_types(value, origin)
         raise NotImplementedError(f"Missing handler for {type_} with {value}!")
+    # Models are immutable, so we convert all Mappings to frozendicts.
     if isinstance(value, Mapping) and not isinstance(value, frozendict):
         value = frozendict(value)
+    if lenient_issubclass(type_, Mapping):
+        type_ = frozendict
     if not lenient_issubclass(type(value), type_):
         raise mismatch_error
     return value
@@ -152,6 +155,7 @@ class Model(BaseModel):
     class Config:
         extra = Extra.forbid
         frozen = True
+        json_encoders = {frozendict: dict}
         keep_untouched = (cached_property, classproperty)
         smart_union = True
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
@@ -180,14 +184,14 @@ class Model(BaseModel):
         return copy
 
     @staticmethod
-    def _fingerprint_json_encoder(obj: Any) -> Any:
+    def _fingerprint_json_encoder(obj: Any, encoder: Any = pydantic_json_encoder) -> Any:
         from arti.fingerprints import Fingerprint
 
         if isinstance(obj, Fingerprint):
             return obj.key
         if isinstance(obj, Model):
             return obj.fingerprint
-        return pydantic_json_encoder(obj)
+        return encoder(obj)
 
     @property
     def fingerprint(self) -> "Fingerprint":
@@ -207,7 +211,7 @@ class Model(BaseModel):
         )
         json_repr = self.__config__.json_dumps(
             data,
-            default=self._fingerprint_json_encoder,
+            default=partial(self._fingerprint_json_encoder, encoder=self.__json_encoder__),
         )
         return Fingerprint.from_string(f"{self._class_key_}:{json_repr}")
 

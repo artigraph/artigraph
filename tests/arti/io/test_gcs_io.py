@@ -3,7 +3,6 @@ import pytest
 from arti import CompositeKey, Fingerprint, Format, StoragePartition, StoragePartitions, View, io
 from arti.formats.json import JSON
 from arti.formats.pickle import Pickle
-from arti.internal.utils import frozendict
 from arti.partitions import Int64Key
 from arti.storage.google.cloud.storage import GCSFile
 from arti.types import Collection, Int64, Struct
@@ -69,15 +68,15 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
 )
 def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
     a = PartitionedNum(format=format, storage=GCSFile(bucket=gcs_bucket, path="{i.key}"))
-    data: dict[frozendict[str, int], StoragePartition] = {
-        frozendict(i=i): a.storage.generate_partition(
+    data: dict[StoragePartition, dict[str, int]] = {
+        a.storage.generate_partition(
             keys=CompositeKey(i=Int64Key(key=i)),
             input_fingerprint=Fingerprint.empty(),
             with_content_fingerprint=False,
-        )
+        ): dict(i=i)
         for i in [1, 2]
     }
-    for record, partition in data.items():
+    for partition, record in data.items():
         io.write(
             [record],
             a.type,
@@ -85,10 +84,8 @@ def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
             partition,
             view=View.get_class_for(list, validation_type=a.type)(),
         )
-    assert {p.with_content_fingerprint() for p in data.values()} == set(
-        a.discover_storage_partitions()
-    )
-    for record, partition in data.items():
+    assert {p.with_content_fingerprint() for p in data} == set(a.discover_storage_partitions())
+    for partition, record in data.items():
         assert io.read(
             a.type,
             a.format,
