@@ -858,7 +858,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "multimethod"
-version = "1.7"
+version = "1.8"
 description = "Multiple argument dispatching."
 category = "main"
 optional = false
@@ -2257,8 +2257,8 @@ multidict = [
     {file = "multidict-6.0.2.tar.gz", hash = "sha256:5ff3bd75f38e4c43f1f470f2df7a4d430b821c4ce22be384e1459cb57d6bb013"},
 ]
 multimethod = [
-    {file = "multimethod-1.7-py3-none-any.whl", hash = "sha256:c9ed3841ddb5ca314ad12ca88d64e4a75d283e98f16622b580bb90fe72f79231"},
-    {file = "multimethod-1.7.tar.gz", hash = "sha256:7b8a16c03f4968e1daea7e4d48cbe78cc9b4b085fb1088931d19778b914f9891"},
+    {file = "multimethod-1.8-py3-none-any.whl", hash = "sha256:ebff0b254d9373b587a99fdd5c238fc0e76861b802704a56d9a71d78aa7d097f"},
+    {file = "multimethod-1.8.tar.gz", hash = "sha256:10f79f40c35c7cc87c40efa753960900429705e0c08078a084136cb8ce67b840"},
 ]
 mypy = [
     {file = "mypy-0.941-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:98f61aad0bb54f797b17da5b82f419e6ce214de0aa7e92211ebee9e40eb04276"},
