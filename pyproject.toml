@@ -65,7 +65,7 @@ python-box = ">=5.4.1,<7.0.0"
 
 [tool.poetry.dev-dependencies]
 bandit = "^1.7.4"
-black = "22.1.0"
+black = "22.3.0"
 blacken-docs = "^1.12.1"
 coverage = {version = "^6.3", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
