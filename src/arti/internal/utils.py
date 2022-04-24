@@ -137,6 +137,9 @@ class frozendict(Mapping[_K, _V]):
 
     __ror__ = __or__
 
+    def __repr__(self) -> str:
+        return repr(self._data)
+
 
 def import_submodules(
     path: list[str],  # module.__path__ is a list[str]
