@@ -85,7 +85,7 @@ pytest-sugar = "0.9.4"
 pyupgrade = "^2.32.0"
 sh = "^1.14.2"
 truffleHog = "^2.2.1"
-typer = "^0.4.0"
+typer = "^0.4.1"
 types-pyfarmhash = "^0.2.3"
 
 
