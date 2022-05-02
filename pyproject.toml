@@ -71,7 +71,7 @@ coverage = {version = "^6.3", extras = ["toml"]} # pyproject.toml support
 flake8 = "4.0.1"
 gcp-storage-emulator = {git = "https://github.com/oittaa/gcp-storage-emulator.git", rev = "main"} # Waiting for next release to fix https://github.com/oittaa/gcp-storage-emulator/issues/147
 ipdb = "^0.13.9"
-ipython = "^8.2.0"
+ipython = "^8.3.0"
 isort = "5.10.1"
 mypy = "0.942"
 pdocs = {git = "https://github.com/JacobHayes/pdocs.git", rev = "master"} # Fix GenericAlias error https://github.com/timothycrosley/pdocs/pull/29
