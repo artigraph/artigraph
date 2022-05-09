@@ -76,7 +76,7 @@ isort = "5.10.1"
 mypy = "0.950"
 pdocs = {git = "https://github.com/JacobHayes/pdocs.git", rev = "master"} # Fix GenericAlias error https://github.com/timothycrosley/pdocs/pull/29
 portray = "^1.7.0"
-pre-commit = "2.18.1"
+pre-commit = "2.19.0"
 pylint = "^2.13.7"
 pytest = "7.1.2"
 pytest-benchmark = "3.4.1"
