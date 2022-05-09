@@ -9,18 +9,7 @@ from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Mu
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
-from typing import (
-    IO,
-    Any,
-    ClassVar,
-    Generic,
-    Optional,
-    SupportsIndex,
-    TypeVar,
-    Union,
-    cast,
-    overload,
-)
+from typing import IO, Any, ClassVar, Optional, SupportsIndex, TypeVar, Union, cast, overload
 
 from box import Box
 from multimethod import multidispatch
@@ -43,19 +32,10 @@ class_name = cast(Callable[[], str], ClassName)
 PropReturn = TypeVar("PropReturn")
 
 
-class classproperty(Generic[PropReturn]):
-    """Access a @classmethod like a @property.
-
-    Can be stacked above @classmethod (to satisfy pylint, mypy, etc).
-    """
-
-    def __init__(self, f: Callable[..., PropReturn]) -> None:
-        self.f = f
-        if isinstance(self.f, classmethod):
-            self.f = lambda type_: f.__get__(None, type_)()
-
-    def __get__(self, obj: Any, type_: Any) -> PropReturn:
-        return self.f(type_)
+def classproperty(meth: Callable[..., PropReturn]) -> PropReturn:
+    """Access a @classmethod like a @property."""
+    # mypy doesn't understand class properties yet: https://github.com/python/mypy/issues/2563
+    return classmethod(property(meth))  # type: ignore
 
 
 RETURN = TypeVar("RETURN")

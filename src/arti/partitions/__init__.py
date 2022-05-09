@@ -36,7 +36,6 @@ class PartitionKey(Model):
         register(cls._by_type_, cls.matching_type, cls)
 
     @classproperty
-    @classmethod
     def key_components(cls) -> frozenset[str]:
         return frozenset(cls.__fields__) | frozenset(
             name for name in dir(cls) if isinstance(getattr_static(cls, name), key_component)

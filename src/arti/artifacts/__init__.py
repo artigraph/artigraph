@@ -89,12 +89,10 @@ class BaseArtifact(Model):
         ).resolve_templates()
 
     @classproperty
-    @classmethod
     def partition_key_types(cls) -> CompositeKeyTypes:
         return PartitionKey.types_from(cls._type)
 
     @classproperty
-    @classmethod
     def is_partitioned(cls) -> bool:
         return bool(cls.partition_key_types)
 

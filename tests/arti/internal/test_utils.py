@@ -42,15 +42,8 @@ def test_classproperty() -> None:
         def a(cls) -> str:
             return cls.__name__  # type: ignore
 
-        @classproperty
-        @classmethod
-        def b(cls) -> str:
-            return cls.__name__
-
     assert Test.a == "Test"
     assert Test().a == "Test"
-    assert Test.b == "Test"
-    assert Test().b == "Test"
 
 
 class A:

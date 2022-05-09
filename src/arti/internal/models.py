@@ -18,7 +18,7 @@ from pydantic.fields import ModelField, Undefined
 from pydantic.json import pydantic_encoder as pydantic_json_encoder
 
 from arti.internal.type_hints import is_union, lenient_issubclass
-from arti.internal.utils import class_name, classproperty, frozendict
+from arti.internal.utils import class_name, frozendict
 
 if TYPE_CHECKING:
     from arti.fingerprints import Fingerprint
@@ -156,7 +156,7 @@ class Model(BaseModel):
         extra = Extra.forbid
         frozen = True
         json_encoders = {frozendict: dict}
-        keep_untouched = (cached_property, classproperty)
+        keep_untouched = (cached_property,)
         smart_union = True
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
 
