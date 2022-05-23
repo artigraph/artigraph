@@ -344,7 +344,7 @@ scandir = ["scandir (>=1.5,<2.0)"]
 
 [[package]]
 name = "fsspec"
-version = "2022.3.0"
+version = "2022.5.0"
 description = "File-system specification"
 category = "main"
 optional = false
@@ -394,7 +394,7 @@ resolved_reference = "407b142583526a4b4d6598ac45fbf9f5d7f12123"
 
 [[package]]
 name = "gcsfs"
-version = "2022.3.0"
+version = "2022.5.0"
 description = "Convenient Filesystem interface over GCS"
 category = "main"
 optional = false
@@ -403,7 +403,7 @@ python-versions = ">=3.7"
 [package.dependencies]
 aiohttp = "<4"
 decorator = ">4.1.2"
-fsspec = "2022.3.0"
+fsspec = "2022.5.0"
 google-auth = ">=1.2"
 google-auth-oauthlib = "*"
 google-cloud-storage = "*"
@@ -1979,13 +1979,13 @@ fs = [
     {file = "fs-2.4.15.tar.gz", hash = "sha256:b09d02c311f4add1e6e2b75724c450eafcfeecc917579224ca8ad21dacd0a182"},
 ]
 fsspec = [
-    {file = "fsspec-2022.3.0-py3-none-any.whl", hash = "sha256:a53491b003210fce6911dd8f2d37e20c41a27ce52a655eef11b885d1578ed4cf"},
-    {file = "fsspec-2022.3.0.tar.gz", hash = "sha256:fd582cc4aa0db5968bad9317cae513450eddd08b2193c4428d9349265a995523"},
+    {file = "fsspec-2022.5.0-py3-none-any.whl", hash = "sha256:2c198c50eb541a80bbd03540b07602c4a957366f3fb416a1f270d34bd4ff0926"},
+    {file = "fsspec-2022.5.0.tar.gz", hash = "sha256:7a5459c75c44e760fbe6a3ccb1f37e81e023cde7da8ba20401258d877ec483b4"},
 ]
 gcp-storage-emulator = []
 gcsfs = [
-    {file = "gcsfs-2022.3.0-py2.py3-none-any.whl", hash = "sha256:dcb96b05c2603dd20e2a63957275d7389d55f1cfc91cf58663ef4adce2e019fe"},
-    {file = "gcsfs-2022.3.0.tar.gz", hash = "sha256:f35d0b92b9fcd5ccf696dfd582e61a593ec885554fd7d297765f20ecd6aa9761"},
+    {file = "gcsfs-2022.5.0-py2.py3-none-any.whl", hash = "sha256:a3922d34713de3133e362a2299ae3ad0a898fa6cdab3c405f4bbf16d83caa92a"},
+    {file = "gcsfs-2022.5.0.tar.gz", hash = "sha256:c28bbbc8f3fb29656f2379ffb8b2b888b95f44d9a46d8dc746253598d1493bb9"},
 ]
 ghp-import = [
     {file = "ghp-import-2.0.2.tar.gz", hash = "sha256:947b3771f11be850c852c64b561c600fdddf794bab363060854c1ee7ad05e071"},
