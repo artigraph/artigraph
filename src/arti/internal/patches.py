@@ -4,7 +4,7 @@ def patch_TopologicalSorter_class_getitem() -> None:
     TopologicalSorter is considered Generic in typeshed (hence mypy expects a type arg),
     but is not at runtime.
 
-    Pending: https://github.com/python/cpython/pull/28714
+    This has been fixed for 3.11+ (https://github.com/python/cpython/pull/28714).
     """
     from graphlib import TopologicalSorter
     from types import GenericAlias
