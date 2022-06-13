@@ -328,7 +328,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "fs"
-version = "2.4.15"
+version = "2.4.16"
 description = "Python's filesystem abstraction layer"
 category = "dev"
 optional = false
@@ -336,7 +336,6 @@ python-versions = "*"
 
 [package.dependencies]
 appdirs = ">=1.4.3,<1.5.0"
-pytz = "*"
 six = ">=1.10,<2.0"
 
 [package.extras]
@@ -375,14 +374,14 @@ tqdm = ["tqdm"]
 
 [[package]]
 name = "gcp-storage-emulator"
-version = "2022.4.13"
+version = "2022.6.11"
 description = "A stub emulator for the Google Cloud Storage API"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 
 [package.dependencies]
-fs = "2.4.15"
+fs = "2.4.16"
 google-crc32c = "1.3.0"
 
 [[package]]
@@ -1318,14 +1317,6 @@ python-versions = "!=3.0.*,!=3.1.*,!=3.2.*,>=2.7"
 six = ">=1.5"
 
 [[package]]
-name = "pytz"
-version = "2021.3"
-description = "World timezone definitions, modern and historical"
-category = "dev"
-optional = false
-python-versions = "*"
-
-[[package]]
 name = "pyupgrade"
 version = "2.34.0"
 description = "A tool to automatically upgrade syntax for newer versions."
@@ -1656,7 +1647,7 @@ testing = ["pytest (>=6)", "pytest-checkdocs (>=2.4)", "pytest-flake8", "pytest-
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "f72999838228872b2f50146a62803c6b45863e34e193e74799a8979439ce4963"
+content-hash = "004ee89f054b4dbb4ff04c9336134ac682b85a9934687003f086066b3d398b52"
 
 [metadata.files]
 aiohttp = [
@@ -1978,16 +1969,16 @@ frozenlist = [
     {file = "frozenlist-1.3.0.tar.gz", hash = "sha256:ce6f2ba0edb7b0c1d8976565298ad2deba6f8064d2bebb6ffce2ca896eb35b0b"},
 ]
 fs = [
-    {file = "fs-2.4.15-py2.py3-none-any.whl", hash = "sha256:86fbd7268edc365e5f120c4871addf2a0a899049625c35fe579910339296d13d"},
-    {file = "fs-2.4.15.tar.gz", hash = "sha256:b09d02c311f4add1e6e2b75724c450eafcfeecc917579224ca8ad21dacd0a182"},
+    {file = "fs-2.4.16-py2.py3-none-any.whl", hash = "sha256:660064febbccda264ae0b6bace80a8d1be9e089e0a5eb2427b7d517f9a91545c"},
+    {file = "fs-2.4.16.tar.gz", hash = "sha256:ae97c7d51213f4b70b6a958292530289090de3a7e15841e108fbe144f069d313"},
 ]
 fsspec = [
     {file = "fsspec-2022.5.0-py3-none-any.whl", hash = "sha256:2c198c50eb541a80bbd03540b07602c4a957366f3fb416a1f270d34bd4ff0926"},
     {file = "fsspec-2022.5.0.tar.gz", hash = "sha256:7a5459c75c44e760fbe6a3ccb1f37e81e023cde7da8ba20401258d877ec483b4"},
 ]
 gcp-storage-emulator = [
-    {file = "gcp-storage-emulator-2022.4.13.tar.gz", hash = "sha256:d63b800eeef9fbcdaf6b102408b6128a8a109db21b384f655b09cf975cdebb69"},
-    {file = "gcp_storage_emulator-2022.4.13-py3-none-any.whl", hash = "sha256:e3bdb57601d09b98db6218eb2ae971f5895d44358cbb7fcb95ac41bb5ff54b57"},
+    {file = "gcp-storage-emulator-2022.6.11.tar.gz", hash = "sha256:fbc896723df95b7527a4ced499bfdd374247dfc40d6992bfa34da67e66bad4be"},
+    {file = "gcp_storage_emulator-2022.6.11-py3-none-any.whl", hash = "sha256:81271737f099cec22b3b4d0ceca5d43f484bfc39770a7d98e6545eb94bf46a1b"},
 ]
 gcsfs = [
     {file = "gcsfs-2022.5.0-py2.py3-none-any.whl", hash = "sha256:a3922d34713de3133e362a2299ae3ad0a898fa6cdab3c405f4bbf16d83caa92a"},
@@ -2546,10 +2537,6 @@ python-box = [
 python-dateutil = [
     {file = "python-dateutil-2.8.2.tar.gz", hash = "sha256:0123cacc1627ae19ddf3c27a5de5bd67ee4586fbdd6440d9748f8abb483d3e86"},
     {file = "python_dateutil-2.8.2-py2.py3-none-any.whl", hash = "sha256:961d03dc3453ebbc59dbdea9e4e11c5651520a876d0f4db161e8674aae935da9"},
-]
-pytz = [
-    {file = "pytz-2021.3-py2.py3-none-any.whl", hash = "sha256:3672058bc3453457b622aab7a1c3bfd5ab0bdae451512f6cf25f64ed37f5b87c"},
-    {file = "pytz-2021.3.tar.gz", hash = "sha256:acad2d8b20a1af07d4e4c9d2e9285c5ed9104354062f275f3fcd88dcef4f1326"},
 ]
 pyupgrade = [
     {file = "pyupgrade-2.34.0-py2.py3-none-any.whl", hash = "sha256:16617805b8d1138f96a1ff9cdb4b302b39b51804b3fc5474dc36c0326387445a"},
