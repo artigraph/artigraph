@@ -39,7 +39,7 @@ namespace_packages = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["gcp_storage_emulator.*", "gcsfs", "sh", ]
+module = ["gcp_storage_emulator.*", "gcsfs", "pyarrow", "sh", ]
 ignore_missing_imports = true
 
 
@@ -58,6 +58,7 @@ include = ["src/arti/py.typed"]
 gcsfs = "^2022.2.0"
 multimethod = "^1.6"
 parse = "^1.19.0"
+pyarrow = "^8.0.0"
 pydantic = "^1.9.0"
 pyfarmhash = ">=0.2.2,<0.4.0"
 python = "^3.9"
@@ -99,6 +100,7 @@ max-line-length = "100"
 [tool.pylint.master]
 extension-pkg-whitelist = [
     "farmhash",
+    "pyarrow",
     "pydantic",
 ]
 
