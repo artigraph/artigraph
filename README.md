@@ -91,4 +91,4 @@ Everyone is welcome to join the community - learn more in out [support](SUPPORT.
 
 ## Presentations
 
-- 2022-01-27: Requesting Sandbox Incubation with [LF AI & Data](https://lfaidata.foundation/) ([deck](https://docs.google.com/presentation/d/1KLM9r0L5sTbpb_UPR5nx4fil-7fO-UnmhTeatSiaN3Y), [presentation](https://wiki.lfaidata.foundation/download/attachments/7733341/GMT20220127-140219_Recording_3840x2160.mp4?version=1&modificationDate=1643716019000&api=v2))
+- 2022-01-27: Requesting Sandbox Incubation with [LF AI & Data](https://lfaidata.foundation/) ([deck](https://docs.google.com/presentation/d/1KLM9r0L5sTbpb_UPR5nx4fil-7fO-UnmhTeatSiaN3Y), [presentation](https://wiki.lfaidata.foundation/download/attachments/7733341/GMT20220127-140219_Recording_3840x2160.mp4?version=1&modificationDate=1643716019000&api=v2) @ 6m35s)
