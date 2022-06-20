@@ -78,7 +78,7 @@ mypy = "0.961"
 pdocs = {git = "https://github.com/JacobHayes/pdocs.git", rev = "master"} # Fix GenericAlias error https://github.com/timothycrosley/pdocs/pull/29
 portray = "^1.7.0"
 pre-commit = "2.19.0"
-pylint = "^2.14.2"
+pylint = "^2.14.3"
 pytest = "7.1.2"
 pytest-benchmark = "3.4.1"
 pytest-cov = "3.0.0"
