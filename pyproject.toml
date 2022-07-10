@@ -110,7 +110,6 @@ disable = """
     import-outside-toplevel,
     invalid-name,
     line-too-long,
-    no-self-use,
     redefined-builtin,
     too-few-public-methods,
     unsubscriptable-object,
