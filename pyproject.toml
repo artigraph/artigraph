@@ -39,7 +39,7 @@ namespace_packages = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["gcp_storage_emulator.*", "gcsfs", "pyarrow", "sh", ]
+module = ["gcp_storage_emulator.*", "gcsfs", "pandas", "pyarrow", "sh", ]
 ignore_missing_imports = true
 
 
