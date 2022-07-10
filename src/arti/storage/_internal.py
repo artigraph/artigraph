@@ -1,8 +1,8 @@
 import string
 from collections import defaultdict
-from collections.abc import Callable, Mapping
+from collections.abc import Callable, Iterable, Mapping
 from functools import partial
-from typing import Any, Iterable, Optional
+from typing import Any, Optional
 
 import parse
 
