@@ -1330,7 +1330,7 @@ six = ">=1.5"
 
 [[package]]
 name = "pyupgrade"
-version = "2.35.0"
+version = "2.37.1"
 description = "A tool to automatically upgrade syntax for newer versions."
 category = "dev"
 optional = false
@@ -1661,7 +1661,7 @@ all = ["pyarrow"]
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.9"
-content-hash = "42f9d777962cc6e3a1f70af0c0d3e7c7a877ddf3a49ad29c5f71a19891ca1ee8"
+content-hash = "7293a876c895a6194ea70ce1a19c2700889e090ecf057349039f9b2427a87e06"
 
 [metadata.files]
 aiohttp = []
