@@ -389,3 +389,7 @@ class TypeSystem(Model):
             except NotImplementedError:
                 pass
         raise NotImplementedError(f"No {self} adapter for Artigraph type: {type_}.")
+
+
+# Fix ForwardRefs in outer_type_, pending: https://github.com/samuelcolvin/pydantic/pull/4249
+TypeSystem.__fields__["extends"].outer_type_ = tuple[TypeSystem, ...]
