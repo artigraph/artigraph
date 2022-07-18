@@ -359,6 +359,7 @@ class TypeSystem(Model):
     key: str
 
     _adapter_by_key: dict[str, type[TypeAdapter]] = PrivateAttr(default_factory=dict)
+    extends: "tuple[TypeSystem, ...]" = ()
 
     def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
         return register(self._adapter_by_key, adapter.key, adapter)
@@ -371,10 +372,20 @@ class TypeSystem(Model):
         for adapter in self._priority_sorted_adapters:
             if adapter.matches_system(type_, hints=hints):
                 return adapter.to_artigraph(type_, hints=hints)
+        for type_system in self.extends:
+            try:
+                return type_system.to_artigraph(type_, hints=hints)
+            except NotImplementedError:
+                pass
         raise NotImplementedError(f"No {self} adapter for system type: {type_}.")
 
     def to_system(self, type_: Type, *, hints: dict[str, Any]) -> Any:
         for adapter in self._priority_sorted_adapters:
             if adapter.matches_artigraph(type_, hints=hints):
                 return adapter.to_system(type_, hints=hints)
+        for type_system in self.extends:
+            try:
+                return type_system.to_system(type_, hints=hints)
+            except NotImplementedError:
+                pass
         raise NotImplementedError(f"No {self} adapter for Artigraph type: {type_}.")
