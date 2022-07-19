@@ -258,9 +258,7 @@ def test_TypeSystem(
     assert dummy.to_system(Int32(), hints={}) is MyInt
 
 
-def test_TypeSystem_extends(
-    Int32Adapter: type[TypeAdapter],
-) -> None:
+def test_TypeSystem_extends(Int32Adapter: type[TypeAdapter]) -> None:
     base = TypeSystem(key="base")
     extended = TypeSystem(key="extended", extends=(base,))
 
