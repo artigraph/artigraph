@@ -42,7 +42,9 @@ def _gen_numeric_adapter(
         priority = precision
 
         @classmethod
-        def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
+        def to_artigraph(
+            cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
+        ) -> Type:
             return cls.artigraph()
 
         @classmethod
@@ -50,7 +52,7 @@ def _gen_numeric_adapter(
             return type_ is cls.system
 
         @classmethod
-        def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
+        def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
             return cls.system
 
     return Adapter
@@ -254,3 +256,19 @@ def test_TypeSystem(
     dummy.register_adapter(Int32Adapter)
     assert isinstance(dummy.to_artigraph(MyInt, hints={}), Int32)
     assert dummy.to_system(Int32(), hints={}) is MyInt
+
+
+def test_TypeSystem_extends(Int32Adapter: type[TypeAdapter]) -> None:
+    base = TypeSystem(key="base")
+    extended = TypeSystem(key="extended", extends=(base,))
+
+    # NOTE: Even adapters registered to `base` after `extended` is created should be available.
+    base.register_adapter(Int32Adapter)
+
+    assert isinstance(extended.to_artigraph(MyInt, hints={}), Int32)
+    assert extended.to_system(Int32(), hints={}) is MyInt
+
+    with pytest.raises(NotImplementedError, match=re.escape(f"No {extended} adapter")):
+        extended.to_artigraph(MyFloat, hints={})
+    with pytest.raises(NotImplementedError, match=re.escape(f"No {extended} adapter")):
+        extended.to_system(Float32(), hints={})
