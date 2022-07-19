@@ -1,16 +1,15 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from abc import abstractmethod
-from collections import defaultdict
 from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional
 
-from pydantic import validator
+from pydantic import PrivateAttr, validator
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
-from arti.internal.utils import class_name, frozendict, register
+from arti.internal.utils import NoCopyDict, class_name, frozendict, register
 
 DEFAULT_ANONYMOUS_NAME = "anon"
 
@@ -359,14 +358,19 @@ class _ScalarClassTypeAdapter(TypeAdapter):
 class TypeSystem(Model):
     key: str
 
+    # NOTE: Use a NoCopyDict to avoid copies of the registry. Otherwise, TypeSystems that extend
+    # this TypeSystem will only see the adapters registered *as of initialization* (as pydantic
+    # would deepcopy the TypeSystems in the `extends` argument).
+    _adapter_by_key: NoCopyDict[str, type[TypeAdapter]] = PrivateAttr(default_factory=NoCopyDict)
+
     extends: "tuple[TypeSystem, ...]" = ()
 
     def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
-        return register(_TYPE_SYSTEM_ADAPTERS[self], adapter.key, adapter)
+        return register(self._adapter_by_key, adapter.key, adapter)
 
     @property
     def _priority_sorted_adapters(self) -> Iterator[type[TypeAdapter]]:
-        return reversed(sorted(_TYPE_SYSTEM_ADAPTERS[self].values(), key=attrgetter("priority")))
+        return reversed(sorted(self._adapter_by_key.values(), key=attrgetter("priority")))
 
     def to_artigraph(
         self, type_: Any, *, hints: dict[str, Any], type_system: "Optional[TypeSystem]" = None
@@ -396,8 +400,6 @@ class TypeSystem(Model):
                 pass
         raise NotImplementedError(f"No {root_type_system} adapter for Artigraph type: {type_}.")
 
-
-_TYPE_SYSTEM_ADAPTERS = defaultdict[TypeSystem, dict[str, type[TypeAdapter]]](dict)
 
 # Fix ForwardRefs in outer_type_, pending: https://github.com/samuelcolvin/pydantic/pull/4249
 TypeSystem.__fields__["extends"].outer_type_ = tuple[TypeSystem, ...]
