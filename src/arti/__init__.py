@@ -1,6 +1,9 @@
 from __future__ import annotations
 
+import importlib.metadata
+
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
+__version__ = importlib.metadata.version("arti")
 
 import threading
 from typing import Optional

@@ -1,8 +1,5 @@
-import importlib.metadata
 from collections.abc import Iterator
 from contextlib import contextmanager
-
-version = importlib.metadata.version("arti")
 
 
 @contextmanager
