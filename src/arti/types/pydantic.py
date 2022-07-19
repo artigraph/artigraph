@@ -66,7 +66,7 @@ class BaseModelAdapter(TypeAdapter):
             (BaseModel,),
             {
                 "__annotations__": {
-                    k: (type_system.to_system(v, hints=hints)) for k, v in type_.fields.items()
+                    k: type_system.to_system(v, hints=hints) for k, v in type_.fields.items()
                 }
             },
         )
