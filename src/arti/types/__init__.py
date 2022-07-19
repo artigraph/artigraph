@@ -373,29 +373,31 @@ class TypeSystem(Model):
         return reversed(sorted(self._adapter_by_key.values(), key=attrgetter("priority")))
 
     def to_artigraph(
-        self, type_: Any, *, hints: dict[str, Any], type_system: "Optional[TypeSystem]" = None
+        self, type_: Any, *, hints: dict[str, Any], root_type_system: "Optional[TypeSystem]" = None
     ) -> Type:
-        root_type_system = type_system or self
+        root_type_system = root_type_system or self
         for adapter in self._priority_sorted_adapters:
             if adapter.matches_system(type_, hints=hints):
                 return adapter.to_artigraph(type_, hints=hints, type_system=root_type_system)
         for type_system in self.extends:
             try:
-                return type_system.to_artigraph(type_, hints=hints, type_system=root_type_system)
+                return type_system.to_artigraph(
+                    type_, hints=hints, root_type_system=root_type_system
+                )
             except NotImplementedError:
                 pass
         raise NotImplementedError(f"No {root_type_system} adapter for system type: {type_}.")
 
     def to_system(
-        self, type_: Type, *, hints: dict[str, Any], type_system: "Optional[TypeSystem]" = None
+        self, type_: Type, *, hints: dict[str, Any], root_type_system: "Optional[TypeSystem]" = None
     ) -> Any:
-        root_type_system = type_system or self
+        root_type_system = root_type_system or self
         for adapter in self._priority_sorted_adapters:
             if adapter.matches_artigraph(type_, hints=hints):
                 return adapter.to_system(type_, hints=hints, type_system=root_type_system)
         for type_system in self.extends:
             try:
-                return type_system.to_system(type_, hints=hints, type_system=root_type_system)
+                return type_system.to_system(type_, hints=hints, root_type_system=root_type_system)
             except NotImplementedError:
                 pass
         raise NotImplementedError(f"No {root_type_system} adapter for Artigraph type: {type_}.")

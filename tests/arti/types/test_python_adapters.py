@@ -177,7 +177,7 @@ def test_python_tuple() -> None:
 
     assert python_type_system.to_system(a, hints={}) == list[int]  # list has higher priority
     assert PyTuple.to_system(List(element=Int64()), hints={}, type_system=python_type_system) == p
-    assert python_type_system.to_artigraph(p, hints={}, type_system=python_type_system) == a
+    assert python_type_system.to_artigraph(p, hints={}) == a
 
     assert (
         PyTuple.to_system(Collection(element=Int64()), hints={}, type_system=python_type_system)
