@@ -52,7 +52,7 @@ class PyValueContainer(TypeAdapter):
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         (element,) = get_args(type_)
         return cls.artigraph(
-            element=python_type_system.to_artigraph(element, hints=hints),
+            element=type_system.to_artigraph(element, hints=hints),
         )
 
     @classmethod
@@ -62,9 +62,7 @@ class PyValueContainer(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return cls.system[
-            python_type_system.to_system(type_.element, hints=hints),  # type: ignore
-        ]
+        return cls.system[type_system.to_system(type_.element, hints=hints)]  # type: ignore
 
 
 @python_type_system.register_adapter
@@ -141,10 +139,7 @@ class PyLiteral(TypeAdapter):
         py_type, *other_types = (type(v) for v in items)
         if not all(t is py_type for t in other_types):
             raise ValueError("All Literals must be the same type, got: {(py_type, *other_types)}")
-        return cls.artigraph(
-            type=python_type_system.to_artigraph(py_type, hints=hints),
-            items=items,
-        )
+        return cls.artigraph(type=type_system.to_artigraph(py_type, hints=hints), items=items)
 
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:

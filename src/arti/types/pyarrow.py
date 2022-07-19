@@ -142,7 +142,7 @@ class ListTypeAdapter(_PyarrowTypeAdapter):
         cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
     ) -> types.Type:
         return cls.artigraph(
-            element=pyarrow_type_system.to_artigraph(type_.value_type, hints=hints),
+            element=type_system.to_artigraph(type_.value_type, hints=hints),
         )
 
     @classmethod
@@ -152,7 +152,7 @@ class ListTypeAdapter(_PyarrowTypeAdapter):
     @classmethod
     def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return cls.system(value_type=pyarrow_type_system.to_system(type_.element, hints=hints))
+        return cls.system(value_type=type_system.to_system(type_.element, hints=hints))
 
 
 @pyarrow_type_system.register_adapter
@@ -165,8 +165,8 @@ class MapTypeAdapter(_PyarrowTypeAdapter):
         cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
     ) -> types.Type:
         return cls.artigraph(
-            key=pyarrow_type_system.to_artigraph(type_.key_type, hints=hints),
-            value=pyarrow_type_system.to_artigraph(type_.item_type, hints=hints),
+            key=type_system.to_artigraph(type_.key_type, hints=hints),
+            value=type_system.to_artigraph(type_.item_type, hints=hints),
         )
 
     @classmethod
@@ -177,8 +177,8 @@ class MapTypeAdapter(_PyarrowTypeAdapter):
     def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system(
-            key_type=pyarrow_type_system.to_system(type_.key, hints=hints),
-            item_type=pyarrow_type_system.to_system(type_.value, hints=hints),
+            key_type=type_system.to_system(type_.key, hints=hints),
+            item_type=type_system.to_system(type_.value, hints=hints),
         )
 
 
@@ -188,8 +188,10 @@ class StructTypeAdapter(_PyarrowTypeAdapter):
     system = pa.struct
 
     @classmethod
-    def _field_to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> types.Type:
-        ret = pyarrow_type_system.to_artigraph(type_.type, hints=hints)
+    def _field_to_artigraph(
+        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
+    ) -> types.Type:
+        ret = type_system.to_artigraph(type_.type, hints=hints)
         if type_.nullable != ret.nullable:  # Avoid setting nullable if matching to minimize repr
             ret = ret.copy(update={"nullable": type_.nullable})
         return ret
@@ -199,21 +201,24 @@ class StructTypeAdapter(_PyarrowTypeAdapter):
         cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
     ) -> types.Type:
         return cls.artigraph(
-            fields={field.name: cls._field_to_artigraph(field, hints=hints) for field in type_}
+            fields={
+                field.name: cls._field_to_artigraph(field, hints=hints, type_system=type_system)
+                for field in type_
+            }
         )
 
     @classmethod
-    def _field_to_system(cls, name: str, type_: types.Type, *, hints: dict[str, Any]) -> Any:
-        return pa.field(
-            name, pyarrow_type_system.to_system(type_, hints=hints), nullable=type_.nullable
-        )
+    def _field_to_system(
+        cls, name: str, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem
+    ) -> Any:
+        return pa.field(name, type_system.to_system(type_, hints=hints), nullable=type_.nullable)
 
     @classmethod
     def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system(
             [
-                cls._field_to_system(name, subtype, hints=hints)
+                cls._field_to_system(name, subtype, hints=hints, type_system=type_system)
                 for name, subtype in type_.fields.items()
             ]
         )
