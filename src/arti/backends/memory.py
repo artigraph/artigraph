@@ -3,16 +3,14 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, TypeVar
 
 from pydantic import PrivateAttr
 
 from arti.artifacts import Artifact
 from arti.backends import Backend
 from arti.fingerprints import Fingerprint
+from arti.internal.utils import NoCopyMixin
 from arti.storage import AnyStorage, InputFingerprints, StoragePartition, StoragePartitions
-
-_Self = TypeVar("_Self")
 
 
 def _ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePartition]:
@@ -24,7 +22,7 @@ _GraphSnapshotPartitions = dict[str, dict[Fingerprint, dict[str, set[StoragePart
 _StoragePartitions = dict[AnyStorage, set[StoragePartition]]
 
 
-class _NoCopyContainer:
+class _NoCopyContainer(NoCopyMixin):
     """Container for MemoryBackend data that bypasses (deep)copying.
 
     The MemoryBackend is *intended* to be stateful, like a connection to an external database in
@@ -44,12 +42,6 @@ class _NoCopyContainer:
         )
         self.graph_tags: dict[str, dict[str, Fingerprint]] = defaultdict(dict)
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartition])
-
-    def __copy__(self: _Self) -> _Self:
-        return self  # pragma: no cover
-
-    def __deepcopy__(self: _Self, memo: Any) -> _Self:
-        return self  # pragma: no cover
 
 
 class MemoryBackend(Backend):
