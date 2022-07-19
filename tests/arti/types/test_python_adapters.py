@@ -99,7 +99,7 @@ def test_python_literal_errors() -> None:
     with pytest.raises(ValueError, match="All Literals must be the same type"):
         assert python_type_system.to_artigraph(Literal[1, 1.0], hints={})
     with pytest.raises(NotImplementedError, match="Invalid Literal with no values"):
-        PyLiteral.to_artigraph(Literal[()], hints={})
+        PyLiteral.to_artigraph(Literal[()], hints={}, type_system=python_type_system)
     # Confirm other Unions aren't handled
     for invalid_hint in (Union[int, str], Union[int, Literal[1]]):
         with pytest.raises(NotImplementedError, match="No TypeSystem.* adapter for system type"):
@@ -110,7 +110,7 @@ def test_python_literal_errors() -> None:
         NotImplementedError,
         match=re.escape("Only Union[Literal[...], ...] (enums) are currently supported"),
     ):
-        PyLiteral.to_artigraph(Union[int, str], hints={})
+        PyLiteral.to_artigraph(Union[int, str], hints={}, type_system=python_type_system)
 
 
 def test_python_map() -> None:
@@ -176,10 +176,13 @@ def test_python_tuple() -> None:
     p = tuple[int, ...]
 
     assert python_type_system.to_system(a, hints={}) == list[int]  # list has higher priority
-    assert PyTuple.to_system(List(element=Int64()), hints={}) == p
-    assert python_type_system.to_artigraph(p, hints={}) == a
+    assert PyTuple.to_system(List(element=Int64()), hints={}, type_system=python_type_system) == p
+    assert python_type_system.to_artigraph(p, hints={}, type_system=python_type_system) == a
 
-    assert PyTuple.to_system(Collection(element=Int64()), hints={}) == p
+    assert (
+        PyTuple.to_system(Collection(element=Int64()), hints={}, type_system=python_type_system)
+        == p
+    )
 
     # We don't (currently) support structure based tuples
     with pytest.raises(NotImplementedError):

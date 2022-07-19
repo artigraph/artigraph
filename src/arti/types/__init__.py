@@ -1,11 +1,12 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from abc import abstractmethod
+from collections import defaultdict
 from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional
 
-from pydantic import PrivateAttr, validator
+from pydantic import validator
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
@@ -307,7 +308,7 @@ class TypeAdapter:
         return isinstance(type_, cls.artigraph)
 
     @classmethod
-    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: "TypeSystem") -> Type:
         raise NotImplementedError()
 
     @classmethod
@@ -315,7 +316,7 @@ class TypeAdapter:
         raise NotImplementedError()
 
     @classmethod
-    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: "TypeSystem") -> Any:
         raise NotImplementedError()
 
 
@@ -323,7 +324,7 @@ class TypeAdapter:
 # python TypeSystem).
 class _ScalarClassTypeAdapter(TypeAdapter):
     @classmethod
-    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any]) -> Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: "TypeSystem") -> Type:
         return cls.artigraph()
 
     @classmethod
@@ -331,7 +332,7 @@ class _ScalarClassTypeAdapter(TypeAdapter):
         return lenient_issubclass(type_, cls.system)
 
     @classmethod
-    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: "TypeSystem") -> Any:
         return cls.system
 
     @classmethod
@@ -358,38 +359,45 @@ class _ScalarClassTypeAdapter(TypeAdapter):
 class TypeSystem(Model):
     key: str
 
-    _adapter_by_key: dict[str, type[TypeAdapter]] = PrivateAttr(default_factory=dict)
     extends: "tuple[TypeSystem, ...]" = ()
 
     def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
-        return register(self._adapter_by_key, adapter.key, adapter)
+        return register(_TYPE_SYSTEM_ADAPTERS[self], adapter.key, adapter)
 
     @property
     def _priority_sorted_adapters(self) -> Iterator[type[TypeAdapter]]:
-        return reversed(sorted(self._adapter_by_key.values(), key=attrgetter("priority")))
+        return reversed(sorted(_TYPE_SYSTEM_ADAPTERS[self].values(), key=attrgetter("priority")))
 
-    def to_artigraph(self, type_: Any, *, hints: dict[str, Any]) -> Type:
+    def to_artigraph(
+        self, type_: Any, *, hints: dict[str, Any], type_system: "Optional[TypeSystem]" = None
+    ) -> Type:
+        root_type_system = type_system or self
         for adapter in self._priority_sorted_adapters:
             if adapter.matches_system(type_, hints=hints):
-                return adapter.to_artigraph(type_, hints=hints)
+                return adapter.to_artigraph(type_, hints=hints, type_system=root_type_system)
         for type_system in self.extends:
             try:
-                return type_system.to_artigraph(type_, hints=hints)
+                return type_system.to_artigraph(type_, hints=hints, type_system=root_type_system)
             except NotImplementedError:
                 pass
-        raise NotImplementedError(f"No {self} adapter for system type: {type_}.")
+        raise NotImplementedError(f"No {root_type_system} adapter for system type: {type_}.")
 
-    def to_system(self, type_: Type, *, hints: dict[str, Any]) -> Any:
+    def to_system(
+        self, type_: Type, *, hints: dict[str, Any], type_system: "Optional[TypeSystem]" = None
+    ) -> Any:
+        root_type_system = type_system or self
         for adapter in self._priority_sorted_adapters:
             if adapter.matches_artigraph(type_, hints=hints):
-                return adapter.to_system(type_, hints=hints)
+                return adapter.to_system(type_, hints=hints, type_system=root_type_system)
         for type_system in self.extends:
             try:
-                return type_system.to_system(type_, hints=hints)
+                return type_system.to_system(type_, hints=hints, type_system=root_type_system)
             except NotImplementedError:
                 pass
-        raise NotImplementedError(f"No {self} adapter for Artigraph type: {type_}.")
+        raise NotImplementedError(f"No {root_type_system} adapter for Artigraph type: {type_}.")
 
+
+_TYPE_SYSTEM_ADAPTERS = defaultdict[TypeSystem, dict[str, type[TypeAdapter]]](dict)
 
 # Fix ForwardRefs in outer_type_, pending: https://github.com/samuelcolvin/pydantic/pull/4249
 TypeSystem.__fields__["extends"].outer_type_ = tuple[TypeSystem, ...]

@@ -28,8 +28,10 @@ class BaseModelAdapter(TypeAdapter):
     system = BaseModel
 
     @staticmethod
-    def _field_to_artigraph(field: ModelField, *, hints: dict[str, Any]) -> Type:
-        subtype = pydantic_type_system.to_artigraph(field.outer_type_, hints=hints)
+    def _field_to_artigraph(
+        field: ModelField, *, hints: dict[str, Any], type_system: TypeSystem
+    ) -> Type:
+        subtype = type_system.to_artigraph(field.outer_type_, hints=hints)
         return get_post_field_conversion_hook(subtype)(
             subtype,
             name=field.name,
@@ -39,11 +41,13 @@ class BaseModelAdapter(TypeAdapter):
         )
 
     @classmethod
-    def to_artigraph(cls, type_: type[BaseModel], *, hints: dict[str, Any]) -> Type:
+    def to_artigraph(
+        cls, type_: type[BaseModel], *, hints: dict[str, Any], type_system: TypeSystem
+    ) -> Type:
         return Struct(
             name=type_.__name__,
             fields={
-                field.name: cls._field_to_artigraph(field, hints=hints)
+                field.name: cls._field_to_artigraph(field, hints=hints, type_system=type_system)
                 for field in type_.__fields__.values()
             },
         )
@@ -53,19 +57,16 @@ class BaseModelAdapter(TypeAdapter):
         return lenient_issubclass(type_, cls.system)
 
     @classmethod
-    def to_system(cls, type_: Type, *, hints: dict[str, Any]) -> type[BaseModel]:
+    def to_system(
+        cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem
+    ) -> type[BaseModel]:
         assert isinstance(type_, Struct)
         return type(
             f"{type_.name}",
             (BaseModel,),
             {
                 "__annotations__": {
-                    k: (
-                        pydantic_type_system.to_system(v, hints=hints)
-                        if isinstance(v, Struct)
-                        else python_type_system.to_system(v, hints=hints)
-                    )
-                    for k, v in type_.fields.items()
+                    k: (type_system.to_system(v, hints=hints)) for k, v in type_.fields.items()
                 }
             },
         )
