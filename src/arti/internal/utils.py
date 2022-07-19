@@ -326,6 +326,27 @@ def qname(val: Union[object, type]) -> str:
     return type(val).__qualname__
 
 
+_Self = TypeVar("_Self")
+
+
+class NoCopyMixin:
+    """Mixin to bypass (deep)copying.
+
+    This is useful for objects that are *intended* to be stateful and preserved, despite usually
+    preferring immutable data structures and Pydantic models, which (deep)copy often.
+    """
+
+    def __copy__(self: _Self) -> _Self:
+        return self  # pragma: no cover
+
+    def __deepcopy__(self: _Self, memo: Any) -> _Self:
+        return self  # pragma: no cover
+
+
+class NoCopyDict(dict[_K, _V], NoCopyMixin):
+    pass
+
+
 _K_str = TypeVar("_K_str")
 
 
