@@ -1,10 +1,6 @@
 import pytest
 
-from arti.internal import version, wrap_exc
-
-
-def test_version() -> None:
-    assert version is not None
+from arti.internal import wrap_exc
 
 
 def test_wrap_exc() -> None:
