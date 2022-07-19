@@ -262,6 +262,7 @@ def test_TypeSystem_extends(Int32Adapter: type[TypeAdapter]) -> None:
     base = TypeSystem(key="base")
     extended = TypeSystem(key="extended", extends=(base,))
 
+    # NOTE: Even adapters registered to `base` after `extended` is created should be available.
     base.register_adapter(Int32Adapter)
 
     assert isinstance(extended.to_artigraph(MyInt, hints={}), Int32)
