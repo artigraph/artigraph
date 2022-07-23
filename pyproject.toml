@@ -74,7 +74,7 @@ gcp-storage-emulator = "^2022.6.11"
 ipdb = "^0.13.9"
 ipython = "^8.4.0"
 isort = "5.10.1"
-mypy = "0.961"
+mypy = "0.971"
 pdocs = {git = "https://github.com/JacobHayes/pdocs.git", rev = "master"} # Fix GenericAlias error https://github.com/timothycrosley/pdocs/pull/29
 portray = "^1.7.0"
 pre-commit = "2.20.0"
