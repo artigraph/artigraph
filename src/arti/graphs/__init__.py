@@ -93,14 +93,12 @@ class ArtifactBox(TypedBox[str, Artifact]):
         )
 
     def _Box__convert_and_store(self, item: str, value: Artifact) -> None:
+        super()._Box__convert_and_store(item, value)  # pylint: disable=no-member
         if isinstance(value, dict):
-            super()._Box__convert_and_store(item, value)  # pylint: disable=no-member
             # TODO: Test if this works with `Box({"some": {"nested": "thing"}})`.
             # Guessing not, may need to put in an empty dict/box first, set the path,
             # and then update it.
             object.__setattr__(self[item], "_path", self._path + (item,))
-        else:
-            super()._Box__convert_and_store(item, value)  # pylint: disable=no-member
 
     def _Box__get_default(self, item: str, attr: bool = False) -> Any:
         value = super()._Box__get_default(item, attr=attr)  # type: ignore
