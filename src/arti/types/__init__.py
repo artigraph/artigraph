@@ -357,13 +357,12 @@ class _ScalarClassTypeAdapter(TypeAdapter):
 
 class TypeSystem(Model):
     key: str
+    extends: "tuple[TypeSystem, ...]" = ()
 
     # NOTE: Use a NoCopyDict to avoid copies of the registry. Otherwise, TypeSystems that extend
     # this TypeSystem will only see the adapters registered *as of initialization* (as pydantic
     # would deepcopy the TypeSystems in the `extends` argument).
     _adapter_by_key: NoCopyDict[str, type[TypeAdapter]] = PrivateAttr(default_factory=NoCopyDict)
-
-    extends: "tuple[TypeSystem, ...]" = ()
 
     def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
         return register(self._adapter_by_key, adapter.key, adapter)
