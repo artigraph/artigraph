@@ -1,4 +1,5 @@
 import json
+import pickle
 import re
 from datetime import date, datetime
 from typing import Any
@@ -196,3 +197,9 @@ def test_Artifact_storage_path_resolution() -> None:
         storage: S
 
     assert A(storage=S()).storage.key == "test-a_key={a.key}"
+
+
+def test_Artifact_from_type_pickle() -> None:
+    artifact = Artifact.from_type(Int64())()
+    msg = pickle.dumps(artifact)
+    assert pickle.loads(msg) == artifact

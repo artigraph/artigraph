@@ -1,6 +1,8 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import json
+from collections.abc import Callable
+from functools import cache
 from itertools import chain
 from typing import Any, ClassVar, Optional
 
@@ -125,10 +127,6 @@ class Artifact(BaseArtifact):
     """
 
     _abstract_ = True
-    # The Artifact._by_type registry is used to track Artifact classes generated from literal python
-    # values. This is populated by Artifact.from_type and used in Producer class validation
-    # to find a default Artifact type for un-Annotated hints (eg: `def build(i: int)`).
-    _by_type: "ClassVar[dict[Type, type[Artifact]]]" = {}
 
     annotations: tuple[Annotation, ...] = ()
     statistics: tuple[Statistic, ...] = ()
@@ -182,26 +180,59 @@ class Artifact(BaseArtifact):
 
     @classmethod
     def from_type(cls, type_: Type) -> "type[Artifact]":
+        return _DynamicArtifact.from_type(type_)
+
+
+class _DynamicArtifact(Artifact):
+    """_DynamicArtifact is the base class of dynamically generated Artifact classes.
+
+    This class allows the dynamically generated classes to be `pickle`d and used across processes.
+
+    Subclasses can be created dynamically from a `Type` instance with `_DynamicArtifact.from_type`.
+    This generation allows using simple python types in `Producer.build` signatures (eg: `x: int`)
+    and assigning simple python values (eg: `5`) to `Graph.artifacts`. We infer the `Type` from the
+    python hint or value, create a new `Artifact` class, and then instantiate with a default
+    `Format`/`Storage`.
+    """
+
+    _abstract_ = True
+
+    @classmethod
+    @cache
+    def from_type(cls, type_: Type) -> type[Artifact]:
         from arti.formats.json import JSON
         from arti.storage.literal import StringLiteral
 
-        if type_ not in cls._by_type:
-            defaults: dict[str, Any] = {
-                "type": type_,
-                "format": JSON(),
-                "storage": StringLiteral(),  # Set a default Storage instance to support easy `Producer.out` use.
-            }
-            cls._by_type[type_] = type(
-                f"{type_.friendly_key}Artifact",
-                (cls,),
-                {
-                    "__annotations__": {  # Preserve the looser default type hints
-                        field: cls.__fields__[field].outer_type_ for field in defaults
-                    },
-                    **defaults,
+        defaults: dict[str, Any] = {
+            "type": type_,
+            "format": JSON(),
+            "storage": StringLiteral(),  # Set a default Storage instance to support easy `Producer.out` use.
+        }
+        return type(
+            f"{type_.friendly_key}Artifact",
+            (cls,),
+            {
+                "__annotations__": {  # Preserve the looser default type hints
+                    field: cls.__fields__[field].outer_type_ for field in defaults
                 },
-            )
-        return cls._by_type[type_]
+                "__module__": __name__,
+                **defaults,
+            },
+        )
+
+    @classmethod
+    def _instance_from_type(cls, type_: Type) -> Artifact:
+        """Helper used in `__reduce__` to handle instantiating the object for `pickle.load`."""
+        return cls.from_type(type_)()
+
+    def __reduce__(self) -> tuple[Callable[[Type], Artifact], tuple[Type], dict[str, Any]]:
+        """Support pickling the dynamically generated subclasses."""
+        # Pickle requires a globally available name when loading, but the dynamic subclasses aren't
+        # visible. While we could register them to `globals()`, we'd only be able to load instances
+        # in processes that *have already registered a class for that `Type`*. Instead, we can
+        # override the loading to generate the class, instantiate the type, and *then* set the
+        # state.
+        return (_DynamicArtifact._instance_from_type, (self.type,), self.__getstate__())
 
 
 from arti.producers import ProducerOutput  # noqa: E402
