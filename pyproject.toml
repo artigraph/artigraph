@@ -116,6 +116,7 @@ disable = """
     import-outside-toplevel,
     invalid-name,
     line-too-long,
+    no-else-return,
     redefined-builtin,
     too-few-public-methods,
     unsubscriptable-object,
