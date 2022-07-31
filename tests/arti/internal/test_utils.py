@@ -1,7 +1,6 @@
 import math
 import operator as op
 import os
-import re
 from collections.abc import Callable
 from copy import deepcopy
 from functools import partial
@@ -16,7 +15,6 @@ from arti.internal.utils import (
     _int,
     class_name,
     classproperty,
-    dispatch,
     frozendict,
     import_submodules,
     int64,
@@ -44,89 +42,6 @@ def test_classproperty() -> None:
 
     assert Test.a == "Test"
     assert Test().a == "Test"
-
-
-class A:
-    pass
-
-
-class A1(A):
-    pass
-
-
-class B:
-    pass
-
-
-class B1(B):
-    pass
-
-
-def test_dispatch() -> None:
-    @dispatch
-    def dispatch_test(a: A, b: B) -> Any:
-        return "good_a_b"
-
-    @dispatch_test.register
-    def good_a_b1(a: A, b: B1) -> Any:
-        return "good_a_b1"
-
-    @dispatch_test.register
-    def good_a1_b(a: A1, b: B) -> Any:
-        return "good_a1_b"
-
-    # Check that the non-annotated registration works
-    @dispatch_test.register(A1, B1)
-    def good_a1_b1(a, b) -> Any:  # type: ignore
-        return "good_a1_b1"
-
-    with pytest.raises(
-        TypeError,
-        match=re.escape("Expected `bad_name` to have ['a', 'b'] parameters, got ['a']"),
-    ):
-
-        @dispatch_test.register
-        def bad_name(a: int) -> Any:
-            return a
-
-    with pytest.raises(
-        TypeError,
-        match="Expected the `bad_param_kind.a` parameter to be POSITIONAL_OR_KEYWORD, got KEYWORD_ONLY",
-    ):
-
-        @dispatch_test.register
-        def bad_param_kind(*, a: A, b: B) -> Any:
-            return a, b
-
-    with pytest.raises(
-        TypeError,
-        match="Expected the `bad_type.a` parameter to be a subclass of <class 'test_utils.A'>, got <class 'int'>",
-    ):
-
-        @dispatch_test.register
-        def bad_type(a: int, b: str) -> Any:
-            return a, b
-
-    with pytest.raises(
-        TypeError,
-        match=re.escape("Expected the `bad` return to match"),
-    ):
-
-        @dispatch
-        def ok(a: A) -> str:
-            return "good_a_b"
-
-        @ok.register
-        def bad(a: A1) -> int:
-            return 5
-
-    assert dispatch_test(A(), B()) == "good_a_b"
-    assert dispatch_test(A(), B1()) == "good_a_b1"
-    assert dispatch_test(A1(), B()) == "good_a1_b"
-    assert dispatch_test(A1(), B1()) == "good_a1_b1"
-    # Check that a bad one didn't get registered
-    with pytest.raises(TypeError):
-        assert dispatch_test(5, "")
 
 
 def test_frozendict() -> None:

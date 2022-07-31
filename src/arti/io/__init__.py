@@ -5,7 +5,8 @@ from types import ModuleType
 from typing import Any, Optional
 
 from arti.formats import Format
-from arti.internal.utils import dispatch, import_submodules
+from arti.internal.dispatch import multipledispatch
+from arti.internal.utils import import_submodules
 from arti.storage import StoragePartition, _StoragePartition
 from arti.types import Collection, Type
 from arti.views import View
@@ -19,7 +20,7 @@ def _discover() -> None:
         _submodules = import_submodules(__path__, __name__)
 
 
-@dispatch
+@multipledispatch
 def _read(
     type_: Type, format: Format, storage_partitions: Sequence[StoragePartition], view: View
 ) -> Any:
@@ -49,7 +50,7 @@ def read(
     return _read(type_, format, storage_partitions, view)
 
 
-@dispatch  # type: ignore
+@multipledispatch  # type: ignore
 def _write(
     data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
 ) -> Optional[_StoragePartition]:
