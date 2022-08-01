@@ -14,7 +14,6 @@ from typing import (
     get_args,
     get_origin,
     get_type_hints,
-    no_type_check,
 )
 
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
@@ -203,7 +202,6 @@ else:  # pragma: no cover
 
     # mypy doesn't know of types.UnionType yet, but `type: ignore` would be "unused"
     # (and error) on other python versions.
-    @no_type_check
     def is_union(type_: Any) -> bool:
         # `Union[int, str]` or `int | str`
         return type_ is Union or type_ is types.UnionType  # noqa: E721
