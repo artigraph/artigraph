@@ -20,6 +20,7 @@ from arti.types import (
     String,
     Struct,
     Timestamp,
+    is_partitioned,
 )
 
 
@@ -135,11 +136,11 @@ def test_Collection() -> None:
     assert isinstance(collection, List)  # Confirm subclass
     assert collection.cluster_by == ()
     assert collection.element == Int32()
-    assert collection.is_partitioned is False
+    assert collection.friendly_key == "Int32Collection"
     assert collection.name == DEFAULT_ANONYMOUS_NAME
     assert collection.partition_by == ()
     assert collection.partition_fields == frozendict()
-    assert collection.friendly_key == "Int32Collection"
+    assert is_partitioned(collection) is False
     # Test fields accessor - it raises a standard AttributeError if the element doesn't contain a
     # fields member.
     with pytest.raises(AttributeError):
@@ -151,10 +152,10 @@ def test_Collection_partitioned() -> None:
     fields = {"x": Int32(), "y": Int32()}
 
     collection = Collection(element=Struct(fields=fields), partition_by=("x",), cluster_by=("y",))
-    assert collection.partition_by == ("x",)
     assert collection.cluster_by == ("y",)
+    assert collection.partition_by == ("x",)
     assert collection.partition_fields == frozendict({"x": fields["x"]})
-    assert collection.is_partitioned is True
+    assert is_partitioned(collection) is True
 
     with pytest.raises(ValueError, match="requires element to be a Struct"):
         Collection(element=Int32(), partition_by=("x",))

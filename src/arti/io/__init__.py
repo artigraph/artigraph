@@ -8,7 +8,7 @@ from arti.formats import Format
 from arti.internal.dispatch import multipledispatch
 from arti.internal.utils import import_submodules
 from arti.storage import StoragePartition, _StoragePartition
-from arti.types import Collection, Type
+from arti.types import Type, is_partitioned
 from arti.views import View
 
 _submodules: Optional[dict[str, ModuleType]] = None
@@ -39,7 +39,7 @@ def read(
         # NOTE: Aside from simplifying this check up front, multiple dispatch with unknown list
         # element type can be ambiguous/error.
         raise FileNotFoundError("No data")
-    if len(storage_partitions) > 1 and not (isinstance(type_, Collection) and type_.is_partitioned):
+    if len(storage_partitions) > 1 and not is_partitioned(type_):
         raise ValueError(
             f"Multiple partitions can only be read into a partitioned Collection, not {type_}"
         )

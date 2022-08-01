@@ -6,9 +6,8 @@ from typing import Any
 import pytest
 from pydantic import validator
 
-from arti import Annotation, Artifact, CompositeKeyTypes, Format, Statistic, Type
+from arti import Annotation, Artifact, Format, Statistic, Type
 from arti.formats.json import JSON
-from arti.partitions import Int64Key
 from arti.storage.literal import StringLiteral
 from arti.types import (
     Binary,
@@ -170,20 +169,6 @@ def test_instance_attr_merging() -> None:
     artifact = MyArtifact(annotations=[Ann2(y=10)], statistics=[Stat2()])
     assert tuple(type(a) for a in artifact.annotations) == (Ann1, Ann2)
     assert tuple(type(s) for s in artifact.statistics) == (Stat1, Stat2)
-
-
-def test_Artifact_partition_key_types() -> None:
-    class NonPartitioned(Artifact):
-        type = Collection(element=Struct(fields={"a": Int64()}))
-
-    assert NonPartitioned.partition_key_types == CompositeKeyTypes()
-    assert not NonPartitioned.is_partitioned
-
-    class Partitioned(Artifact):
-        type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
-
-    assert Partitioned.partition_key_types == CompositeKeyTypes({"a": Int64Key})
-    assert Partitioned.is_partitioned
 
 
 def test_Artifact_storage_path_resolution() -> None:

@@ -7,7 +7,7 @@ from typing import Any
 from arti.formats.pickle import Pickle
 from arti.io import register_reader, register_writer
 from arti.storage.local import LocalFilePartition
-from arti.types import Collection, Type
+from arti.types import Type, is_partitioned
 from arti.views.python import PythonBuiltin
 
 
@@ -23,7 +23,7 @@ def _read_pickle_localfile_python(
     storage_partitions: Sequence[LocalFilePartition],
     view: PythonBuiltin,
 ) -> Any:
-    if isinstance(type_, Collection) and type_.is_partitioned:
+    if is_partitioned(type_):
         return list(
             chain.from_iterable(
                 _read_pickle_file(storage_partition.path)

@@ -23,8 +23,9 @@ from arti.internal import wrap_exc
 from arti.internal.models import Model
 from arti.internal.type_hints import NoneType, lenient_issubclass, signature
 from arti.internal.utils import frozendict, ordinal
-from arti.partitions import CompositeKey, CompositeKeyTypes, NotPartitioned
+from arti.partitions import CompositeKey, CompositeKeyTypes, NotPartitioned, PartitionKey
 from arti.storage import StoragePartitions
+from arti.types import is_partitioned
 from arti.versions import SemVer, Version
 from arti.views import View
 
@@ -140,7 +141,7 @@ class Producer(Model):
     @classmethod
     def _get_view_from_annotation(cls, annotation: Any, artifact: type[Artifact]) -> type[View]:
         wrap_msg = f"{artifact.__name__}"
-        if artifact.is_partitioned:
+        if is_partitioned(artifact._type):
             wrap_msg = f"partitions of {artifact.__name__}"
         with wrap_exc(ValueError, prefix=f" ({wrap_msg})"):
             return View.get_class_for(annotation, validation_type=artifact._type)
@@ -225,7 +226,7 @@ class Producer(Model):
         # heterogeneous names if necessary.
         artifacts_by_composite_key = defaultdict[CompositeKeyTypes, list[type[Artifact]]](list)
         for (artifact, _) in output_metadata:
-            artifacts_by_composite_key[artifact.partition_key_types].append(artifact)
+            artifacts_by_composite_key[PartitionKey.types_from(artifact._type)].append(artifact)
         if len(artifacts_by_composite_key) != 1:
             raise ValueError("all output Artifacts must have the same partitioning scheme")
         # TODO: Save off output composite_key_types
@@ -278,7 +279,9 @@ class Producer(Model):
         """Validate partitioned Artifacts and the .map method"""
         if not hasattr(cls, "map"):
             partitioned_outputs = [
-                artifact for (artifact, view) in cls._output_metadata_ if artifact.is_partitioned
+                artifact
+                for (artifact, view) in cls._output_metadata_
+                if is_partitioned(artifact._type)
             ]
             # TODO: Add runtime checking of `map` output (ie: output aligns w/ output
             # artifacts and such).

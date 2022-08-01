@@ -20,6 +20,7 @@ from arti.internal.utils import TypedBox, frozendict
 from arti.partitions import CompositeKey
 from arti.producers import Producer
 from arti.storage import StoragePartition, StoragePartitions
+from arti.types import is_partitioned
 from arti.views import View
 
 if TYPE_CHECKING:
@@ -203,7 +204,7 @@ class Graph(Model):
                         for partition in node.discover_storage_partitions()
                     )
                     if not known_artifact_partitions[key]:
-                        content_str = "partitions" if node.is_partitioned else "data"
+                        content_str = "partitions" if is_partitioned(node.type) else "data"
                         raise ValueError(f"No {content_str} found for `{key}`: {node}")
                     snapshot_id = snapshot_id.combine(
                         *[partition.fingerprint for partition in known_artifact_partitions[key]]

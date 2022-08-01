@@ -11,8 +11,6 @@ from arti.annotations import Annotation
 from arti.formats import Format
 from arti.internal.models import Model
 from arti.internal.type_hints import get_annotation_from_value
-from arti.internal.utils import classproperty
-from arti.partitions import CompositeKeyTypes, PartitionKey
 from arti.storage import InputFingerprints, Storage, StoragePartition
 from arti.types import Type
 
@@ -87,14 +85,6 @@ class BaseArtifact(Model):
         return storage.copy(
             update={name: values[name] for name in ["type", "format"] if name in values}
         ).resolve_templates()
-
-    @classproperty
-    def partition_key_types(cls) -> CompositeKeyTypes:
-        return PartitionKey.types_from(cls._type)
-
-    @classproperty
-    def is_partitioned(cls) -> bool:
-        return bool(cls.partition_key_types)
 
     def discover_storage_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()

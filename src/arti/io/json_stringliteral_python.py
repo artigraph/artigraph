@@ -6,7 +6,7 @@ from typing import Any
 from arti.formats.json import JSON
 from arti.io import register_reader, register_writer
 from arti.storage.literal import StringLiteralPartition, _not_written_err
-from arti.types import Collection, Type
+from arti.types import Type, is_partitioned
 from arti.views.python import PythonBuiltin
 
 
@@ -23,7 +23,7 @@ def _read_json_stringliteral_python(
     storage_partitions: Sequence[StringLiteralPartition],
     view: PythonBuiltin,
 ) -> Any:
-    if isinstance(type_, Collection) and type_.is_partitioned:
+    if is_partitioned(type_):
         return list(
             chain.from_iterable(
                 _read_json_literal(storage_partition) for storage_partition in storage_partitions

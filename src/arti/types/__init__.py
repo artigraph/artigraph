@@ -35,6 +35,11 @@ class Type(Model):
         return self._class_key_
 
 
+def is_partitioned(type_: Type) -> bool:
+    """Helper function to determine whether the type is partitioned."""
+    return isinstance(type_, Collection) and bool(type_.partition_fields)
+
+
 class _NamedMixin(Model):
     name: str = DEFAULT_ANONYMOUS_NAME
 
@@ -212,10 +217,6 @@ class Collection(_NamedMixin, List):
         If the element is not a Struct, an AttributeError will be raised.
         """
         return self.element.fields  # type: ignore # We want the standard AttributeError
-
-    @property
-    def is_partitioned(self) -> bool:
-        return bool(self.partition_fields)
 
     @property
     def partition_fields(self) -> frozendict[str, Type]:
