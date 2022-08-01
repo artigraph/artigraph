@@ -3,19 +3,24 @@ import sys
 import types
 from collections.abc import Callable
 from datetime import date, datetime
-from typing import _AnnotatedAlias  # type: ignore
 from typing import (
     TYPE_CHECKING,
     Annotated,
     Any,
+    Literal,
+    Optional,
     TypeVar,
     Union,
     cast,
     get_args,
     get_origin,
     get_type_hints,
+    overload,
 )
 
+from arti.internal.utils import one_or_none
+
+_T = TypeVar("_T")
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
 
@@ -89,6 +94,37 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
             continue
         return args
     raise TypeError(f"{klass.__name__} must subclass a subscripted Generic")
+
+
+@overload
+def get_item_from_annotated(
+    annotation: Any, klass: type[_T], *, is_subclass: Literal[True]
+) -> Optional[type[_T]]:
+    ...
+
+
+@overload
+def get_item_from_annotated(
+    annotation: Any, klass: type[_T], *, is_subclass: Literal[False]
+) -> Optional[_T]:
+    ...
+
+
+@overload
+def get_item_from_annotated(
+    annotation: Any, klass: type[_T], *, is_subclass: bool
+) -> Optional[Union[_T, type[_T]]]:
+    ...
+
+
+def get_item_from_annotated(
+    annotation: Any, klass: type[_T], *, is_subclass: bool
+) -> Optional[Union[_T, type[_T]]]:
+    if not is_Annotated(annotation):
+        return None
+    _, *hints = get_args(annotation)
+    checker = lenient_issubclass if is_subclass else isinstance
+    return one_or_none([hint for hint in hints if checker(hint, klass)], item_name=klass.__name__)
 
 
 def get_annotation_from_value(value: Any) -> Any:
@@ -208,13 +244,13 @@ else:  # pragma: no cover
 
 
 def is_Annotated(type_: Any) -> bool:
-    return isinstance(type_, _AnnotatedAlias)
+    return get_origin(type_) is Annotated
 
 
 def is_generic_alias(type_: Any) -> bool:
     from typing import _GenericAlias  # type: ignore
 
-    return isinstance(type_, _GenericAlias)
+    return isinstance(type_, (_GenericAlias, types.GenericAlias))
 
 
 def is_optional_hint(type_: Any) -> bool:

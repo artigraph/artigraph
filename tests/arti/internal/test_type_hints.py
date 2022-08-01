@@ -7,6 +7,7 @@ import pytest
 from arti.internal.type_hints import (
     NoneType,
     get_class_type_vars,
+    get_item_from_annotated,
     is_optional_hint,
     is_union,
     is_union_hint,
@@ -57,6 +58,23 @@ def test_get_class_type_vars() -> None:
     # And finally, check error cases
     with pytest.raises(TypeError, match="Base must subclass a subscripted Generic"):
         get_class_type_vars(Base)
+
+
+@pytest.mark.parametrize(
+    ("annotation", "klass", "is_subclass", "expected"),
+    (
+        (int, int, True, None),
+        (int, int, False, None),
+        (Annotated[int, 5], int, False, 5),
+        (Annotated[int, 5], int, True, None),
+        (Annotated[int, int], int, False, None),
+        (Annotated[int, int], int, True, int),
+    ),
+)
+def test_get_item_from_annotated(
+    annotation: Any, klass: type, is_subclass: bool, expected: Any
+) -> None:
+    assert get_item_from_annotated(annotation, klass, is_subclass=is_subclass) == expected
 
 
 @pytest.mark.parametrize(

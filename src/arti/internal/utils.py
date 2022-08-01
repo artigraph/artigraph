@@ -234,6 +234,14 @@ def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any], None, None]:
             yield f
 
 
+def one_or_none(values: Optional[list[_V]], *, item_name: str) -> Optional[_V]:
+    if values is None or len(values) == 0:
+        return None
+    if len(values) > 1:
+        raise ValueError(f"multiple {item_name} values found: {values}")
+    return values[0]
+
+
 def ordinal(n: int) -> str:
     """Convert an integer into its ordinal representation."""
     n = int(n)

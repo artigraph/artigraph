@@ -19,6 +19,7 @@ from arti.internal.utils import (
     import_submodules,
     int64,
     named_temporary_file,
+    one_or_none,
     ordinal,
     qname,
     register,
@@ -200,6 +201,13 @@ def test_named_temporary_file(mode: str) -> None:
         assert f.mode == mode
         with open(f.name, mode=f.mode) as f1:
             assert f1
+
+
+def test_one_or_none() -> None:
+    assert one_or_none([1], item_name="num") == 1
+    assert one_or_none([], item_name="num") is None
+    with pytest.raises(ValueError, match="multiple num values found"):
+        one_or_none([1, 2], item_name="num")
 
 
 def test_ordinal() -> None:
