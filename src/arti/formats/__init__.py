@@ -27,3 +27,9 @@ class Format(Model):
         # Ensure our type system can handle the provided type.
         cls.type_system.to_system(type_, hints={})
         return type_
+
+    @classmethod
+    def get_default(cls) -> "Format":
+        from arti.formats.json import JSON
+
+        return JSON()  # TODO: Support some sort of configurable defaults.

@@ -39,8 +39,8 @@ class BaseArtifact(Model):
     #
     # In order to override on the instance, avoid ClassVars lest mypy complains when/if we override.
     type: Type
-    format: Format
-    storage: Storage[Any]
+    format: Format = Field(default_factory=Format.get_default)
+    storage: Storage[Any] = Field(default_factory=Storage.get_default)
 
     # Hide in repr to prevent showing the entire upstream graph.
     #
@@ -95,8 +95,6 @@ class BaseArtifact(Model):
 
 class Statistic(BaseArtifact):
     """A Statistic is a piece of data derived from an Artifact that can be tracked over time."""
-
-    # TODO: Set format/storage to some "system default" that can be used across backends?
 
     _abstract_ = True
 

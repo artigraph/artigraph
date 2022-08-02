@@ -132,6 +132,12 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
             }
         )
 
+    @classmethod
+    def get_default(cls) -> "AnyStorage":
+        from arti.storage.literal import StringLiteral
+
+        return StringLiteral()  # TODO: Support some sort of configurable defaults.
+
     @abc.abstractmethod
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
