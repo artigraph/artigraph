@@ -87,12 +87,9 @@ class LocalExecutor(Executor):
                 name: graph.read(
                     artifact=producer.inputs[name],
                     storage_partitions=partition_dependencies[output_partition_key][name],
-                    # TODO: We'll probably need to update Producer._build_input_views_
-                    # to hold *instances* (either objects set in Annotated or init
-                    # during Producer.__init_subclass__)
-                    view=view_class(),
+                    view=view,
                 )
-                for name, view_class in producer._build_input_views_.items()
+                for name, view in producer._build_input_views_.items()
             }
             outputs = producer.build(**arguments)
             if len(producer._output_metadata_) == 1:
@@ -106,7 +103,7 @@ class LocalExecutor(Executor):
                     artifact=output_artifacts[i],
                     input_fingerprint=partition_input_fingerprints[output_partition_key],
                     keys=output_partition_key,
-                    view=producer._output_metadata_[i][1](),
+                    view=producer._output_metadata_[i][1],
                 )
 
     def build(self, graph: Graph) -> None:

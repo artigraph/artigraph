@@ -19,7 +19,7 @@ def test_python_View() -> None:
         (None, Null, NoneType),
         ("", Str, str),
     ]:
-        assert View.get_class_for(python_type) is view
+        assert View.from_annotation(python_type) == view()
 
         test_type = view.type_system.to_artigraph(python_type, hints={})
         test_format = Pickle()

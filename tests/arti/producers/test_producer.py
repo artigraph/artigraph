@@ -103,7 +103,7 @@ def test_Producer_partitioned_input_validation() -> None:
             pass
 
     assert P._input_artifact_types_ == frozendict(a=A)
-    assert P._build_input_views_ == frozendict(a=python_views.List)
+    assert P._build_input_views_ == frozendict(a=python_views.List())
 
     with pytest.raises(ValueError, match="dict.* cannot be used to represent Collection"):
 
@@ -127,7 +127,7 @@ def test_Producer_partitioned_input_validation() -> None:
 
 
 def test_Producer_output_metadata() -> None:
-    assert DummyProducer._output_metadata_ == ((A2, python_views.Dict), (A3, python_views.Dict))
+    assert DummyProducer._output_metadata_ == ((A2, python_views.Dict()), (A3, python_views.Dict()))
 
     class ImplicitArtifact(Producer):
         a1: A1
@@ -137,31 +137,33 @@ def test_Producer_output_metadata() -> None:
             pass
 
     assert ImplicitArtifact._output_metadata_ == (
-        (Artifact.from_type(Int64()), python_views.Int),
-        (A2, python_views.Dict),
+        (Artifact.from_type(Int64()), python_views.Int()),
+        (A2, python_views.Dict()),
     )
 
     class ExplicitView(Producer):
         a1: A1
 
         @staticmethod
-        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict]:  # type: ignore
+        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict()]:  # type: ignore
             pass
 
-    assert ExplicitView._output_metadata_ == ((A2, python_views.Dict),)
+    assert ExplicitView._output_metadata_ == ((A2, python_views.Dict()),)
 
     with pytest.raises(
-        ValueError, match=re.escape("DupView.build 1st return (A2) - multiple Views set")
+        ValueError, match=re.escape("DupView.build 1st return (A2) - multiple View values found")
     ):
 
         class DupView(Producer):
             a1: A1
 
             @staticmethod
-            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore
+            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict(), python_views.Int()]:  # type: ignore
                 pass
 
-    with pytest.raises(ValueError, match="DupArtifact.build 1st return - multiple Artifacts set"):
+    with pytest.raises(
+        ValueError, match="DupArtifact.build 1st return - multiple Artifact classes found"
+    ):
 
         class DupArtifact(Producer):
             a1: A1

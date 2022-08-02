@@ -36,9 +36,9 @@ def test_View_registry(MockView: type[View]) -> None:
     assert MockView._by_python_type_ == {int: Int2, str: Str}
 
 
-def test_View_get_class_for(MockView: type[View]) -> None:
+def test_View_from_annotation(MockView: type[View]) -> None:
     with pytest.raises(ValueError, match="cannot be matched to a View, try setting one explicitly"):
-        MockView.get_class_for(list)
+        MockView.from_annotation(list)
 
     class List(MockView):  # type: ignore
         python_type = list
@@ -49,7 +49,7 @@ def test_View_get_class_for(MockView: type[View]) -> None:
         (list[int], None),
         (list[int], types.List(element=types.Int64())),
     ]:
-        assert MockView.get_class_for(annotation, validation_type=validation_type) is List
+        assert MockView.from_annotation(annotation, validation_type=validation_type) == List()
 
     with pytest.raises(ValueError, match="list'> cannot be used to represent Float64"):
-        MockView.get_class_for(list, validation_type=types.Float64())
+        MockView.from_annotation(list, validation_type=types.Float64())

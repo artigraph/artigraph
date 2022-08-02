@@ -28,7 +28,7 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
         a.type,
         a.format,
         a.storage.generate_partition(with_content_fingerprint=False),
-        view=View.get_class_for(int, validation_type=a.type)(),
+        view=View.from_annotation(int, validation_type=a.type),
     )
     partitions = a.discover_storage_partitions()
     assert len(partitions) == 1
@@ -37,7 +37,7 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
             a.type,
             a.format,
             partitions,
-            view=View.get_class_for(int, validation_type=a.type)(),
+            view=View.from_annotation(int, validation_type=a.type),
         )
         == n
     )
@@ -46,7 +46,7 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
             a.type,
             a.format,
             StoragePartitions(),
-            view=View.get_class_for(int, validation_type=a.type)(),
+            view=View.from_annotation(int, validation_type=a.type),
         )
     with pytest.raises(
         ValueError, match="Multiple partitions can only be read into a partitioned Collection, not"
@@ -55,7 +55,7 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
             a.type,
             a.format,
             partitions * 2,
-            view=View.get_class_for(int, validation_type=a.type)(),
+            view=View.from_annotation(int, validation_type=a.type),
         )
 
 
@@ -82,7 +82,7 @@ def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
             a.type,
             a.format,
             partition,
-            view=View.get_class_for(list, validation_type=a.type)(),
+            view=View.from_annotation(list, validation_type=a.type),
         )
     assert {p.with_content_fingerprint() for p in data} == set(a.discover_storage_partitions())
     for partition, record in data.items():
@@ -90,5 +90,5 @@ def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
             a.type,
             a.format,
             [partition],
-            view=View.get_class_for(list, validation_type=a.type)(),
+            view=View.from_annotation(list, validation_type=a.type),
         ) == [record]

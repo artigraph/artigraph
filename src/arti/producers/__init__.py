@@ -37,8 +37,8 @@ def _commas(vals: Iterable[Any]) -> str:
 # TODO: Add @validator over all (build) fields checking for an io.{read,write} handler.
 
 
-ArtifactViewPair = tuple[type[Artifact], type[View]]
-BuildInputViews = frozendict[str, type[View]]
+ArtifactViewPair = tuple[type[Artifact], View]
+BuildInputViews = frozendict[str, View]
 MapInputMetadata = frozendict[str, type[Artifact]]
 OutputMetadata = tuple[ArtifactViewPair, ...]
 
@@ -135,16 +135,16 @@ class Producer(Model):
         if len(artifacts) == 0:
             return Artifact.from_type(python_type_system.to_artigraph(annotation, hints={}))
         if len(artifacts) > 1:
-            raise ValueError("multiple Artifacts set")
+            raise ValueError("multiple Artifact classes found")
         return cast(type[Artifact], artifacts[0])
 
     @classmethod
-    def _get_view_from_annotation(cls, annotation: Any, artifact: type[Artifact]) -> type[View]:
+    def _get_view_from_annotation(cls, annotation: Any, artifact: type[Artifact]) -> View:
         wrap_msg = f"{artifact.__name__}"
         if is_partitioned(artifact._type):
             wrap_msg = f"partitions of {artifact.__name__}"
         with wrap_exc(ValueError, prefix=f" ({wrap_msg})"):
-            return View.get_class_for(annotation, validation_type=artifact._type)
+            return View.from_annotation(annotation, validation_type=artifact._type)
 
     @classmethod
     def _validate_fields(cls) -> frozendict[str, type[Artifact]]:
