@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib
+import inspect
 import os.path
 import pkgutil
 import threading
@@ -63,6 +64,25 @@ class frozendict(Mapping[_K, _V]):
 
     def __repr__(self) -> str:
         return repr(self._data)
+
+
+def get_module_name(depth: int = 1) -> Optional[str]:
+    """Return the module name of a specific level in the stack.
+
+    Depth describes how many levels to traverse, for example:
+    - depth=0: return get_module_name's module
+    - depth=1 (default): return the caller's module
+    - depth=2: return the caller's calling module
+    - ...
+    """
+    frame = inspect.currentframe()
+    if frame is None:  # the interpreter doesn't support frame inspection
+        return None  # pragma: no cover
+    for _ in range(depth):
+        frame = frame.f_back
+        if frame is None:
+            return None
+    return frame.f_globals.get("__name__", "__main__")
 
 
 def import_submodules(
@@ -322,7 +342,7 @@ class TypedBox(Box, MutableMapping[_K_str, Union[_V, MutableMapping[_K_str, _V]]
                 cls.__name__,
                 (cls,),
                 {
-                    "__module__": __name__,
+                    "__module__": get_module_name(depth=2),  # Set to our caller's module
                     "__target_type__": value_type,
                 },
             ),

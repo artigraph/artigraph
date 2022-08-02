@@ -16,6 +16,7 @@ from arti.internal.utils import (
     class_name,
     classproperty,
     frozendict,
+    get_module_name,
     import_submodules,
     int64,
     named_temporary_file,
@@ -85,6 +86,12 @@ def test_frozendict_typing() -> None:
         # Confirm deepcopying the class works:
         #     https://bugs.python.org/issue45167
         assert deepcopy(klass) == klass
+
+
+def test_get_module_name() -> None:
+    assert get_module_name(depth=0) == get_module_name.__module__
+    assert get_module_name(depth=1) == get_module_name() == __name__
+    assert get_module_name(depth=100) is None
 
 
 # NOTE: We don't test the thread safety here
