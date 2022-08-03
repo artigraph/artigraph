@@ -30,7 +30,7 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
         a.storage.generate_partition(with_content_fingerprint=False),
         view=View.from_annotation(int, validation_type=a.type),
     )
-    partitions = a.discover_storage_partitions()
+    partitions = a.storage.discover_partitions()
     assert len(partitions) == 1
     assert (
         io.read(
@@ -84,7 +84,7 @@ def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
             partition,
             view=View.from_annotation(list, validation_type=a.type),
         )
-    assert {p.with_content_fingerprint() for p in data} == set(a.discover_storage_partitions())
+    assert {p.with_content_fingerprint() for p in data} == set(a.storage.discover_partitions())
     for partition, record in data.items():
         assert io.read(
             a.type,

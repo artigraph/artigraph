@@ -201,7 +201,7 @@ class Graph(Model):
                 if node.producer_output is None:
                     known_artifact_partitions[key] = StoragePartitions(
                         partition.with_content_fingerprint()
-                        for partition in node.discover_storage_partitions()
+                        for partition in node.storage.discover_partitions()
                     )
                     if not known_artifact_partitions[key]:
                         content_str = "partitions" if is_partitioned(node.type) else "data"

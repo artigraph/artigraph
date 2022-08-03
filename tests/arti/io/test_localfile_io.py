@@ -32,7 +32,7 @@ def test_localfile_io(tmp_path: Path, format: Format) -> None:
         a.storage.generate_partition(with_content_fingerprint=False),
         view=View.from_annotation(int, validation_type=a.type),
     )
-    partitions = a.discover_storage_partitions()
+    partitions = a.storage.discover_partitions()
     assert len(partitions) == 1
     assert (
         io.read(
@@ -86,7 +86,7 @@ def test_localfile_io_partitioned(tmp_path: Path, format: Format) -> None:
             partition,
             view=View.from_annotation(list, validation_type=a.type),
         )
-    assert {p.with_content_fingerprint() for p in data} == set(a.discover_storage_partitions())
+    assert {p.with_content_fingerprint() for p in data} == set(a.storage.discover_partitions())
     for partition, record in data.items():
         assert io.read(
             a.type,

@@ -11,7 +11,7 @@ from arti.annotations import Annotation
 from arti.formats import Format
 from arti.internal.models import Model
 from arti.internal.type_hints import get_annotation_from_value
-from arti.storage import InputFingerprints, Storage, StoragePartition
+from arti.storage import Storage
 from arti.types import Type
 
 
@@ -53,12 +53,6 @@ class BaseArtifact(Model):
         return storage.copy(
             update={name: values[name] for name in ["type", "format"] if name in values}
         ).resolve_templates()
-
-    def discover_storage_partitions(
-        self, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> tuple[StoragePartition, ...]:
-        # TODO: Should we support calculating the input fingerprints if not passed?
-        return self.storage.discover_partitions(input_fingerprints)
 
 
 class Statistic(BaseArtifact):

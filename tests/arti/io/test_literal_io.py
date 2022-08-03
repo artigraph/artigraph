@@ -18,7 +18,7 @@ def test_stringliteral_io() -> None:
     n = 5
     a = Num(format=JSON(), storage=StringLiteral(id="test", value=json.dumps(n)))
 
-    partitions = a.discover_storage_partitions()
+    partitions = a.storage.discover_partitions()
     assert len(partitions) == 1
     partition = partitions[0]
     assert isinstance(partition, StringLiteralPartition)

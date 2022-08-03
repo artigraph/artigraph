@@ -127,7 +127,7 @@ def test_Graph_snapshot() -> None:
         p1.fingerprint,
         *(
             storage_partition.with_content_fingerprint().fingerprint
-            for storage_partition in g.artifacts.a.discover_storage_partitions()
+            for storage_partition in g.artifacts.a.storage.discover_partitions()
         ),
     ]
 

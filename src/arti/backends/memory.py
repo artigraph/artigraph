@@ -58,7 +58,7 @@ class MemoryBackend(Backend):
         # know about. If we haven't seen this storage before, we'll attempt to "warm" the cache.
         if artifact.storage not in self._container.storage_partitions:
             self.write_artifact_partitions(
-                artifact, artifact.discover_storage_partitions(input_fingerprints)
+                artifact, artifact.storage.discover_partitions(input_fingerprints)
             )
         partitions = self._container.storage_partitions[artifact.storage]
         if input_fingerprints:
