@@ -8,6 +8,7 @@ from box import BoxError
 from arti import Artifact, CompositeKey, Fingerprint, Graph, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
+from arti.formats.json import JSON
 from arti.internal.utils import frozendict
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
@@ -63,12 +64,15 @@ def test_Graph_literals(tmp_path: Path) -> None:
         # snapshot_id.
         g.artifacts.phase = Num(storage=LocalFile(path=str(tmp_path / "phase.json")))
 
-    Int64Artifact = Artifact.from_type(Int64())
     x, y, z, phase = g.artifacts.x, g.artifacts.y, g.artifacts.z, g.artifacts.phase
-    assert isinstance(x, Int64Artifact)
+    assert isinstance(x, Artifact)
+    assert isinstance(x.type, Int64)
+    assert isinstance(x.format, JSON)
     assert isinstance(x.storage, StringLiteral)
     assert x.storage.value == "1"
-    assert isinstance(z, Int64Artifact)
+    assert isinstance(z, Artifact)
+    assert isinstance(z.type, Int64)
+    assert isinstance(z.format, JSON)
     assert isinstance(z.storage, StringLiteral)
     assert z.storage.value is None
 

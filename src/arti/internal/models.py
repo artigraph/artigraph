@@ -227,3 +227,7 @@ class Model(BaseModel):
         cls, type_: "Type", *, name: str, required: bool
     ) -> "Type":
         return type_
+
+
+def get_field_default(model: type[Model], field: str) -> Optional[Any]:
+    return model.__fields__[field].default

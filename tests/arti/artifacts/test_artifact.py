@@ -49,12 +49,9 @@ def test_cast() -> None:
 def test_cast_literals(value: Any, expected_type: Type) -> None:
     artifact = Artifact.cast(value)
     assert artifact.type == expected_type
-    assert artifact._class_key_ == f"{expected_type.friendly_key}Artifact"
     assert isinstance(artifact.format, JSON)
     assert isinstance(artifact.storage, StringLiteral)
     assert artifact.storage.value == json.dumps(value)
-    # Confirm the Artifact class is reused
-    assert type(Artifact.cast(value)) is type(artifact)
 
 
 @pytest.mark.xfail
@@ -103,11 +100,8 @@ def test_Artifact_validation() -> None:
         def validate_format(cls, format: Format) -> Format:
             raise ValueError("Storage - Boo!")
 
-    with pytest.raises(ValueError, match="MissingTypeArtifact must set `type`") as exc:
-
-        class MissingTypeArtifact(Artifact):
-            format = DummyFormat()
-            storage = DummyStorage()
+    with pytest.raises(ValueError, match="type\n  field required"):
+        Artifact()
 
     with pytest.raises(ValueError, match="Format - Boo!"):
 
@@ -126,20 +120,6 @@ def test_Artifact_validation() -> None:
             storage = BadStorage()
 
         BadStorageArtifact()
-
-    with pytest.raises(ValueError, match="overriding `type` is not supported") as exc:
-
-        class OverrideTypeArtifact(Artifact):
-            type = Int64()
-            format = DummyFormat()
-            storage = DummyStorage()
-
-        OverrideTypeArtifact(type=Int64(nullable=True))
-    # Confirm {Format,Storage}.support are not called
-    with pytest.raises(AssertionError):
-        exc.match("Format - Boo!")
-    with pytest.raises(AssertionError):
-        exc.match("Storage - Boo!")
 
     class GoodArtifact(Artifact):
         type = Int64()

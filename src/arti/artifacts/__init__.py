@@ -2,7 +2,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import json
 from itertools import chain
-from typing import Any, ClassVar, Optional
+from typing import Any, Optional
 
 from pydantic import Field, validator
 from pydantic.fields import ModelField
@@ -30,47 +30,15 @@ class BaseArtifact(Model):
     # Artifact.fingerprints). Even so, this may still be quite sensitive.
     _fingerprint_includes_ = frozenset(["type", "format", "storage"])
 
-    # Type *must* be set on the class and be rather static - small additions may be necessary at
-    # Graph level (eg: dynamic column additions), but these should be minor. We might allow Struct
-    # Types to be "open" (partial type) or "closed".
-    #
-    # Format and storage *should* be set with defaults on Artifact subclasses to ease most Graph
-    # definitions, but will often need to be overridden at the Graph level.
-    #
-    # In order to override on the instance, avoid ClassVars lest mypy complains when/if we override.
     type: Type
     format: Format = Field(default_factory=Format.get_default)
     storage: Storage[Any] = Field(default_factory=Storage.get_default)
 
-    # Hide in repr to prevent showing the entire upstream graph.
+    # Hide `producer_output` in repr to prevent showing the entire upstream graph.
     #
     # ProducerOutput is a ForwardRef/cyclic import. Quote the entire hint to force full resolution
     # during `.update_forward_refs`, rather than `Optional[ForwardRef("ProducerOutput")]`.
     producer_output: "Optional[ProducerOutput]" = Field(None, repr=False)
-
-    # Class level alias for `type`, which must be set on (non-abstract) subclasses.
-    #
-    # Pydantic removes class defaults and stashes them in cls.__fields__. To ease access, we
-    # automatically populate this from `type` in `__init_subclass__`.
-    _type: ClassVar[Type]
-
-    @classmethod
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if not cls._abstract_ and cls.__fields__["type"].default is None:
-            raise ValueError(f"{cls.__name__} must set `type`")
-        cls._type = cls.__fields__["type"].default
-
-    @validator("type", always=True)
-    @classmethod
-    def validate_type(cls, type_: Type) -> Type:
-        if type_ != cls._type:
-            # NOTE: We do a lot of class level validation (particularly in Producer) that relies on
-            # the *class* type, such as partition key validation. It's possible we could loosen this
-            # a bit by allowing *new* Struct fields, but still requiring an exact match for other
-            # Types (including existing Struct fields).
-            raise ValueError("overriding `type` is not supported")
-        return type_
 
     @validator("format", always=True)
     @classmethod
@@ -96,8 +64,6 @@ class BaseArtifact(Model):
 class Statistic(BaseArtifact):
     """A Statistic is a piece of data derived from an Artifact that can be tracked over time."""
 
-    _abstract_ = True
-
 
 class Artifact(BaseArtifact):
     """An Artifact is the base structure describing an existing or generated dataset.
@@ -112,12 +78,6 @@ class Artifact(BaseArtifact):
     over time).
     """
 
-    _abstract_ = True
-    # The Artifact._by_type registry is used to track Artifact classes generated from literal python
-    # values. This is populated by Artifact.from_type and used in Producer class validation
-    # to find a default Artifact type for un-Annotated hints (eg: `def build(i: int)`).
-    _by_type: "ClassVar[dict[Type, type[Artifact]]]" = {}
-
     annotations: tuple[Annotation, ...] = ()
     statistics: tuple[Statistic, ...] = ()
 
@@ -130,14 +90,17 @@ class Artifact(BaseArtifact):
     def cast(cls, value: Any) -> "Artifact":
         """Attempt to convert an arbitrary value to an appropriate Artifact instance.
 
-        `Artifact.cast` is used to convert values assigned to an `Artifact.box` (such as
+        `Artifact.cast` is used to convert values assigned to an `ArtifactBox` (such as
         `Graph.artifacts`) into an Artifact. When called with:
         - an Artifact instance, it is returned
         - a Producer instance with a single output Artifact, the output Artifact is returned
         - a Producer instance with a multiple output Artifacts, an error is raised
-        - other types, an error is raised
+        - other types, we attempt to map to a `Type` and return an Artifact instance with defaulted Format and Storage
         """
+        from arti.formats.json import JSON
         from arti.producers import Producer
+        from arti.storage.literal import StringLiteral
+        from arti.types.python import python_type_system
 
         if isinstance(value, Artifact):
             return value
@@ -153,43 +116,13 @@ class Artifact(BaseArtifact):
             raise ValueError(
                 f"{type(value).__name__} produces {len(output_artifacts)} Artifacts. Try assigning each to a new name in the Graph!"
             )
-        return Artifact.for_literal(value)
-
-    @classmethod
-    def for_literal(cls, value: Any) -> "Artifact":
-        from arti.formats.json import JSON
-        from arti.storage.literal import StringLiteral
-        from arti.types.python import python_type_system
 
         annotation = get_annotation_from_value(value)
-        klass = cls.from_type(python_type_system.to_artigraph(annotation, hints={}))
-        return klass(
+        return cls(
+            type=python_type_system.to_artigraph(annotation, hints={}),
             format=JSON(),
             storage=StringLiteral(value=json.dumps(value)),
         )
-
-    @classmethod
-    def from_type(cls, type_: Type) -> "type[Artifact]":
-        from arti.formats.json import JSON
-        from arti.storage.literal import StringLiteral
-
-        if type_ not in cls._by_type:
-            defaults: dict[str, Any] = {
-                "type": type_,
-                "format": JSON(),
-                "storage": StringLiteral(),  # Set a default Storage instance to support easy `Producer.out` use.
-            }
-            cls._by_type[type_] = type(
-                f"{type_.friendly_key}Artifact",
-                (cls,),
-                {
-                    "__annotations__": {  # Preserve the looser default type hints
-                        field: cls.__fields__[field].outer_type_ for field in defaults
-                    },
-                    **defaults,
-                },
-            )
-        return cls._by_type[type_]
 
 
 from arti.producers import ProducerOutput  # noqa: E402
