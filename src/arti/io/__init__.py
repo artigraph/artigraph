@@ -20,7 +20,7 @@ def _discover() -> None:
         _submodules = import_submodules(__path__, __name__)
 
 
-@multipledispatch
+@multipledispatch("io.read")
 def _read(
     type_: Type, format: Format, storage_partitions: Sequence[StoragePartition], view: View
 ) -> Any:
@@ -50,7 +50,7 @@ def read(
     return _read(type_, format, storage_partitions, view)
 
 
-@multipledispatch  # type: ignore
+@multipledispatch("io.write")  # type: ignore
 def _write(
     data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
 ) -> Optional[_StoragePartition]:

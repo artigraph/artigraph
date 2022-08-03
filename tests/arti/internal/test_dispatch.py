@@ -23,7 +23,7 @@ class B1(B):
 
 
 def test_multipledispatch() -> None:
-    @multipledispatch
+    @multipledispatch("test")
     def test(a: A, b: B) -> Any:
         return "good_a_b"
 
@@ -72,7 +72,7 @@ def test_multipledispatch() -> None:
         match=re.escape("Expected the `bad` return to match"),
     ):
 
-        @multipledispatch
+        @multipledispatch("ok")
         def ok(a: A) -> str:
             return "good_a_b"
 
@@ -87,3 +87,24 @@ def test_multipledispatch() -> None:
     # Check that a bad one didn't get registered
     with pytest.raises(TypeError):
         assert test(5, "")
+
+
+def test_multipledispatch_lookup() -> None:
+    @multipledispatch("test-lookup")
+    def reg(value: Any) -> Any:
+        return value
+
+    with pytest.raises(ValueError, match="No `test-lookup` implementation found for:"):
+        reg.lookup(int)
+
+    @reg.register
+    def _int(value: int) -> int:
+        return value
+
+    assert reg.lookup(int) is _int
+
+    @reg.register
+    def _list_int(value: list[int]) -> list[int]:
+        return value
+
+    assert reg.lookup(list[int]) is _list_int

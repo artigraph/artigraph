@@ -1,8 +1,8 @@
 import inspect
 from collections.abc import Callable
-from typing import Any, TypeVar, overload
+from typing import Any, Optional, TypeVar, cast, overload
 
-from multimethod import multidispatch as _multidispatch  # Minimize name confusion
+import multimethod as _multimethod  # Minimize name confusion
 
 from arti.internal.type_hints import lenient_issubclass, tidy_signature
 
@@ -12,16 +12,37 @@ REGISTERED = TypeVar("REGISTERED", bound=Callable[..., Any])
 
 # This may be less useful once mypy supports ParamSpecs - after that, we might be able to define
 # multidispatch with a ParamSpec and have mypy check the handlers' arguments are covariant.
-class multipledispatch(_multidispatch[RETURN]):
+class _multipledispatch(_multimethod.multidispatch[RETURN]):
     """Multiple dispatch for a set of functions based on parameter type.
 
     Usage is similar to `@functools.singledispatch`. The original definition defines the "spec" that
     subsequent handlers must follow, namely the name and (base)class of parameters.
     """
 
+    # NOTE: We can't add extra (kw)args without also overriding __new__. However, `__new__` is
+    # called for each *registered* func in the multimethod  internals (a bit confusing). Instead, we
+    # can just set attrs in a helper func below.
     def __init__(self, func: Callable[..., RETURN]) -> None:
         super().__init__(func)
+        self.canonical_name: Optional[str] = None
         self.clean_signature = tidy_signature(func, self.signature)
+
+    def lookup(self, *args: type[Any]) -> REGISTERED:
+        # multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same
+        # before looking up. Non-Generics pass through as is.
+        args = tuple(_multimethod.subtype(arg) for arg in args)  # type: ignore[attr-defined]
+        # NOTE: multimethod doesn't override __contains__ (likely so __missing__ will still run), so
+        # "args in self" will be False when using subclasses of any arg.
+        missing_error = ValueError(f"No `{self.canonical_name}` implementation found for: {args}")
+        try:
+            handler = cast(REGISTERED, self[args])
+        # multimethod raises a TypeError instead of KeyError, as __call__.
+        except TypeError as e:  # pragma: no cover
+            raise missing_error from e
+        # Filter out the base "NotImplementedError" handler.
+        if getattr(handler, "_abstract_", False):
+            raise missing_error
+        return handler
 
     @overload
     def register(self, __func: REGISTERED) -> REGISTERED:
@@ -57,3 +78,16 @@ class multipledispatch(_multidispatch[RETURN]):
                     f"Expected the `{func.__name__}` return to match {spec.return_annotation}, got {sig.return_annotation}"
                 )
         return super().register(*args)  # type: ignore
+
+
+def multipledispatch(
+    canonical_name: str,
+) -> Callable[[Callable[..., RETURN]], _multipledispatch[RETURN]]:
+    def wrap(func: Callable[..., RETURN]) -> _multipledispatch[RETURN]:
+        # The base handler is expected to `raise NotImplementedError`
+        func._abstract_ = True  # type: ignore[attr-defined]
+        dispatch = _multipledispatch(func)
+        dispatch.canonical_name = canonical_name
+        return dispatch
+
+    return wrap
