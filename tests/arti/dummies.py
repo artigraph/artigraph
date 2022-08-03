@@ -19,6 +19,7 @@ from arti import (
 )
 from arti.formats.json import JSON
 from arti.types import Int32, Int64, Struct
+from arti.types.python import python_type_system
 
 
 class Num(Artifact):
@@ -32,7 +33,7 @@ def div(a: Annotated[int, Num], b: Annotated[int, Num]) -> Annotated[int, Num]:
     return a // b
 
 
-dummy_type_system = TypeSystem(key="dummy")
+dummy_type_system = TypeSystem(key="dummy", extends=(python_type_system,))
 
 
 class DummyAnnotation(Annotation):

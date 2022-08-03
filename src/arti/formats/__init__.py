@@ -24,6 +24,6 @@ class Format(Model):
     @validator("type")
     @classmethod
     def validate_type(cls, type_: Type) -> Type:
-        # TODO: Check self.type_system supports the type. We can likely add a TypeSystem method
-        # that will check for matching TypeAdapters.
+        # Ensure our type system can handle the provided type.
+        cls.type_system.to_system(type_, hints={})
         return type_
