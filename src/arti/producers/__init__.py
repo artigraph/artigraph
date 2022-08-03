@@ -22,7 +22,7 @@ from pydantic.fields import ModelField
 
 from arti import io
 from arti.annotations import Annotation
-from arti.artifacts import Artifact, BaseArtifact, Statistic
+from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal import wrap_exc
 from arti.internal.models import Model, get_field_default
@@ -514,6 +514,4 @@ class ProducerOutput(Model):
     position: int  # TODO: Support named output (defaulting to artifact classname?)
 
 
-BaseArtifact.update_forward_refs(ProducerOutput=ProducerOutput)
-Statistic.update_forward_refs(ProducerOutput=ProducerOutput)
 Artifact.update_forward_refs(ProducerOutput=ProducerOutput)

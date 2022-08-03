@@ -9,36 +9,44 @@ from pydantic.fields import ModelField
 
 from arti.annotations import Annotation
 from arti.formats import Format
-from arti.internal.models import Model
+from arti.internal.models import Model, get_field_default
 from arti.internal.type_hints import get_annotation_from_value
+from arti.statistics import Statistic
 from arti.storage import Storage
 from arti.types import Type
 
 
-class BaseArtifact(Model):
-    """A BaseArtifact is the most basic data structure describing data in the Artigraph ecosystem.
+class Artifact(Model):
+    """An Artifact is the base structure describing an existing or generated dataset.
 
-    A BaseArtifact is comprised of three key elements:
-    - type: spec of the data's structure, such as data types, nullable, etc.
-    - format: the data's serialized format, such as CSV, Parquet, database native, etc.
-    - storage: the data's persistent storage system, such as blob storage, database native, etc.
+    An Artifact is comprised of three key elements:
+    - `type`: spec of the data's structure, such as data types, nullable, etc.
+    - `format`: the data's serialized format, such as CSV, Parquet, database native, etc.
+    - `storage`: the data's persistent storage system, such as blob storage, database native, etc.
+
+    In addition to the core elements, an Artifact can be tagged with additional `annotations` (to
+    associate it with human knowledge) and `statistics` (to track derived characteristics over
+    time).
     """
-
-    # NOTE: Narrow the fields that affect the fingerprint to minimize changes (which trigger
-    # recompute). Importantly, avoid fingerprinting the `.producer_output` (ie: the *upstream*
-    # producer) to prevent cascading fingerprint changes (Producer.fingerprint accesses the *input*
-    # Artifact.fingerprints). Even so, this may still be quite sensitive.
-    _fingerprint_includes_ = frozenset(["type", "format", "storage"])
 
     type: Type
     format: Format = Field(default_factory=Format.get_default)
     storage: Storage[Any] = Field(default_factory=Storage.get_default)
+
+    annotations: tuple[Annotation, ...] = ()
+    statistics: tuple[Statistic, ...] = ()
 
     # Hide `producer_output` in repr to prevent showing the entire upstream graph.
     #
     # ProducerOutput is a ForwardRef/cyclic import. Quote the entire hint to force full resolution
     # during `.update_forward_refs`, rather than `Optional[ForwardRef("ProducerOutput")]`.
     producer_output: "Optional[ProducerOutput]" = Field(None, repr=False)
+
+    # NOTE: Narrow the fields that affect the fingerprint to minimize changes (which trigger
+    # recompute). Importantly, avoid fingerprinting the `.producer_output` (ie: the *upstream*
+    # producer) to prevent cascading fingerprint changes (Producer.fingerprint accesses the *input*
+    # Artifact.fingerprints). Even so, this may still be quite sensitive.
+    _fingerprint_includes_ = frozenset(["type", "format", "storage"])
 
     @validator("format", always=True)
     @classmethod
@@ -54,31 +62,10 @@ class BaseArtifact(Model):
             update={name: values[name] for name in ["type", "format"] if name in values}
         ).resolve_templates()
 
-
-class Statistic(BaseArtifact):
-    """A Statistic is a piece of data derived from an Artifact that can be tracked over time."""
-
-
-class Artifact(BaseArtifact):
-    """An Artifact is the base structure describing an existing or generated dataset.
-
-    An Artifact is comprised of three key elements:
-    - `type`: spec of the data's structure, such as data types, nullable, etc.
-    - `format`: the data's serialized format, such as CSV, Parquet, database native, etc.
-    - `storage`: the data's persistent storage system, such as blob storage, database native, etc.
-
-    In addition to the core elements, an Artifact can be tagged with additional `annotations`
-    (to associate it with human knowledge) and `statistics` (to track derived characteristics
-    over time).
-    """
-
-    annotations: tuple[Annotation, ...] = ()
-    statistics: tuple[Statistic, ...] = ()
-
     @validator("annotations", "statistics", always=True, pre=True)
     @classmethod
     def _merge_class_defaults(cls, value: tuple[Any, ...], field: ModelField) -> tuple[Any, ...]:
-        return tuple(chain(cls.__fields__[field.name].default, value))
+        return tuple(chain(get_field_default(cls, field.name) or (), value))
 
     @classmethod
     def cast(cls, value: Any) -> "Artifact":

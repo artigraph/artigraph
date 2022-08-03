@@ -1,6 +1,11 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
-from arti.artifacts import Statistic as Statistic  # noqa: F401
+from arti.internal.models import Model
+
+
+class Statistic(Model):
+    pass  # TODO: Determine the interface for Statistics
+
 
 # class FieldStatistic(Statistic):
 #     """ A FieldStatistic is a Statistic associated with a particular Artifact field.
