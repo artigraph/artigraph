@@ -20,7 +20,7 @@ def _discover() -> None:
         _submodules = import_submodules(__path__, __name__)
 
 
-@multipledispatch("io.read")
+@multipledispatch("io.read", discovery_func=_discover)
 def _read(
     type_: Type, format: Format, storage_partitions: Sequence[StoragePartition], view: View
 ) -> Any:
@@ -43,14 +43,13 @@ def read(
         raise ValueError(
             f"Multiple partitions can only be read into a partitioned Collection, not {type_}"
         )
-    _discover()
     # TODO Checks that the returned data matches the Type/View
     #
     # Likely add a View method that can handle this type + schema checking, filtering to column/row subsets if necessary, etc
     return _read(type_, format, storage_partitions, view)
 
 
-@multipledispatch("io.write")  # type: ignore
+@multipledispatch("io.write", discovery_func=_discover)  # type: ignore
 def _write(
     data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
 ) -> Optional[_StoragePartition]:
@@ -65,7 +64,6 @@ register_writer = _write.register
 def write(
     data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
 ) -> _StoragePartition:
-    _discover()
     if (updated := _write(data, type_, format, storage_partition, view)) is not None:
         return updated
     return storage_partition
