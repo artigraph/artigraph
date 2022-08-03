@@ -1,6 +1,7 @@
 from __future__ import annotations
 
-from typing import Annotated
+from collections.abc import Sequence
+from typing import Annotated, Any
 
 from arti import (
     Annotation,
@@ -15,6 +16,8 @@ from arti import (
     StoragePartition,
     Type,
     TypeSystem,
+    View,
+    io,
     producer,
 )
 from arti.formats.json import JSON
@@ -62,6 +65,27 @@ class DummyStorage(Storage[DummyPartition]):
         if input_fingerprints is not None and input_fingerprints != InputFingerprints():
             raise NotImplementedError()
         return (self.generate_partition(),)
+
+
+@io.register_reader
+def dummy_reader(
+    type_: Type,
+    format: DummyFormat,
+    storage_partitions: Sequence[DummyPartition],
+    view: View,
+) -> Any:
+    return "test-read"
+
+
+@io.register_writer
+def dummy_writer(
+    data: object,
+    type_: Type,
+    format: DummyFormat,
+    storage_partition: DummyPartition,
+    view: View,
+) -> None:
+    pass
 
 
 class DummyStatistic(Statistic):

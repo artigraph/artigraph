@@ -1,4 +1,5 @@
 import re
+from collections.abc import Sequence
 from typing import Annotated, Any, Optional
 
 import pytest
@@ -7,20 +8,23 @@ from arti import (
     Annotation,
     Artifact,
     Fingerprint,
+    Format,
     PartitionDependencies,
     Producer,
+    StoragePartition,
     StoragePartitions,
+    Type,
+    View,
+    io,
 )
 from arti import producer as producer_decorator  # Avoid shadowing
-from arti.internal.models import Model
+from arti.internal.models import Model, get_field_default
 from arti.internal.utils import frozendict
-from arti.producers import ValidateSig
-from arti.types import Collection, Int64, Struct
+from arti.producers import IOInfo, ValidateSig
+from arti.types import Collection, Int64, List, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views
-from tests.arti.dummies import A1, A2, A3, A4, P1, P2, DummyStorage
-
-Int64Artifact = Artifact.from_type(Int64())
+from tests.arti.dummies import A1, A2, A3, A4, P1, P2, DummyStorage, dummy_type_system
 
 
 class DummyProducer(Producer):
@@ -55,9 +59,9 @@ def test_producer_decorator() -> None:
         return {}
 
     assert dummy_producer.__name__ == "dummy_producer"
-    assert dummy_producer._input_artifact_types_ == frozendict(a1=A1)
-    assert len(dummy_producer._output_metadata_) == 1
-    assert dummy_producer._output_metadata_[0][0] == A2
+    assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1)
+    assert len(dummy_producer._outputs_) == 1
+    assert dummy_producer._outputs_[0].artifact_class == A2
     assert dummy_producer(a1=A1()).annotations == Producer.__fields__["annotations"].default
     assert dummy_producer(a1=A1()).version == Producer.__fields__["version"].default
 
@@ -79,16 +83,14 @@ def test_producer_decorator() -> None:
     assert dummy_producer2(a1=A1()).version == StringVersion(value="test")
 
 
-def test_producer_input_metadata() -> None:
+def test_Producer_input_artifact_classes() -> None:
     @producer_decorator()
     def dummy_producer(
         a1: Annotated[dict, A1], *, a: int, b: Annotated[int, "non-Artifact"]  # type: ignore
     ) -> Annotated[dict, A2]:  # type: ignore
         return {}
 
-    assert dummy_producer._input_artifact_types_ == frozendict(
-        a1=A1, a=Int64Artifact, b=Int64Artifact
-    )
+    assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1, a=Artifact, b=Artifact)
 
 
 def test_Producer_partitioned_input_validation() -> None:
@@ -102,8 +104,15 @@ def test_Producer_partitioned_input_validation() -> None:
         def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore
             pass
 
-    assert P._input_artifact_types_ == frozendict(a=A)
-    assert P._build_input_views_ == frozendict(a=python_views.List())
+    assert P._input_artifact_classes_ == frozendict(a=A)
+    assert P._build_inputs_ == frozendict(
+        a=IOInfo(
+            artifact_class=A,
+            type=get_field_default(A, "type"),
+            view=python_views.List(),
+            mode="READ",
+        )
+    )
 
     with pytest.raises(ValueError, match="dict.* cannot be used to represent Collection"):
 
@@ -126,8 +135,21 @@ def test_Producer_partitioned_input_validation() -> None:
                 pass
 
 
-def test_Producer_output_metadata() -> None:
-    assert DummyProducer._output_metadata_ == ((A2, python_views.Dict()), (A3, python_views.Dict()))
+def test_Producer_outputs() -> None:
+    assert DummyProducer._outputs_ == (
+        IOInfo(
+            artifact_class=A2,
+            type=get_field_default(A2, "type"),
+            view=python_views.Dict(),
+            mode="WRITE",
+        ),
+        IOInfo(
+            artifact_class=A3,
+            type=get_field_default(A3, "type"),
+            view=python_views.Dict(),
+            mode="WRITE",
+        ),
+    )
 
     class ImplicitArtifact(Producer):
         a1: A1
@@ -136,9 +158,14 @@ def test_Producer_output_metadata() -> None:
         def build(cls, a1: dict) -> tuple[int, Annotated[dict, A2]]:  # type: ignore
             pass
 
-    assert ImplicitArtifact._output_metadata_ == (
-        (Artifact.from_type(Int64()), python_views.Int()),
-        (A2, python_views.Dict()),
+    assert ImplicitArtifact._outputs_ == (
+        IOInfo(artifact_class=Artifact, type=Int64(), view=python_views.Int(), mode="WRITE"),
+        IOInfo(
+            artifact_class=A2,
+            type=get_field_default(A2, "type"),
+            view=python_views.Dict(),
+            mode="WRITE",
+        ),
     )
 
     class ExplicitView(Producer):
@@ -148,10 +175,17 @@ def test_Producer_output_metadata() -> None:
         def build(a1: dict) -> Annotated[dict, A2, python_views.Dict()]:  # type: ignore
             pass
 
-    assert ExplicitView._output_metadata_ == ((A2, python_views.Dict()),)
+    assert ExplicitView._outputs_ == (
+        IOInfo(
+            artifact_class=A2,
+            type=get_field_default(A2, "type"),
+            view=python_views.Dict(),
+            mode="WRITE",
+        ),
+    )
 
     with pytest.raises(
-        ValueError, match=re.escape("DupView.build 1st return (A2) - multiple View values found")
+        ValueError, match=re.escape("DupView.build 1st return - multiple View values found")
     ):
 
         class DupView(Producer):
@@ -162,7 +196,7 @@ def test_Producer_output_metadata() -> None:
                 pass
 
     with pytest.raises(
-        ValueError, match="DupArtifact.build 1st return - multiple Artifact classes found"
+        ValueError, match="DupArtifact.build 1st return - multiple Artifact values found"
     ):
 
         class DupArtifact(Producer):
@@ -248,7 +282,7 @@ def test_Producer_map_artifacts() -> None:
         def map(a1: StoragePartitions) -> PartitionDependencies:
             pass
 
-    assert P._map_input_metadata_ == frozendict(a1=A1)
+    assert P._map_inputs_ == {"a1"}
 
     with pytest.raises(
         ValueError,
@@ -372,9 +406,7 @@ def test_Producer_build_outputs_check() -> None:
             return PartitionDependencies()
 
     for first_output in [Annotated[int, A], Annotated[list[dict], C]]:  # type: ignore
-        with pytest.raises(
-            ValueError, match="all output Artifacts must have the same partitioning scheme"
-        ):
+        with pytest.raises(ValueError, match="all outputs must have the same partitioning scheme"):
 
             class MixedPartitioning(Producer):
                 @staticmethod
@@ -547,11 +579,35 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             def build(cls, a1: dict) -> A2:  # type: ignore
                 pass
 
+    with pytest.raises(
+        ValueError,
+        match=r"BadProducer.build a1 param - annotation artifact class .* does not match that set on the field",
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            a1: A1
+
+            @classmethod
+            def build(cls, a1: Annotated[dict, A2]) -> A2:  # type: ignore
+                pass
+
     with pytest.raises(ValueError, match=r"str.* cannot be used to represent Struct"):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
             @classmethod
             def build(cls) -> Annotated[str, A2]:
+                pass
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            r"the specified Type (`Int64()`) is not compatible with the Artifact's Type"
+        ),
+    ):
+
+        class BadProducer(Producer):  # type: ignore # noqa: F811
+            @classmethod
+            def build(cls) -> Annotated[int, Int64(), A2]:
                 pass
 
     with pytest.raises(
@@ -595,13 +651,119 @@ def test_Producer_bad_out() -> None:
     with pytest.raises(ValueError, match="expected 2 arguments of"):
         producer.out(1)  # type: ignore
     with pytest.raises(
-        ValueError, match=r"DummyProducer.out\(\) 1st argument - expected instance of"
+        ValueError, match=r"DummyProducer.out\(\) 1st argument - expected an instance of"
     ):
         producer.out(1, 2)  # type: ignore
     with pytest.raises(
-        ValueError, match=r"DummyProducer.out\(\) 2nd argument - expected instance of"
+        ValueError, match=r"DummyProducer.out\(\) 2nd argument - expected an instance of"
     ):
         producer.out(A2(), A2())
     output = producer.out(A2(), A3())
     with pytest.raises(ValueError, match="is produced by"):
         producer.out(*output)
+
+
+numbers_type = List(element=Int64())
+
+
+class Numbers(Artifact):
+    type = numbers_type
+
+
+@pytest.mark.parametrize(
+    ["annotation", "type_", "artifact_class"],
+    (
+        pytest.param(list[int], numbers_type, Artifact, id="simple"),
+        pytest.param(
+            Annotated[list[int], numbers_type],
+            numbers_type,
+            Artifact,
+            id="annotated-Type",
+        ),
+        pytest.param(
+            Annotated[list[int], Numbers],
+            numbers_type,
+            Numbers,
+            id="annotated-Artifact",
+        ),
+        pytest.param(
+            Annotated[list[int], numbers_type, Numbers],
+            numbers_type,
+            Numbers,
+            id="annotated-Type-and-Artifact",
+        ),
+    ),
+)
+def test_Producer_type_inference(
+    annotation: Any, type_: Type, artifact_class: type[Artifact]
+) -> None:
+    numbers_ioinfo_read = IOInfo(
+        artifact_class=artifact_class, type=type_, view=python_views.List(), mode="READ"
+    )
+    numbers_ioinfo_write = numbers_ioinfo_read.copy(update={"mode": "WRITE"})
+
+    @producer_decorator()
+    def plusone(numbers: annotation) -> annotation:  # type: ignore[valid-type]
+        return [n + 1 for n in numbers]  # type: ignore[attr-defined]
+
+    assert plusone._input_artifact_classes_ == frozendict(numbers=artifact_class)
+    assert plusone._build_inputs_ == frozendict(numbers=numbers_ioinfo_read)
+    assert plusone._outputs_ == (numbers_ioinfo_write,)
+    assert plusone._map_inputs_ == {"numbers"}
+
+
+def test_Producer_io_checks() -> None:
+    # NOTE: Using class style with different kwargs for map/build to confirm we only validate
+    # `build` kwargs (since we won't read map-only kwargs anyway).
+    class CheckIO(Producer):
+        m: Artifact
+        b: Artifact
+
+        @staticmethod
+        def map(m: StoragePartitions) -> PartitionDependencies:
+            pass
+
+        @staticmethod
+        def build(b: int) -> int:
+            return b + 1
+
+    # Create some fake format for which we don't have any io implemented.
+    class FakeFormat(Format):
+        type_system = dummy_type_system
+
+    good_artifact = Artifact.cast(1)
+    fake_artifact = good_artifact.copy(update={"format": FakeFormat()})
+
+    # Check reading
+    producer = CheckIO(m=fake_artifact, b=good_artifact)
+    with pytest.raises(ValueError, match="No `io.read` implementation found for: "):
+        CheckIO(m=fake_artifact, b=fake_artifact)
+    # Check writing
+    producer.out(good_artifact)
+    with pytest.raises(ValueError, match="No `io.write` implementation found for: "):
+        producer.out(fake_artifact)
+
+    @io.register_reader
+    def dummy_reader(
+        type_: Type,
+        format: FakeFormat,
+        storage_partitions: Sequence[StoragePartition],
+        view: View,
+    ) -> Any:
+        return "test-read"
+
+    # We should now be able to read it...
+    CheckIO(m=fake_artifact, b=fake_artifact)
+
+    @io.register_writer
+    def dummy_writer(
+        data: object,
+        type_: Type,
+        format: FakeFormat,
+        storage_partition: StoragePartition,
+        view: View,
+    ) -> None:
+        pass
+
+    # and write it.
+    producer.out(fake_artifact)

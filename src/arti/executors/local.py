@@ -40,7 +40,7 @@ class LocalExecutor(Executor):
             **{
                 name: partitions
                 for name, partitions in input_partitions.items()
-                if name in producer._map_input_metadata_
+                if name in producer._map_inputs_
             }
         )
         # TODO: Need to validate the partition_dependencies against the Producer's
@@ -87,12 +87,12 @@ class LocalExecutor(Executor):
                 name: graph.read(
                     artifact=producer.inputs[name],
                     storage_partitions=partition_dependencies[output_partition_key][name],
-                    view=view,
+                    view=ioinfo.view,
                 )
-                for name, view in producer._build_input_views_.items()
+                for name, ioinfo in producer._build_inputs_.items()
             }
             outputs = producer.build(**arguments)
-            if len(producer._output_metadata_) == 1:
+            if len(producer._outputs_) == 1:
                 outputs = (outputs,)
             validation_passed, validation_message = producer.validate_outputs(*outputs)
             if not validation_passed:
@@ -103,7 +103,7 @@ class LocalExecutor(Executor):
                     artifact=output_artifacts[i],
                     input_fingerprint=partition_input_fingerprints[output_partition_key],
                     keys=output_partition_key,
-                    view=producer._output_metadata_[i][1],
+                    view=producer._outputs_[i].view,
                 )
 
     def build(self, graph: Graph) -> None:
