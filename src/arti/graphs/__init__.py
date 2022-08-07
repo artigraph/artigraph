@@ -289,10 +289,14 @@ class Graph(Model):
         key = self.artifact_to_key[artifact]
         if annotation is None and view is None:
             raise ValueError("Either `annotation` or `view` must be passed")
-        elif annotation is not None and view is not None:
+        if annotation is not None and view is not None:
             raise ValueError("Only one of `annotation` or `view` may be passed")
-        elif annotation is not None:
-            view = View.from_annotation(annotation, validation_type=artifact.type)
+        if annotation is not None:
+            view = View.get_class_for(annotation)(
+                artifact_class=type(artifact), type=artifact.type, mode="READ"
+            )
+            view.check_annotation_compatibility(annotation)
+            view.check_artifact_compatibility(artifact)
         assert view is not None  # mypy gets mixed up with ^
         if storage_partitions is None:
             with self.backend.connect() as backend:
@@ -322,7 +326,11 @@ class Graph(Model):
                 f"Writing to a raw Artifact (`{key}`) would cause a `snapshot_id` change."
             )
         if view is None:
-            view = View.from_annotation(type(data), validation_type=artifact.type)
+            view = View.get_class_for(type(data))(
+                artifact_class=type(artifact), type=artifact.type, mode="WRITE"
+            )
+        view.check_annotation_compatibility(type(data))
+        view.check_artifact_compatibility(artifact)
         storage_partition = artifact.storage.generate_partition(
             input_fingerprint=input_fingerprint, keys=keys, with_content_fingerprint=False
         )

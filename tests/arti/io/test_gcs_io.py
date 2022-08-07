@@ -1,3 +1,5 @@
+from typing import Annotated
+
 import pytest
 
 from arti import CompositeKey, Fingerprint, Format, StoragePartition, StoragePartitions, View, io
@@ -22,41 +24,20 @@ class PartitionedNum(Num):
 )
 def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
     a, n = Num(format=format, storage=GCSFile(bucket=gcs_bucket, path="file")), 5
+    view = View.from_annotation(Annotated[int, a.type], mode="READWRITE")
 
     io.write(
-        n,
-        a.type,
-        a.format,
-        a.storage.generate_partition(with_content_fingerprint=False),
-        view=View.from_annotation(int, validation_type=a.type),
+        n, a.type, a.format, a.storage.generate_partition(with_content_fingerprint=False), view=view
     )
     partitions = a.storage.discover_partitions()
     assert len(partitions) == 1
-    assert (
-        io.read(
-            a.type,
-            a.format,
-            partitions,
-            view=View.from_annotation(int, validation_type=a.type),
-        )
-        == n
-    )
+    assert io.read(a.type, a.format, partitions, view=view) == n
     with pytest.raises(FileNotFoundError, match="No data"):
-        io.read(
-            a.type,
-            a.format,
-            StoragePartitions(),
-            view=View.from_annotation(int, validation_type=a.type),
-        )
+        io.read(a.type, a.format, StoragePartitions(), view=view)
     with pytest.raises(
         ValueError, match="Multiple partitions can only be read into a partitioned Collection, not"
     ):
-        io.read(
-            a.type,
-            a.format,
-            partitions * 2,
-            view=View.from_annotation(int, validation_type=a.type),
-        )
+        io.read(a.type, a.format, partitions * 2, view=view)
 
 
 @pytest.mark.parametrize(
@@ -76,19 +57,9 @@ def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
         ): dict(i=i)
         for i in [1, 2]
     }
+    view = View.from_annotation(Annotated[list, a.type], mode="READWRITE")
     for partition, record in data.items():
-        io.write(
-            [record],
-            a.type,
-            a.format,
-            partition,
-            view=View.from_annotation(list, validation_type=a.type),
-        )
+        io.write([record], a.type, a.format, partition, view=view)
     assert {p.with_content_fingerprint() for p in data} == set(a.storage.discover_partitions())
     for partition, record in data.items():
-        assert io.read(
-            a.type,
-            a.format,
-            [partition],
-            view=View.from_annotation(list, validation_type=a.type),
-        ) == [record]
+        assert io.read(a.type, a.format, [partition], view=view) == [record]

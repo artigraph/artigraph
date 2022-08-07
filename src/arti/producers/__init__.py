@@ -1,6 +1,5 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
-import builtins
 from collections.abc import Callable, Iterator
 from inspect import Parameter, Signature, getattr_static
 from typing import (
@@ -8,7 +7,6 @@ from typing import (
     Annotated,
     Any,
     ClassVar,
-    Literal,
     Optional,
     TypeVar,
     Union,
@@ -17,15 +15,14 @@ from typing import (
     get_origin,
 )
 
-from pydantic import root_validator, validator
+from pydantic import validator
 from pydantic.fields import ModelField
 
-from arti import io
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal import wrap_exc
-from arti.internal.models import Model, get_field_default
+from arti.internal.models import Model
 from arti.internal.type_hints import (
     NoneType,
     get_item_from_annotated,
@@ -35,106 +32,16 @@ from arti.internal.type_hints import (
 from arti.internal.utils import frozendict, get_module_name, ordinal
 from arti.partitions import CompositeKey, NotPartitioned, PartitionKey
 from arti.storage import StoragePartitions
-from arti.types import Type, is_partitioned
+from arti.types import is_partitioned
 from arti.versions import SemVer, Version
 from arti.views import View
 
 _T = TypeVar("_T")
 
-MODE = Literal["READ", "WRITE"]
-
-
-class IOInfo(Model):
-    mode: MODE
-
-    artifact_class: type[Artifact]
-    type: Type
-    view: View
-
-    @classmethod
-    def from_annotation(
-        cls,
-        annotation: Any,
-        *,
-        artifact_class_fallback: builtins.type[Artifact] = Artifact,
-        mode: MODE,
-    ) -> "IOInfo":  # TODO: Use typing.Self, pending mypy
-        type_ = get_item_from_annotated(annotation, Type, is_subclass=False)
-        artifact_class = (
-            get_item_from_annotated(annotation, Artifact, is_subclass=True)
-            or artifact_class_fallback
-        )
-        artifact_type: Optional[Type] = get_field_default(artifact_class, "type")
-        if artifact_type is None and type_ is None:
-            from arti.types.python import python_type_system
-
-            type_ = python_type_system.to_artigraph(annotation, hints={})
-        elif artifact_type is None and type_ is not None:
-            pass  # type_ is already set correctly
-        elif artifact_type is not None and type_ is None:
-            type_ = artifact_type
-        else:
-            # NOTE: We validate that the type_ and artifact_type are compatible in
-            # _validate_type_compatibility_pydantic, which will get run for *any* instance, not just
-            # those created via `.from_annotation`.
-            assert artifact_type is not None
-            assert type_ is not None
-        return cls(
-            mode=mode,
-            artifact_class=artifact_class,
-            type=type_,
-            view=View.from_annotation(annotation, validation_type=type_),
-        )
-
-    @classmethod
-    def _validate_type_compatibility(cls, *, producer_type: Type, artifact_type: Type) -> None:
-        # TODO: Consider supporting some form of "reader schema" where the Producer's Type is a subset
-        # of the Artifact's Type (and we filter the columns on read).
-        #
-        # We could also consider allowing the Producer's Type to be a superset of the Artifact's
-        # Type (and we'd filter the columns on write). If implementing, we can leverage the `mode`
-        # to determine which should be the "superset".
-        if producer_type != artifact_type:
-            raise ValueError(
-                f"the specified Type (`{producer_type}`) is not compatible with the Artifact's Type (`{artifact_type}`)."
-            )
-
-    @root_validator(skip_on_failure=True)
-    @classmethod
-    def _validate_type_compatibility_pydantic(cls, values: dict[str, Any]) -> dict[str, Any]:
-        type_: Type = values["type"]
-        artifact_class: type[Artifact] = values["artifact_class"]
-        artifact_type: Optional[Type] = get_field_default(artifact_class, "type")
-        if artifact_type is not None:
-            cls._validate_type_compatibility(producer_type=type_, artifact_type=artifact_type)
-        return values
-
-    def validate_artifact_compatibility(self, artifact: Artifact) -> None:
-        if not isinstance(artifact, self.artifact_class):
-            raise ValueError(f"expected an instance of {self.artifact_class}, got {type(artifact)}")
-        self._validate_type_compatibility(producer_type=self.type, artifact_type=artifact.type)
-        if self.mode == "READ":
-            io._read.lookup(
-                type(artifact.type),
-                type(artifact.format),
-                list[artifact.storage.storage_partition_type],  # type: ignore[name-defined]
-                type(self.view),
-            )
-        elif self.mode == "WRITE":
-            io._write.lookup(
-                self.view.python_type,
-                type(artifact.type),
-                type(artifact.format),
-                artifact.storage.storage_partition_type,
-                type(self.view),
-            )
-        else:
-            raise NotImplementedError(f"Unexpected 'mode': {self.mode}")  # pragma: no cover
-
 
 MapInputs = set[str]
-BuildInputs = frozendict[str, IOInfo]
-Outputs = tuple[IOInfo, ...]
+BuildInputs = frozendict[str, View]
+Outputs = tuple[View, ...]
 
 PartitionDependencies = frozendict[CompositeKey, frozendict[str, StoragePartitions]]
 MapSig = Callable[..., PartitionDependencies]
@@ -249,21 +156,23 @@ class Producer(Model):
                 yield validator(name, param)
 
     @classmethod
-    def _validate_build_param(cls, name: str, param: Parameter) -> tuple[str, IOInfo]:
+    def _validate_build_param(cls, name: str, param: Parameter) -> tuple[str, View]:
+        annotation = param.annotation
         field_artifact_class = cls._input_artifact_classes_[param.name]
-        ioinfo = IOInfo.from_annotation(
-            param.annotation, artifact_class_fallback=field_artifact_class, mode="READ"
-        )
-        if ioinfo.artifact_class != field_artifact_class:
+        # If there is no Artifact hint, add in the field value as the default.
+        if get_item_from_annotated(annotation, Artifact, is_subclass=True) is None:
+            annotation = Annotated[annotation, field_artifact_class]
+        view = View.from_annotation(annotation, mode="READ")
+        if view.artifact_class != field_artifact_class:
             raise ValueError(
-                f"annotation artifact class ({ioinfo.artifact_class}) does not match that set on the field ({field_artifact_class})."
+                f"annotation Artifact class ({view.artifact_class}) does not match that set on the field ({field_artifact_class})."
             )
-        return name, ioinfo
+        return name, view
 
     @classmethod
-    def _validate_build_sig_return(cls, annotation: Any, *, i: int) -> IOInfo:
+    def _validate_build_sig_return(cls, annotation: Any, *, i: int) -> View:
         with wrap_exc(ValueError, prefix=f" {ordinal(i+1)} return"):
-            return IOInfo.from_annotation(annotation, mode="WRITE")
+            return View.from_annotation(annotation, mode="WRITE")
 
     @classmethod
     def _validate_build_sig(cls) -> tuple[Signature, BuildInputs, Outputs]:
@@ -293,7 +202,7 @@ class Producer(Model):
         # We currently require the partition key type *and* name to match, but in the future we
         # might be able to extend the dependency metadata to support heterogeneous names if
         # necessary.
-        seen_key_types = {PartitionKey.types_from(ioinfo.type) for ioinfo in outputs}
+        seen_key_types = {PartitionKey.types_from(view.type) for view in outputs}
         if len(seen_key_types) != 1:
             raise ValueError("all outputs must have the same partitioning scheme")
 
@@ -353,17 +262,11 @@ class Producer(Model):
         if not hasattr(cls, "map"):
             # TODO: Add runtime checking of `map` output (ie: output aligns w/ output
             # artifacts and such).
-            if any(is_partitioned(ioinfo.type) for ioinfo in cls._outputs_):
+            if any(is_partitioned(view.type) for view in cls._outputs_):
                 raise ValueError("must be implemented when the `build` outputs are partitioned")
 
             def map(**kwargs: StoragePartitions) -> PartitionDependencies:
-                return PartitionDependencies(
-                    {
-                        NotPartitioned: frozendict(
-                            {name: partitions for name, partitions in kwargs.items()}
-                        )
-                    }
-                )
+                return PartitionDependencies({NotPartitioned: frozendict(kwargs)})
 
             # Narrow the map signature, which is validated below and used at graph build time (via
             # cls._map_inputs_) to determine what arguments to pass to map.
@@ -394,8 +297,8 @@ class Producer(Model):
     @validator("*")
     @classmethod
     def _validate_instance_artifact_args(cls, value: Artifact, field: ModelField) -> Artifact:
-        if (ioinfo := cls._build_inputs_.get(field.name)) is not None:
-            ioinfo.validate_artifact_compatibility(value)
+        if (view := cls._build_inputs_.get(field.name)) is not None:
+            view.check_artifact_compatibility(value)
         return value
 
     # NOTE: pydantic defines .__iter__ to return `self.__dict__.items()` to support `dict(model)`,
@@ -437,7 +340,7 @@ class Producer(Model):
         The arguments are matched to the `Producer.build` return signature in order.
         """
         if not outputs:
-            outputs = tuple(ioinfo.artifact_class(type=ioinfo.type) for ioinfo in self._outputs_)
+            outputs = tuple(view.artifact_class(type=view.type) for view in self._outputs_)
         passed_n, expected_n = len(outputs), len(self._build_sig_.return_annotation)
         if passed_n != expected_n:
             ret_str = ", ".join([str(v) for v in self._build_sig_.return_annotation])
@@ -446,9 +349,9 @@ class Producer(Model):
             )
 
         def validate(artifact: Artifact, *, ord: int) -> Artifact:
-            ioinfo = self._outputs_[ord]
+            view = self._outputs_[ord]
             with wrap_exc(ValueError, prefix=f"{self._class_key_}.out() {ordinal(ord+1)} argument"):
-                ioinfo.validate_artifact_compatibility(artifact)
+                view.check_artifact_compatibility(artifact)
                 if artifact.producer_output is not None:
                     raise ValueError(
                         f"{artifact} is produced by {artifact.producer_output.producer}!"
@@ -477,8 +380,8 @@ def producer(
         __annotations__: dict[str, Any] = {}
         for param in signature(build).parameters.values():
             with wrap_exc(ValueError, prefix=f"{name} {param.name} param"):
-                ioinfo = IOInfo.from_annotation(param.annotation, mode="READ")
-                __annotations__[param.name] = ioinfo.artifact_class
+                view = View.from_annotation(param.annotation, mode="READ")
+                __annotations__[param.name] = view.artifact_class
         # If overriding, set an explicit "annotations" hint until [1] is released.
         #
         # 1: https://github.com/samuelcolvin/pydantic/pull/3018

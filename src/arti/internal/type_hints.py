@@ -26,11 +26,9 @@ NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an obje
 
 def _check_issubclass(klass: Any, check_type: type) -> bool:
     # If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the
-    # annotations.
+    # metadata.
+    klass = discard_Annotated(klass)
     klass_origin, klass_args = get_origin(klass), get_args(klass)
-    if klass_origin is Annotated:
-        klass = klass_args[0]
-        klass_origin, klass_args = get_origin(klass), get_args(klass)
     if isinstance(klass, TypeVar):
         klass = cast(type, Any) if klass.__bound__ is None else klass.__bound__
         klass_origin, klass_args = get_origin(klass), get_args(klass)
@@ -74,6 +72,10 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
         return lenient_issubclass(klass_origin, check_type_origin)
     # Shouldn't happen, but need to explicitly say "x is not None" to narrow mypy types.
     raise NotImplementedError("The origin conditions don't cover all cases!")
+
+
+def discard_Annotated(type_: Any) -> Any:
+    return get_args(type_)[0] if is_Annotated(type_) else type_
 
 
 def get_class_type_vars(klass: type) -> tuple[type, ...]:

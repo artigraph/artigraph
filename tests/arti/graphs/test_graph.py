@@ -5,7 +5,7 @@ from typing import Annotated, cast
 import pytest
 from box import BoxError
 
-from arti import Artifact, CompositeKey, Fingerprint, Graph, producer
+from arti import Artifact, CompositeKey, Fingerprint, Graph, View, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
 from arti.formats.json import JSON
@@ -13,7 +13,6 @@ from arti.internal.utils import frozendict
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
 from arti.types import Int64
-from arti.views import python as python_views
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 from tests.arti.dummies import Num as _Num
 from tests.arti.dummies import div
@@ -372,12 +371,12 @@ def test_Graph_read_write(tmp_path: Path) -> None:
         g.snapshot().write(10, artifact=i)
     # Test read
     assert g.read(i, annotation=int) == 5
-    assert g.read(i, view=python_views.Int()) == 5
+    assert g.read(i, view=View.from_annotation(int, mode="READ")) == 5
     assert g.read(i, annotation=int, storage_partitions=[storage_partition]) == 5
     with pytest.raises(ValueError, match="Either `annotation` or `view` must be passed"):
         g.read(i)
     with pytest.raises(ValueError, match="Only one of `annotation` or `view` may be passed"):
-        g.read(i, annotation=int, view=python_views.Int())
+        g.read(i, annotation=int, view=View.from_annotation(int, mode="READ"))
 
 
 def test_Graph_references(graph: Graph) -> None:

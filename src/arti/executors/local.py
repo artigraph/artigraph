@@ -87,9 +87,9 @@ class LocalExecutor(Executor):
                 name: graph.read(
                     artifact=producer.inputs[name],
                     storage_partitions=partition_dependencies[output_partition_key][name],
-                    view=ioinfo.view,
+                    view=view,
                 )
-                for name, ioinfo in producer._build_inputs_.items()
+                for name, view in producer._build_inputs_.items()
             }
             outputs = producer.build(**arguments)
             if len(producer._outputs_) == 1:
@@ -103,7 +103,7 @@ class LocalExecutor(Executor):
                     artifact=output_artifacts[i],
                     input_fingerprint=partition_input_fingerprints[output_partition_key],
                     keys=output_partition_key,
-                    view=producer._outputs_[i].view,
+                    view=producer._outputs_[i],
                 )
 
     def build(self, graph: Graph) -> None:

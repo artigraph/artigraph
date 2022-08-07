@@ -20,7 +20,7 @@ from arti import (
 from arti import producer as producer_decorator  # Avoid shadowing
 from arti.internal.models import Model, get_field_default
 from arti.internal.utils import frozendict
-from arti.producers import IOInfo, ValidateSig
+from arti.producers import ValidateSig
 from arti.types import Collection, Int64, List, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views
@@ -106,12 +106,7 @@ def test_Producer_partitioned_input_validation() -> None:
 
     assert P._input_artifact_classes_ == frozendict(a=A)
     assert P._build_inputs_ == frozendict(
-        a=IOInfo(
-            artifact_class=A,
-            type=get_field_default(A, "type"),
-            view=python_views.List(),
-            mode="READ",
-        )
+        a=python_views.List(artifact_class=A, type=get_field_default(A, "type"), mode="READ")
     )
 
     with pytest.raises(ValueError, match="dict.* cannot be used to represent Collection"):
@@ -137,18 +132,8 @@ def test_Producer_partitioned_input_validation() -> None:
 
 def test_Producer_outputs() -> None:
     assert DummyProducer._outputs_ == (
-        IOInfo(
-            artifact_class=A2,
-            type=get_field_default(A2, "type"),
-            view=python_views.Dict(),
-            mode="WRITE",
-        ),
-        IOInfo(
-            artifact_class=A3,
-            type=get_field_default(A3, "type"),
-            view=python_views.Dict(),
-            mode="WRITE",
-        ),
+        python_views.Dict(artifact_class=A2, type=get_field_default(A2, "type"), mode="WRITE"),
+        python_views.Dict(artifact_class=A3, type=get_field_default(A3, "type"), mode="WRITE"),
     )
 
     class ImplicitArtifact(Producer):
@@ -159,29 +144,19 @@ def test_Producer_outputs() -> None:
             pass
 
     assert ImplicitArtifact._outputs_ == (
-        IOInfo(artifact_class=Artifact, type=Int64(), view=python_views.Int(), mode="WRITE"),
-        IOInfo(
-            artifact_class=A2,
-            type=get_field_default(A2, "type"),
-            view=python_views.Dict(),
-            mode="WRITE",
-        ),
+        python_views.Int(artifact_class=Artifact, type=Int64(), mode="WRITE"),
+        python_views.Dict(artifact_class=A2, type=get_field_default(A2, "type"), mode="WRITE"),
     )
 
     class ExplicitView(Producer):
         a1: A1
 
         @staticmethod
-        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict()]:  # type: ignore
+        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict]:  # type: ignore
             pass
 
     assert ExplicitView._outputs_ == (
-        IOInfo(
-            artifact_class=A2,
-            type=get_field_default(A2, "type"),
-            view=python_views.Dict(),
-            mode="WRITE",
-        ),
+        python_views.Dict(artifact_class=A2, type=get_field_default(A2, "type"), mode="WRITE"),
     )
 
     with pytest.raises(
@@ -192,7 +167,7 @@ def test_Producer_outputs() -> None:
             a1: A1
 
             @staticmethod
-            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict(), python_views.Int()]:  # type: ignore
+            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore
                 pass
 
     with pytest.raises(
@@ -581,7 +556,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
     with pytest.raises(
         ValueError,
-        match=r"BadProducer.build a1 param - annotation artifact class .* does not match that set on the field",
+        match=r"BadProducer.build a1 param - annotation Artifact class .* does not match that set on the field",
     ):
 
         class BadProducer(Producer):  # type: ignore # noqa: F811
@@ -697,18 +672,16 @@ class Numbers(Artifact):
 def test_Producer_type_inference(
     annotation: Any, type_: Type, artifact_class: type[Artifact]
 ) -> None:
-    numbers_ioinfo_read = IOInfo(
-        artifact_class=artifact_class, type=type_, view=python_views.List(), mode="READ"
-    )
-    numbers_ioinfo_write = numbers_ioinfo_read.copy(update={"mode": "WRITE"})
+    numbers_view_read = python_views.List(artifact_class=artifact_class, type=type_, mode="READ")
+    numbers_view_write = numbers_view_read.copy(update={"mode": "WRITE"})
 
     @producer_decorator()
     def plusone(numbers: annotation) -> annotation:  # type: ignore[valid-type]
         return [n + 1 for n in numbers]  # type: ignore[attr-defined]
 
     assert plusone._input_artifact_classes_ == frozendict(numbers=artifact_class)
-    assert plusone._build_inputs_ == frozendict(numbers=numbers_ioinfo_read)
-    assert plusone._outputs_ == (numbers_ioinfo_write,)
+    assert plusone._build_inputs_ == frozendict(numbers=numbers_view_read)
+    assert plusone._outputs_ == (numbers_view_write,)
     assert plusone._map_inputs_ == {"numbers"}
 
 

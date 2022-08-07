@@ -2,7 +2,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import json
 from itertools import chain
-from typing import Any, Optional
+from typing import TYPE_CHECKING, Any, Optional
 
 from pydantic import Field, validator
 from pydantic.fields import ModelField
@@ -14,6 +14,9 @@ from arti.internal.type_hints import get_annotation_from_value
 from arti.statistics import Statistic
 from arti.storage import Storage
 from arti.types import Type
+
+if TYPE_CHECKING:
+    from arti.producers import ProducerOutput
 
 
 class Artifact(Model):
@@ -104,6 +107,3 @@ class Artifact(Model):
             format=JSON(),
             storage=StringLiteral(value=json.dumps(value)),
         )
-
-
-from arti.producers import ProducerOutput  # noqa: E402
