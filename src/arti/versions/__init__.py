@@ -69,7 +69,7 @@ class Timestamp(Version):
 
     @property
     def fingerprint(self) -> Fingerprint:
-        return Fingerprint.from_int(round((self.dt or datetime.utcnow()).timestamp()))
+        return Fingerprint.from_int(round(self.dt.timestamp()))
 
 
 # TODO: Consider a Timestamp like version with a "frequency" arg (day, hour, etc) that we floor/ceil
