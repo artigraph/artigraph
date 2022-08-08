@@ -30,7 +30,7 @@ from arti.internal.type_hints import (
     signature,
 )
 from arti.internal.utils import frozendict, get_module_name, ordinal
-from arti.partitions import CompositeKey, NotPartitioned, PartitionKey
+from arti.partitions import CompositeKey, InputFingerprints, NotPartitioned, PartitionKey
 from arti.storage import StoragePartitions
 from arti.types import is_partitioned
 from arti.versions import SemVer, Version
@@ -43,7 +43,8 @@ MapInputs = set[str]
 BuildInputs = frozendict[str, View]
 Outputs = tuple[View, ...]
 
-PartitionDependencies = frozendict[CompositeKey, frozendict[str, StoragePartitions]]
+InputPartitions = frozendict[str, StoragePartitions]
+PartitionDependencies = frozendict[CompositeKey, InputPartitions]
 MapSig = Callable[..., PartitionDependencies]
 BuildSig = Callable[..., Any]
 ValidateSig = Callable[..., tuple[bool, str]]
@@ -329,6 +330,27 @@ class Producer(Model):
                 for partition in partitions
             ),
         )
+
+    def compute_dependencies(
+        self, input_partitions: InputPartitions
+    ) -> tuple[PartitionDependencies, InputFingerprints]:
+        # TODO: Validate the partition_dependencies against the Producer's partitioning scheme and
+        # such (basically, check user error). eg: if output is not partitioned, we expect only 1
+        # entry in partition_dependencies (NotPartitioned).
+        partition_dependencies = self.map(
+            **{
+                name: partitions
+                for name, partitions in input_partitions.items()
+                if name in self._map_inputs_
+            }
+        )
+        partition_input_fingerprints = InputFingerprints(
+            {
+                composite_key: self.compute_input_fingerprint(dependency_partitions)
+                for composite_key, dependency_partitions in partition_dependencies.items()
+            }
+        )
+        return partition_dependencies, partition_input_fingerprints
 
     @property
     def inputs(self) -> dict[str, Artifact]:
