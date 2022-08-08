@@ -8,7 +8,8 @@ from typing import TypeVar
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
-from arti.storage import InputFingerprints, StoragePartitions
+from arti.partitions import InputFingerprints
+from arti.storage import StoragePartitions
 
 # TODO: Consider adding CRUD methods for "everything"?
 #

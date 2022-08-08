@@ -10,7 +10,8 @@ from arti.artifacts import Artifact
 from arti.backends import Backend
 from arti.fingerprints import Fingerprint
 from arti.internal.utils import NoCopyMixin
-from arti.storage import AnyStorage, InputFingerprints, StoragePartition, StoragePartitions
+from arti.partitions import InputFingerprints
+from arti.storage import AnyStorage, StoragePartition, StoragePartitions
 
 
 def _ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePartition]:

@@ -16,10 +16,10 @@ from arti.fingerprints import Fingerprint
 from arti.formats import Format
 from arti.graphs import Graph
 from arti.io import read, register_reader, register_writer, write
-from arti.partitions import CompositeKey, CompositeKeyTypes, PartitionKey
+from arti.partitions import CompositeKey, CompositeKeyTypes, InputFingerprints, PartitionKey
 from arti.producers import PartitionDependencies, Producer, producer
 from arti.statistics import Statistic
-from arti.storage import InputFingerprints, Storage, StoragePartition, StoragePartitions
+from arti.storage import Storage, StoragePartition, StoragePartitions
 from arti.thresholds import Threshold
 from arti.types import Type, TypeAdapter, TypeSystem
 from arti.versions import Version

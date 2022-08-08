@@ -8,9 +8,7 @@ import parse
 
 from arti.fingerprints import Fingerprint
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, CompositeKeyTypes, PartitionKey
-
-InputFingerprints = frozendict[CompositeKey, Fingerprint]
+from arti.partitions import CompositeKey, CompositeKeyTypes, InputFingerprints, PartitionKey
 
 
 class Placeholder:

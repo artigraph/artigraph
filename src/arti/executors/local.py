@@ -6,8 +6,8 @@ from arti.artifacts import Artifact
 from arti.backends import Backend
 from arti.executors import Executor
 from arti.graphs import Graph
+from arti.partitions import InputFingerprints
 from arti.producers import Producer
-from arti.storage import InputFingerprints
 
 # TODO: Factor this code out to reusable helpers/better homes.
 #   - Perhaps a lot of the _build_producer logic can live in a few Producer methods. We

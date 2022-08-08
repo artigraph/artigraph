@@ -1,8 +1,8 @@
 from typing import Optional
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import CompositeKey
-from arti.storage import InputFingerprints, Storage, StoragePartition
+from arti.partitions import CompositeKey, InputFingerprints
+from arti.storage import Storage, StoragePartition
 
 _not_written_err = FileNotFoundError("Literal has not been written yet")
 

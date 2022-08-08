@@ -5,6 +5,7 @@ from datetime import date
 from inspect import getattr_static
 from typing import Any, ClassVar
 
+from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import classproperty, frozendict, register
 from arti.types import Collection, Date, Int8, Int16, Int32, Int64, Null, Type
@@ -149,3 +150,6 @@ class NullKey(PartitionKey):
                 raise ValueError(f"'{cls.__name__}' can only be used with 'None'!")
             return cls()
         return super().from_key_components(**key_components)
+
+
+InputFingerprints = frozendict[CompositeKey, Fingerprint]

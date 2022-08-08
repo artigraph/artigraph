@@ -11,8 +11,7 @@ from arti.formats import Format
 from arti.internal.models import Model
 from arti.internal.type_hints import get_class_type_vars, lenient_issubclass
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, CompositeKeyTypes, PartitionKey
-from arti.storage._internal import InputFingerprints as InputFingerprints
+from arti.partitions import CompositeKey, CompositeKeyTypes, InputFingerprints, PartitionKey
 from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
 

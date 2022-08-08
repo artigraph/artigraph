@@ -7,7 +7,8 @@ from pathlib import Path
 from typing import Optional, Union
 
 from arti.fingerprints import Fingerprint
-from arti.storage import InputFingerprints, Storage, StoragePartition
+from arti.partitions import InputFingerprints
+from arti.storage import Storage, StoragePartition
 from arti.storage._internal import parse_spec, spec_to_wildcard
 
 
