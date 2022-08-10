@@ -58,10 +58,6 @@ def requires_sealed(fn: Callable[..., _Return]) -> Callable[..., _Return]:
 
 
 class ArtifactBox(TypedBox[Artifact]):
-    def __init__(self, *args: Any, **kwargs: Any) -> None:
-        object.__setattr__(self, "_path", ())
-        super().__init__(*args, **kwargs)
-
     def _TypedBox__cast_value(self, item: str, artifact: Any) -> Artifact:
         artifact = super()._TypedBox__cast_value(item, artifact)  # type: ignore[misc]
         storage_template_values = dict[str, Any]()
@@ -69,7 +65,7 @@ class ArtifactBox(TypedBox[Artifact]):
             storage_template_values.update(
                 {
                     "graph_name": graph.name,
-                    "names": (*self._path, item),
+                    "names": (*self._box_config["box_namespace"], item),
                     "path_tags": graph.path_tags,
                 }
             )
@@ -92,19 +88,6 @@ class ArtifactBox(TypedBox[Artifact]):
                 update={"storage": artifact.storage.resolve_templates(**storage_template_values)}
             ),
         )
-
-    def _Box__convert_and_store(self, item: str, value: Artifact) -> None:
-        super()._Box__convert_and_store(item, value)  # pylint: disable=no-member
-        if isinstance(value, dict):
-            # TODO: Test if this works with `Box({"some": {"nested": "thing"}})`.
-            # Guessing not, may need to put in an empty dict/box first, set the path,
-            # and then update it.
-            object.__setattr__(self[item], "_path", self._path + (item,))
-
-    def _Box__get_default(self, item: str, attr: bool = False) -> Any:
-        value = super()._Box__get_default(item, attr=attr)  # type: ignore[misc]
-        object.__setattr__(value, "_path", self._path + (item,))
-        return value
 
 
 Node = Union[Artifact, Producer]
