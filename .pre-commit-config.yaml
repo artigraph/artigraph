@@ -8,9 +8,17 @@ repos:
         stages: [prepare-commit-msg]
         language: system
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.1.0
+    rev: v4.3.0
     hooks:
+      - id: check-added-large-files
+      - id: check-ast
+      - id: check-case-conflict
+      - id: check-docstring-first
+      - id: check-executables-have-shebangs
+      - id: check-json
       - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
       - id: debug-statements
       - id: end-of-file-fixer
       - id: no-commit-to-branch
@@ -18,8 +26,19 @@ repos:
       - id: pretty-format-json
         args: [--autofix]
       - id: trailing-whitespace
+  - repo: https://github.com/pre-commit/pygrep-hooks
+    rev: v1.9.0
+    hooks:
+    - id: python-check-blanket-noqa
+    - id: python-check-blanket-type-ignore
   - repo: local  # Prefer local tools to streamline version management with poetry
     hooks:
+      - id: poetry-check
+        name: poetry-check
+        entry: poetry check
+        files: ^pyproject.toml$
+        language: system
+        pass_filenames: false
       # Rewriters
       - id: pyupgrade
         name: pyupgrade
