@@ -18,7 +18,7 @@ class _PostFieldConversionHook(Protocol):
 
 def get_post_field_conversion_hook(type_: Any) -> _PostFieldConversionHook:
     if hasattr(type_, "_pydantic_type_system_post_field_conversion_hook_"):
-        return type_._pydantic_type_system_post_field_conversion_hook_  # type: ignore
+        return type_._pydantic_type_system_post_field_conversion_hook_  # type: ignore[no-any-return]
     return lambda type_, *, name, required: type_
 
 

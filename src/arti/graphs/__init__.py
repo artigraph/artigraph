@@ -63,7 +63,7 @@ class ArtifactBox(TypedBox[Artifact]):
         super().__init__(*args, **kwargs)
 
     def _TypedBox__cast_value(self, item: str, artifact: Any) -> Artifact:
-        artifact = super()._TypedBox__cast_value(item, artifact)  # type: ignore
+        artifact = super()._TypedBox__cast_value(item, artifact)  # type: ignore[misc]
         storage_template_values = dict[str, Any]()
         if (graph := arti.context.graph) is not None:
             storage_template_values.update(
@@ -102,7 +102,7 @@ class ArtifactBox(TypedBox[Artifact]):
             object.__setattr__(self[item], "_path", self._path + (item,))
 
     def _Box__get_default(self, item: str, attr: bool = False) -> Any:
-        value = super()._Box__get_default(item, attr=attr)  # type: ignore
+        value = super()._Box__get_default(item, attr=attr)  # type: ignore[misc]
         object.__setattr__(value, "_path", self._path + (item,))
         return value
 
@@ -213,7 +213,7 @@ class Graph(Model):
             # NOTE: This shouldn't happen unless the logic above is faulty.
             raise ValueError("Fingerprint is empty!")
         snapshot = self.copy(update={"snapshot_id": snapshot_id})
-        assert snapshot.snapshot_id is not None  # mypy
+        assert snapshot.snapshot_id is not None
         # Write the discovered partitions (if not already known) and link to this new snapshot.
         for key, partitions in known_artifact_partitions.items():
             snapshot.backend.write_artifact_and_graph_partitions(
@@ -224,7 +224,7 @@ class Graph(Model):
     def get_snapshot_id(self) -> Fingerprint:
         return cast(Fingerprint, self.snapshot().snapshot_id)
 
-    @cached_property  # type: ignore # python/mypy#1362
+    @cached_property  # type: ignore[misc] # python/mypy#1362
     @requires_sealed
     def dependencies(self) -> NodeDependencies:
         artifact_deps = {
@@ -243,12 +243,12 @@ class Graph(Model):
         }
         return NodeDependencies(artifact_deps | producer_deps)
 
-    @cached_property  # type: ignore # python/mypy#1362
+    @cached_property  # type: ignore[misc] # python/mypy#1362
     @requires_sealed
     def producers(self) -> frozenset[Producer]:
         return frozenset(self.producer_outputs)
 
-    @cached_property  # type: ignore # python/mypy#1362
+    @cached_property  # type: ignore[misc] # python/mypy#1362
     @requires_sealed
     def producer_outputs(self) -> frozendict[Producer, tuple[Artifact, ...]]:
         d = defaultdict[Producer, dict[int, Artifact]](dict)

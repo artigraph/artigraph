@@ -46,7 +46,7 @@ def test_StoragePartition_validation() -> None:
     with pytest.raises(ValueError) as err:
         MockStoragePartition(keys=CompositeKey(i=Int8Key(key=5)), path="/tmp/test")
     # Make sure keys validation is skipped since the type was missing
-    assert {e["loc"] for e in err.value.errors()} == {("format",), ("type",)}  # type: ignore
+    assert {e["loc"] for e in err.value.errors()} == {("format",), ("type",)}  # type: ignore[attr-defined]
     with pytest.raises(ValueError, match="Expected no partition keys but got"):
         MockStoragePartition(
             format=DummyFormat(), keys=CompositeKey(i=Int8Key(key=5)), path="/tmp/test", type=Int8()
@@ -74,14 +74,14 @@ def test_StoragePartition_content_fingerprint() -> None:
 
 
 def test_Storage_init_subclass() -> None:
-    class Abstract(Storage):  # type: ignore
+    class Abstract(Storage):  # type: ignore[type-arg]
         _abstract_ = True
 
     assert not hasattr(Abstract, "storage_partition_type")
 
     with pytest.raises(TypeError, match="NoSubscript must subclass a subscripted Generic"):
 
-        class NoSubscript(Storage):  # type: ignore
+        class NoSubscript(Storage):  # type: ignore[type-arg]
             pass
 
     with pytest.raises(TypeError, match="Bad fields must match MockStoragePartition"):
@@ -93,7 +93,7 @@ def test_Storage_init_subclass() -> None:
         path: str
 
     assert not hasattr(Storage, "storage_partition_type")
-    assert S.storage_partition_type is MockStoragePartition  # type: ignore
+    assert S.storage_partition_type is MockStoragePartition  # type: ignore[misc]
 
 
 def test_Storage_resolve_empty_error() -> None:

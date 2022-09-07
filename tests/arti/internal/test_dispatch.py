@@ -37,7 +37,7 @@ def test_multipledispatch() -> None:
 
     # Check that the non-annotated registration works
     @test.register(A1, B1)
-    def good_a1_b1(a, b) -> Any:  # type: ignore
+    def good_a1_b1(a, b) -> Any:  # type: ignore[no-untyped-def]
         return "good_a1_b1"
 
     with pytest.raises(

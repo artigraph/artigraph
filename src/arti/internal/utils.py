@@ -33,7 +33,7 @@ PropReturn = TypeVar("PropReturn")
 def classproperty(meth: Callable[..., PropReturn]) -> PropReturn:
     """Access a @classmethod like a @property."""
     # mypy doesn't understand class properties yet: https://github.com/python/mypy/issues/2563
-    return classmethod(property(meth))  # type: ignore
+    return classmethod(property(meth))  # type: ignore[arg-type,return-value]
 
 
 class frozendict(Mapping[_K, _V]):
@@ -325,7 +325,7 @@ class TypedBox(Box, MutableMapping[str, Union[_V, MutableMapping[str, _V]]]):
     Subclasses must set the __target_type__ to a base class for the contained values.
     """
 
-    __target_type__: ClassVar[type[_V]]  # type: ignore
+    __target_type__: ClassVar[type[_V]]  # type: ignore[misc]
 
     @classmethod
     def __class_getitem__(cls, item: type[_V]) -> GenericAlias:
@@ -379,4 +379,4 @@ class TypedBox(Box, MutableMapping[str, Union[_V, MutableMapping[str, _V]]]):
             if isinstance(v, TypedBox):
                 yield from v.walk(root=subroot)
             else:
-                yield ".".join(subroot), v  # type: ignore
+                yield ".".join(subroot), v  # type: ignore[misc]

@@ -17,7 +17,7 @@ from arti.internal.type_hints import (
 Tuple = getattr(typing, "Tuple")  # Work around https://github.com/asottile/pyupgrade/issues/574
 
 
-class MyTuple(tuple):  # type: ignore
+class MyTuple(tuple):  # type: ignore[type-arg]
     pass
 
 
@@ -26,7 +26,7 @@ class MyTypedDict(TypedDict):
 
 
 MyTupleVar = TypeVar("MyTupleVar", bound=MyTuple)
-TupleVar = TypeVar("TupleVar", bound=tuple)  # type: ignore
+TupleVar = TypeVar("TupleVar", bound=tuple)  # type: ignore[type-arg]
 UnboundVar = TypeVar("UnboundVar")
 
 
@@ -112,8 +112,8 @@ def test_get_item_from_annotated(
         (tuple, TupleVar),
         (tuple, UnboundVar),
         (tuple, tuple),
-        (tuple[MyTuple[int]], tuple),  # type: ignore
-        (tuple[MyTuple[int]], tuple[tuple[int]]),  # type: ignore
+        (tuple[MyTuple[int]], tuple),  # type: ignore[type-arg]
+        (tuple[MyTuple[int]], tuple[tuple[int]]),  # type: ignore[type-arg]
         (tuple[int], Sequence),
         (tuple[int], Sequence[int]),
         (tuple[int], Tuple),
@@ -146,10 +146,10 @@ def test_lenient_issubclass_true(
         (str, Union[int, float]),
         (tuple, MyTupleVar),
         (tuple, Sequence[int]),
-        (tuple, tuple[MyTuple[int]]),  # type: ignore
+        (tuple, tuple[MyTuple[int]]),  # type: ignore[type-arg]
         (tuple, tuple[int]),
         (tuple[str], Sequence[int]),
-        (tuple[tuple[int]], tuple[MyTuple[int]]),  # type: ignore
+        (tuple[tuple[int]], tuple[MyTuple[int]]),  # type: ignore[type-arg]
         (tuple[tuple[str]], tuple[tuple[int]]),
         # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for these (but
         # oddly, `issubclass(tuple[int], tuple)` does not).
@@ -164,9 +164,9 @@ def test_lenient_issubclass_false(
 
 
 def test_lenient_issubclass_error_cases() -> None:
-    assert not lenient_issubclass(5, 5)  # type: ignore
+    assert not lenient_issubclass(5, 5)  # type: ignore[arg-type]
     with pytest.raises(TypeError, match="arg 2 must be a class"):
-        lenient_issubclass(tuple, 5)  # type: ignore
+        lenient_issubclass(tuple, 5)  # type: ignore[arg-type]
     # Might support this in the future
     with pytest.raises(TypeError, match="TypedDict does not support instance and class checks"):
         lenient_issubclass(dict, MyTypedDict)

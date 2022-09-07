@@ -216,7 +216,7 @@ class Collection(_NamedMixin, List):
 
         If the element is not a Struct, an AttributeError will be raised.
         """
-        return self.element.fields  # type: ignore # We want the standard AttributeError
+        return self.element.fields  # type: ignore[attr-defined,no-any-return] # We want the standard AttributeError
 
     @property
     def partition_fields(self) -> frozendict[str, Type]:

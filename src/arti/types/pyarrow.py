@@ -23,7 +23,7 @@ pyarrow_type_system = types.TypeSystem(key="pyarrow")
 class _PyarrowTypeAdapter(types.TypeAdapter):
     @classproperty
     def _is_system(cls) -> Callable[[pa.DataType], bool]:
-        return getattr(pa.types, f"is_{cls.system.__name__}")  # type: ignore
+        return getattr(pa.types, f"is_{cls.system.__name__}")  # type: ignore[no-any-return]
 
     @classmethod
     def to_artigraph(
@@ -236,7 +236,7 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
         # Collection can hold arbitrary types, but `pa.schema` is only a struct (but with arbitrary
         # metadata)
         return super().matches_artigraph(type_=type_, hints=hints) and isinstance(
-            type_.element, types.Struct  # type: ignore
+            type_.element, types.Struct  # type: ignore[attr-defined]
         )
 
     @classmethod
@@ -301,7 +301,7 @@ class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
 
     @classmethod
     def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
-        precision = type_.precision  # type: ignore
+        precision = type_.precision  # type: ignore[attr-defined]
         if (unit := cls.precision_to_unit.get(precision)) is None:  # pragma: no cover
             raise ValueError(
                 f"{type_}.precision must be one of {tuple(cls.precision_to_unit)}, got {precision}"
@@ -350,7 +350,7 @@ class _BaseSizedTimeTypeAdapter(_BaseTimeTypeAdapter):
     def matches_artigraph(cls, type_: types.Type, *, hints: dict[str, Any]) -> bool:
         return (
             super().matches_artigraph(type_=type_, hints=hints)
-            and type_.precision in cls.precision_to_unit  # type: ignore
+            and type_.precision in cls.precision_to_unit  # type: ignore[attr-defined]
         )
 
     @classmethod

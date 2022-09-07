@@ -31,7 +31,7 @@ class DummyProducer(Producer):
     a1: A1
 
     @staticmethod
-    def build(a1: dict) -> tuple[Annotated[dict, A2], Annotated[dict, A3]]:  # type: ignore
+    def build(a1: dict) -> tuple[Annotated[dict, A2], Annotated[dict, A3]]:  # type: ignore[type-arg]
         pass
 
     @staticmethod
@@ -55,7 +55,7 @@ def test_Producer() -> None:
 
 def test_producer_decorator() -> None:
     @producer_decorator()
-    def dummy_producer(a1: Annotated[dict, A1]) -> Annotated[dict, A2]:  # type: ignore
+    def dummy_producer(a1: Annotated[dict, A1]) -> Annotated[dict, A2]:  # type: ignore[type-arg]
         return {}
 
     assert dummy_producer.__name__ == "dummy_producer"
@@ -74,7 +74,7 @@ def test_producer_decorator() -> None:
     @producer_decorator(
         annotations=(MyAnnotation(),), map=mapper, name="test", version=StringVersion(value="test")
     )
-    def dummy_producer2(a1: Annotated[dict, A1]) -> Annotated[dict, A2]:  # type: ignore
+    def dummy_producer2(a1: Annotated[dict, A1]) -> Annotated[dict, A2]:  # type: ignore[type-arg]
         return {}
 
     assert dummy_producer2.__name__ == "test"
@@ -86,8 +86,8 @@ def test_producer_decorator() -> None:
 def test_Producer_input_artifact_classes() -> None:
     @producer_decorator()
     def dummy_producer(
-        a1: Annotated[dict, A1], *, a: int, b: Annotated[int, "non-Artifact"]  # type: ignore
-    ) -> Annotated[dict, A2]:  # type: ignore
+        a1: Annotated[dict, A1], *, a: int, b: Annotated[int, "non-Artifact"]  # type: ignore[type-arg]
+    ) -> Annotated[dict, A2]:  # type: ignore[type-arg]
         return {}
 
     assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1, a=Artifact, b=Artifact)
@@ -101,7 +101,7 @@ def test_Producer_partitioned_input_validation() -> None:
         a: A
 
         @staticmethod
-        def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore
+        def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore[type-arg]
             pass
 
     assert P._input_artifact_classes_ == frozendict(a=A)
@@ -115,7 +115,7 @@ def test_Producer_partitioned_input_validation() -> None:
             a: A
 
             @staticmethod
-            def build(a: dict) -> Annotated[dict, A2]:  # type: ignore
+            def build(a: dict) -> Annotated[dict, A2]:  # type: ignore[type-arg]
                 pass
 
     with pytest.raises(
@@ -126,7 +126,7 @@ def test_Producer_partitioned_input_validation() -> None:
             a: A
 
             @staticmethod
-            def build(a: list[int]) -> Annotated[dict, A]:  # type: ignore
+            def build(a: list[int]) -> Annotated[dict, A]:  # type: ignore[type-arg]
                 pass
 
 
@@ -140,7 +140,7 @@ def test_Producer_outputs() -> None:
         a1: A1
 
         @classmethod
-        def build(cls, a1: dict) -> tuple[int, Annotated[dict, A2]]:  # type: ignore
+        def build(cls, a1: dict) -> tuple[int, Annotated[dict, A2]]:  # type: ignore[type-arg]
             pass
 
     assert ImplicitArtifact._outputs_ == (
@@ -152,7 +152,7 @@ def test_Producer_outputs() -> None:
         a1: A1
 
         @staticmethod
-        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict]:  # type: ignore
+        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict]:  # type: ignore[type-arg]
             pass
 
     assert ExplicitView._outputs_ == (
@@ -167,7 +167,7 @@ def test_Producer_outputs() -> None:
             a1: A1
 
             @staticmethod
-            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore
+            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore[type-arg]
                 pass
 
     with pytest.raises(
@@ -178,7 +178,7 @@ def test_Producer_outputs() -> None:
             a1: A1
 
             @staticmethod
-            def build(a1: dict) -> Annotated[dict, A1, A2]:  # type: ignore
+            def build(a1: dict) -> Annotated[dict, A1, A2]:  # type: ignore[type-arg]
                 pass
 
 
@@ -188,7 +188,7 @@ def test_Producer_string_annotation() -> None:
         a1: "A1"
 
         @staticmethod
-        def build(a1: "dict") -> "Annotated[dict, A2]":  # type: ignore
+        def build(a1: "dict") -> "Annotated[dict, A2]":  # type: ignore[type-arg]
             pass
 
     assert isinstance(StrAnnotation(a1=A1()).out(), A2)
@@ -250,7 +250,7 @@ def test_Producer_map_artifacts() -> None:
         a1: A1
 
         @staticmethod
-        def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore
+        def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore[type-arg]
             pass
 
         @staticmethod
@@ -266,7 +266,7 @@ def test_Producer_map_artifacts() -> None:
 
         class BadMapParam(P):
             @staticmethod
-            def map(a1: list) -> PartitionDependencies:  # type: ignore
+            def map(a1: list) -> PartitionDependencies:  # type: ignore[override,type-arg]
                 pass
 
 
@@ -373,19 +373,19 @@ def test_Producer_build_outputs_check() -> None:
 
     class MatchingPartitioning(Producer):
         @staticmethod
-        def build() -> tuple[Annotated[list[dict], C], Annotated[list[dict], C]]:  # type: ignore
+        def build() -> tuple[Annotated[list[dict], C], Annotated[list[dict], C]]:  # type: ignore[type-arg]
             pass
 
         @staticmethod
         def map() -> PartitionDependencies:
             return PartitionDependencies()
 
-    for first_output in [Annotated[int, A], Annotated[list[dict], C]]:  # type: ignore
+    for first_output in [Annotated[int, A], Annotated[list[dict], C]]:  # type: ignore[type-arg]
         with pytest.raises(ValueError, match="all outputs must have the same partitioning scheme"):
 
             class MixedPartitioning(Producer):
                 @staticmethod
-                def build() -> tuple[first_output, Annotated[list[dict], D]]:  # type: ignore
+                def build() -> tuple[first_output, Annotated[list[dict], D]]:  # type: ignore[type-arg,valid-type]
                     pass
 
     with pytest.raises(
@@ -395,7 +395,7 @@ def test_Producer_build_outputs_check() -> None:
 
         class BadProducer(Producer):  # noqa: F811
             @staticmethod
-            def build() -> Annotated[list[dict], C]:  # type: ignore
+            def build() -> Annotated[list[dict], C]:  # type: ignore[type-arg]
                 pass
 
 
@@ -416,9 +416,9 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
         match=r"BadProducer.build - the following parameter\(s\) must be defined as a field: {'a1'}",
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
-            def build(cls, a1: dict) -> Annotated[dict, A2]:  # type: ignore
+            def build(cls, a1: dict) -> Annotated[dict, A2]:  # type: ignore[type-arg]
                 pass
 
     with pytest.raises(
@@ -426,9 +426,9 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
         match=r"BadProducer.map - the following parameter\(s\) must be defined as a field: {'a1'}",
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore[type-arg]
                 pass
 
             @classmethod
@@ -440,26 +440,26 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
         match=r"BadProducer - the following fields aren't used in `.build` or `.map`: {'a2'}",
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
             a2: A2
 
             @classmethod
-            def build(cls, a1: dict) -> Annotated[dict, A3]:  # type: ignore
+            def build(cls, a1: dict) -> Annotated[dict, A3]:  # type: ignore[type-arg]
                 pass
 
     with pytest.raises(ValueError, match="must have a type hint"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1):  # type: ignore
+            def build(cls, a1):  # type: ignore[no-untyped-def]
                 pass
 
     with pytest.raises(ValueError, match="type hint must be an Artifact subclass"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: str
 
             @classmethod
@@ -468,78 +468,78 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
     with pytest.raises(ValueError, match="must not have a default"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: dict = A1()):  # type: ignore
+            def build(cls, a1: dict = A1()):  # type: ignore[assignment,no-untyped-def,type-arg]
                 pass
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: dict, /):  # type: ignore
+            def build(cls, a1: dict, /):  # type: ignore[no-untyped-def,type-arg]
                 pass
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, *a1: dict):  # type: ignore
+            def build(cls, *a1: dict):  # type: ignore[no-untyped-def,type-arg]
                 pass
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, **a1: dict):  # type: ignore
+            def build(cls, **a1: dict):  # type: ignore[no-untyped-def,type-arg]
                 pass
 
     with pytest.raises(ValueError, match="a return value must be set"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: dict):  # type: ignore
+            def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]
                 pass
 
     with pytest.raises(ValueError, match="missing return signature"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: dict) -> None:  # type: ignore
+            def build(cls, a1: dict) -> None:  # type: ignore[type-arg]
                 pass
 
     with pytest.raises(
         ValueError, match="BadProducer.a1 - field must not have a default nor be Optional."
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
-            a1: A1 = None  # type: ignore
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+            a1: A1 = None  # type: ignore[assignment]
 
             @classmethod
-            def build(cls, a1: dict):  # type: ignore
+            def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]
                 pass
 
     with pytest.raises(
         ValueError, match="BadProducer.a1 - field must not have a default nor be Optional."
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: Optional[A1]
 
             @classmethod
-            def build(cls, a1: dict):  # type: ignore
+            def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]
                 pass
 
     with pytest.raises(
@@ -547,11 +547,11 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
         match=r"BadProducer.a1 - field must not have a default nor be Optional.",
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1 = A1()
 
             @classmethod
-            def build(cls, a1: dict) -> A2:  # type: ignore
+            def build(cls, a1: dict) -> A2:  # type: ignore[type-arg]
                 pass
 
     with pytest.raises(
@@ -559,16 +559,16 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
         match=r"BadProducer.build a1 param - annotation Artifact class .* does not match that set on the field",
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1
 
             @classmethod
-            def build(cls, a1: Annotated[dict, A2]) -> A2:  # type: ignore
+            def build(cls, a1: Annotated[dict, A2]) -> A2:  # type: ignore[type-arg]
                 pass
 
     with pytest.raises(ValueError, match=r"str.* cannot be used to represent Struct"):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
             def build(cls) -> Annotated[str, A2]:
                 pass
@@ -580,7 +580,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
         ),
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
             def build(cls) -> Annotated[int, Int64(), A2]:
                 pass
@@ -590,8 +590,8 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
         match=r"BadProducer.build - must be a @classmethod or @staticmethod",
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore[type-arg]
                 pass
 
     with pytest.raises(
@@ -599,9 +599,9 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
         match=r"BadProducer.map - must be a @classmethod or @staticmethod",
     ):
 
-        class BadProducer(Producer):  # type: ignore # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore[type-arg]
                 pass
 
             def map(cls) -> PartitionDependencies:
@@ -624,11 +624,11 @@ def test_Producer_bad_init() -> None:
 def test_Producer_bad_out() -> None:
     producer = DummyProducer(a1=A1())
     with pytest.raises(ValueError, match="expected 2 arguments of"):
-        producer.out(1)  # type: ignore
+        producer.out(1)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError, match=r"DummyProducer.out\(\) 1st argument - expected an instance of"
     ):
-        producer.out(1, 2)  # type: ignore
+        producer.out(1, 2)  # type: ignore[arg-type]
     with pytest.raises(
         ValueError, match=r"DummyProducer.out\(\) 2nd argument - expected an instance of"
     ):

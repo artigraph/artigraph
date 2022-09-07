@@ -49,7 +49,7 @@ def read(
     return _read(type_, format, storage_partitions, view)
 
 
-@multipledispatch("io.write", discovery_func=_discover)  # type: ignore
+@multipledispatch("io.write", discovery_func=_discover)  # type: ignore[arg-type]
 def _write(
     data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
 ) -> Optional[_StoragePartition]:

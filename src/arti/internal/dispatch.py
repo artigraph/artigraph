@@ -31,7 +31,7 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
     def __missing__(self, types: type[Any]) -> Callable[..., RETURN]:
         if self.discovery_func is not None:
             self.discovery_func()
-        return super().__missing__(types)  # type: ignore
+        return super().__missing__(types)  # type: ignore[misc,no-any-return]
 
     def lookup(self, *args: type[Any]) -> REGISTERED:
         # multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same
@@ -83,7 +83,7 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
                 raise TypeError(
                     f"Expected the `{func.__name__}` return to match {spec.return_annotation}, got {sig.return_annotation}"
                 )
-        return super().register(*args)  # type: ignore
+        return super().register(*args)  # type: ignore[no-any-return]
 
 
 def multipledispatch(

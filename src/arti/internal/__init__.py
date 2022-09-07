@@ -20,5 +20,5 @@ def wrap_exc(error_type: type[Exception], *, prefix: str) -> Iterator[None]:
             msg = f" - {msg}"
             src = e
         error = error_type(f"{prefix}{msg}")
-        error.wrapped = True  # type: ignore
+        error.wrapped = True  # type: ignore[attr-defined]
         raise error from src

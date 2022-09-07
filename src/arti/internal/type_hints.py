@@ -86,7 +86,7 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
     if is_generic_alias(klass):
         bases = (klass,)
     else:
-        bases = klass.__orig_bases__  # type: ignore
+        bases = klass.__orig_bases__  # type: ignore[attr-defined]
     for base in bases:
         base_origin = get_origin(base)
         if base_origin is None:
@@ -137,15 +137,15 @@ def get_annotation_from_value(value: Any) -> Any:
         first_type = type(first)
         if all(isinstance(v, first_type) for v in tail):
             if isinstance(value, tuple):
-                return tuple[first_type, ...]  # type: ignore
-            return type(value)[first_type]  # type: ignore
+                return tuple[first_type, ...]  # type: ignore[valid-type]
+            return type(value)[first_type]  # type: ignore[index]
     if isinstance(value, dict):
         items = value.items()
         first_key_type, first_value_type = (type(v) for v in tuple(items)[0])
         if all(
             isinstance(k, first_key_type) and isinstance(v, first_value_type) for (k, v) in items
         ):
-            return dict[first_key_type, first_value_type]  # type: ignore
+            return dict[first_key_type, first_value_type]  # type: ignore[valid-type]
         # TODO: Implement with TypedDict to support Struct types...?
     raise NotImplementedError(f"Unable to determine type of {value}")
 
@@ -250,7 +250,7 @@ def is_Annotated(type_: Any) -> bool:
 
 
 def is_generic_alias(type_: Any) -> bool:
-    from typing import _GenericAlias  # type: ignore
+    from typing import _GenericAlias  # type: ignore[attr-defined]
 
     return isinstance(type_, (_GenericAlias, types.GenericAlias))
 

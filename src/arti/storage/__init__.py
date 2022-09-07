@@ -19,9 +19,9 @@ from arti.types import Type
 class _StorageMixin(Model):
     @property
     def key_types(self) -> CompositeKeyTypes:
-        if self.type is None:  # type: ignore
+        if self.type is None:  # type: ignore[attr-defined]
             raise ValueError(f"{self}.type is not set")
-        return PartitionKey.types_from(self.type)  # type: ignore
+        return PartitionKey.types_from(self.type)  # type: ignore[attr-defined]
 
     @classmethod
     def _check_keys(cls, key_types: CompositeKeyTypes, keys: CompositeKey) -> None:
@@ -84,7 +84,7 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
     partition_name_component_sep: ClassVar[str] = "_"
     segment_sep: ClassVar[str] = os.sep
 
-    storage_partition_type: ClassVar[type[_StoragePartition]]  # type: ignore
+    storage_partition_type: ClassVar[type[_StoragePartition]]  # type: ignore[misc]
 
     type: Optional[Type] = Field(None, repr=False)
     format: Optional[Format] = Field(None, repr=False)

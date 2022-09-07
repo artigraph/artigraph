@@ -62,7 +62,7 @@ class PyValueContainer(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return cls.system[type_system.to_system(type_.element, hints=hints)]  # type: ignore
+        return cls.system[type_system.to_system(type_.element, hints=hints)]  # type: ignore[attr-defined]
 
 
 @python_type_system.register_adapter
@@ -177,10 +177,10 @@ class PyMap(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return cls.system[
+        return cls.system[  # type: ignore[index]
             type_system.to_system(type_.key, hints=hints),
             type_system.to_system(type_.value, hints=hints),
-        ]  # type: ignore
+        ]
 
 
 @python_type_system.register_adapter
@@ -237,10 +237,10 @@ class PyStruct(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return TypedDict(
+        return TypedDict(  # type: ignore[operator]
             type_.name,
             {
                 field_name: type_system.to_system(field_type, hints=hints)
                 for field_name, field_type in type_.fields.items()
             },
-        )  # type: ignore
+        )
