@@ -37,8 +37,8 @@ jobs:
           pip-v0-${{ runner.os }}-
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade poetry
-        poetry install -E all
+        python -m pip install --upgrade poetry==1.2.0
+        poetry install --all-extras --no-interaction
     - name: code-checkers
       run: |
         # Skip:
