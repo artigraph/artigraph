@@ -319,10 +319,7 @@ class NoCopyDict(dict[_K, _V], NoCopyMixin):
     pass
 
 
-_K_str = TypeVar("_K_str")
-
-
-class TypedBox(Box, MutableMapping[_K_str, Union[_V, MutableMapping[_K_str, _V]]]):
+class TypedBox(Box, MutableMapping[str, Union[_V, MutableMapping[str, _V]]]):
     """TypedBox holds a collection of typed values.
 
     Subclasses must set the __target_type__ to a base class for the contained values.
@@ -331,12 +328,10 @@ class TypedBox(Box, MutableMapping[_K_str, Union[_V, MutableMapping[_K_str, _V]]
     __target_type__: ClassVar[type[_V]]  # type: ignore
 
     @classmethod
-    def __class_getitem__(cls, item: tuple[type[_K_str], type[_V]]) -> GenericAlias:
-        if not isinstance(item, tuple) or len(item) != 2:
-            raise TypeError(f"{cls.__name__} expects a key and value type")
-        key_type, value_type = item
-        if key_type is not str:
-            raise TypeError(f"{cls.__name__} key must be `str`")
+    def __class_getitem__(cls, item: type[_V]) -> GenericAlias:
+        if isinstance(item, tuple):
+            raise TypeError(f"{cls.__name__} expects a single value type")
+        value_type = item
         return GenericAlias(
             type(
                 cls.__name__,
@@ -378,7 +373,7 @@ class TypedBox(Box, MutableMapping[_K_str, Union[_V, MutableMapping[_K_str, _V]]
         else:
             super()._Box__convert_and_store(item, self.__cast_value(item, value))
 
-    def walk(self, root: tuple[_K_str, ...] = ()) -> Iterator[tuple[_K_str, _V]]:
+    def walk(self, root: tuple[str, ...] = ()) -> Iterator[tuple[str, _V]]:
         for k, v in self.items():
             subroot = root + (k,)
             if isinstance(v, TypedBox):

@@ -57,7 +57,7 @@ def requires_sealed(fn: Callable[..., _Return]) -> Callable[..., _Return]:
     return check_if_sealed
 
 
-class ArtifactBox(TypedBox[str, Artifact]):
+class ArtifactBox(TypedBox[Artifact]):
     def __init__(self, *args: Any, **kwargs: Any) -> None:
         object.__setattr__(self, "_path", ())
         super().__init__(*args, **kwargs)

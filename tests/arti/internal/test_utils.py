@@ -267,7 +267,7 @@ def test_TypedBox() -> None:
     class Coord(BaseCoord):
         pass
 
-    CoordBox = TypedBox[str, Coord]
+    CoordBox = TypedBox[Coord]
 
     box = CoordBox({"home": Coord(1, 1)})
     assert (box.home.x, box.home.y) == (1, 1)
@@ -280,20 +280,16 @@ def test_TypedBox() -> None:
 
 def test_TypedBox_introspection() -> None:
     # We subclass the original TypedBox to set .__target_type__
-    hint = TypedBox[str, str]
+    hint = TypedBox[str]
     origin, args = get_origin(hint), get_args(hint)
     assert origin is not None
     assert issubclass(origin, TypedBox)
-    assert args == (str, str)
+    assert args == (str,)
 
 
 def test_TypedBox_bad_hint() -> None:
-    with pytest.raises(TypeError, match="TypedBox expects a key and value type"):
-        TypedBox[str]  # type: ignore
-    with pytest.raises(TypeError, match="TypedBox expects a key and value type"):
-        TypedBox[str, str, str]  # type: ignore
-    with pytest.raises(TypeError, match="TypedBox key must be `str`"):
-        TypedBox[int, str]
+    with pytest.raises(TypeError, match="TypedBox expects a single value type"):
+        TypedBox[str, str]  # type: ignore
 
 
 def test_TypedBox_cast() -> None:
@@ -302,7 +298,7 @@ def test_TypedBox_cast() -> None:
         def cast(cls, value: tuple[int, int]) -> "Coord":
             return cls(*value)
 
-    CoordBox = TypedBox[str, Coord]
+    CoordBox = TypedBox[Coord]
 
     home = Coord(1, 1)
     box = CoordBox(
@@ -324,7 +320,7 @@ def test_TypedBox_bad_cast() -> None:
         def cast(cls, value: tuple[int, int]) -> tuple[int, int]:  # Should return a Coord
             return value
 
-    CoordBox = TypedBox[str, Coord]
+    CoordBox = TypedBox[Coord]
 
     box = CoordBox()
     box.home = Coord(1, 1)
