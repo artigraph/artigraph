@@ -122,7 +122,7 @@ class P1(Producer):
     a1: A1
 
     @staticmethod
-    def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore
+    def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore[type-arg]
         return {}
 
 
@@ -130,7 +130,7 @@ class P2(Producer):
     a2: A2
 
     @staticmethod
-    def build(a2: dict) -> tuple[Annotated[dict, A3], Annotated[dict, A4]]:  # type: ignore
+    def build(a2: dict) -> tuple[Annotated[dict, A3], Annotated[dict, A4]]:  # type: ignore[type-arg]
         return {}, {}
 
 
@@ -139,5 +139,5 @@ class P3(Producer):
     a2: A2
 
     @staticmethod
-    def build(a1: dict, a2: dict) -> tuple[Annotated[dict, A3], Annotated[dict, A4]]:  # type: ignore
+    def build(a1: dict, a2: dict) -> tuple[Annotated[dict, A3], Annotated[dict, A4]]:  # type: ignore[type-arg]
         return {}, {}

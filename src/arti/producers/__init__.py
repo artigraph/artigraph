@@ -271,7 +271,7 @@ class Producer(Model):
 
             # Narrow the map signature, which is validated below and used at graph build time (via
             # cls._map_inputs_) to determine what arguments to pass to map.
-            map.__signature__ = Signature(  # type: ignore
+            map.__signature__ = Signature(  # type: ignore[attr-defined]
                 [
                     Parameter(name=name, annotation=StoragePartitions, kind=Parameter.KEYWORD_ONLY)
                     for name, artifact in cls._input_artifact_classes_.items()
@@ -305,7 +305,7 @@ class Producer(Model):
     # NOTE: pydantic defines .__iter__ to return `self.__dict__.items()` to support `dict(model)`,
     # but we want to override to support easy expansion/assignment to a Graph  without `.out()` (eg:
     # `g.artifacts.a, g.artifacts.b = MyProducer(...)`).
-    def __iter__(self) -> Iterator[Artifact]:  # type: ignore
+    def __iter__(self) -> Iterator[Artifact]:  # type: ignore[override]
         ret = self.out()
         if not isinstance(ret, tuple):
             ret = (ret,)

@@ -85,7 +85,7 @@ def test_Model_copy_validation() -> None:
     with pytest.raises(ValueError, match="expected an instance"):
         v.copy(update={"x": "junk"})
     v2 = v.copy(update={"x": "junk"}, validate=False)  # Skip validation for "trusted" data.
-    assert v2.x == "junk"  # type: ignore
+    assert v2.x == "junk"  # type: ignore[comparison-overlap]
 
 
 def test_Model_fingerprint() -> None:
@@ -180,7 +180,7 @@ def test_Model_static_types() -> None:
         (tuple[Optional[int], ...], (5, None), None),
         (tuple[int, ...], (1, 2), None),
         (tuple[int], (5,), None),
-        (tuple[str, int], ("test", 5), None),  # type: ignore
+        (tuple[str, int], ("test", 5), None),  # type: ignore[misc]
         # Detected bad input:
         (Literal[5], 6, ValueError),
         (Optional[int], "hi", ValueError),
@@ -189,7 +189,7 @@ def test_Model_static_types() -> None:
         (dict[int, str], {"5": "hi"}, ValueError),
         (dict[str, int], {"hi": "5"}, ValueError),
         (int, None, ValueError),
-        (tuple[str, int], ("test",), ValueError),  # type: ignore
+        (tuple[str, int], ("test",), ValueError),  # type: ignore[misc]
     ],
 )
 def test_Model_static_types_complex(
@@ -197,7 +197,7 @@ def test_Model_static_types_complex(
 ) -> None:
     M = type(str(hint), (Model,), {"__annotations__": {"x": hint}})
     ctx = nullcontext() if error_type is None else pytest.raises(error_type)
-    with ctx:  # type: ignore
+    with ctx:  # type: ignore[attr-defined]
         data = {"x": value}
         # Ensure data can be round-tripped to (at the least) confirm dict keys are checked.
         assert dict(M(**data)) == data

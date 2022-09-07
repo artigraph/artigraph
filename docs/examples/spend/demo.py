@@ -36,7 +36,7 @@ class TotalSpend(Artifact):
 
 @producer(version=SemVer(major=1, minor=0, patch=0))
 def aggregate_transactions(
-    transactions: Annotated[list[dict], Transactions]  # type: ignore
+    transactions: Annotated[list[dict], Transactions]  # type: ignore[type-arg]
 ) -> Annotated[float, TotalSpend]:
     return sum(txn["amount"] for txn in transactions)
 
@@ -57,7 +57,7 @@ if __name__ == "__main__":
         with g.backend.connect() as backend:
             for partition in backend.read_artifact_partitions(artifact):
                 contents = g.read(artifact, annotation=annotation, storage_partitions=(partition,))
-                logging.info(f"\t{partition.path}: {contents}")  # type: ignore
+                logging.info(f"\t{partition.path}: {contents}")  # type: ignore[attr-defined]
 
     logging.info("Writing mock Transactions data:")
     g.write(
@@ -75,4 +75,4 @@ if __name__ == "__main__":
     g.build()
 
     logging.info("Final Spend data:")
-    print_partition_info(g.artifacts.spend, annotation=float)  # type: ignore
+    print_partition_info(g.artifacts.spend, annotation=float)  # type: ignore[arg-type]

@@ -56,4 +56,4 @@ def test_Fingerprint_math() -> None:
 
     for val in [None, "a"]:
         with pytest.raises(TypeError):
-            f1.combine(val)  # type: ignore
+            f1.combine(val)  # type: ignore[arg-type]

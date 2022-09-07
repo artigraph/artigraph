@@ -56,7 +56,7 @@ def test_local_partitioning(tmp_path: Path, date_keys: list[CompositeKey]) -> No
 
 
 def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[CompositeKey]) -> None:
-    for year in {k["date"].Y for k in date_keys}:  # type: ignore
+    for year in {k["date"].Y for k in date_keys}:  # type: ignore[attr-defined]
         storage = LocalFile(
             format=DummyFormat(),
             path=str(

@@ -23,14 +23,14 @@ def test_View_init() -> None:
 
 
 def test_View_registry(MockView: type[View]) -> None:
-    class Int(MockView):  # type: ignore
+    class Int(MockView):  # type: ignore[misc,valid-type]
         python_type = int
 
-    class Int2(MockView):  # type: ignore
+    class Int2(MockView):  # type: ignore[misc,valid-type]
         priority = Int.priority + 1
         python_type = int
 
-    class Str(MockView):  # type: ignore
+    class Str(MockView):  # type: ignore[misc,valid-type]
         python_type = str
 
     assert MockView._by_python_type_ == {int: Int2, str: Str}
@@ -40,7 +40,7 @@ def test_View_get_class_for(MockView: type[View]) -> None:
     with pytest.raises(ValueError, match="cannot be matched to a View, try setting one explicitly"):
         MockView.get_class_for(list)
 
-    class List(MockView):  # type: ignore
+    class List(MockView):  # type: ignore[misc,valid-type]
         python_type = list
 
     for annotation in [list, list[int]]:
@@ -51,7 +51,7 @@ def test_View_from_annotation(MockView: type[View]) -> None:
     with pytest.raises(ValueError, match="cannot be matched to a View, try setting one explicitly"):
         MockView.from_annotation(list, mode="READ")
 
-    class List(MockView):  # type: ignore
+    class List(MockView):  # type: ignore[misc,valid-type]
         python_type = list
 
     int_list = types.List(element=types.Int64())

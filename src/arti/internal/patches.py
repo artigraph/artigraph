@@ -10,4 +10,4 @@ def patch_TopologicalSorter_class_getitem() -> None:
     from types import GenericAlias
 
     if not hasattr(TopologicalSorter, "__class_getitem__"):  # pragma: no cover
-        TopologicalSorter.__class_getitem__ = classmethod(GenericAlias)  # type: ignore
+        TopologicalSorter.__class_getitem__ = classmethod(GenericAlias)  # type: ignore[attr-defined]

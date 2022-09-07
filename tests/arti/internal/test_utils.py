@@ -40,7 +40,7 @@ def test_classproperty() -> None:
     class Test:
         @classproperty
         def a(cls) -> str:
-            return cls.__name__  # type: ignore
+            return cls.__name__  # type: ignore[attr-defined,no-any-return]
 
     assert Test.a == "Test"
     assert Test().a == "Test"
@@ -62,11 +62,11 @@ def test_frozendict() -> None:
 def test_frozendict_immutability() -> None:
     val = frozendict({"x": 5})
     with pytest.raises(TypeError, match="does not support item assignment"):
-        val["x"] = 10  # type: ignore
+        val["x"] = 10  # type: ignore[index]
     with pytest.raises(TypeError, match="does not support item assignment"):
-        val["y"] = 10  # type: ignore
+        val["y"] = 10  # type: ignore[index]
     with pytest.raises(TypeError, match="does not support item deletion"):
-        del val["x"]  # type: ignore
+        del val["x"]  # type: ignore[attr-defined]
 
 
 def test_frozendict_hash() -> None:
@@ -74,8 +74,8 @@ def test_frozendict_hash() -> None:
 
 
 def test_frozendict_union() -> None:
-    assert dict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore
-    assert frozendict(a=5) | dict(b=10) == frozendict(a=5, b=10)  # type: ignore
+    assert dict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
+    assert frozendict(a=5) | dict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
     assert frozendict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)
 
 
@@ -289,7 +289,7 @@ def test_TypedBox_introspection() -> None:
 
 def test_TypedBox_bad_hint() -> None:
     with pytest.raises(TypeError, match="TypedBox expects a single value type"):
-        TypedBox[str, str]  # type: ignore
+        TypedBox[str, str]  # type: ignore[misc]
 
 
 def test_TypedBox_cast() -> None:

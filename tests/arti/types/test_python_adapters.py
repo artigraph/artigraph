@@ -172,7 +172,6 @@ def test_python_struct() -> None:
 
 def test_python_tuple() -> None:
     a = List(element=Int64())
-    # mypy errors here for some reason...?
     p = tuple[int, ...]
 
     assert python_type_system.to_system(a, hints={}) == list[int]  # list has higher priority
@@ -186,4 +185,4 @@ def test_python_tuple() -> None:
 
     # We don't (currently) support structure based tuples
     with pytest.raises(NotImplementedError):
-        python_type_system.to_artigraph(tuple[str, int], hints={})  # type: ignore
+        python_type_system.to_artigraph(tuple[str, int], hints={})  # type: ignore[misc]
