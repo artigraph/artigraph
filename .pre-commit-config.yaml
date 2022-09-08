@@ -76,6 +76,7 @@ repos:
         name: mypy
         entry: mypy
         language: system
+        pass_filenames: false  # Running on a subset of files may mask interface breaks
         types: [python]
       - id: pytest
         name: pytest
