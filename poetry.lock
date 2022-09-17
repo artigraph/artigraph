@@ -859,7 +859,7 @@ python-versions = ">=3.7"
 
 [[package]]
 name = "multimethod"
-version = "1.8"
+version = "1.9"
 description = "Multiple argument dispatching."
 category = "main"
 optional = false
@@ -915,7 +915,7 @@ name = "oauthlib"
 version = "3.2.1"
 description = "A generic, spec-compliant, thorough implementation of the OAuth request-signing logic"
 category = "main"
-optional = false
+optional = true
 python-versions = ">=3.6"
 
 [package.extras]
@@ -2361,8 +2361,8 @@ multidict = [
     {file = "multidict-6.0.2.tar.gz", hash = "sha256:5ff3bd75f38e4c43f1f470f2df7a4d430b821c4ce22be384e1459cb57d6bb013"},
 ]
 multimethod = [
-    {file = "multimethod-1.8-py3-none-any.whl", hash = "sha256:ebff0b254d9373b587a99fdd5c238fc0e76861b802704a56d9a71d78aa7d097f"},
-    {file = "multimethod-1.8.tar.gz", hash = "sha256:10f79f40c35c7cc87c40efa753960900429705e0c08078a084136cb8ce67b840"},
+    {file = "multimethod-1.9-py3-none-any.whl", hash = "sha256:59cb8ffec7449bd5557993c8d84e788fe04aca9c94b3b181ba8429ab954c24df"},
+    {file = "multimethod-1.9.tar.gz", hash = "sha256:cb1b87815732984172d6802bbfea81d68bfa2a0d5a562fb212ae7d59bad7a455"},
 ]
 mypy = [
     {file = "mypy-0.961-cp310-cp310-macosx_10_9_universal2.whl", hash = "sha256:697540876638ce349b01b6786bc6094ccdaba88af446a9abb967293ce6eaa2b0"},
