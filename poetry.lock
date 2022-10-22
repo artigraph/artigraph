@@ -335,7 +335,7 @@ scandir = ["scandir (>=1.5,<2.0)"]
 
 [[package]]
 name = "fsspec"
-version = "2022.8.2"
+version = "2022.10.0"
 description = "File-system specification"
 category = "main"
 optional = true
@@ -378,7 +378,7 @@ google-crc32c = "1.3.0"
 
 [[package]]
 name = "gcsfs"
-version = "2022.8.2"
+version = "2022.10.0"
 description = "Convenient Filesystem interface over GCS"
 category = "main"
 optional = true
@@ -387,7 +387,7 @@ python-versions = ">=3.7"
 [package.dependencies]
 aiohttp = "<4.0.0a0 || >4.0.0a0,<4.0.0a1 || >4.0.0a1"
 decorator = ">4.1.2"
-fsspec = "2022.8.2"
+fsspec = "2022.10.0"
 google-auth = ">=1.2"
 google-auth-oauthlib = "*"
 google-cloud-storage = "*"
@@ -2043,16 +2043,16 @@ fs = [
     {file = "fs-2.4.16.tar.gz", hash = "sha256:ae97c7d51213f4b70b6a958292530289090de3a7e15841e108fbe144f069d313"},
 ]
 fsspec = [
-    {file = "fsspec-2022.8.2-py3-none-any.whl", hash = "sha256:6374804a2c0d24f225a67d009ee1eabb4046ad00c793c3f6df97e426c890a1d9"},
-    {file = "fsspec-2022.8.2.tar.gz", hash = "sha256:7f12b90964a98a7e921d27fb36be536ea036b73bf3b724ac0b0bd7b8e39c7c18"},
+    {file = "fsspec-2022.10.0-py3-none-any.whl", hash = "sha256:6b7c6ab3b476cdf17efcfeccde7fca28ef5a48f73a71010aaceec5fc15bf9ebf"},
+    {file = "fsspec-2022.10.0.tar.gz", hash = "sha256:cb6092474e90487a51de768170f3afa50ca8982c26150a59072b16433879ff1d"},
 ]
 gcp-storage-emulator = [
     {file = "gcp-storage-emulator-2022.6.11.tar.gz", hash = "sha256:fbc896723df95b7527a4ced499bfdd374247dfc40d6992bfa34da67e66bad4be"},
     {file = "gcp_storage_emulator-2022.6.11-py3-none-any.whl", hash = "sha256:81271737f099cec22b3b4d0ceca5d43f484bfc39770a7d98e6545eb94bf46a1b"},
 ]
 gcsfs = [
-    {file = "gcsfs-2022.8.2-py2.py3-none-any.whl", hash = "sha256:c8d63c552c46d8792b870959b4e9048a6ba2de41410552cdf0d7deb6a1069a94"},
-    {file = "gcsfs-2022.8.2.tar.gz", hash = "sha256:23380fe0ae7036da88f4bd1687b737a5e94a34c96d7355abfbd7ff0936a35885"},
+    {file = "gcsfs-2022.10.0-py2.py3-none-any.whl", hash = "sha256:73b14ec41d423b3c4b24383353cdcb597c8490e3c8e599575db861e984aebd3f"},
+    {file = "gcsfs-2022.10.0.tar.gz", hash = "sha256:d5cdaf52c0256e3aa0176c2e4ec71bec10455f9126cb9ab17dc457d83cf24b3e"},
 ]
 ghp-import = [
     {file = "ghp-import-2.1.0.tar.gz", hash = "sha256:9c535c4c61193c2df8871222567d7fd7e5014d835f97dc7b7439069e2413d343"},
