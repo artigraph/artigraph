@@ -61,7 +61,7 @@ multimethod = "^1.6"
 numpy = {version = "^1.23.1", optional = true}
 pandas = {version = "^1.4.3", optional = true}
 parse = "^1.19.0"
-pyarrow = {version = ">=8,<10", optional = true}
+pyarrow = {version = ">=8,<11", optional = true}
 pydantic = "^1.9.0"
 pyfarmhash = ">=0.2.2,<0.4.0"
 python = "^3.9"
