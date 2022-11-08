@@ -130,7 +130,7 @@ generated-members="sh"
 
 
 [tool.pytest.ini_options]
-addopts = "--cov --cov-report=term-missing --doctest-modules --ignore-glob='tests/arti/internal/import_submodules_test_modules/' --no-cov-on-fail"
+addopts = "--cov --cov-report=term-missing --doctest-modules --durations=5 --ignore-glob='tests/arti/internal/import_submodules_test_modules/' --no-cov-on-fail"
 filterwarnings = [
     "error",
     # Ignore gcsfs unclosed session - https://github.com/fsspec/gcsfs/pull/452
