@@ -56,16 +56,17 @@ repository = "https://github.com/artigraph/artigraph"
 include = ["src/arti/py.typed"]
 
 [tool.poetry.dependencies]
-gcsfs = {version = "^2022.2.0", optional = true}
-multimethod = "^1.6"
-numpy = {version = "^1.23.1", optional = true}
-pandas = {version = "^1.4.3", optional = true}
-parse = "^1.19.0"
-pyarrow = {version = ">=8,<11", optional = true}
-pydantic = "^1.9.0"
-pyfarmhash = ">=0.2.2,<0.4.0"
+gcsfs = {version = ">=2022.2.0", optional = true}
+multimethod = ">=1.6"
+numpy = {version = ">=1.23.1", optional = true}
+pandas = {version = ">=1.4.3", optional = true}
+parse = ">=1.19.0"
+pyarrow = {version = ">=8", optional = true}
+pydantic = ">=1.9.0,<2"  # We use some pydantic internals, so expect 2.0 to break things.
+pyfarmhash = ">=0.2.2"
+python-box = ">=5.4.1"
+
 python = "^3.9"
-python-box = ">=5.4.1,<7.0.0"
 
 [tool.poetry.group.dev.dependencies]
 bandit = "^1.7.4"
