@@ -134,8 +134,8 @@ generated-members="sh"
 addopts = "--cov --cov-report=term-missing --doctest-modules --durations=5 --ignore-glob='tests/arti/internal/import_submodules_test_modules/' --no-cov-on-fail"
 filterwarnings = [
     "error",
-    # Ignore gcsfs unclosed session - https://github.com/fsspec/gcsfs/pull/452
-    "ignore:unclosed <ssl.SSLSocket:ResourceWarning:gcsfs",
+    # Ignore uncompiled crc32c warning on py 3.11 (which doesn't have wheels on older versions) - https://github.com/oittaa/gcp-storage-emulator/pull/217
+    "ignore:As the c extension couldn't be imported:RuntimeWarning:google_crc32c",
 ]
 testpaths = [
     "src/",
