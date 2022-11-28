@@ -36,9 +36,9 @@ class TotalSpend(Artifact):
 
 @producer(version=SemVer(major=1, minor=0, patch=0))
 def aggregate_transactions(
-    transactions: Annotated[list[dict[str, float]], Transactions]
+    transactions: Annotated[list[dict], Transactions]  # type: ignore[type-arg]
 ) -> Annotated[float, TotalSpend]:
-    return sum(txn["amount"] for txn in transactions)
+    return sum(txn["amount"] for txn in transactions)  # type: ignore[no-any-return]
 
 
 with Graph(name="test-graph") as g:
