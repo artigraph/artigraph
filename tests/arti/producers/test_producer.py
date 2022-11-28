@@ -31,11 +31,11 @@ class DummyProducer(Producer):
     a1: A1
 
     @staticmethod
-    def build(a1: dict) -> tuple[Annotated[dict, A2], Annotated[dict, A3]]:  # type: ignore[type-arg]
+    def build(a1: dict) -> tuple[Annotated[dict, A2], Annotated[dict, A3]]:  # type: ignore[empty-body,type-arg]
         pass
 
     @staticmethod
-    def map(a1: StoragePartitions) -> PartitionDependencies:
+    def map(a1: StoragePartitions) -> PartitionDependencies:  # type: ignore[empty-body]
         pass
 
 
@@ -101,7 +101,7 @@ def test_Producer_partitioned_input_validation() -> None:
         a: A
 
         @staticmethod
-        def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+        def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
             pass
 
     assert P._input_artifact_classes_ == frozendict(a=A)
@@ -115,7 +115,7 @@ def test_Producer_partitioned_input_validation() -> None:
             a: A
 
             @staticmethod
-            def build(a: dict) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+            def build(a: dict) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
     with pytest.raises(
@@ -126,7 +126,7 @@ def test_Producer_partitioned_input_validation() -> None:
             a: A
 
             @staticmethod
-            def build(a: list[int]) -> Annotated[dict, A]:  # type: ignore[type-arg]
+            def build(a: list[int]) -> Annotated[dict, A]:  # type: ignore[empty-body,type-arg]
                 pass
 
 
@@ -140,7 +140,7 @@ def test_Producer_outputs() -> None:
         a1: A1
 
         @classmethod
-        def build(cls, a1: dict) -> tuple[int, Annotated[dict, A2]]:  # type: ignore[type-arg]
+        def build(cls, a1: dict) -> tuple[int, Annotated[dict, A2]]:  # type: ignore[empty-body,type-arg]
             pass
 
     assert ImplicitArtifact._outputs_ == (
@@ -152,7 +152,7 @@ def test_Producer_outputs() -> None:
         a1: A1
 
         @staticmethod
-        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict]:  # type: ignore[type-arg]
+        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict]:  # type: ignore[empty-body,type-arg]
             pass
 
     assert ExplicitView._outputs_ == (
@@ -167,7 +167,7 @@ def test_Producer_outputs() -> None:
             a1: A1
 
             @staticmethod
-            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore[type-arg]
+            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore[empty-body,type-arg]
                 pass
 
     with pytest.raises(
@@ -178,7 +178,7 @@ def test_Producer_outputs() -> None:
             a1: A1
 
             @staticmethod
-            def build(a1: dict) -> Annotated[dict, A1, A2]:  # type: ignore[type-arg]
+            def build(a1: dict) -> Annotated[dict, A1, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
 
@@ -188,7 +188,7 @@ def test_Producer_string_annotation() -> None:
         a1: "A1"
 
         @staticmethod
-        def build(a1: "dict") -> "Annotated[dict, A2]":  # type: ignore[type-arg]
+        def build(a1: "dict") -> "Annotated[dict, A2]":  # type: ignore[empty-body,type-arg]
             pass
 
     assert isinstance(StrAnnotation(a1=A1()).out(), A2)
@@ -250,11 +250,11 @@ def test_Producer_map_artifacts() -> None:
         a1: A1
 
         @staticmethod
-        def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+        def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
             pass
 
         @staticmethod
-        def map(a1: StoragePartitions) -> PartitionDependencies:
+        def map(a1: StoragePartitions) -> PartitionDependencies:  # type: ignore[empty-body]
             pass
 
     assert P._map_inputs_ == {"a1"}
@@ -266,7 +266,7 @@ def test_Producer_map_artifacts() -> None:
 
         class BadMapParam(P):
             @staticmethod
-            def map(a1: list) -> PartitionDependencies:  # type: ignore[override,type-arg]
+            def map(a1: list) -> PartitionDependencies:  # type: ignore[override,empty-body,type-arg]
                 pass
 
 
@@ -368,12 +368,12 @@ def test_Producer_build_outputs_check() -> None:
 
     class NoPartitioning(Producer):
         @staticmethod
-        def build() -> tuple[Annotated[int, A], Annotated[int, B]]:
+        def build() -> tuple[Annotated[int, A], Annotated[int, B]]:  # type: ignore[empty-body]
             pass
 
     class MatchingPartitioning(Producer):
         @staticmethod
-        def build() -> tuple[Annotated[list[dict], C], Annotated[list[dict], C]]:  # type: ignore[type-arg]
+        def build() -> tuple[Annotated[list[dict], C], Annotated[list[dict], C]]:  # type: ignore[empty-body,type-arg]
             pass
 
         @staticmethod
@@ -385,7 +385,7 @@ def test_Producer_build_outputs_check() -> None:
 
             class MixedPartitioning(Producer):
                 @staticmethod
-                def build() -> tuple[first_output, Annotated[list[dict], D]]:  # type: ignore[type-arg,valid-type]
+                def build() -> tuple[first_output, Annotated[list[dict], D]]:  # type: ignore[empty-body,type-arg,valid-type]
                     pass
 
     with pytest.raises(
@@ -395,7 +395,7 @@ def test_Producer_build_outputs_check() -> None:
 
         class BadProducer(Producer):  # noqa: F811
             @staticmethod
-            def build() -> Annotated[list[dict], C]:  # type: ignore[type-arg]
+            def build() -> Annotated[list[dict], C]:  # type: ignore[empty-body,type-arg]
                 pass
 
 
@@ -418,7 +418,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
-            def build(cls, a1: dict) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+            def build(cls, a1: dict) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
     with pytest.raises(
@@ -428,11 +428,11 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
             @classmethod
-            def map(cls, a1: StoragePartitions) -> PartitionDependencies:
+            def map(cls, a1: StoragePartitions) -> PartitionDependencies:  # type: ignore[empty-body]
                 pass
 
     with pytest.raises(
@@ -445,7 +445,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a2: A2
 
             @classmethod
-            def build(cls, a1: dict) -> Annotated[dict, A3]:  # type: ignore[type-arg]
+            def build(cls, a1: dict) -> Annotated[dict, A3]:  # type: ignore[empty-body,type-arg]
                 pass
 
     with pytest.raises(ValueError, match="must have a type hint"):
@@ -463,7 +463,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a1: str
 
             @classmethod
-            def build(cls, a1: str) -> tuple[A2, A3]:
+            def build(cls, a1: str) -> tuple[A2, A3]:  # type: ignore[empty-body]
                 pass
 
     with pytest.raises(ValueError, match="must not have a default"):
@@ -551,7 +551,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a1: A1 = A1()
 
             @classmethod
-            def build(cls, a1: dict) -> A2:  # type: ignore[type-arg]
+            def build(cls, a1: dict) -> A2:  # type: ignore[empty-body,type-arg]
                 pass
 
     with pytest.raises(
@@ -563,14 +563,14 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
             a1: A1
 
             @classmethod
-            def build(cls, a1: Annotated[dict, A2]) -> A2:  # type: ignore[type-arg]
+            def build(cls, a1: Annotated[dict, A2]) -> A2:  # type: ignore[empty-body,type-arg]
                 pass
 
     with pytest.raises(ValueError, match=r"str.* cannot be used to represent Struct"):
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
-            def build(cls) -> Annotated[str, A2]:
+            def build(cls) -> Annotated[str, A2]:  # type: ignore[empty-body]
                 pass
 
     with pytest.raises(
@@ -582,7 +582,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
-            def build(cls) -> Annotated[int, Int64(), A2]:
+            def build(cls) -> Annotated[int, Int64(), A2]:  # type: ignore[empty-body]
                 pass
 
     with pytest.raises(
@@ -591,7 +591,7 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
     ):
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
     with pytest.raises(
@@ -601,10 +601,10 @@ def test_Producer_bad_signature() -> None:  # noqa: C901
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             @classmethod
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+            def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
-            def map(cls) -> PartitionDependencies:
+            def map(cls) -> PartitionDependencies:  # type: ignore[empty-body]
                 pass
 
 
@@ -693,7 +693,7 @@ def test_Producer_io_checks() -> None:
         b: Artifact
 
         @staticmethod
-        def map(m: StoragePartitions) -> PartitionDependencies:
+        def map(m: StoragePartitions) -> PartitionDependencies:  # type: ignore[empty-body]
             pass
 
         @staticmethod

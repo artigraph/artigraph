@@ -26,22 +26,23 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
         super().__init__(func)
         self.canonical_name: Optional[str] = None
         self.discovery_func: Optional[Callable[[], None]] = None
+        assert self.signature is not None
         self.clean_signature = tidy_signature(func, self.signature)
 
-    def __missing__(self, types: type[Any]) -> Callable[..., RETURN]:
+    def __missing__(self, types: tuple[Any, ...]) -> Callable[..., RETURN]:
         if self.discovery_func is not None:
             self.discovery_func()
-        return super().__missing__(types)  # type: ignore[misc,no-any-return]
+        return super().__missing__(types)
 
-    def lookup(self, *args: type[Any]) -> REGISTERED:
+    def lookup(self, *args: type[Any]) -> Callable[..., Any]:
         # multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same
         # before looking up. Non-Generics pass through as is.
-        args = tuple(_multimethod.subtype(arg) for arg in args)  # type: ignore[attr-defined]
+        args = tuple(_multimethod.subtype(arg) for arg in args)  # type: ignore[no-untyped-call]
         # NOTE: multimethod doesn't override __contains__ (likely so __missing__ will still run), so
         # "args in self" will be False when using subclasses of any arg.
         missing_error = ValueError(f"No `{self.canonical_name}` implementation found for: {args}")
         try:
-            handler = cast(REGISTERED, self[args])
+            handler = cast(Callable[..., Any], self[args])
         # multimethod raises a TypeError instead of KeyError, as __call__.
         except TypeError as e:  # pragma: no cover
             raise missing_error from e
@@ -83,7 +84,7 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
                 raise TypeError(
                     f"Expected the `{func.__name__}` return to match {spec.return_annotation}, got {sig.return_annotation}"
                 )
-        return super().register(*args)  # type: ignore[no-any-return]
+        return cast(Callable[..., Any], super().register(*args))
 
 
 def multipledispatch(
