@@ -224,7 +224,7 @@ class Graph(Model):
     def get_snapshot_id(self) -> Fingerprint:
         return cast(Fingerprint, self.snapshot().snapshot_id)
 
-    @cached_property  # type: ignore[misc] # python/mypy#1362
+    @cached_property
     @requires_sealed
     def dependencies(self) -> NodeDependencies:
         artifact_deps = {
@@ -243,12 +243,12 @@ class Graph(Model):
         }
         return NodeDependencies(artifact_deps | producer_deps)
 
-    @cached_property  # type: ignore[misc] # python/mypy#1362
+    @cached_property
     @requires_sealed
     def producers(self) -> frozenset[Producer]:
         return frozenset(self.producer_outputs)
 
-    @cached_property  # type: ignore[misc] # python/mypy#1362
+    @cached_property
     @requires_sealed
     def producer_outputs(self) -> frozendict[Producer, tuple[Artifact, ...]]:
         d = defaultdict[Producer, dict[int, Artifact]](dict)
