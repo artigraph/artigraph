@@ -151,7 +151,11 @@ def get_annotation_from_value(value: Any) -> Any:
 
 
 def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:
-    if not (isinstance(klass, (type, TypeVar)) or is_Annotated(klass) or klass is Any):
+    if not (
+        isinstance(klass, (type, types.GenericAlias, TypeVar))
+        or is_Annotated(klass)
+        or klass is Any
+    ):
         return False
     if isinstance(class_or_tuple, tuple):
         return any(lenient_issubclass(klass, subtype) for subtype in class_or_tuple)
