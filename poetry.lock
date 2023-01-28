@@ -690,14 +690,14 @@ scandir = ["scandir (>=1.5,<2.0)"]
 
 [[package]]
 name = "fsspec"
-version = "2022.11.0"
+version = "2023.1.0"
 description = "File-system specification"
 category = "main"
 optional = true
 python-versions = ">=3.7"
 files = [
-    {file = "fsspec-2022.11.0-py3-none-any.whl", hash = "sha256:d6e462003e3dcdcb8c7aa84c73a228f8227e72453cd22570e2363e8844edfe7b"},
-    {file = "fsspec-2022.11.0.tar.gz", hash = "sha256:259d5fd5c8e756ff2ea72f42e7613c32667dc2049a4ac3d84364a7ca034acb8b"},
+    {file = "fsspec-2023.1.0-py3-none-any.whl", hash = "sha256:b833e2e541e9e8cde0ab549414187871243177feb3d344f9d27b25a93f5d8139"},
+    {file = "fsspec-2023.1.0.tar.gz", hash = "sha256:fbae7f20ff801eb5f7d0bedf81f25c787c0dfac5e982d98fa3884a9cde2b5411"},
 ]
 
 [package.extras]
@@ -741,20 +741,20 @@ google-crc32c = "1.3.0"
 
 [[package]]
 name = "gcsfs"
-version = "2022.11.0"
+version = "2023.1.0"
 description = "Convenient Filesystem interface over GCS"
 category = "main"
 optional = true
 python-versions = ">=3.7"
 files = [
-    {file = "gcsfs-2022.11.0-py2.py3-none-any.whl", hash = "sha256:b4543f4711d4f59284cd79747c0b76783c9501251c641957ab0dc70b4eab0e70"},
-    {file = "gcsfs-2022.11.0.tar.gz", hash = "sha256:84d0caada7097e357d735d7e16e8064f0819d28746101d6f65ff42938557e831"},
+    {file = "gcsfs-2023.1.0-py2.py3-none-any.whl", hash = "sha256:62c491b9e2a8e9e58b8a899eec2ce111f827718a65539019ff3cadf447e48f41"},
+    {file = "gcsfs-2023.1.0.tar.gz", hash = "sha256:0a7b7ca8c1affa126a14ba35d7b7dff81c49e2aaceedda9732c7f159a4837a26"},
 ]
 
 [package.dependencies]
 aiohttp = "<4.0.0a0 || >4.0.0a0,<4.0.0a1 || >4.0.0a1"
 decorator = ">4.1.2"
-fsspec = "2022.11.0"
+fsspec = "2023.1.0"
 google-auth = ">=1.2"
 google-auth-oauthlib = "*"
 google-cloud-storage = "*"
