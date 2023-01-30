@@ -3,6 +3,7 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Iterator
 from contextlib import contextmanager
+from functools import partial
 
 from pydantic import PrivateAttr
 
@@ -39,7 +40,7 @@ class _NoCopyContainer(NoCopyMixin):
         # `container.storage_partitions` tracks all partitions, across all graphs. This separation is important
         # to allow for Literals to be used even after a snapshot_id change.
         self.graph_snapshot_partitions: _GraphSnapshotPartitions = defaultdict(
-            lambda: defaultdict(lambda: defaultdict(set[StoragePartition]))
+            partial(defaultdict, partial(defaultdict, set[StoragePartition]))  # type: ignore[arg-type]
         )
         self.graph_tags: dict[str, dict[str, Fingerprint]] = defaultdict(dict)
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartition])

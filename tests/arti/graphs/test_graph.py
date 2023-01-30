@@ -45,6 +45,10 @@ def test_Graph(graph: Graph) -> None:
     assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
 
 
+def test_Graph_pickle(graph: Graph) -> None:
+    assert graph == pickle.loads(pickle.dumps(graph))
+
+
 def test_Graph_literals(tmp_path: Path) -> None:
     n_add_runs = 0
 
