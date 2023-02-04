@@ -1,3 +1,4 @@
+import pickle
 import re
 from pathlib import Path
 from typing import Annotated, cast
@@ -42,6 +43,10 @@ def test_Graph(graph: Graph) -> None:
     assert graph.artifacts.b.storage.includes_input_fingerprint_template
     assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
     assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
+
+
+def test_Graph_pickle(graph: Graph) -> None:
+    assert graph == pickle.loads(pickle.dumps(graph))
 
 
 def test_Graph_literals(tmp_path: Path) -> None:
@@ -405,3 +410,12 @@ def test_Graph_storage_resolution() -> None:
     assert g.artifacts.root.a.storage.path.endswith("/test/tag=value/root/a/a.json")
     assert g.artifacts.root.b.storage.path.endswith("/test/tag=value/root/b/b.json")
     assert g.artifacts.c.storage.path.endswith("/test/tag=value/c/{input_fingerprint}/c.json")
+
+
+def test_ArtifactBox() -> None:
+    with Graph(name="test") as g:
+        g.artifacts.a.b.c = 5  # test chained assignment
+        g.artifacts.x = {"y": {"z": 5}}  # test direct nested assignment
+    assert g.artifacts.a.b.c.storage.id == "test/a/b/c/c.json"  # type: ignore[attr-defined]
+    assert g.artifacts.x.y.z.storage.id == "test/x/y/z/z.json"  # type: ignore[attr-defined]
+    assert g.artifacts == pickle.loads(pickle.dumps(g.artifacts))
