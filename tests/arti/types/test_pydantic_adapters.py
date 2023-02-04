@@ -91,7 +91,7 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
             expected_args = get_args(expected_type)
             if lenient_issubclass(expected_origin, Mapping):
                 assert isinstance(spec, Map)
-                for (sub_type, sub_spec) in zip(expected_args, (spec.key, spec.value)):
+                for sub_type, sub_spec in zip(expected_args, (spec.key, spec.value)):
                     if lenient_issubclass(sub_type, BaseModel):
                         compare_model_to_type(sub_type, sub_spec)
                     else:
@@ -139,7 +139,7 @@ def compare_model_to_generated(  # noqa: C901
             expected_args, got_args = get_args(expected_type), get_args(got_type)
             if lenient_issubclass(expected_origin, Mapping):
                 assert lenient_issubclass(got_origin, Mapping)
-                for (expected_arg, got_arg) in zip(expected_args, got_args):
+                for expected_arg, got_arg in zip(expected_args, got_args):
                     if lenient_issubclass(expected_arg, BaseModel):
                         compare_model_to_generated(expected_arg, got_arg)
                     else:

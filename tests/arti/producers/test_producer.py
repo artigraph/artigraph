@@ -230,7 +230,7 @@ def test_Producer_out() -> None:
     # multi return Producer
     p2 = P2(a2=a2)
     a3_, a4_ = p2.out(a3, a4)
-    for (producer, inp, out, type_, position) in (
+    for producer, inp, out, type_, position in (
         (p1, a2, a2_, A2, 0),
         (p2, a3, a3_, A3, 0),
         (p2, a4, a4_, A4, 1),
