@@ -135,7 +135,7 @@ def test_python_null() -> None:
     ),
 )
 def test_python_optional(arti: Type, py: Any) -> None:
-    for (a, p) in [
+    for a, p in [
         (arti, py),
         # Confirm non-null too
         (arti.copy(update={"nullable": False}), get_args(py)[0]),

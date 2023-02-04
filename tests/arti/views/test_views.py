@@ -55,7 +55,7 @@ def test_View_from_annotation(MockView: type[View]) -> None:
         python_type = list
 
     int_list = types.List(element=types.Int64())
-    for (annotation, hint_type, expected_type) in [
+    for annotation, hint_type, expected_type in [
         (list, int_list, int_list),
         (list[int], None, int_list),
         (list[int], int_list, int_list),
