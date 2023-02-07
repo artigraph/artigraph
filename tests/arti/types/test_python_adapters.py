@@ -185,4 +185,4 @@ def test_python_tuple() -> None:
 
     # We don't (currently) support structure based tuples
     with pytest.raises(NotImplementedError):
-        python_type_system.to_artigraph(tuple[str, int], hints={})  # type: ignore[misc]
+        python_type_system.to_artigraph(tuple[str, int], hints={})

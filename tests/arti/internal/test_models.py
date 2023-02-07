@@ -180,7 +180,7 @@ def test_Model_static_types() -> None:
         (tuple[Optional[int], ...], (5, None), None),
         (tuple[int, ...], (1, 2), None),
         (tuple[int], (5,), None),
-        (tuple[str, int], ("test", 5), None),  # type: ignore[misc]
+        (tuple[str, int], ("test", 5), None),
         # Detected bad input:
         (Literal[5], 6, ValueError),
         (Optional[int], "hi", ValueError),
@@ -189,7 +189,7 @@ def test_Model_static_types() -> None:
         (dict[int, str], {"5": "hi"}, ValueError),
         (dict[str, int], {"hi": "5"}, ValueError),
         (int, None, ValueError),
-        (tuple[str, int], ("test",), ValueError),  # type: ignore[misc]
+        (tuple[str, int], ("test",), ValueError),
     ],
 )
 def test_Model_static_types_complex(

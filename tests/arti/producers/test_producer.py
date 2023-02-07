@@ -676,8 +676,8 @@ def test_Producer_type_inference(
     numbers_view_write = numbers_view_read.copy(update={"mode": "WRITE"})
 
     @producer_decorator()
-    def plusone(numbers: annotation) -> annotation:  # type: ignore[valid-type]
-        return [n + 1 for n in numbers]  # type: ignore[attr-defined]
+    def plusone(numbers: annotation) -> annotation:
+        return [n + 1 for n in numbers]
 
     assert plusone._input_artifact_classes_ == frozendict(numbers=artifact_class)
     assert plusone._build_inputs_ == frozendict(numbers=numbers_view_read)
