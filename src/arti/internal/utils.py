@@ -9,7 +9,7 @@ from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Mu
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
-from typing import IO, Any, ClassVar, Optional, Self, SupportsIndex, TypeVar, Union, cast
+from typing import IO, Any, ClassVar, Optional, SupportsIndex, TypeVar, Union, cast
 
 from box import Box
 
@@ -298,6 +298,9 @@ def qname(val: Union[object, type]) -> str:
     return type(val).__qualname__
 
 
+_Self = TypeVar("_Self")
+
+
 class NoCopyMixin:
     """Mixin to bypass (deep)copying.
 
@@ -305,10 +308,10 @@ class NoCopyMixin:
     preferring immutable data structures and Pydantic models, which (deep)copy often.
     """
 
-    def __copy__(self) -> Self:
+    def __copy__(self: _Self) -> _Self:
         return self  # pragma: no cover
 
-    def __deepcopy__(self, memo: Any) -> Self:
+    def __deepcopy__(self: _Self, memo: Any) -> _Self:
         return self  # pragma: no cover
 
 
