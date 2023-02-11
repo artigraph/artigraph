@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 from sh import ErrorReturnCode_128, bash, git  # pylint: disable=no-name-in-module
 
-REPO_ROOT = Path(git("rev-parse", "--show-toplevel").stdout.decode().strip())
+REPO_ROOT = Path(git("rev-parse", "--show-toplevel").strip())
 WORKTREE_BASE_DIR = REPO_ROOT / ".wt"
 
 app = typer.Typer(name="dev")
