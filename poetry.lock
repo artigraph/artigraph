@@ -3079,4 +3079,4 @@ all = ["gcsfs", "numpy", "pandas", "pyarrow"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.9"
-content-hash = "acfcd0937f2881b46673965b3dcb22d5e3f5f8d2305dd36e787cdf7a6c0bcb30"
+content-hash = "19bf7f85ded58c63fb8751a366dfb6225c26e44e72aa341973ed4a7e33080e84"
