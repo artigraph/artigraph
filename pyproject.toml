@@ -122,6 +122,7 @@ disable = """
     invalid-name,
     line-too-long,
     logging-fstring-interpolation,
+    missing-function-docstring,
     no-else-return,
     protected-access,
     redefined-builtin,
