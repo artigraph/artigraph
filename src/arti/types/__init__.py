@@ -5,7 +5,9 @@ from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional
 
-from pydantic import PrivateAttr, validator
+from pydantic import PrivateAttr
+from pydantic import __version__ as pydantic_version
+from pydantic import validator
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
@@ -403,5 +405,6 @@ class TypeSystem(Model):
         raise NotImplementedError(f"No {root_type_system} adapter for Artigraph type: {type_}.")
 
 
-# Fix ForwardRefs in outer_type_, pending: https://github.com/samuelcolvin/pydantic/pull/4249
-TypeSystem.__fields__["extends"].outer_type_ = tuple[TypeSystem, ...]
+if tuple(int(i) for i in pydantic_version.split(".")) < (1, 10):  # pragma: no cover
+    # Fix ForwardRefs in outer_type_ before https://github.com/samuelcolvin/pydantic/pull/4249
+    TypeSystem.__fields__["extends"].outer_type_ = tuple[TypeSystem, ...]
