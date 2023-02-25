@@ -2770,14 +2770,14 @@ test = ["black (>=22.3.0,<23.0.0)", "coverage (>=6.2,<7.0)", "isort (>=5.0.6,<6.
 
 [[package]]
 name = "types-pyfarmhash"
-version = "0.3.1"
+version = "0.3.1.1"
 description = "Typing stubs for pyfarmhash"
 category = "dev"
 optional = false
 python-versions = "*"
 files = [
-    {file = "types-pyfarmhash-0.3.1.tar.gz", hash = "sha256:82ee5383befb880359dd74ce3e8aa7b4af6ebadfd1ee6fc2c6244f3eb56508ae"},
-    {file = "types_pyfarmhash-0.3.1-py3-none-any.whl", hash = "sha256:3844c9c396e279e2e25a87312ef36bcf46b154951e1d59ef068442a5b43365b2"},
+    {file = "types-pyfarmhash-0.3.1.1.tar.gz", hash = "sha256:2777d4619ca214313a29cfa273dde62ecb5e96b5f1b491b3d0d4549e21f6ffd0"},
+    {file = "types_pyfarmhash-0.3.1.1-py3-none-any.whl", hash = "sha256:707f751a8e6b9c41ff00f3380b1c0330c34cc1cb035ba9f09172aa385d4fb69c"},
 ]
 
 [[package]]
