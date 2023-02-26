@@ -1,5 +1,0 @@
-# SHAs are detected
-poetry.lock
-
-# Old, has a commit SHA in a comment
-src/arti/internal/vendored/setuptools.py

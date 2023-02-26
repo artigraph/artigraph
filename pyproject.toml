@@ -89,7 +89,6 @@ pytest-cov = ">=3.0.0"
 pytest-sugar = ">=0.9.5"
 pyupgrade = ">=2.37.3"
 sh = ">=2"
-truffleHog = ">=2.2.1"
 typer = ">=0.6.1"
 types-pyfarmhash = ">=0.3.1"
 
