@@ -6,11 +6,10 @@ from typing import Any, cast
 
 import pyarrow as pa
 
-from arti import types
+from arti import Type, TypeAdapter, TypeSystem, types
 from arti.internal.utils import classproperty
-from arti.types import TypeSystem
 
-pyarrow_type_system = types.TypeSystem(key="pyarrow")
+pyarrow_type_system = TypeSystem(key="pyarrow")
 
 # Not implemented:
 #     decimal128(int precision, int scale=0),
@@ -20,15 +19,13 @@ pyarrow_type_system = types.TypeSystem(key="pyarrow")
 #     large_string(),
 
 
-class _PyarrowTypeAdapter(types.TypeAdapter):
+class _PyarrowTypeAdapter(TypeAdapter):
     @classproperty
     def _is_system(cls) -> Callable[[pa.DataType], bool]:
         return getattr(pa.types, f"is_{cls.system.__name__}")  # type: ignore[no-any-return]
 
     @classmethod
-    def to_artigraph(
-        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         return cls.artigraph()
 
     @classmethod
@@ -36,13 +33,11 @@ class _PyarrowTypeAdapter(types.TypeAdapter):
         return isinstance(type_, pa.DataType) and cls._is_system(type_)
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         return cls.system()
 
 
-def _gen_adapter(
-    *, artigraph: type[types.Type], system: Any, priority: int = 0
-) -> type[types.TypeAdapter]:
+def _gen_adapter(*, artigraph: type[Type], system: Any, priority: int = 0) -> type[TypeAdapter]:
     return pyarrow_type_system.register_adapter(
         type(
             f"Pyarrow{system.__name__}",
@@ -83,9 +78,7 @@ class BinaryTypeAdapter(_PyarrowTypeAdapter):
     system = pa.binary
 
     @classmethod
-    def to_artigraph(
-        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         if isinstance(type_, pa.FixedSizeBinaryType):
             return cls.artigraph(byte_size=type_.byte_width)
         return cls.artigraph()
@@ -97,7 +90,7 @@ class BinaryTypeAdapter(_PyarrowTypeAdapter):
         return super().matches_system(type_, hints=hints) or pa.types.is_fixed_size_binary(type_)
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system(length=-1 if type_.byte_size is None else type_.byte_size)
 
@@ -127,7 +120,7 @@ class GeographyTypeAdapter(_PyarrowTypeAdapter):
         return False
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         return pa.binary() if type_.format == "WKB" else pa.string()
 
@@ -138,9 +131,7 @@ class ListTypeAdapter(_PyarrowTypeAdapter):
     system = pa.list_
 
     @classmethod
-    def to_artigraph(
-        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         return cls.artigraph(
             element=type_system.to_artigraph(type_.value_type, hints=hints),
         )
@@ -150,7 +141,7 @@ class ListTypeAdapter(_PyarrowTypeAdapter):
         return cast(bool, pa.types.is_list(type_))
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system(value_type=type_system.to_system(type_.element, hints=hints))
 
@@ -161,9 +152,7 @@ class MapTypeAdapter(_PyarrowTypeAdapter):
     system = pa.map_
 
     @classmethod
-    def to_artigraph(
-        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         return cls.artigraph(
             key=type_system.to_artigraph(type_.key_type, hints=hints),
             value=type_system.to_artigraph(type_.item_type, hints=hints),
@@ -174,7 +163,7 @@ class MapTypeAdapter(_PyarrowTypeAdapter):
         return cast(bool, pa.types.is_map(type_))
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system(
             key_type=type_system.to_system(type_.key, hints=hints),
@@ -190,16 +179,14 @@ class StructTypeAdapter(_PyarrowTypeAdapter):
     @classmethod
     def _field_to_artigraph(
         cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    ) -> Type:
         ret = type_system.to_artigraph(type_.type, hints=hints)
         if type_.nullable != ret.nullable:  # Avoid setting nullable if matching to minimize repr
             ret = ret.copy(update={"nullable": type_.nullable})
         return ret
 
     @classmethod
-    def to_artigraph(
-        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         return cls.artigraph(
             fields={
                 field.name: cls._field_to_artigraph(field, hints=hints, type_system=type_system)
@@ -209,12 +196,12 @@ class StructTypeAdapter(_PyarrowTypeAdapter):
 
     @classmethod
     def _field_to_system(
-        cls, name: str, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem
+        cls, name: str, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem
     ) -> Any:
         return pa.field(name, type_system.to_system(type_, hints=hints), nullable=type_.nullable)
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         return cls.system(
             [
@@ -232,7 +219,7 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
     system = pa.schema
 
     @classmethod
-    def matches_artigraph(cls, type_: types.Type, *, hints: dict[str, Any]) -> bool:
+    def matches_artigraph(cls, type_: Type, *, hints: dict[str, Any]) -> bool:
         # Collection can hold arbitrary types, but `pa.schema` is only a struct (but with arbitrary
         # metadata)
         return super().matches_artigraph(type_=type_, hints=hints) and isinstance(
@@ -240,9 +227,7 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
         )
 
     @classmethod
-    def to_artigraph(
-        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         kwargs = {}
         # NOTE: pyarrow converts all metadata keys/values to bytes
         if type_.metadata and b"artigraph" in type_.metadata:
@@ -260,7 +245,7 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
         return isinstance(type_, pa.lib.Schema)
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         assert isinstance(type_.element, types.Struct)
         return cls.system(
@@ -290,9 +275,7 @@ class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
         return {v: k for k, v in cls.precision_to_unit.items()}
 
     @classmethod
-    def to_artigraph(
-        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         if (precision := cls.unit_to_precision.get(type_.unit)) is None:  # pragma: no cover
             raise ValueError(
                 f"{type_}.unit must be one of {tuple(cls.unit_to_precision)}, got {type_.unit}"
@@ -300,7 +283,7 @@ class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
         return cls.artigraph(precision=precision)
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         precision = type_.precision  # type: ignore[attr-defined]
         if (unit := cls.precision_to_unit.get(precision)) is None:  # pragma: no cover
             raise ValueError(
@@ -325,9 +308,7 @@ class TimestampTypeAdapter(_BaseTimeTypeAdapter):
     system = pa.timestamp
 
     @classmethod
-    def to_artigraph(
-        cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem
-    ) -> types.Type:
+    def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         tz = type_.tz.upper()
         if tz != "UTC":
             raise ValueError(f"Timestamp {type_}.tz must be in UTC, got {tz}")
@@ -338,7 +319,7 @@ class TimestampTypeAdapter(_BaseTimeTypeAdapter):
         return super().matches_system(type_, hints=hints) and type_.tz is not None
 
     @classmethod
-    def to_system(cls, type_: types.Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
+    def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         ts = super().to_system(type_, hints=hints, type_system=type_system)
         return cls.system(ts.unit, "UTC")
 
@@ -347,7 +328,7 @@ class _BaseSizedTimeTypeAdapter(_BaseTimeTypeAdapter):
     artigraph = types.Time
 
     @classmethod
-    def matches_artigraph(cls, type_: types.Type, *, hints: dict[str, Any]) -> bool:
+    def matches_artigraph(cls, type_: Type, *, hints: dict[str, Any]) -> bool:
         return (
             super().matches_artigraph(type_=type_, hints=hints)
             and type_.precision in cls.precision_to_unit  # type: ignore[attr-defined]
