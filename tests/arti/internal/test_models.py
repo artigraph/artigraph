@@ -197,7 +197,7 @@ def test_Model_static_types_complex(
 ) -> None:
     M = type(str(hint), (Model,), {"__annotations__": {"x": hint}})
     ctx = nullcontext() if error_type is None else pytest.raises(error_type)
-    with ctx:  # type: ignore[attr-defined]
+    with ctx:
         data = {"x": value}
         # Ensure data can be round-tripped to (at the least) confirm dict keys are checked.
         assert dict(M(**data)) == data
