@@ -137,7 +137,7 @@ def test_Model__iter() -> None:
 
 def test_Model_unknown_kwargs() -> None:
     with pytest.raises(ValidationError, match="extra fields not permitted"):
-        Concrete(junk=1)
+        Concrete(junk=1)  # type: ignore[call-arg]
 
 
 def test_Model_static_types() -> None:
@@ -155,9 +155,9 @@ def test_Model_static_types() -> None:
     m = M(a=5, b="b", c=0, d={"a": 1}, e=MyInt)
     assert isinstance(m.d, frozendict)
     with pytest.raises(ValidationError, match="expected an instance of <class 'str'>, got"):
-        M(a=5, b=5, c=0)
+        M(a=5, b=5, c=0)  # type: ignore[call-arg]
     with pytest.raises(ValidationError, match=r"expected an instance of <class 'int'>, got"):
-        M(a=5, b="b", c=0.0)
+        M(a=5, b="b", c=0.0)  # type: ignore[call-arg]
     with pytest.raises(ValidationError, match=r"expected a subclass of <class 'int'>, got"):
         M(a=5, b="b", c=0, d={"a": 1}, e=str)
 

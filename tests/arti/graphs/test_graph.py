@@ -61,7 +61,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     with Graph(name="Test") as g:
         g.artifacts.x = 1
         g.artifacts.y = Num(storage=LocalFile(path=str(tmp_path / "y.json")))
-        g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y).out()
+        g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y).out()  # type: ignore[call-arg]
         # Changes to `phase` will cause a new snapshot_id. However, since `phase` isn't an input to
         # `add`, we *shouldn't* have to recompute `z` - assuming the backend properly stores
         # storage->storage_partitions separate from the set of storage_partitions associated with a
@@ -174,9 +174,9 @@ def test_Graph_snapshot_id_producer_arg_order(tmp_path: Path) -> None:
 
     # Create two Graphs, varying only by the arg order to the Producer.
     with Graph(name="test") as g_ab:
-        g_ab.artifacts.c = div(a=a, b=b).out(c)
+        g_ab.artifacts.c = div(a=a, b=b).out(c)  # type: ignore[call-arg]
     with Graph(name="test") as g_ba:
-        g_ba.artifacts.c = div(a=b, b=a).out(c)
+        g_ba.artifacts.c = div(a=b, b=a).out(c)  # type: ignore[call-arg]
 
     assert g_ab.get_snapshot_id() != g_ba.get_snapshot_id()
 
@@ -188,7 +188,7 @@ def test_Graph_tagging(tmp_path: Path) -> None:
 
     with Graph(name="Test") as g:
         g.artifacts.x = Num(storage=LocalFile(path=str(tmp_path / "x.json")))
-        g.artifacts.y = plus1(x=g.artifacts.x)
+        g.artifacts.y = plus1(x=g.artifacts.x)  # type: ignore[call-arg]
 
     g.write(1, artifact=g.artifacts.x)
     snapshot_1 = g.build()
@@ -227,11 +227,11 @@ def test_Graph_build(tmp_path: Path) -> None:
 
     with Graph(name="test") as g:
         g.artifacts.root.a = Num(storage=LocalFile(path=str(tmp_path / "a.json")))
-        g.artifacts.b = increment(i=g.artifacts.root.a).out(
+        g.artifacts.b = increment(i=g.artifacts.root.a).out(  # type: ignore[call-arg]
             Num(storage=LocalFile.rooted_at(tmp_path))
         )
         # Test multiple return values
-        g.artifacts.c, g.artifacts.d = dup(i=g.artifacts.root.a).out(
+        g.artifacts.c, g.artifacts.d = dup(i=g.artifacts.root.a).out(  # type: ignore[call-arg]
             Num(storage=LocalFile.rooted_at(tmp_path)),
             Num(storage=LocalFile.rooted_at(tmp_path)),
         )
@@ -292,7 +292,7 @@ def test_Graph_build_failed_validation(tmp_path: Path) -> None:
     num = Num(storage=LocalFile.rooted_at(tmp_path))  # Immutable, thus can reuse
     with Graph(name="test") as g:
         g.artifacts.a = num
-        g.artifacts.b = cast(Num, angry_add(i=g.artifacts.a).out(num))
+        g.artifacts.b = cast(Num, angry_add(i=g.artifacts.a).out(num))  # type: ignore[call-arg]
 
     g.write(0, artifact=g.artifacts.a)
     with pytest.raises(ValueError, match=failed_validation_msg):
@@ -395,7 +395,7 @@ def test_Graph_storage_resolution() -> None:
         g.artifacts.root.a = Num(storage=LocalFile())
         g.artifacts.root.b = Num(storage=LocalFile())
         g.artifacts.c = cast(
-            Num, div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(Num(storage=LocalFile()))
+            Num, div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(Num(storage=LocalFile()))  # type: ignore[call-arg]
         )
         with pytest.raises(
             ValueError,
@@ -403,7 +403,7 @@ def test_Graph_storage_resolution() -> None:
                 "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
             ),
         ):
-            g.artifacts.d = div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(
+            g.artifacts.d = div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(  # type: ignore[call-arg]
                 Num(storage=LocalFile(path="junk"))
             )
 

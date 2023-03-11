@@ -1,6 +1,6 @@
 import re
 from collections.abc import Sequence
-from typing import Annotated, Any, Optional
+from typing import Annotated, Any, ClassVar, Optional
 
 import pytest
 
@@ -14,6 +14,7 @@ from arti import (
     StoragePartition,
     StoragePartitions,
     Type,
+    TypeSystem,
     View,
     io,
 )
@@ -62,8 +63,8 @@ def test_producer_decorator() -> None:
     assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1)
     assert len(dummy_producer._outputs_) == 1
     assert dummy_producer._outputs_[0].artifact_class == A2
-    assert dummy_producer(a1=A1()).annotations == Producer.__fields__["annotations"].default
-    assert dummy_producer(a1=A1()).version == Producer.__fields__["version"].default
+    assert dummy_producer(a1=A1()).annotations == Producer.__fields__["annotations"].default  # type: ignore[call-arg]
+    assert dummy_producer(a1=A1()).version == Producer.__fields__["version"].default  # type: ignore[call-arg]
 
     class MyAnnotation(Annotation):
         pass
@@ -79,8 +80,8 @@ def test_producer_decorator() -> None:
 
     assert dummy_producer2.__name__ == "test"
     assert dummy_producer2.map == mapper
-    assert dummy_producer2(a1=A1()).annotations == (MyAnnotation(),)
-    assert dummy_producer2(a1=A1()).version == StringVersion(value="test")
+    assert dummy_producer2(a1=A1()).annotations == (MyAnnotation(),)  # type: ignore[call-arg]
+    assert dummy_producer2(a1=A1()).version == StringVersion(value="test")  # type: ignore[call-arg]
 
 
 def test_Producer_input_artifact_classes() -> None:
@@ -95,7 +96,7 @@ def test_Producer_input_artifact_classes() -> None:
 
 def test_Producer_partitioned_input_validation() -> None:
     class A(Artifact):
-        type = Collection(element=Struct(fields={"x": Int64()}), partition_by=("x",))
+        type: Type = Collection(element=Struct(fields={"x": Int64()}), partition_by=("x",))
 
     class P(Producer):
         a: A
@@ -355,16 +356,18 @@ def test_Producer_validate_output_hint_validation() -> None:
 
 def test_Producer_build_outputs_check() -> None:
     class A(Artifact):
-        type = Int64()
+        type: Type = Int64()
 
     class B(Artifact):
-        type = Int64()
+        type: Type = Int64()
 
     class C(Artifact):
-        type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        type: Type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
 
     class D(Artifact):
-        type = Collection(element=Struct(fields={"a": Int64(), "b": Int64()}), partition_by=("b",))
+        type: Type = Collection(
+            element=Struct(fields={"a": Int64(), "b": Int64()}), partition_by=("b",)
+        )
 
     class NoPartitioning(Producer):
         @staticmethod
@@ -612,9 +615,9 @@ def test_Producer_bad_init() -> None:
     with pytest.raises(ValueError, match="cannot be instantiated directly"):
         Producer()
     with pytest.raises(ValueError, match="extra fields not permitted"):
-        DummyProducer(junk=5)
+        DummyProducer(junk=5)  # type: ignore[call-arg]
     with pytest.raises(ValueError, match="field required"):
-        DummyProducer()
+        DummyProducer()  # type: ignore[call-arg]
     with pytest.raises(ValueError, match="expected an instance of"):
         DummyProducer(a1=5)
     with pytest.raises(ValueError, match="expected an instance of"):
@@ -702,7 +705,7 @@ def test_Producer_io_checks() -> None:
 
     # Create some fake format for which we don't have any io implemented.
     class FakeFormat(Format):
-        type_system = dummy_type_system
+        type_system: ClassVar[TypeSystem] = dummy_type_system
 
     good_artifact = Artifact.cast(1)
     fake_artifact = good_artifact.copy(update={"format": FakeFormat()})

@@ -70,11 +70,11 @@ def test_PartitionKey_subclass() -> None:
 
         class UnknownDefaultKey(AbstractKey):
             default_key_components: ClassVar[frozendict[str, str]] = frozendict(junk="junk")
-            matching_type = Int8
+            matching_type: ClassVar[type[Type]] = Int8
 
     class SomeKey(AbstractKey):
         default_key_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
-        matching_type = Int8
+        matching_type: ClassVar[type[Type]] = Int8
 
     assert AbstractKey._by_type_ == {Int8: SomeKey}
     assert SomeKey not in PartitionKey._by_type_.values()
