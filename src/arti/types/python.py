@@ -51,7 +51,7 @@ class PyValueContainer(TypeAdapter):
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         (element,) = get_args(type_)
-        return cls.artigraph(
+        return cls.artigraph(  # type: ignore[call-arg]
             element=type_system.to_artigraph(element, hints=hints),
         )
 

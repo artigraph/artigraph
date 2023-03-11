@@ -36,6 +36,7 @@ explicit_package_bases = true
 files = "docs/,src/,tests/"
 mypy_path = "$MYPY_CONFIG_FILE_DIR/src,$MYPY_CONFIG_FILE_DIR/stubs"
 namespace_packages = true
+plugins = ["pydantic.mypy", ]
 show_error_codes = true
 strict = true
 

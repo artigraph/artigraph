@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+from typing import ClassVar
 
 import pytest
 
@@ -44,7 +45,7 @@ class MockStorage(Storage[MockStoragePartition]):
 
 def test_StoragePartition_validation() -> None:
     with pytest.raises(ValueError) as err:
-        MockStoragePartition(keys=CompositeKey(i=Int8Key(key=5)), path="/tmp/test")
+        MockStoragePartition(keys=CompositeKey(i=Int8Key(key=5)), path="/tmp/test")  # type: ignore[call-arg]
     # Make sure keys validation is skipped since the type was missing
     assert {e["loc"] for e in err.value.errors()} == {("format",), ("type",)}  # type: ignore[attr-defined]
     with pytest.raises(ValueError, match="Expected no partition keys but got"):
@@ -179,9 +180,10 @@ def test_Storage_resolve_partition_key_spec_extra() -> None:
             return Fingerprint.empty()
 
     class Table(Storage[TablePartition]):
-        key_value_sep = "_"
-        partition_name_component_sep = "_"
-        segment_sep = "__"
+        # NOTE: The type hints are needed to fix https://github.com/pydantic/pydantic/issues/1777#issuecomment-1465026331
+        key_value_sep: ClassVar[str] = "_"
+        partition_name_component_sep: ClassVar[str] = "_"
+        segment_sep: ClassVar[str] = "__"
 
         dataset: str = "s_{tag}"
         name: str = "{partition_key_spec}"

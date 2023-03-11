@@ -9,6 +9,7 @@ from pydantic import validator
 
 from arti import Annotation, Artifact, Format, Statistic, Type
 from arti.formats.json import JSON
+from arti.storage import AnyStorage
 from arti.storage.literal import StringLiteral
 from arti.types import (
     Binary,
@@ -102,30 +103,30 @@ def test_Artifact_validation() -> None:
             raise ValueError("Storage - Boo!")
 
     with pytest.raises(ValueError, match="type\n  field required"):
-        Artifact()
+        Artifact()  # type: ignore[call-arg]
 
     with pytest.raises(ValueError, match="Format - Boo!"):
 
         class BadFormatArtifact(Artifact):
-            type = Int64()
-            format = BadFormat()
-            storage = DummyStorage()
+            type: Type = Int64()
+            format: Format = BadFormat()
+            storage: AnyStorage = DummyStorage()
 
         BadFormatArtifact()
 
     with pytest.raises(ValueError, match="Storage - Boo!"):
 
         class BadStorageArtifact(Artifact):
-            type = Int64()
-            format = DummyFormat()
-            storage = BadStorage()
+            type: Type = Int64()
+            format: Format = DummyFormat()
+            storage: AnyStorage = BadStorage()
 
         BadStorageArtifact()
 
     class GoodArtifact(Artifact):
-        type = Int64()
-        format = DummyFormat()
-        storage = DummyStorage()
+        type: Type = Int64()
+        format: Format = DummyFormat()
+        storage: AnyStorage = DummyStorage()
 
     GoodArtifact()
 
@@ -154,11 +155,11 @@ def test_instance_attr_merging() -> None:
 
 def test_Artifact_storage_path_resolution() -> None:
     class S(DummyStorage):
-        key = "test-{partition_key_spec}"
+        key: str = "test-{partition_key_spec}"
 
     class A(Artifact):
-        type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
-        format = DummyFormat()
+        type: Type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
+        format: Format = DummyFormat()
         storage: S
 
     assert A(storage=S()).storage.key == "test-a_key={a.key}"

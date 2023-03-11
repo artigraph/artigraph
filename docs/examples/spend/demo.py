@@ -47,7 +47,7 @@ with Graph(name="test-graph") as g:
         format=JSON(),
         storage=LocalFile(path=str(DIR / "transactions" / "{date.iso}.json")),
     )
-    g.artifacts.spend = aggregate_transactions(transactions=g.artifacts.vendor.transactions)
+    g.artifacts.spend = aggregate_transactions(transactions=g.artifacts.vendor.transactions)  # type: ignore[call-arg]
 
 
 if __name__ == "__main__":
