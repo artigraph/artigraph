@@ -788,14 +788,14 @@ scandir = ["scandir (>=1.5,<2.0)"]
 
 [[package]]
 name = "fsspec"
-version = "2023.1.0"
+version = "2023.3.0"
 description = "File-system specification"
 category = "main"
 optional = true
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "fsspec-2023.1.0-py3-none-any.whl", hash = "sha256:b833e2e541e9e8cde0ab549414187871243177feb3d344f9d27b25a93f5d8139"},
-    {file = "fsspec-2023.1.0.tar.gz", hash = "sha256:fbae7f20ff801eb5f7d0bedf81f25c787c0dfac5e982d98fa3884a9cde2b5411"},
+    {file = "fsspec-2023.3.0-py3-none-any.whl", hash = "sha256:bf57215e19dbfa4fe7edae53040cc1deef825e3b1605cca9a8d2c2fadd2328a0"},
+    {file = "fsspec-2023.3.0.tar.gz", hash = "sha256:24e635549a590d74c6c18274ddd3ffab4753341753e923408b1904eaabafe04d"},
 ]
 
 [package.extras]
@@ -804,7 +804,6 @@ adl = ["adlfs"]
 arrow = ["pyarrow (>=1)"]
 dask = ["dask", "distributed"]
 dropbox = ["dropbox", "dropboxdrivefs", "requests"]
-entrypoints = ["importlib-metadata"]
 fuse = ["fusepy"]
 gcs = ["gcsfs"]
 git = ["pygit2"]
@@ -839,20 +838,20 @@ google-crc32c = "1.3.0"
 
 [[package]]
 name = "gcsfs"
-version = "2023.1.0"
+version = "2023.3.0"
 description = "Convenient Filesystem interface over GCS"
 category = "main"
 optional = true
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "gcsfs-2023.1.0-py2.py3-none-any.whl", hash = "sha256:62c491b9e2a8e9e58b8a899eec2ce111f827718a65539019ff3cadf447e48f41"},
-    {file = "gcsfs-2023.1.0.tar.gz", hash = "sha256:0a7b7ca8c1affa126a14ba35d7b7dff81c49e2aaceedda9732c7f159a4837a26"},
+    {file = "gcsfs-2023.3.0-py2.py3-none-any.whl", hash = "sha256:f76e09c436ca7319d6f7647654c891d8618f341932a6a00c845eee8fa00c53e5"},
+    {file = "gcsfs-2023.3.0.tar.gz", hash = "sha256:28dc035b4de9f131ecc542ce402ad8f208093e5b733b8b8f58908a709eb54280"},
 ]
 
 [package.dependencies]
 aiohttp = "<4.0.0a0 || >4.0.0a0,<4.0.0a1 || >4.0.0a1"
 decorator = ">4.1.2"
-fsspec = "2023.1.0"
+fsspec = "2023.3.0"
 google-auth = ">=1.2"
 google-auth-oauthlib = "*"
 google-cloud-storage = "*"
