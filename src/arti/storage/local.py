@@ -18,10 +18,8 @@ class LocalFilePartition(StoragePartition):
     def compute_content_fingerprint(self, buffer_size: int = 1024 * 1024) -> Fingerprint:
         with open(self.path, mode="rb") as f:
             sha = hashlib.sha256()
-            data = f.read(buffer_size)
-            while len(data) > 0:
+            while data := f.read(buffer_size):
                 sha.update(data)
-                data = f.read(buffer_size)
         return Fingerprint.from_string(sha.hexdigest())
 
 
