@@ -54,3 +54,4 @@ jobs:
         env_vars: OS,PYTHON_VERSION
         fail_ci_if_error: true
         files: coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
+        token: ${{ secrets.CODECOV_TOKEN }}
