@@ -149,7 +149,8 @@ filterwarnings = [
     # Ignore uncompiled crc32c warning on py 3.11 (which doesn't have wheels on older versions) - https://github.com/oittaa/gcp-storage-emulator/pull/217
     "ignore:As the c extension couldn't be imported:RuntimeWarning:google_crc32c",
     # Ignore a couple external tools that use old form namespace packages
-    "ignore:Deprecated call to `pkg_resources.declare_namespace.*:DeprecationWarning"
+    "ignore:Deprecated call to `pkg_resources.declare_namespace.*:DeprecationWarning",
+    "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
 ]
 testpaths = [
     "src/",
