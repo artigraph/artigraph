@@ -1,6 +1,6 @@
 name: CI
 on:
-  pull_request:
+  pull_request_target: # Using pull_request_target grants PRs from forks access to the codecov upload token secret, avoiding rate limits.
   push:
     branches:
     - golden
