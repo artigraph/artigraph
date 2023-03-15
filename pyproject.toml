@@ -57,7 +57,10 @@ repository = "https://github.com/artigraph/artigraph"
 include = ["src/arti/py.typed"]
 
 [tool.poetry.dependencies]
+python = "^3.9"
+
 gcsfs = {version = ">=2022.2.0", optional = true}
+google-cloud-bigquery = {version = "^3.5.0", optional = true}
 multimethod = ">=1.6"
 numpy = {version = ">=1.23.1", optional = true}
 pandas = {version = ">=1.4.3", optional = true}
@@ -66,8 +69,6 @@ pyarrow = {version = ">=8", optional = true}
 pydantic = ">=1.9.0,<2"  # We use some pydantic internals, so expect 2.0 to break things.
 pyfarmhash = ">=0.2.2"
 python-box = ">=7.0.0" # Tracking box_namespace requires 7+
-
-python = "^3.9"
 
 [tool.poetry.group.dev.dependencies]
 bandit = ">=1.7.4"
@@ -98,7 +99,13 @@ types-pyfarmhash = ">=0.3.1"
 aiohttp = {version = ">=3.8.3", optional = true}
 
 [tool.poetry.extras]
-all = ["gcsfs", "numpy", "pandas", "pyarrow"]
+all = [
+    "gcsfs",
+    "google-cloud-bigquery",
+    "numpy",
+    "pandas",
+    "pyarrow",
+]
 
 
 [tool.portray.mkdocs]
