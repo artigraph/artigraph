@@ -280,7 +280,8 @@ class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
             raise ValueError(
                 f"{type_}.unit must be one of {tuple(cls.unit_to_precision)}, got {type_.unit}"
             )
-        return cls.artigraph(precision=precision)  # type: ignore[call-arg]
+        assert issubclass(cls.artigraph, types._TimeMixin)
+        return cls.artigraph(precision=precision)
 
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:

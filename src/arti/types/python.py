@@ -12,7 +12,7 @@ from arti.internal.type_hints import (
     is_union,
     lenient_issubclass,
 )
-from arti.types import Type, TypeAdapter, TypeSystem, _ScalarClassTypeAdapter
+from arti.types import Type, TypeAdapter, TypeSystem, _ContainerMixin, _ScalarClassTypeAdapter
 
 python_type_system = TypeSystem(key="python")
 _generate = partial(_ScalarClassTypeAdapter.generate, type_system=python_type_system)
@@ -51,7 +51,8 @@ class PyValueContainer(TypeAdapter):
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         (element,) = get_args(type_)
-        return cls.artigraph(  # type: ignore[call-arg]
+        assert issubclass(cls.artigraph, _ContainerMixin)
+        return cls.artigraph(
             element=type_system.to_artigraph(element, hints=hints),
         )
 

@@ -15,8 +15,6 @@ from arti.internal.utils import NoCopyDict, class_name, frozendict, register
 
 DEFAULT_ANONYMOUS_NAME = "anon"
 
-_TimePrecision = Literal["second", "millisecond", "microsecond", "nanosecond"]
-
 
 class Type(Model):
     """Type represents a data type."""
@@ -42,6 +40,10 @@ def is_partitioned(type_: Type) -> bool:
     return isinstance(type_, Collection) and bool(type_.partition_fields)
 
 
+class _ContainerMixin(Model):
+    element: Type
+
+
 class _NamedMixin(Model):
     name: str = DEFAULT_ANONYMOUS_NAME
 
@@ -64,6 +66,10 @@ class _NamedMixin(Model):
     @property
     def friendly_key(self) -> str:
         return self._default_friendly_key if self.name == DEFAULT_ANONYMOUS_NAME else self.name
+
+
+class _TimeMixin(Model):
+    precision: Literal["second", "millisecond", "microsecond", "nanosecond"]
 
 
 ########################
@@ -95,10 +101,8 @@ class Date(Type):
     pass
 
 
-class DateTime(Type):
+class DateTime(_TimeMixin, Type):
     """A Date and Time as shown on a calendar and clock, independent of timezone."""
-
-    precision: _TimePrecision
 
 
 class Enum(_NamedMixin, Type):
@@ -166,9 +170,7 @@ class Int64(_Int):
     pass
 
 
-class List(Type):
-    element: Type
-
+class List(_ContainerMixin, Type):
     @property
     def friendly_key(self) -> str:
         return f"{self.element.friendly_key}{self._class_key_}"
@@ -240,9 +242,7 @@ class Null(Type):
     pass
 
 
-class Set(Type):
-    element: Type
-
+class Set(_ContainerMixin, Type):
     @property
     def friendly_key(self) -> str:
         return f"{self.element.friendly_key}{self._class_key_}"
@@ -260,14 +260,12 @@ class Struct(_NamedMixin, Type):
         return f"Custom{self._class_key_}"  # :shrug:
 
 
-class Time(Type):
-    precision: _TimePrecision
+class Time(_TimeMixin, Type):
+    pass
 
 
-class Timestamp(Type):
+class Timestamp(_TimeMixin, Type):
     """UTC timestamp with configurable precision."""
-
-    precision: _TimePrecision
 
     @property
     def friendly_key(self) -> str:
