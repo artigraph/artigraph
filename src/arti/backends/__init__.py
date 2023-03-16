@@ -3,7 +3,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from abc import abstractmethod
 from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import TypeVar
+from typing import Generic, TypeVar
 
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
@@ -19,25 +19,14 @@ from arti.storage import StoragePartitions
 # bunch of low level calls, each own network call), Backend can override.
 
 
-_Backend = TypeVar("_Backend", bound="Backend")
+class Connection:
+    """Connection is a wrapper around an active connection to a Backend resource.
 
-
-class Backend(Model):
-    """Backend represents a storage for internal Artigraph metadata.
-
-    Backend storage is an addressable location (local path, database connection, etc) that
-    tracks metadata for a collection of Graphs over time, including:
-    - the Artifact(s)->Producer->Artifact(s) dependency graph
-    - Artifact Annotations, Statistics, Partitions, and other metadata
-    - Artifact and Producer Fingerprints
-    - etc
+    For example, a Backend connecting to a database might wrap up a SQLAlchemy connection in a
+    Connection subclass implementing the required methods.
     """
 
-    @contextmanager
-    def connect(self: _Backend) -> Iterator[_Backend]:
-        raise NotImplementedError()
-
-    # Artifact partitions - independent of a specific Graph (snapshot)
+    # Artifact partitions - independent of a specific GraphSnapshot
 
     @abstractmethod
     def read_artifact_partitions(
@@ -57,7 +46,7 @@ class Backend(Model):
         """Add more partitions for a Storage spec."""
         raise NotImplementedError()
 
-    # Artifact partitions for a specific Graph (snapshot)
+    # Artifact partitions for a specific GraphSnapshot
 
     @abstractmethod
     def read_graph_partitions(
@@ -91,7 +80,7 @@ class Backend(Model):
             graph_name, graph_snapshot_id, artifact_key, artifact, partitions
         )
 
-    # Graph Snapshot Tagging
+    # GraphSnapshot Tagging
 
     @abstractmethod
     def read_graph_tag(self, graph_name: str, tag: str) -> Fingerprint:
@@ -103,4 +92,24 @@ class Backend(Model):
         self, graph_name: str, graph_snapshot_id: Fingerprint, tag: str, overwrite: bool = False
     ) -> None:
         """Tag a Graph Snapshot ID with an arbitrary name."""
+        raise NotImplementedError()
+
+
+ConnectionVar = TypeVar("ConnectionVar", bound=Connection)
+
+
+class Backend(Model, Generic[ConnectionVar]):
+    """Backend represents a storage for internal Artigraph metadata.
+
+    Backend storage is an addressable location (local path, database connection, etc) that
+    tracks metadata for a collection of Graphs over time, including:
+    - the Artifact(s)->Producer->Artifact(s) dependency graph
+    - Artifact Annotations, Statistics, Partitions, and other metadata
+    - Artifact and Producer Fingerprints
+    - etc
+    """
+
+    @contextmanager
+    @abstractmethod
+    def connect(self) -> Iterator[ConnectionVar]:
         raise NotImplementedError()

@@ -40,6 +40,8 @@ def test_Graph(graph: Graph) -> None:
     assert graph.artifacts.b.storage.includes_input_fingerprint_template
     assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
     assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
+    # NOTE: We may need to occasionally update this, but ensure graph.backend is not included.
+    assert graph.fingerprint == Fingerprint.from_int(4705012302096346878)
 
 
 def test_Graph_pickle(graph: Graph) -> None:
@@ -86,22 +88,25 @@ def test_Graph_literals(tmp_path: Path) -> None:
     s = g.build()
     assert g.read(z, annotation=int) == 2
     assert n_add_runs == 1
-    assert len(g.backend.read_graph_partitions(g.name, s.id, "z", z)) == 1
-    assert len(g.backend.read_artifact_partitions(z)) == 1
+    with g.backend.connect() as conn:
+        assert len(conn.read_graph_partitions(g.name, s.id, "z", z)) == 1
+        assert len(conn.read_artifact_partitions(z)) == 1
     # A subsequent build shouldn't require a rerun, ensuring we properly lookup existing literals.
     s = g.build()
     assert g.read(z, annotation=int) == 2
     assert n_add_runs == 1
-    assert len(g.backend.read_graph_partitions(g.name, s.id, "z", z)) == 1
-    assert len(g.backend.read_artifact_partitions(z)) == 1
+    with g.backend.connect() as conn:
+        assert len(conn.read_graph_partitions(g.name, s.id, "z", z)) == 1
+        assert len(conn.read_artifact_partitions(z)) == 1
     # Changing an input should trigger a rerun. There will still only be 1 z literal for this graph,
     # but now 2 overall for the storage (with different `input_fingerprint`s).
     g.write(2, artifact=y)
     s = g.build()
     assert g.read(z, annotation=int) == 3
     assert n_add_runs == 2
-    assert len(g.backend.read_graph_partitions(g.name, s.id, "z", z)) == 1
-    assert len(g.backend.read_artifact_partitions(z)) == 2
+    with g.backend.connect() as conn:
+        assert len(conn.read_graph_partitions(g.name, s.id, "z", z)) == 1
+        assert len(conn.read_artifact_partitions(z)) == 2
     # After getting a new GraphSnapshot, but no changes to `add`s inputs, ensure we properly lookup
     # existing literals - even though the GraphSnapshot will change, the input_fingerprint for `z`
     # will not.
@@ -109,8 +114,9 @@ def test_Graph_literals(tmp_path: Path) -> None:
     s = g.build()
     assert g.read(z, annotation=int) == 3
     assert n_add_runs == 2
-    assert len(g.backend.read_graph_partitions(g.name, s.id, "z", z)) == 1
-    assert len(g.backend.read_artifact_partitions(z)) == 2
+    with g.backend.connect() as conn:
+        assert len(conn.read_graph_partitions(g.name, s.id, "z", z)) == 1
+        assert len(conn.read_artifact_partitions(z)) == 2
 
 
 def test_Graph_snapshot() -> None:
@@ -173,7 +179,8 @@ def test_Graph_tagging(tmp_path: Path) -> None:
     g.write(1, artifact=g.artifacts.x)
     s1 = g.build()
     s1.tag(tag)
-    assert g.backend.read_graph_tag(g.name, tag) == s1.id
+    with g.backend.connect() as conn:
+        assert conn.read_graph_tag(g.name, tag) == s1.id
 
     g.write(2, artifact=g.artifacts.x)
     s2 = g.build()
@@ -186,10 +193,12 @@ def test_Graph_tagging(tmp_path: Path) -> None:
         s2.tag(tag)
 
     s2.tag(tag, overwrite=True)
-    assert g.backend.read_graph_tag(g.name, tag) == s2.id
+    with g.backend.connect() as conn:
+        assert conn.read_graph_tag(g.name, tag) == s2.id
 
     with pytest.raises(ValueError, match=re.escape("No known `fake` tag for Graph `Test`")):
-        g.backend.read_graph_tag(g.name, "fake")
+        with g.backend.connect() as conn:
+            conn.read_graph_tag(g.name, "fake")
 
 
 def test_Graph_build(tmp_path: Path) -> None:
