@@ -196,6 +196,92 @@ class Graph(Model):
             for producer, artifacts_by_position in d.items()
         )
 
+    # TODO: io.read/write probably need a bit of sanity checking (probably somewhere else), eg: type
+    # ~= view. Doing validation on the data, etc. Should some of this live on the View?
+
+    def read(
+        self,
+        artifact: Artifact,
+        *,
+        annotation: Optional[Any] = None,
+        storage_partitions: Optional[Sequence[StoragePartition]] = None,
+        view: Optional[View] = None,
+        snapshot: Optional[GraphSnapshot] = None,
+    ) -> Any:
+        key = self.artifact_to_key[artifact]
+        if annotation is None and view is None:
+            raise ValueError("Either `annotation` or `view` must be passed")
+        if annotation is not None and view is not None:
+            raise ValueError("Only one of `annotation` or `view` may be passed")
+        if annotation is not None:
+            view = View.get_class_for(annotation)(
+                artifact_class=type(artifact), type=artifact.type, mode="READ"
+            )
+            view.check_annotation_compatibility(annotation)
+            view.check_artifact_compatibility(artifact)
+        assert view is not None  # mypy gets mixed up with ^
+        if storage_partitions is None:
+            # We want to allow reading raw Artifacts even if other raw Artifacts are missing (which
+            # prevents snapshotting).
+            if snapshot is None and artifact.producer_output is None:
+                # NOTE: We're not using read_artifact_partitions as the underlying data may have
+                # changed. The backend may have pointers to old versions (which is expected), but we
+                # only want to return the current values.
+                storage_partitions = artifact.storage.discover_partitions()
+            else:
+                snapshot = snapshot or self.snapshot()
+                with self.backend.connect() as backend:
+                    storage_partitions = backend.read_graph_partitions(
+                        snapshot.name, snapshot.id, key, artifact
+                    )
+        return io.read(
+            type_=artifact.type,
+            format=artifact.format,
+            storage_partitions=storage_partitions,
+            view=view,
+        )
+
+    def write(
+        self,
+        data: Any,
+        *,
+        artifact: Artifact,
+        input_fingerprint: Fingerprint = Fingerprint.empty(),
+        keys: CompositeKey = CompositeKey(),
+        view: Optional[View] = None,
+        snapshot: Optional[GraphSnapshot] = None,
+    ) -> StoragePartition:
+        key = self.artifact_to_key[artifact]
+        if snapshot is not None and artifact.producer_output is None:
+            raise ValueError(
+                f"Writing to a raw Artifact (`{key}`) with a GraphSnapshot is not supported."
+            )
+        if view is None:
+            view = View.get_class_for(type(data))(
+                artifact_class=type(artifact), type=artifact.type, mode="WRITE"
+            )
+        view.check_annotation_compatibility(type(data))
+        view.check_artifact_compatibility(artifact)
+        storage_partition = artifact.storage.generate_partition(
+            input_fingerprint=input_fingerprint, keys=keys, with_content_fingerprint=False
+        )
+        storage_partition = io.write(
+            data,
+            type_=artifact.type,
+            format=artifact.format,
+            storage_partition=storage_partition,
+            view=view,
+        ).with_content_fingerprint()
+        # TODO: Should we only do this in bulk? We might want the backends to transparently batch
+        # requests, but that's not so friendly with the transient ".connect".
+        with self.backend.connect() as backend:
+            backend.write_artifact_partitions(artifact, (storage_partition,))
+            if snapshot is not None:
+                backend.write_graph_partitions(
+                    snapshot.name, snapshot.id, key, artifact, (storage_partition,)
+                )
+        return cast(StoragePartition, storage_partition)
+
 
 class GraphSnapshot(Model):
     """GraphSnapshot represents the state of a Graph and the referenced raw data at a point in time.
@@ -285,9 +371,6 @@ class GraphSnapshot(Model):
     #     with backend.connect() as backend:
     #         snapshot_id = backend.read_graph_tag(name, tag)})
 
-    # TODO: io.read/write probably need a bit of sanity checking (probably somewhere else), eg: type
-    # ~= view. Doing validation on the data, etc. Should some of this live on the View?
-
     def read(
         self,
         artifact: Artifact,
@@ -296,36 +379,12 @@ class GraphSnapshot(Model):
         storage_partitions: Optional[Sequence[StoragePartition]] = None,
         view: Optional[View] = None,
     ) -> Any:
-        key = self.graph.artifact_to_key[artifact]
-        if annotation is None and view is None:
-            raise ValueError("Either `annotation` or `view` must be passed")
-        if annotation is not None and view is not None:
-            raise ValueError("Only one of `annotation` or `view` may be passed")
-        if annotation is not None:
-            view = View.get_class_for(annotation)(
-                artifact_class=type(artifact), type=artifact.type, mode="READ"
-            )
-            view.check_annotation_compatibility(annotation)
-            view.check_artifact_compatibility(artifact)
-        assert view is not None  # mypy gets mixed up with ^
-        if storage_partitions is None:
-            # We want to allow reading raw Artifacts even if other raw Artifacts are missing (which prevents
-            # snapshotting).
-            if artifact.producer_output is None:
-                # NOTE: We're not using read_artifact_partitions as the underlying data may have
-                # changed. The backend may have pointers to old versions (which is expected), but we
-                # only want to return the current values.
-                storage_partitions = artifact.storage.discover_partitions()
-            else:
-                with self.backend.connect() as backend:
-                    storage_partitions = backend.read_graph_partitions(
-                        self.name, self.id, key, artifact
-                    )
-        return io.read(
-            type_=artifact.type,
-            format=artifact.format,
+        return self.graph.read(
+            artifact,
+            annotation=annotation,
             storage_partitions=storage_partitions,
             view=view,
+            snapshot=self,
         )
 
     def write(
@@ -337,30 +396,11 @@ class GraphSnapshot(Model):
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
     ) -> StoragePartition:
-        key = self.graph.artifact_to_key[artifact]
-        if artifact.producer_output is None:
-            raise ValueError(
-                f"Writing to a raw Artifact (`{key}`) is not supported - update the original `Graph` instead."
-            )
-        if view is None:
-            view = View.get_class_for(type(data))(
-                artifact_class=type(artifact), type=artifact.type, mode="WRITE"
-            )
-        view.check_annotation_compatibility(type(data))
-        view.check_artifact_compatibility(artifact)
-        storage_partition = artifact.storage.generate_partition(
-            input_fingerprint=input_fingerprint, keys=keys, with_content_fingerprint=False
-        )
-        storage_partition = io.write(
+        return self.graph.write(
             data,
-            type_=artifact.type,
-            format=artifact.format,
-            storage_partition=storage_partition,
+            artifact=artifact,
+            input_fingerprint=input_fingerprint,
+            keys=keys,
             view=view,
-        ).with_content_fingerprint()
-        # TODO: Should we only do this in bulk? We might want the backends to transparently batch
-        # requests, but that's not so friendly with the transient ".connect".
-        with self.backend.connect() as backend:
-            backend.write_artifact_partitions(artifact, (storage_partition,))
-            backend.write_graph_partitions(self.name, self.id, key, artifact, (storage_partition,))
-        return cast(StoragePartition, storage_partition)
+            snapshot=self,
+        )

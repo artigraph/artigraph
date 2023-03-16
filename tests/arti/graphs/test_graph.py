@@ -82,6 +82,10 @@ def test_Graph_literals(tmp_path: Path) -> None:
     assert x.storage.value == "1"
     assert z.storage.value is None
 
+    # Ensure we can read raw Artifacts, even if others are not populated yet.
+    assert g.read(x, annotation=int) == 1
+    with pytest.raises(FileNotFoundError, match="No data"):
+        assert g.read(y, annotation=int) == 1
     write_local_json_file(y, 1)
     write_local_json_file(phase, 1)
     s = g.snapshot()
@@ -380,7 +384,7 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     # Once snapshotted, writing to the raw Artifacts would result in a different snapshot.
     with pytest.raises(
         ValueError,
-        match=re.escape("Writing to a raw Artifact (`x`) is not supported"),
+        match=re.escape("Writing to a raw Artifact (`x`) with a GraphSnapshot is not supported"),
     ):
         s.write(10, artifact=x)
 
