@@ -80,6 +80,10 @@ def test_Graph_literals(tmp_path: Path) -> None:
     assert isinstance(z.storage, StringLiteral)
     assert z.storage.value is None
 
+    # Ensure we can read raw Artifacts, even if others are not populated yet.
+    assert g.read(x, annotation=int) == 1
+    with pytest.raises(FileNotFoundError, match="No data"):
+        assert g.read(y, annotation=int) == 1
     g.write(1, artifact=y)
     g.write(1, artifact=phase)
     with pytest.raises(FileNotFoundError, match="No data"):
