@@ -199,6 +199,7 @@ class Graph(Model):
     # TODO: io.read/write probably need a bit of sanity checking (probably somewhere else), eg: type
     # ~= view. Doing validation on the data, etc. Should some of this live on the View?
 
+    @requires_sealed
     def read(
         self,
         artifact: Artifact,
@@ -241,6 +242,7 @@ class Graph(Model):
             view=view,
         )
 
+    @requires_sealed
     def write(
         self,
         data: Any,
@@ -276,7 +278,9 @@ class Graph(Model):
         # requests, but that's not so friendly with the transient ".connect".
         with self.backend.connect() as backend:
             backend.write_artifact_partitions(artifact, (storage_partition,))
-            if snapshot is not None:
+            # Skip linking this partition to the snapshot if it affects raw Artifacts (which would
+            # trigger an id change).
+            if snapshot is not None and artifact.producer_output is not None:
                 backend.write_graph_partitions(
                     snapshot.name, snapshot.id, key, artifact, (storage_partition,)
                 )
