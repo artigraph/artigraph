@@ -8,7 +8,7 @@ from itertools import chain
 
 from arti.backends import Backend
 from arti.fingerprints import Fingerprint
-from arti.graphs import Graph
+from arti.graphs import GraphSnapshot
 from arti.internal.models import Model
 from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey, InputFingerprints
@@ -18,16 +18,16 @@ from arti.storage import StoragePartitions
 
 class Executor(Model):
     @abc.abstractmethod
-    def build(self, graph: Graph) -> None:
+    def build(self, snapshot: GraphSnapshot) -> None:
         raise NotImplementedError()
 
     def get_producer_inputs(
-        self, graph: Graph, backend: Backend, producer: Producer
+        self, snapshot: GraphSnapshot, backend: Backend, producer: Producer
     ) -> InputPartitions:
         return InputPartitions(
             {
                 name: backend.read_graph_partitions(
-                    graph.name, graph.get_snapshot_id(), graph.artifact_to_key[artifact], artifact
+                    snapshot.name, snapshot.id, snapshot.graph.artifact_to_key[artifact], artifact
                 )
                 for name, artifact in producer.inputs.items()
             }
@@ -35,25 +35,26 @@ class Executor(Model):
 
     def discover_producer_partitions(
         self,
-        graph: Graph,
+        snapshot: GraphSnapshot,
         backend: Backend,
         producer: Producer,
         *,
         partition_input_fingerprints: InputFingerprints,
     ) -> set[CompositeKey]:
-        # NOTE: The output partitions may be built, but not yet associated with this snapshot_id
+        # NOTE: The output partitions may be built, but not yet associated with this GraphSnapshot
         # (eg: raw input data changed, but no changes trickled into this specific Producer). Hence
         # we'll fetch all StoragePartitions for each Storage, filtered to the PKs and
-        # input_fingerprints we've computed *are* for this Graph - and then link them to the graph.
+        # input_fingerprints we've computed *are* for this snapshot - and then link them to the
+        # snapshot.
         existing_output_partitions = {
             output: backend.read_artifact_partitions(output, partition_input_fingerprints)
-            for output in graph.producer_outputs[producer]
+            for output in snapshot.graph.producer_outputs[producer]
         }
         for artifact, partitions in existing_output_partitions.items():
             backend.write_graph_partitions(
-                graph.name,
-                graph.get_snapshot_id(),
-                graph.artifact_to_key[artifact],
+                snapshot.name,
+                snapshot.id,
+                snapshot.graph.artifact_to_key[artifact],
                 artifact,
                 partitions,
             )
@@ -65,7 +66,7 @@ class Executor(Model):
 
     def build_producer_partition(
         self,
-        graph: Graph,
+        snapshot: GraphSnapshot,
         backend: Backend,
         producer: Producer,
         *,
@@ -84,7 +85,7 @@ class Executor(Model):
         # @dispatch wrapper (eg: msg arg, or even fn that returns the message to
         # raise).
         arguments = {
-            name: graph.read(
+            name: snapshot.read(
                 artifact=producer.inputs[name],
                 storage_partitions=partition_dependencies[name],
                 view=view,
@@ -98,9 +99,9 @@ class Executor(Model):
         if not validation_passed:
             raise ValueError(validation_message)
         for i, output in enumerate(outputs):
-            graph.write(
+            snapshot.write(
                 output,
-                artifact=graph.producer_outputs[producer][i],
+                artifact=snapshot.graph.producer_outputs[producer][i],
                 input_fingerprint=input_fingerprint,
                 keys=partition_key,
                 view=producer._outputs_[i],

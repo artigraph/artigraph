@@ -1,7 +1,8 @@
+import json
 import pickle
 import re
 from pathlib import Path
-from typing import Annotated, cast
+from typing import Annotated, Any, cast
 
 import pytest
 from box import BoxError
@@ -9,14 +10,19 @@ from box import BoxError
 from arti import Artifact, CompositeKey, Fingerprint, Graph, View, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
-from arti.formats.json import JSON
 from arti.internal.utils import frozendict
-from arti.storage.literal import StringLiteral
-from arti.storage.local import LocalFile, LocalFilePartition
-from arti.types import Int64
+from arti.storage.local import LocalFile
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 from tests.arti.dummies import Num as _Num
 from tests.arti.dummies import div
+
+
+def write_local_json_file(artifact: Artifact, val: Any) -> None:
+    assert hasattr(artifact.storage, "path")
+    path = Path(artifact.storage.path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    with path.open("w") as f:
+        json.dump(val, f)
 
 
 class Num(_Num):
@@ -53,7 +59,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     n_add_runs = 0
 
     @producer()
-    def add(x: int, y: Annotated[int, Num]) -> int:
+    def add(x: int, y: int) -> int:
         nonlocal n_add_runs
         n_add_runs += 1
         return x + y
@@ -61,7 +67,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     with Graph(name="Test") as g:
         g.artifacts.x = 1
         g.artifacts.y = Num(storage=LocalFile(path=str(tmp_path / "y.json")))
-        g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y).out()  # type: ignore[call-arg]
+        g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y)  # type: ignore[call-arg]
         # Changes to `phase` will cause a new snapshot_id. However, since `phase` isn't an input to
         # `add`, we *shouldn't* have to recompute `z` - assuming the backend properly stores
         # storage->storage_partitions separate from the set of storage_partitions associated with a
@@ -70,54 +76,47 @@ def test_Graph_literals(tmp_path: Path) -> None:
 
     x, y, z, phase = g.artifacts.x, g.artifacts.y, g.artifacts.z, g.artifacts.phase
     assert isinstance(x, Artifact)
-    assert isinstance(x.type, Int64)
-    assert isinstance(x.format, JSON)
-    assert isinstance(x.storage, StringLiteral)
-    assert x.storage.value == "1"
+    assert isinstance(y, Artifact)
     assert isinstance(z, Artifact)
-    assert isinstance(z.type, Int64)
-    assert isinstance(z.format, JSON)
-    assert isinstance(z.storage, StringLiteral)
+    assert isinstance(phase, Artifact)
+    assert x.storage.value == "1"
     assert z.storage.value is None
 
-    # Ensure we can read raw Artifacts, even if others are not populated yet.
-    assert g.read(x, annotation=int) == 1
+    write_local_json_file(y, 1)
+    write_local_json_file(phase, 1)
+    s = g.snapshot()
     with pytest.raises(FileNotFoundError, match="No data"):
-        assert g.read(y, annotation=int) == 1
-    g.write(1, artifact=y)
-    g.write(1, artifact=phase)
-    with pytest.raises(FileNotFoundError, match="No data"):
-        g.read(z, annotation=int)
+        s.read(z, annotation=int)
 
     # Run the initial build to compute z
-    g.build()
-    assert g.read(z, annotation=int) == 2
+    s = g.build()
+    assert s.read(z, annotation=int) == 2
     assert n_add_runs == 1
-    assert len(g.backend.read_graph_partitions(g.name, g.get_snapshot_id(), "z", z)) == 1
-    assert len(g.backend.read_artifact_partitions(z)) == 1
+    assert len(s.backend.read_graph_partitions(s.name, s.id, "z", z)) == 1
+    assert len(s.backend.read_artifact_partitions(z)) == 1
     # A subsequent build shouldn't require a rerun, ensuring we properly lookup existing literals.
-    g.build()
-    assert g.read(z, annotation=int) == 2
+    s = g.build()
+    assert s.read(z, annotation=int) == 2
     assert n_add_runs == 1
-    assert len(g.backend.read_graph_partitions(g.name, g.get_snapshot_id(), "z", z)) == 1
-    assert len(g.backend.read_artifact_partitions(z)) == 1
+    assert len(s.backend.read_graph_partitions(s.name, s.id, "z", z)) == 1
+    assert len(s.backend.read_artifact_partitions(z)) == 1
     # Changing an input should trigger a rerun. There will still only be 1 z literal for this graph,
     # but now 2 overall for the storage (with different `input_fingerprint`s).
-    g.write(2, artifact=y)
-    g.build()
-    assert g.read(z, annotation=int) == 3
+    write_local_json_file(y, 2)
+    s = g.build()  # TODO: Check that s.build() errors b/c the raw data changed
+    assert s.read(z, annotation=int) == 3
     assert n_add_runs == 2
-    assert len(g.backend.read_graph_partitions(g.name, g.get_snapshot_id(), "z", z)) == 1
-    assert len(g.backend.read_artifact_partitions(z)) == 2
-    # After getting a new snapshot_id, but no changes to `add`s inputs, ensure we properly lookup
-    # existing literals - even though the snapshot_id will change, the input_fingerprint for `z`
+    assert len(s.backend.read_graph_partitions(s.name, s.id, "z", z)) == 1
+    assert len(s.backend.read_artifact_partitions(z)) == 2
+    # After getting a new snapshot id, but no changes to `add`s inputs, ensure we properly lookup
+    # existing literals - even though the snapshot id will change, the input_fingerprint for `z`
     # will not.
-    g.write(2, artifact=phase)
-    g.build()
-    assert g.read(z, annotation=int) == 3
+    write_local_json_file(phase, 2)
+    s = g.build()
+    assert s.read(z, annotation=int) == 3
     assert n_add_runs == 2
-    assert len(g.backend.read_graph_partitions(g.name, g.get_snapshot_id(), "z", z)) == 1
-    assert len(g.backend.read_artifact_partitions(z)) == 2
+    assert len(s.backend.read_graph_partitions(s.name, s.id, "z", z)) == 1
+    assert len(s.backend.read_artifact_partitions(z)) == 2
 
 
 def test_Graph_snapshot() -> None:
@@ -139,24 +138,10 @@ def test_Graph_snapshot() -> None:
         ),
     ]
 
-    snapshot = g.snapshot()
-    assert snapshot.snapshot_id == Fingerprint.combine(*id_components)
+    s = g.snapshot()
+    assert s.id == Fingerprint.combine(*id_components)
     # Ensure order independence
-    assert snapshot.snapshot_id == Fingerprint.combine(*reversed(id_components))
-    # Ensure snapshot of a snapshot doesn't copy
-    assert snapshot.snapshot() is snapshot
-
-
-def test_Graph_get_snapshot_id(tmp_path: Path) -> None:
-    with Graph(name="test") as g:
-        g.artifacts.a = 5
-
-    assert g.snapshot_id is None
-    snapshot = g.snapshot()
-    assert snapshot.snapshot_id is not None
-    assert snapshot.snapshot_id == g.get_snapshot_id()
-    # Confirm snapshot_id is still unset on the original graph
-    assert g.snapshot_id is None
+    assert s.id == Fingerprint.combine(*reversed(id_components))
 
 
 def test_Graph_snapshot_missing_input_artifact(tmp_path: Path) -> None:
@@ -182,127 +167,128 @@ def test_Graph_snapshot_id_producer_arg_order(tmp_path: Path) -> None:
     with Graph(name="test") as g_ba:
         g_ba.artifacts.c = div(a=b, b=a).out(c)  # type: ignore[call-arg]
 
-    assert g_ab.get_snapshot_id() != g_ba.get_snapshot_id()
+    assert g_ab.snapshot().id != g_ba.snapshot().id
 
 
 def test_Graph_tagging(tmp_path: Path) -> None:
     @producer()
-    def plus1(x: Annotated[int, Num]) -> int:
+    def plus1(x: int) -> int:
         return x + 1
 
-    with Graph(name="Test") as g:
-        g.artifacts.x = Num(storage=LocalFile(path=str(tmp_path / "x.json")))
-        g.artifacts.y = plus1(x=g.artifacts.x)  # type: ignore[call-arg]
+    name, tag = "Test", "test"
 
-    g.write(1, artifact=g.artifacts.x)
-    snapshot_1 = g.build()
-    assert snapshot_1.read(g.artifacts.y, annotation=int) == 2
-    snapshot_1.tag("prod")
-    assert g.from_tag("prod").read(g.artifacts.y, annotation=int) == 2
+    with Graph(name=name) as g1:
+        g1.artifacts.x = 1
+        g1.artifacts.y = plus1(x=g1.artifacts.x)  # type: ignore[call-arg]
 
-    g.write(2, artifact=g.artifacts.x)
-    snapshot_2 = g.build()
-    assert snapshot_2.read(g.artifacts.y, annotation=int) == 3
-    assert snapshot_1.snapshot_id != snapshot_2.snapshot_id
+    with Graph(name=name) as g2:
+        g2.artifacts.x = 2
+        g2.artifacts.y = plus1(x=g2.artifacts.x)  # type: ignore[call-arg]
 
-    assert g.read(g.artifacts.y, annotation=int) == 3
-    assert g.from_tag("prod").read(g.artifacts.y, annotation=int) == 2
+    s1 = g1.build()
+    s1.tag(tag)
+    assert s1.backend.read_graph_tag(name, tag) == s1.id
+
+    s2 = g2.build()
+    s2.tag(tag, overwrite=True)
+    assert s1.id != s2.id
+    assert s2.backend.read_graph_tag(name, tag) == s2.id
 
     with pytest.raises(
-        ValueError, match=re.escape("Existing `prod` tag for Graph `Test` points to Fingerprint")
+        ValueError,
+        match=re.escape(f"Existing `{tag}` tag for Graph `{name}` points to Fingerprint"),
     ):
-        g.tag("prod")
+        s2.tag(tag)
     with pytest.raises(ValueError, match=re.escape("No known `fake` tag for Graph `Test`")):
-        g.from_tag("fake")
+        s2.backend.read_graph_tag(name, "fake")
 
 
 def test_Graph_build(tmp_path: Path) -> None:
     n_builds = 0
 
     @producer()
-    def increment(i: Annotated[int, Num]) -> Annotated[int, Num]:
+    def increment(i: int) -> Annotated[int, Num]:
         nonlocal n_builds
         n_builds += 1
         return i + 1
 
     @producer()
-    def dup(i: Annotated[int, Num]) -> tuple[Annotated[int, Num], Annotated[int, Num]]:
+    def dup(i: int) -> tuple[int, int]:
         return i, i
 
     with Graph(name="test") as g:
         g.artifacts.root.a = Num(storage=LocalFile(path=str(tmp_path / "a.json")))
+        # NOTE: We're using a Num w/ LocalFile output so that the file can be discovered even if we
+        # wipe the default MemoryBackend.
         g.artifacts.b = increment(i=g.artifacts.root.a).out(  # type: ignore[call-arg]
             Num(storage=LocalFile.rooted_at(tmp_path))
         )
         # Test multiple return values
-        g.artifacts.c, g.artifacts.d = dup(i=g.artifacts.root.a).out(  # type: ignore[call-arg]
-            Num(storage=LocalFile.rooted_at(tmp_path)),
-            Num(storage=LocalFile.rooted_at(tmp_path)),
-        )
+        g.artifacts.c, g.artifacts.d = dup(i=g.artifacts.root.a)  # type: ignore[call-arg]
 
-    a, b, c, d = (
-        g.artifacts.root.a,
-        cast(Num, g.artifacts.b),
-        cast(Num, g.artifacts.c),
-        cast(Num, g.artifacts.d),
+    write_local_json_file(g.artifacts.root.a, 0)
+
+    s = g.build()
+    b, c, d = (
+        s.artifacts.b,
+        s.artifacts.c,
+        s.artifacts.d,
     )
+
     # Bootstrap the initial artifact and build
-    g.write(0, artifact=a)
-    g.build()
     assert n_builds == 1
-    assert g.read(b, annotation=int) == 1
-    assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
+    assert s.read(b, annotation=int) == 1
+    assert s.read(c, annotation=int) == s.read(d, annotation=int) == 0
     # A second build should no-op
     g.build(executor=LocalExecutor())
     assert n_builds == 1
-    assert g.read(b, annotation=int) == 1
-    assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
+    assert s.read(b, annotation=int) == 1
+    assert s.read(c, annotation=int) == s.read(d, annotation=int) == 0
     # Changing the raw Artifact data should trigger a rerun
-    g.write(1, artifact=a)
-    g.build()
+    write_local_json_file(g.artifacts.root.a, 1)
+    s = g.build()
     assert n_builds == 2
-    assert g.read(b, annotation=int) == 2
-    assert g.read(c, annotation=int) == g.read(d, annotation=int) == 1
+    assert s.read(b, annotation=int) == 2
+    assert s.read(c, annotation=int) == s.read(d, annotation=int) == 1
     # Changing back to the original data should no-op
-    g.write(0, artifact=a)
-    g.build()
+    write_local_json_file(g.artifacts.root.a, 0)
+    s = g.build()
     assert n_builds == 2
-    assert g.read(b, annotation=int) == 1
-    assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
+    assert s.read(b, annotation=int) == 1
+    assert s.read(c, annotation=int) == s.read(d, annotation=int) == 0
 
-    # Test that the MemoryBackend will discover existing StoragePartitions, even when empty. Other
-    # backends are persistent, so this isn't necessary. This is really a MemoryBackend test, but
-    # easiest to test in a Graph context.
+    # Test that the MemoryBackend will discover existing StoragePartitions (*except for Literals*),
+    # even when empty. Other backends are persistent, so this isn't necessary. This is really a
+    # MemoryBackend test, but easiest to test in a Graph context.
     #
     # Running a build should no-op (ie: num_builds shouldn't increment), but we unfortunately can't
     # read *immediately* because we won't know the input_fingerprints for all the generated
     # Artifacts until build. Eventually, we need to allow the Artifact to access the backend
     # directly and automatically compute the input_fingerprints (ie: sync on the fly), which would
     # allow us to read automatically.
-    g = g.copy(update={"backend": MemoryBackend()})
-    g.build()
+    s = g.copy(update={"backend": MemoryBackend()}).build()
     assert n_builds == 2
-    assert g.read(b, annotation=int) == 1
-    assert g.read(c, annotation=int) == g.read(d, annotation=int) == 0
+    assert s.read(b, annotation=int) == 1
+    assert s.read(c, annotation=int) == s.read(d, annotation=int) == 0
 
 
 def test_Graph_build_failed_validation(tmp_path: Path) -> None:
     failed_validation_msg = "This is junk data!"
 
     @producer(validate_outputs=lambda i: (False, failed_validation_msg))
-    def angry_add(i: Annotated[int, Num]) -> Annotated[int, Num]:
+    def angry_add(i: int) -> int:
         return i + 1
 
-    num = Num(storage=LocalFile.rooted_at(tmp_path))  # Immutable, thus can reuse
     with Graph(name="test") as g:
-        g.artifacts.a = num
-        g.artifacts.b = cast(Num, angry_add(i=g.artifacts.a).out(num))  # type: ignore[call-arg]
+        g.artifacts.a = Num(storage=LocalFile.rooted_at(tmp_path))
+        g.artifacts.b = angry_add(i=g.artifacts.a)  # type: ignore[call-arg]
 
-    g.write(0, artifact=g.artifacts.a)
+    write_local_json_file(g.artifacts.a, 0)
     with pytest.raises(ValueError, match=failed_validation_msg):
         g.build()
+    s = g.snapshot()
     with pytest.raises(FileNotFoundError, match="No data"):
-        g.read(g.artifacts.b, annotation=int)
+        s.read(s.artifacts.b, annotation=int)
 
 
 def test_Graph_dependencies(graph: Graph) -> None:
@@ -361,31 +347,42 @@ def test_Graph_producer_output(graph: Graph) -> None:
 
 
 def test_Graph_read_write(tmp_path: Path) -> None:
-    with Graph(name="test") as g:
-        g.artifacts.i = Num(storage=LocalFile(path=str(tmp_path / "i.json")))
+    @producer()
+    def plus1(x: int) -> int:
+        return x + 1
 
-    i = g.artifacts.i
+    with Graph(name="test") as g:
+        g.artifacts.x = Num(storage=LocalFile(path=str(tmp_path / "i.json")))
+        g.artifacts.y = plus1(x=g.artifacts.x)  # type: ignore[call-arg]
+
+    x, y = g.artifacts.x, g.artifacts.y
+    write_local_json_file(x, 5)
+    s = g.build()
+
+    # Test read
+    assert s.read(x, annotation=int) == 5
+    assert s.read(y, annotation=int) == 6  # type: ignore[arg-type]
+    assert s.read(x, view=View.from_annotation(int, mode="READ")) == 5
+    # assert s.read(x, annotation=int, storage_partitions=[storage_partition]) == 5
+    with pytest.raises(ValueError, match="Either `annotation` or `view` must be passed"):
+        s.read(x)
+    with pytest.raises(ValueError, match="Only one of `annotation` or `view` may be passed"):
+        s.read(x, annotation=int, view=View.from_annotation(int, mode="READ"))
+
     # Test write
-    storage_partition = g.write(5, artifact=i)
-    assert isinstance(storage_partition, LocalFilePartition)
-    assert storage_partition.content_fingerprint != Fingerprint.empty()
-    assert storage_partition.input_fingerprint == Fingerprint.empty()
-    assert storage_partition.keys == CompositeKey()
-    assert storage_partition.path.endswith(i.format.extension)
+    y_input_fingerprint = y.producer_output.producer.compute_input_fingerprint(  # type: ignore[attr-defined]
+        {"x": x.storage.discover_partitions()}
+    )
+    y_storage_partition = s.write(5, artifact=y, input_fingerprint=y_input_fingerprint)  # type: ignore[arg-type]
+    assert y_storage_partition.content_fingerprint != Fingerprint.empty()
+    assert y_storage_partition.input_fingerprint == y_input_fingerprint
+    assert y_storage_partition.keys == CompositeKey()
     # Once snapshotted, writing to the raw Artifacts would result in a different snapshot.
     with pytest.raises(
         ValueError,
-        match=re.escape("Writing to a raw Artifact (`i`) would cause a `snapshot_id` change."),
+        match=re.escape("Writing to a raw Artifact (`x`) is not supported"),
     ):
-        g.snapshot().write(10, artifact=i)
-    # Test read
-    assert g.read(i, annotation=int) == 5
-    assert g.read(i, view=View.from_annotation(int, mode="READ")) == 5
-    assert g.read(i, annotation=int, storage_partitions=[storage_partition]) == 5
-    with pytest.raises(ValueError, match="Either `annotation` or `view` must be passed"):
-        g.read(i)
-    with pytest.raises(ValueError, match="Only one of `annotation` or `view` may be passed"):
-        g.read(i, annotation=int, view=View.from_annotation(int, mode="READ"))
+        s.write(10, artifact=x)
 
 
 def test_Graph_references(graph: Graph) -> None:

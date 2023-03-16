@@ -14,7 +14,7 @@ from arti.backends import Backend
 from arti.executors import Executor
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
-from arti.graphs import Graph
+from arti.graphs import Graph, GraphSnapshot
 from arti.io import read, register_reader, register_writer, write
 from arti.partitions import CompositeKey, CompositeKeyTypes, InputFingerprints, PartitionKey
 from arti.producers import PartitionDependencies, Producer, producer
@@ -36,6 +36,7 @@ __all__ = [
     "Fingerprint",
     "Format",
     "Graph",
+    "GraphSnapshot",
     "InputFingerprints",
     "PartitionDependencies",
     "PartitionKey",
