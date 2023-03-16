@@ -352,7 +352,7 @@ class GraphSnapshot(Model):
         with snapshot.backend.connect() as backend:
             for key, partitions in known_artifact_partitions.items():
                 backend.write_artifact_and_graph_partitions(
-                    snapshot.artifacts[key], partitions, graph.name, snapshot.id, key
+                    snapshot.artifacts[key], partitions, snapshot.name, snapshot.id, key
                 )
         return snapshot
 
