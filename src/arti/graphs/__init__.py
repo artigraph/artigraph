@@ -282,10 +282,18 @@ class Graph(Model):
             view.check_artifact_compatibility(artifact)
         assert view is not None  # mypy gets mixed up with ^
         if storage_partitions is None:
-            with self.backend.connect() as backend:
-                storage_partitions = backend.read_graph_partitions(
-                    self.name, self.get_snapshot_id(), key, artifact
-                )
+            # We want to allow reading raw Artifacts even if other raw Artifacts are missing (which prevents
+            # snapshotting).
+            if artifact.producer_output is None:
+                # NOTE: We're not using read_artifact_partitions as the underlying data may have
+                # changed. The backend may have pointers to old versions (which is expected), but we
+                # only want to return the current values.
+                storage_partitions = artifact.storage.discover_partitions()
+            else:
+                with self.backend.connect() as backend:
+                    storage_partitions = backend.read_graph_partitions(
+                        self.name, self.get_snapshot_id(), key, artifact
+                    )
         return io.read(
             type_=artifact.type,
             format=artifact.format,
