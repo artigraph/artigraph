@@ -47,7 +47,7 @@ ignore_missing_imports = true
 
 [tool.poetry]
 name = "arti"
-version = "0.0.1"
+version = "0.0.2"
 description = ""
 license = "Apache-2.0"
 authors = ["Jacob Hayes <jacob.r.hayes@gmail.com>"]
