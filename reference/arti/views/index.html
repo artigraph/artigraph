@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.0">
+      <meta name="generator" content="mkdocs-1.2.4, mkdocs-material-7.3.0">
     
     
       
@@ -734,6 +734,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../internal/dispatch/" class="md-nav__link">
+        Dispatch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../internal/" class="md-nav__link">
         Index
       </a>
@@ -851,6 +865,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../io/json_gcsfile_python/" class="md-nav__link">
+        Json Gcsfile Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../io/json_localfile_python/" class="md-nav__link">
         Json Localfile Python
       </a>
@@ -867,6 +895,20 @@
     <li class="md-nav__item">
       <a href="../io/json_stringliteral_python/" class="md-nav__link">
         Json Stringliteral Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../io/pickle_gcsfile_python/" class="md-nav__link">
+        Pickle Gcsfile Python
       </a>
     </li>
   
@@ -1001,8 +1043,64 @@
   
   
     <li class="md-nav__item">
+      <a href="../types/bigquery/" class="md-nav__link">
+        Bigquery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../types/" class="md-nav__link">
         Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../types/numpy/" class="md-nav__link">
+        Numpy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../types/pandas/" class="md-nav__link">
+        Pandas
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../types/pyarrow/" class="md-nav__link">
+        Pyarrow
       </a>
     </li>
   
@@ -1118,6 +1216,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    Variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#classes" class="md-nav__link">
     Classes
   </a>
@@ -1162,15 +1267,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#check_type_similarity" class="md-nav__link">
-    check_type_similarity
+  <a href="#construct" class="md-nav__link">
+    construct
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#construct" class="md-nav__link">
-    construct
+  <a href="#from_annotation" class="md-nav__link">
+    from_annotation
   </a>
   
 </li>
@@ -1248,6 +1353,20 @@
           <li class="md-nav__item">
   <a href="#methods" class="md-nav__link">
     Methods
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check_annotation_compatibility" class="md-nav__link">
+    check_annotation_compatibility
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check_artifact_compatibility" class="md-nav__link">
+    check_artifact_compatibility
   </a>
   
 </li>
@@ -1359,6 +1478,13 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    Variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#classes" class="md-nav__link">
     Classes
   </a>
@@ -1403,15 +1529,15 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#check_type_similarity" class="md-nav__link">
-    check_type_similarity
+  <a href="#construct" class="md-nav__link">
+    construct
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#construct" class="md-nav__link">
-    construct
+  <a href="#from_annotation" class="md-nav__link">
+    from_annotation
   </a>
   
 </li>
@@ -1494,6 +1620,20 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#check_annotation_compatibility" class="md-nav__link">
+    check_annotation_compatibility
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#check_artifact_compatibility" class="md-nav__link">
+    check_artifact_compatibility
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#copy" class="md-nav__link">
     copy
   </a>
@@ -1548,19 +1688,29 @@
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="n">__path__</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;pkgutil&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">extend_path</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Annotated</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span>
+<span class="kn">import</span> <span class="nn">builtins</span>
 
-<span class="kn">from</span> <span class="nn">arti.internal.models</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">get_origin</span>
 
-<span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">lenient_issubclass</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">validator</span>
+
+<span class="kn">from</span> <span class="nn">arti</span> <span class="kn">import</span> <span class="n">io</span>
+
+<span class="kn">from</span> <span class="nn">arti.artifacts</span> <span class="kn">import</span> <span class="n">Artifact</span>
+
+<span class="kn">from</span> <span class="nn">arti.internal.models</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">get_field_default</span>
+
+<span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">discard_Annotated</span><span class="p">,</span> <span class="n">get_item_from_annotated</span><span class="p">,</span> <span class="n">lenient_issubclass</span>
 
 <span class="kn">from</span> <span class="nn">arti.internal.utils</span> <span class="kn">import</span> <span class="n">import_submodules</span><span class="p">,</span> <span class="n">register</span>
 
 <span class="kn">from</span> <span class="nn">arti.types</span> <span class="kn">import</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeSystem</span>
 
+<span class="n">MODE</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;READ&quot;</span><span class="p">,</span> <span class="s2">&quot;WRITE&quot;</span><span class="p">,</span> <span class="s2">&quot;READWRITE&quot;</span><span class="p">]</span>
+
 <span class="k">class</span> <span class="nc">View</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
 
-    <span class="sd">&quot;&quot;&quot;View represents the in-memory representation of the artifact.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;View represents the in-memory representation of the artifact.</span>
 
 <span class="sd">    Examples include pandas.DataFrame, dask.DataFrame, a BigQuery table.</span>
 
@@ -1576,6 +1726,12 @@
 
     <span class="n">type_system</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">TypeSystem</span><span class="p">]</span>
 
+    <span class="n">mode</span><span class="p">:</span> <span class="n">MODE</span>
+
+    <span class="n">artifact_class</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Artifact</span><span class="p">]</span> <span class="o">=</span> <span class="n">Artifact</span>
+
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span>
+
     <span class="nd">@classmethod</span>
 
     <span class="k">def</span> <span class="nf">__init_subclass__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -1588,73 +1744,193 @@
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">_check_type_compatibility</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">view_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">artifact_type</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">validation_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># TODO: Consider supporting some form of &quot;reader schema&quot; where the View&#39;s Type is a subset</span>
 
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s2">&quot;View&quot;</span><span class="p">]:</span>
+        <span class="c1"># of the Artifact&#39;s Type (and we filter the columns on read). We could also consider</span>
 
-        <span class="n">import_submodules</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+        <span class="c1"># allowing the Producer&#39;s Type to be a superset of the Artifact&#39;s Type and we&#39;d filter the</span>
 
-        <span class="n">view</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="c1"># columns on write.</span>
 
-        <span class="n">origin</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+        <span class="c1">#</span>
 
-        <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
+        <span class="c1"># If implementing, we can leverage the `mode` to determine which should be the &quot;superset&quot;.</span>
 
-            <span class="n">annotation</span><span class="p">,</span> <span class="o">*</span><span class="n">hints</span> <span class="o">=</span> <span class="n">args</span>
+        <span class="k">if</span> <span class="n">view_type</span> <span class="o">!=</span> <span class="n">artifact_type</span><span class="p">:</span>
 
-            <span class="n">views</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">View</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span><span class="n">hint</span> <span class="k">for</span> <span class="n">hint</span> <span class="ow">in</span> <span class="n">hints</span> <span class="k">if</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">View</span><span class="p">)]</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="sa">f</span><span class="s2">&quot;the specified Type (`</span><span class="si">{</span><span class="n">view_type</span><span class="si">}</span><span class="s2">`) is not compatible with the Artifact&#39;s Type (`</span><span class="si">{</span><span class="n">artifact_type</span><span class="si">}</span><span class="s2">`).&quot;</span>
 
-                <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">validation_type</span><span class="o">=</span><span class="n">validation_type</span><span class="p">)</span>
+            <span class="p">)</span>
 
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-
-                <span class="n">view</span> <span class="o">=</span> <span class="n">views</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-            <span class="k">else</span><span class="p">:</span>
-
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;multiple Views set&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">view</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="k">if</span> <span class="n">origin</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-
-                <span class="n">origin</span> <span class="o">=</span> <span class="n">annotation</span>
-
-            <span class="k">if</span> <span class="n">origin</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_by_python_type_</span><span class="p">:</span>
-
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">annotation</span><span class="si">}</span><span class="s2"> cannot be matched to a View, try setting one explicitly (eg: `Annotated[pd.DataFrame, MyArtifact, PandasDataFrame]`)&quot;</span>
-
-                <span class="p">)</span>
-
-            <span class="n">view</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_by_python_type_</span><span class="p">[</span><span class="n">origin</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="n">validation_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">view</span><span class="o">.</span><span class="n">check_type_similarity</span><span class="p">(</span><span class="n">arti</span><span class="o">=</span><span class="n">validation_type</span><span class="p">,</span> <span class="n">python_type</span><span class="o">=</span><span class="n">annotation</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">view</span>
+    <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">check_type_similarity</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">arti</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">python_type</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_validate_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">:</span>
 
-        <span class="n">system_type</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">to_system</span><span class="p">(</span><span class="n">arti</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="p">{})</span>
+        <span class="n">artifact_class</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">Artifact</span><span class="p">]]</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;artifact_class&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">artifact_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">return</span> <span class="n">type_</span>  <span class="c1"># pragma: no cover</span>
+
+        <span class="n">artifact_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_field_default</span><span class="p">(</span><span class="n">artifact_class</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">artifact_type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_check_type_compatibility</span><span class="p">(</span><span class="n">view_type</span><span class="o">=</span><span class="n">type_</span><span class="p">,</span> <span class="n">artifact_type</span><span class="o">=</span><span class="n">artifact_type</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">type_</span>
+
+    <span class="nd">@classmethod</span>
+
+    <span class="k">def</span> <span class="nf">_get_kwargs_from_annotation</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+
+        <span class="n">artifact_class</span> <span class="o">=</span> <span class="n">get_item_from_annotated</span><span class="p">(</span>
+
+            <span class="n">annotation</span><span class="p">,</span> <span class="n">Artifact</span><span class="p">,</span> <span class="n">is_subclass</span><span class="o">=</span><span class="kc">True</span>
+
+        <span class="p">)</span> <span class="ow">or</span> <span class="n">get_field_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;artifact_class&quot;</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">artifact_class</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">issubclass</span><span class="p">(</span><span class="n">artifact_class</span><span class="p">,</span> <span class="n">Artifact</span><span class="p">)</span>
+
+        <span class="c1"># Try to extract or infer the Type. We prefer: an explicit Type in the annotation, followed</span>
+
+        <span class="c1"># by an Artifact&#39;s default type, falling back to inferring a Type from the type hint.</span>
+
+        <span class="n">type_</span> <span class="o">=</span> <span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">is_subclass</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">type_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">artifact_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_field_default</span><span class="p">(</span><span class="n">artifact_class</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">artifact_type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="kn">from</span> <span class="nn">arti.types.python</span> <span class="kn">import</span> <span class="n">python_type_system</span>
+
+                <span class="n">type_</span> <span class="o">=</span> <span class="n">python_type_system</span><span class="o">.</span><span class="n">to_artigraph</span><span class="p">(</span><span class="n">discard_Annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">),</span> <span class="n">hints</span><span class="o">=</span><span class="p">{})</span>
+
+            <span class="k">else</span><span class="p">:</span>
+
+                <span class="n">type_</span> <span class="o">=</span> <span class="n">artifact_type</span>
+
+        <span class="c1"># NOTE: We validate that type_ and artifact_type (if set) are compatible in _validate_type,</span>
+
+        <span class="c1"># which will run for *any* instance, not just those created with `.from_annotation`.</span>
+
+        <span class="k">return</span> <span class="p">{</span><span class="s2">&quot;artifact_class&quot;</span><span class="p">:</span> <span class="n">artifact_class</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="n">type_</span><span class="p">}</span>
+
+    <span class="nd">@classmethod</span>  <span class="c1"># TODO: Use typing.Self for return, pending mypy support</span>
+
+    <span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">builtins</span><span class="o">.</span><span class="n">type</span><span class="p">[</span><span class="s2">&quot;View&quot;</span><span class="p">]:</span>
+
+        <span class="n">view_class</span> <span class="o">=</span> <span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span> <span class="bp">cls</span><span class="p">,</span> <span class="n">is_subclass</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">view_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="c1"># We&#39;ve already searched for a View instance in the original Annotated args, so just</span>
+
+            <span class="c1"># extract the root annotation.</span>
+
+            <span class="n">annotation</span> <span class="o">=</span> <span class="n">discard_Annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+            <span class="c1"># Import the View submodules to trigger registration.</span>
+
+            <span class="n">import_submodules</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+
+            <span class="n">view_class</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_by_python_type_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+            <span class="c1"># If no match and the type is a subscripted Generic (eg: `list[int]`), try to unwrap any</span>
+
+            <span class="c1"># extra type variables.</span>
+
+            <span class="k">if</span> <span class="n">view_class</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">origin</span> <span class="o">:=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="n">view_class</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_by_python_type_</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">view_class</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">annotation</span><span class="si">}</span><span class="s2"> cannot be matched to a View, try setting one explicitly (eg: `Annotated[int, arti.views.python.Int]`)&quot;</span>
+
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">view_class</span>
+
+    <span class="nd">@classmethod</span>  <span class="c1"># TODO: Use typing.Self for return, pending mypy support</span>
+
+    <span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">mode</span><span class="p">:</span> <span class="n">MODE</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;View&quot;</span><span class="p">:</span>
+
+        <span class="n">view_class</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+        <span class="n">view</span> <span class="o">=</span> <span class="n">view_class</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span> <span class="o">**</span><span class="bp">cls</span><span class="o">.</span><span class="n">_get_kwargs_from_annotation</span><span class="p">(</span><span class="n">annotation</span><span class="p">))</span>
+
+        <span class="n">view</span><span class="o">.</span><span class="n">check_annotation_compatibility</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">view</span>
+
+    <span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="c1"># We&#39;re only checking the root annotation (lenient_issubclass ignores Annotated anyway), so</span>
+
+        <span class="c1"># tidy up the value to improve error messages.</span>
+
+        <span class="n">annotation</span> <span class="o">=</span> <span class="n">discard_Annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+        <span class="n">system_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">type_system</span><span class="o">.</span><span class="n">to_system</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">hints</span><span class="o">=</span><span class="p">{})</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
 
-            <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">system_type</span><span class="p">,</span> <span class="n">python_type</span><span class="p">)</span>
+            <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">system_type</span><span class="p">,</span> <span class="n">annotation</span><span class="p">)</span>
 
-            <span class="ow">or</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">system_type</span><span class="p">),</span> <span class="n">python_type</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">system_type</span><span class="p">),</span> <span class="n">annotation</span><span class="p">)</span>
 
         <span class="p">):</span>
 
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">python_type</span><span class="si">}</span><span class="s2"> cannot be used to represent </span><span class="si">{</span><span class="n">arti</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">annotation</span><span class="si">}</span><span class="s2"> cannot be used to represent </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">artifact</span><span class="p">:</span> <span class="n">Artifact</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">artifact</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">artifact_class</span><span class="p">):</span>
+
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;expected an instance of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">artifact_class</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">artifact</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_type_compatibility</span><span class="p">(</span><span class="n">view_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">,</span> <span class="n">artifact_type</span><span class="o">=</span><span class="n">artifact</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;READ&quot;</span><span class="p">,</span> <span class="s2">&quot;READWRITE&quot;</span><span class="p">}:</span>
+
+            <span class="n">io</span><span class="o">.</span><span class="n">_read</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span>
+
+                <span class="nb">type</span><span class="p">(</span><span class="n">artifact</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
+
+                <span class="nb">type</span><span class="p">(</span><span class="n">artifact</span><span class="o">.</span><span class="n">format</span><span class="p">),</span>
+
+                <span class="nb">list</span><span class="p">[</span><span class="n">artifact</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">storage_partition_type</span><span class="p">],</span>  <span class="c1"># type: ignore[name-defined]</span>
+
+                <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">mode</span> <span class="ow">in</span> <span class="p">{</span><span class="s2">&quot;WRITE&quot;</span><span class="p">,</span> <span class="s2">&quot;READWRITE&quot;</span><span class="p">}:</span>
+
+            <span class="n">io</span><span class="o">.</span><span class="n">_write</span><span class="o">.</span><span class="n">lookup</span><span class="p">(</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">python_type</span><span class="p">,</span>
+
+                <span class="nb">type</span><span class="p">(</span><span class="n">artifact</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
+
+                <span class="nb">type</span><span class="p">(</span><span class="n">artifact</span><span class="o">.</span><span class="n">format</span><span class="p">),</span>
+
+                <span class="n">artifact</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">storage_partition_type</span><span class="p">,</span>
+
+                <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
+
+            <span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -1662,6 +1938,10 @@
 <ul>
 <li><a href="python/">arti.views.python</a></li>
 </ul>
+<h2 id="variables">Variables</h2>
+<div class="codehilite"><pre><span></span><code><span class="n">MODE</span>
+</code></pre></div>
+
 <h2 id="classes">Classes</h2>
 <h3 id="view">View</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">View</span><span class="p">(</span>
@@ -1672,103 +1952,229 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="k">View</span><span class="p">(</span><span class="n">Model</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="k">View</span><span class="p">(</span><span class="n">Model</span><span class="p">)</span><span class="err">:</span>
 
 <span class="w">    </span><span class="ss">&quot;&quot;&quot;View represents the in-memory representation of the artifact.</span>
 
 <span class="ss">    Examples include pandas.DataFrame, dask.DataFrame, a BigQuery table.</span>
 
-<span class="ss">    &quot;&quot;&quot;</span><span class="w"></span>
+<span class="ss">    &quot;&quot;&quot;</span>
 
-<span class="w">    </span><span class="n">_abstract_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">True</span><span class="w"></span>
+<span class="w">    </span><span class="n">_abstract_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">True</span>
 
-<span class="w">    </span><span class="nl">_by_python_type_</span><span class="p">:</span><span class="w"> </span><span class="ss">&quot;ClassVar[dict[type, type[View]]]&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{}</span><span class="w"></span>
+<span class="w">    </span><span class="nl">_by_python_type_</span><span class="p">:</span><span class="w"> </span><span class="ss">&quot;ClassVar[dict[type, type[View]]]&quot;</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{}</span>
 
-<span class="w">    </span><span class="nl">priority</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">int</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">Set</span><span class="w"> </span><span class="n">priority</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="k">view</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">its</span><span class="w"> </span><span class="n">python_type</span><span class="p">.</span><span class="w"> </span><span class="n">Higher</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">better</span><span class="p">.</span><span class="w"></span>
+<span class="w">    </span><span class="nl">priority</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">int</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">0</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="k">Set</span><span class="w"> </span><span class="n">priority</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="k">view</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">its</span><span class="w"> </span><span class="n">python_type</span><span class="p">.</span><span class="w"> </span><span class="n">Higher</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">better</span><span class="p">.</span>
 
-<span class="w">    </span><span class="nl">python_type</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">type</span><span class="o">]</span><span class="w"></span>
+<span class="w">    </span><span class="nl">python_type</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">type</span><span class="o">]</span>
 
-<span class="w">    </span><span class="nl">type_system</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">TypeSystem</span><span class="o">]</span><span class="w"></span>
+<span class="w">    </span><span class="nl">type_system</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">TypeSystem</span><span class="o">]</span>
 
-<span class="w">    </span><span class="nv">@classmethod</span><span class="w"></span>
+<span class="w">    </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">__init_subclass__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="nl">kwargs</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="nl">artifact_class</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="o">[</span><span class="n">Artifact</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Artifact</span>
 
-<span class="w">        </span><span class="n">super</span><span class="p">().</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="nl">_abstract_</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">            </span><span class="n">register</span><span class="p">(</span><span class="n">cls</span><span class="p">.</span><span class="n">_by_python_type_</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">python_type</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">priority</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">__init_subclass__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="nl">kwargs</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">    </span><span class="nv">@classmethod</span><span class="w"></span>
+<span class="w">        </span><span class="n">super</span><span class="p">().</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="nl">_abstract_</span><span class="p">:</span>
 
-<span class="w">        </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">validation_type</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Type</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="w"></span>
+<span class="w">            </span><span class="n">register</span><span class="p">(</span><span class="n">cls</span><span class="p">.</span><span class="n">_by_python_type_</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">python_type</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">lambda</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">x</span><span class="p">.</span><span class="n">priority</span><span class="p">)</span>
 
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">        </span><span class="n">import_submodules</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span><span class="w"> </span><span class="n">__name__</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_check_type_compatibility</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">view_type</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact_type</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">        </span><span class="k">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="w"></span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Consider</span><span class="w"> </span><span class="n">supporting</span><span class="w"> </span><span class="ow">some</span><span class="w"> </span><span class="n">form</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="ss">&quot;reader schema&quot;</span><span class="w"> </span><span class="k">where</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">View</span><span class="s1">&#39;s Type is a subset</span>
 
-<span class="w">        </span><span class="n">origin</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">),</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span><span class="w"></span>
+<span class="s1">        # of the Artifact&#39;</span><span class="n">s</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="p">(</span><span class="ow">and</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="k">filter</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">columns</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="k">read</span><span class="p">).</span><span class="w"> </span><span class="n">We</span><span class="w"> </span><span class="n">could</span><span class="w"> </span><span class="n">also</span><span class="w"> </span><span class="n">consider</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">origin</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nl">Annotated</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">allowing</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Producer</span><span class="s1">&#39;s Type to be a superset of the Artifact&#39;</span><span class="n">s</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">we</span><span class="s1">&#39;d filter the</span>
 
-<span class="w">            </span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">args</span><span class="w"></span>
+<span class="s1">        # columns on write.</span>
 
-<span class="w">            </span><span class="nl">views</span><span class="p">:</span><span class="w"> </span><span class="n">list</span><span class="o">[</span><span class="n">type[View</span><span class="o">]</span><span class="err">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[</span><span class="n">hint for hint in hints if lenient_issubclass(hint, View)</span><span class="o">]</span><span class="w"></span>
+<span class="s1">        #</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nf">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="err">:</span><span class="w"></span>
+<span class="s1">        # If implementing, we can leverage the `mode` to determine which should be the &quot;superset&quot;.</span>
 
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">validation_type</span><span class="o">=</span><span class="n">validation_type</span><span class="p">)</span><span class="w"></span>
+<span class="s1">        if view_type != artifact_type:</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nf">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="err">:</span><span class="w"></span>
+<span class="s1">            raise ValueError(</span>
 
-<span class="w">                </span><span class="k">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">views</span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="w"></span>
+<span class="s1">                f&quot;the specified Type (`{view_type}`) is not compatible with the Artifact&#39;</span><span class="n">s</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="p">(</span><span class="err">`{</span><span class="n">artifact_type</span><span class="err">}`</span><span class="p">).</span><span class="ss">&quot;</span>
 
-<span class="w">            </span><span class="k">else</span><span class="err">:</span><span class="w"></span>
+<span class="ss">            )</span>
 
-<span class="w">                </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="ss">&quot;multiple Views set&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="ss">    @validator(&quot;</span><span class="n">type</span><span class="ss">&quot;)</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="k">view</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
+<span class="ss">    @classmethod</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">origin</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
+<span class="ss">    def _validate_type(cls, type_: Type, values: dict[str, Any]) -&gt; Type:</span>
 
-<span class="w">                </span><span class="n">origin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">annotation</span><span class="w"></span>
+<span class="ss">        artifact_class: Optional[type[Artifact]] = values.get(&quot;</span><span class="n">artifact_class</span><span class="ss">&quot;)</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">origin</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="nl">_by_python_type_</span><span class="p">:</span><span class="w"></span>
+<span class="ss">        if artifact_class is None:</span>
 
-<span class="w">                </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="w"></span>
+<span class="ss">            return type_  # pragma: no cover</span>
 
-<span class="w">                    </span><span class="n">f</span><span class="ss">&quot;{annotation} cannot be matched to a View, try setting one explicitly (eg: `Annotated[pd.DataFrame, MyArtifact, PandasDataFrame]`)&quot;</span><span class="w"></span>
+<span class="ss">        artifact_type: Optional[Type] = get_field_default(artifact_class, &quot;</span><span class="n">type</span><span class="ss">&quot;)</span>
 
-<span class="w">                </span><span class="p">)</span><span class="w"></span>
+<span class="ss">        if artifact_type is not None:</span>
 
-<span class="w">            </span><span class="k">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">_by_python_type_</span><span class="o">[</span><span class="n">origin</span><span class="o">]</span><span class="w"></span>
+<span class="ss">            cls._check_type_compatibility(view_type=type_, artifact_type=artifact_type)</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">validation_type</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
+<span class="ss">        return type_</span>
 
-<span class="w">            </span><span class="k">view</span><span class="p">.</span><span class="n">check_type_similarity</span><span class="p">(</span><span class="n">arti</span><span class="o">=</span><span class="n">validation_type</span><span class="p">,</span><span class="w"> </span><span class="n">python_type</span><span class="o">=</span><span class="n">annotation</span><span class="p">)</span><span class="w"></span>
+<span class="ss">    @classmethod</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">view</span><span class="w"></span>
+<span class="ss">    def _get_kwargs_from_annotation(cls, annotation: Any) -&gt; dict[str, Any]:</span>
 
-<span class="w">    </span><span class="nv">@classmethod</span><span class="w"></span>
+<span class="ss">        artifact_class = get_item_from_annotated(</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">check_type_similarity</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">arti</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="nl">python_type</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
+<span class="ss">            annotation, Artifact, is_subclass=True</span>
 
-<span class="w">        </span><span class="n">system_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">type_system</span><span class="p">.</span><span class="n">to_system</span><span class="p">(</span><span class="n">arti</span><span class="p">,</span><span class="w"> </span><span class="n">hints</span><span class="o">=</span><span class="err">{}</span><span class="p">)</span><span class="w"></span>
+<span class="ss">        ) or get_field_default(cls, &quot;</span><span class="n">artifact_class</span><span class="ss">&quot;)</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
+<span class="ss">        assert artifact_class is not None and issubclass(artifact_class, Artifact)</span>
 
-<span class="w">            </span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">system_type</span><span class="p">,</span><span class="w"> </span><span class="n">python_type</span><span class="p">)</span><span class="w"></span>
+<span class="ss">        # Try to extract or infer the Type. We prefer: an explicit Type in the annotation, followed</span>
 
-<span class="w">            </span><span class="ow">or</span><span class="w"> </span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">type</span><span class="p">(</span><span class="n">system_type</span><span class="p">),</span><span class="w"> </span><span class="n">python_type</span><span class="p">)</span><span class="w"></span>
+<span class="ss">        # by an Artifact&#39;s default type, falling back to inferring a Type from the type hint.</span>
 
-<span class="w">        </span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="ss">        type_ = get_item_from_annotated(annotation, Type, is_subclass=False)</span>
 
-<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;{python_type} cannot be used to represent {arti}&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="ss">        if type_ is None:</span>
+
+<span class="ss">            artifact_type: Optional[Type] = get_field_default(artifact_class, &quot;</span><span class="n">type</span><span class="ss">&quot;)</span>
+
+<span class="ss">            if artifact_type is None:</span>
+
+<span class="ss">                from arti.types.python import python_type_system</span>
+
+<span class="ss">                type_ = python_type_system.to_artigraph(discard_Annotated(annotation), hints={})</span>
+
+<span class="ss">            else:</span>
+
+<span class="ss">                type_ = artifact_type</span>
+
+<span class="ss">        # NOTE: We validate that type_ and artifact_type (if set) are compatible in _validate_type,</span>
+
+<span class="ss">        # which will run for *any* instance, not just those created with `.from_annotation`.</span>
+
+<span class="ss">        return {&quot;</span><span class="n">artifact_class</span><span class="ss">&quot;: artifact_class, &quot;</span><span class="n">type</span><span class="ss">&quot;: type_}</span>
+
+<span class="ss">    @classmethod  # TODO: Use typing.Self for return, pending mypy support</span>
+
+<span class="ss">    def get_class_for(cls, annotation: Any) -&gt; builtins.type[&quot;</span><span class="k">View</span><span class="ss">&quot;]:</span>
+
+<span class="ss">        view_class = get_item_from_annotated(annotation, cls, is_subclass=True)</span>
+
+<span class="ss">        if view_class is None:</span>
+
+<span class="ss">            # We&#39;ve already searched for a View instance in the original Annotated args, so just</span>
+
+<span class="ss">            # extract the root annotation.</span>
+
+<span class="ss">            annotation = discard_Annotated(annotation)</span>
+
+<span class="ss">            # Import the View submodules to trigger registration.</span>
+
+<span class="ss">            import_submodules(__path__, __name__)</span>
+
+<span class="ss">            view_class = cls._by_python_type_.get(annotation)</span>
+
+<span class="ss">            # If no match and the type is a subscripted Generic (eg: `list[int]`), try to unwrap any</span>
+
+<span class="ss">            # extra type variables.</span>
+
+<span class="ss">            if view_class is None and (origin := get_origin(annotation)) is not None:</span>
+
+<span class="ss">                view_class = cls._by_python_type_.get(origin)</span>
+
+<span class="ss">            if view_class is None:</span>
+
+<span class="ss">                raise ValueError(</span>
+
+<span class="ss">                    f&quot;</span><span class="err">{</span><span class="n">annotation</span><span class="err">}</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">matched</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">View</span><span class="p">,</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="n">setting</span><span class="w"> </span><span class="n">one</span><span class="w"> </span><span class="n">explicitly</span><span class="w"> </span><span class="p">(</span><span class="nl">eg</span><span class="p">:</span><span class="w"> </span><span class="err">`</span><span class="n">Annotated</span><span class="o">[</span><span class="n">int, arti.views.python.Int</span><span class="o">]</span><span class="err">`</span><span class="p">)</span><span class="ss">&quot;</span>
+
+<span class="ss">                )</span>
+
+<span class="ss">        return view_class</span>
+
+<span class="ss">    @classmethod  # TODO: Use typing.Self for return, pending mypy support</span>
+
+<span class="ss">    def from_annotation(cls, annotation: Any, *, mode: MODE) -&gt; &quot;</span><span class="k">View</span><span class="ss">&quot;:</span>
+
+<span class="ss">        view_class = cls.get_class_for(annotation)</span>
+
+<span class="ss">        view = view_class(mode=mode, **cls._get_kwargs_from_annotation(annotation))</span>
+
+<span class="ss">        view.check_annotation_compatibility(annotation)</span>
+
+<span class="ss">        return view</span>
+
+<span class="ss">    def check_annotation_compatibility(self, annotation: Any) -&gt; None:</span>
+
+<span class="ss">        # We&#39;re only checking the root annotation (lenient_issubclass ignores Annotated anyway), so</span>
+
+<span class="ss">        # tidy up the value to improve error messages.</span>
+
+<span class="ss">        annotation = discard_Annotated(annotation)</span>
+
+<span class="ss">        system_type = self.type_system.to_system(self.type, hints={})</span>
+
+<span class="ss">        if not (</span>
+
+<span class="ss">            lenient_issubclass(system_type, annotation)</span>
+
+<span class="ss">            or lenient_issubclass(type(system_type), annotation)</span>
+
+<span class="ss">        ):</span>
+
+<span class="ss">            raise ValueError(f&quot;</span><span class="err">{</span><span class="n">annotation</span><span class="err">}</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">represent</span><span class="w"> </span><span class="err">{</span><span class="n">self</span><span class="p">.</span><span class="n">type</span><span class="err">}</span><span class="ss">&quot;)</span>
+
+<span class="ss">    def check_artifact_compatibility(self, artifact: Artifact) -&gt; None:</span>
+
+<span class="ss">        if not isinstance(artifact, self.artifact_class):</span>
+
+<span class="ss">            raise ValueError(f&quot;</span><span class="n">expected</span><span class="w"> </span><span class="n">an</span><span class="w"> </span><span class="n">instance</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="err">{</span><span class="n">self</span><span class="p">.</span><span class="n">artifact_class</span><span class="err">}</span><span class="p">,</span><span class="w"> </span><span class="n">got</span><span class="w"> </span><span class="err">{</span><span class="n">type</span><span class="p">(</span><span class="n">artifact</span><span class="p">)</span><span class="err">}</span><span class="ss">&quot;)</span>
+
+<span class="ss">        self._check_type_compatibility(view_type=self.type, artifact_type=artifact.type)</span>
+
+<span class="ss">        if self.mode in {&quot;</span><span class="k">READ</span><span class="ss">&quot;, &quot;</span><span class="n">READWRITE</span><span class="ss">&quot;}:</span>
+
+<span class="ss">            io._read.lookup(</span>
+
+<span class="ss">                type(artifact.type),</span>
+
+<span class="ss">                type(artifact.format),</span>
+
+<span class="ss">                list[artifact.storage.storage_partition_type],  # type: ignore[name-defined]</span>
+
+<span class="ss">                type(self),</span>
+
+<span class="ss">            )</span>
+
+<span class="ss">        if self.mode in {&quot;</span><span class="k">WRITE</span><span class="ss">&quot;, &quot;</span><span class="n">READWRITE</span><span class="err">&quot;}:</span>
+
+<span class="w">            </span><span class="n">io</span><span class="p">.</span><span class="n">_write</span><span class="p">.</span><span class="n">lookup</span><span class="p">(</span>
+
+<span class="w">                </span><span class="n">self</span><span class="p">.</span><span class="n">python_type</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">type</span><span class="p">(</span><span class="n">artifact</span><span class="p">.</span><span class="n">type</span><span class="p">),</span>
+
+<span class="w">                </span><span class="n">type</span><span class="p">(</span><span class="n">artifact</span><span class="p">.</span><span class="nf">format</span><span class="p">),</span>
+
+<span class="w">                </span><span class="n">artifact</span><span class="p">.</span><span class="n">storage</span><span class="p">.</span><span class="n">storage_partition_type</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">type</span><span class="p">(</span><span class="n">self</span><span class="p">),</span>
+
+<span class="w">            </span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -1791,34 +2197,6 @@
 </code></pre></div>
 
 <h4 id="static-methods">Static methods</h4>
-<h4 id="check_type_similarity">check_type_similarity</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_type_similarity</span><span class="p">(</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">arti</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
-    <span class="n">python_type</span><span class="p">:</span> <span class="nb">type</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
-</code></pre></div>
-
-<details class="example">
-<summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w"></span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">check_type_similarity</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">arti</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="nl">python_type</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">        </span><span class="n">system_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">type_system</span><span class="p">.</span><span class="n">to_system</span><span class="p">(</span><span class="n">arti</span><span class="p">,</span><span class="w"> </span><span class="n">hints</span><span class="o">=</span><span class="err">{}</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="p">(</span><span class="w"></span>
-
-<span class="w">            </span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">system_type</span><span class="p">,</span><span class="w"> </span><span class="n">python_type</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">            </span><span class="ow">or</span><span class="w"> </span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">type</span><span class="p">(</span><span class="n">system_type</span><span class="p">),</span><span class="w"> </span><span class="n">python_type</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">        </span><span class="p">)</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;{python_type} cannot be used to represent {arti}&quot;</span><span class="p">)</span><span class="w"></span>
-</code></pre></div>
-
-</details>
 <h4 id="construct">construct</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">construct</span><span class="p">(</span>
     <span class="n">_fields_set</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;SetStr&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1829,6 +2207,30 @@
 <p>Creates a new model setting <strong>dict</strong> and <strong>fields_set</strong> from trusted or pre-validated data.</p>
 <p>Default values are respected, but no other validation is performed.
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
+<h4 id="from_annotation">from_annotation</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+
+<span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">view_class</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="n">mode</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">cls</span><span class="p">.</span><span class="n">_get_kwargs_from_annotation</span><span class="p">(</span><span class="n">annotation</span><span class="p">))</span>
+
+<span class="w">        </span><span class="k">view</span><span class="p">.</span><span class="n">check_annotation_compatibility</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">view</span>
+</code></pre></div>
+
+</details>
 <h4 id="from_orm">from_orm</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_orm</span><span class="p">(</span>
     <span class="n">obj</span><span class="p">:</span> <span class="n">Any</span>
@@ -1837,67 +2239,49 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-    <span class="o">*</span><span class="p">,</span>
-    <span class="n">validation_type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
 
-<span class="w">        </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">validation_type</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Type</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="w"></span>
+<span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">view_class</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">        </span><span class="n">import_submodules</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span><span class="w"> </span><span class="n">__name__</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="err">#</span><span class="w"> </span><span class="n">We</span><span class="err">&#39;</span><span class="n">ve</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">searched</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">View</span><span class="w"> </span><span class="n">instance</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">original</span><span class="w"> </span><span class="n">Annotated</span><span class="w"> </span><span class="n">args</span><span class="p">,</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">just</span>
 
-<span class="w">        </span><span class="k">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="w"></span>
+<span class="w">            </span><span class="err">#</span><span class="w"> </span><span class="k">extract</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">root</span><span class="w"> </span><span class="n">annotation</span><span class="p">.</span>
 
-<span class="w">        </span><span class="n">origin</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">),</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="n">annotation</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">discard_Annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">origin</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="nl">Annotated</span><span class="p">:</span><span class="w"></span>
+<span class="w">            </span><span class="err">#</span><span class="w"> </span><span class="n">Import</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">View</span><span class="w"> </span><span class="n">submodules</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">trigger</span><span class="w"> </span><span class="n">registration</span><span class="p">.</span>
 
-<span class="w">            </span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">args</span><span class="w"></span>
+<span class="w">            </span><span class="n">import_submodules</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span><span class="w"> </span><span class="n">__name__</span><span class="p">)</span>
 
-<span class="w">            </span><span class="nl">views</span><span class="p">:</span><span class="w"> </span><span class="n">list</span><span class="o">[</span><span class="n">type[View</span><span class="o">]</span><span class="err">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">[</span><span class="n">hint for hint in hints if lenient_issubclass(hint, View)</span><span class="o">]</span><span class="w"></span>
+<span class="w">            </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">_by_python_type_</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nf">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="err">:</span><span class="w"></span>
+<span class="w">            </span><span class="err">#</span><span class="w"> </span><span class="k">If</span><span class="w"> </span><span class="k">no</span><span class="w"> </span><span class="k">match</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">subscripted</span><span class="w"> </span><span class="n">Generic</span><span class="w"> </span><span class="p">(</span><span class="nl">eg</span><span class="p">:</span><span class="w"> </span><span class="err">`</span><span class="n">list</span><span class="o">[</span><span class="n">int</span><span class="o">]</span><span class="err">`</span><span class="p">),</span><span class="w"> </span><span class="k">try</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">unwrap</span><span class="w"> </span><span class="ow">any</span>
 
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">validation_type</span><span class="o">=</span><span class="n">validation_type</span><span class="p">)</span><span class="w"></span>
+<span class="w">            </span><span class="err">#</span><span class="w"> </span><span class="n">extra</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="n">variables</span><span class="p">.</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nf">len</span><span class="p">(</span><span class="n">views</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="err">:</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">view_class</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">None</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="p">(</span><span class="n">origin</span><span class="w"> </span><span class="err">:</span><span class="o">=</span><span class="w"> </span><span class="n">get_origin</span><span class="p">(</span><span class="n">annotation</span><span class="p">))</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">                </span><span class="k">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">views</span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="w"></span>
+<span class="w">                </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">_by_python_type_</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">origin</span><span class="p">)</span>
 
-<span class="w">            </span><span class="k">else</span><span class="err">:</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">view_class</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">                </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="ss">&quot;multiple Views set&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">                </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="k">view</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
+<span class="w">                    </span><span class="n">f</span><span class="ss">&quot;{annotation} cannot be matched to a View, try setting one explicitly (eg: `Annotated[int, arti.views.python.Int]`)&quot;</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">origin</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
+<span class="w">                </span><span class="p">)</span>
 
-<span class="w">                </span><span class="n">origin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">annotation</span><span class="w"></span>
-
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">origin</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="nl">_by_python_type_</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">                </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="w"></span>
-
-<span class="w">                    </span><span class="n">f</span><span class="ss">&quot;{annotation} cannot be matched to a View, try setting one explicitly (eg: `Annotated[pd.DataFrame, MyArtifact, PandasDataFrame]`)&quot;</span><span class="w"></span>
-
-<span class="w">                </span><span class="p">)</span><span class="w"></span>
-
-<span class="w">            </span><span class="k">view</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">_by_python_type_</span><span class="o">[</span><span class="n">origin</span><span class="o">]</span><span class="w"></span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">validation_type</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">            </span><span class="k">view</span><span class="p">.</span><span class="n">check_type_similarity</span><span class="p">(</span><span class="n">arti</span><span class="o">=</span><span class="n">validation_type</span><span class="p">,</span><span class="w"> </span><span class="n">python_type</span><span class="o">=</span><span class="n">annotation</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">view</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">view_class</span>
 </code></pre></div>
 
 </details>
@@ -1963,6 +2347,86 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </code></pre></div>
 
 <h4 id="methods">Methods</h4>
+<h4 id="check_annotation_compatibility">check_annotation_compatibility</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">check_annotation_compatibility</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span><span class="w"> </span><span class="n">annotation</span><span class="o">:</span><span class="w"> </span><span class="kr">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">None</span><span class="o">:</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">We</span><span class="s">&#39;re only checking the root annotation (lenient_issubclass ignores Annotated anyway), so</span>
+
+<span class="s">        # tidy up the value to improve error messages.</span>
+
+<span class="s">        annotation = discard_Annotated(annotation)</span>
+
+<span class="s">        system_type = self.type_system.to_system(self.type, hints={})</span>
+
+<span class="s">        if not (</span>
+
+<span class="s">            lenient_issubclass(system_type, annotation)</span>
+
+<span class="s">            or lenient_issubclass(type(system_type), annotation)</span>
+
+<span class="s">        ):</span>
+
+<span class="s">            raise ValueError(f&quot;</span><span class="p">{</span><span class="n">annotation</span><span class="p">}</span><span class="w"> </span><span class="n">cannot</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="n">to</span><span class="w"> </span><span class="n">represent</span><span class="w"> </span><span class="p">{</span><span class="kr">self</span><span class="p">.</span><span class="kr">type</span><span class="p">}</span><span class="s">&quot;)</span>
+</code></pre></div>
+
+</details>
+<h4 id="check_artifact_compatibility">check_artifact_compatibility</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">check_artifact_compatibility</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span><span class="o">:</span><span class="w"> </span><span class="n">Artifact</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">None</span><span class="o">:</span>
+
+<span class="w">        </span><span class="nf">if</span><span class="w"> </span><span class="kr">not</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="kr">self</span><span class="p">.</span><span class="n">artifact_class</span><span class="p">)</span><span class="o">:</span>
+
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s">&quot;expected an instance of {self.artifact_class}, got {type(artifact)}&quot;</span><span class="p">)</span>
+
+<span class="w">        </span><span class="kr">self</span><span class="p">.</span><span class="n">_check_type_compatibility</span><span class="p">(</span><span class="n">view_type</span><span class="o">=</span><span class="kr">self</span><span class="p">.</span><span class="kr">type</span><span class="p">,</span><span class="w"> </span><span class="n">artifact_type</span><span class="o">=</span><span class="n">artifact</span><span class="p">.</span><span class="kr">type</span><span class="p">)</span>
+
+<span class="w">        </span><span class="nf">if</span><span class="w"> </span><span class="kr">self</span><span class="p">.</span><span class="n">mode</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;READ&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;READWRITE&quot;</span><span class="p">}</span><span class="o">:</span>
+
+<span class="w">            </span><span class="n">io</span><span class="p">.</span><span class="n">_read</span><span class="p">.</span><span class="kr">lookup</span><span class="p">(</span>
+
+<span class="w">                </span><span class="kr">type</span><span class="p">(</span><span class="n">artifact</span><span class="p">.</span><span class="kr">type</span><span class="p">),</span>
+
+<span class="w">                </span><span class="kr">type</span><span class="p">(</span><span class="n">artifact</span><span class="p">.</span><span class="n">format</span><span class="p">),</span>
+
+<span class="w">                </span><span class="n">list</span><span class="p">[</span><span class="n">artifact</span><span class="p">.</span><span class="n">storage</span><span class="p">.</span><span class="n">storage_partition_type</span><span class="p">],</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="kr">type</span><span class="o">:</span><span class="w"> </span><span class="n">ignore</span><span class="p">[</span><span class="n">name</span><span class="o">-</span><span class="n">defined</span><span class="p">]</span>
+
+<span class="w">                </span><span class="kr">type</span><span class="p">(</span><span class="kr">self</span><span class="p">),</span>
+
+<span class="w">            </span><span class="p">)</span>
+
+<span class="w">        </span><span class="nf">if</span><span class="w"> </span><span class="kr">self</span><span class="p">.</span><span class="n">mode</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="p">{</span><span class="s">&quot;WRITE&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;READWRITE&quot;</span><span class="p">}</span><span class="o">:</span>
+
+<span class="w">            </span><span class="n">io</span><span class="p">.</span><span class="n">_write</span><span class="p">.</span><span class="kr">lookup</span><span class="p">(</span>
+
+<span class="w">                </span><span class="kr">self</span><span class="p">.</span><span class="n">python_type</span><span class="p">,</span>
+
+<span class="w">                </span><span class="kr">type</span><span class="p">(</span><span class="n">artifact</span><span class="p">.</span><span class="kr">type</span><span class="p">),</span>
+
+<span class="w">                </span><span class="kr">type</span><span class="p">(</span><span class="n">artifact</span><span class="p">.</span><span class="n">format</span><span class="p">),</span>
+
+<span class="w">                </span><span class="n">artifact</span><span class="p">.</span><span class="n">storage</span><span class="p">.</span><span class="n">storage_partition_type</span><span class="p">,</span>
+
+<span class="w">                </span><span class="kr">type</span><span class="p">(</span><span class="kr">self</span><span class="p">),</span>
+
+<span class="w">            </span><span class="p">)</span>
+</code></pre></div>
+
+</details>
 <h4 id="copy">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
@@ -2034,49 +2498,49 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code>    <span class="n">def</span> <span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span> <span class="n">_Model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">deep</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">False</span><span class="p">,</span> <span class="n">validate</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">:</span> <span class="k">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
 
-        <span class="n">copy</span> <span class="o">=</span> <span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">validate</span><span class="o">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span>
 
-            <span class="c1"># NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as</span>
+<span class="w">            </span><span class="c1"># NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as</span>
 
-            <span class="c1"># is normal `.copy` behavior).</span>
+<span class="w">            </span><span class="c1"># is normal `.copy` behavior).</span>
 
-            <span class="c1">#</span>
+<span class="w">            </span><span class="c1">#</span>
 
-            <span class="c1"># To reduce `repr` noise, we&#39;ll reset .__fields_set__ to those of the pre-validation copy</span>
+<span class="w">            </span><span class="c1"># To reduce `repr` noise, we&#39;ll reset .__fields_set__ to those of the pre-validation copy</span>
 
-            <span class="c1"># (which includes those originally set + updated).</span>
+<span class="w">            </span><span class="c1"># (which includes those originally set + updated).</span>
 
-            <span class="n">fields_set</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">__fields_set__</span>
+<span class="w">            </span><span class="n">fields_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">__fields_set__</span>
 
-            <span class="n">copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">validate</span><span class="p">(</span>
+<span class="w">            </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">validate</span><span class="p">(</span>
 
-                <span class="n">dict</span><span class="p">(</span><span class="n">copy</span><span class="p">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="no">False</span><span class="p">,</span> <span class="n">by_alias</span><span class="o">=</span><span class="no">False</span><span class="p">,</span> <span class="n">exclude_unset</span><span class="o">=</span><span class="no">False</span><span class="p">))</span>
+<span class="w">                </span><span class="n">dict</span><span class="p">(</span><span class="n">copy</span><span class="p">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">by_alias</span><span class="o">=</span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">exclude_unset</span><span class="o">=</span><span class="no">False</span><span class="p">))</span>
 
-            <span class="p">)</span>
+<span class="w">            </span><span class="p">)</span>
 
-            <span class="c1"># Use object.__setattr__ to bypass frozen model assignment errors</span>
+<span class="w">            </span><span class="c1"># Use object.__setattr__ to bypass frozen model assignment errors</span>
 
-            <span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="s2">&quot;__fields_set__&quot;</span><span class="p">,</span> <span class="kt">set</span><span class="p">(</span><span class="n">fields_set</span><span class="p">))</span>
+<span class="w">            </span><span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;__fields_set__&quot;</span><span class="p">,</span><span class="w"> </span><span class="kt">set</span><span class="p">(</span><span class="n">fields_set</span><span class="p">))</span>
 
-            <span class="c1"># Copy over the private attributes, which are missing after validation (since we&#39;re only</span>
+<span class="w">            </span><span class="c1"># Copy over the private attributes, which are missing after validation (since we&#39;re only</span>
 
-            <span class="c1"># passing the fields).</span>
+<span class="w">            </span><span class="c1"># passing the fields).</span>
 
-            <span class="k">for</span> <span class="k">name</span> <span class="k">in</span> <span class="n">self</span><span class="p">.</span><span class="n">__private_attributes__</span><span class="o">:</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="k">name</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">__private_attributes__</span><span class="o">:</span>
 
-                <span class="k">if</span> <span class="p">(</span><span class="k">value</span> <span class="o">:=</span> <span class="n">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="k">name</span><span class="p">,</span> <span class="k">Undefined</span><span class="p">))</span> <span class="k">is</span> <span class="k">not</span> <span class="k">Undefined</span><span class="o">:</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">value</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">name</span><span class="p">,</span><span class="w"> </span><span class="k">Undefined</span><span class="p">))</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">Undefined</span><span class="o">:</span>
 
-                    <span class="k">if</span> <span class="n">deep</span><span class="o">:</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span>
 
-                        <span class="k">value</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="k">value</span><span class="p">)</span>
+<span class="w">                        </span><span class="k">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deepcopy</span><span class="p">(</span><span class="k">value</span><span class="p">)</span>
 
-                    <span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="k">name</span><span class="p">,</span> <span class="k">value</span><span class="p">)</span>
+<span class="w">                    </span><span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span><span class="w"> </span><span class="k">name</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">copy</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">copy</span>
 </code></pre></div>
 
 </details>
@@ -2084,10 +2548,10 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">dict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">by_alias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_defaults</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exclude_unset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_none</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2099,10 +2563,10 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">json</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">by_alias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_defaults</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exclude_unset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_none</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>

@@ -14,7 +14,7 @@
     
     
       
-        <title>Patches - artigraph</title>
+        <title>Dispatch - artigraph</title>
       
     
     
@@ -65,7 +65,7 @@
     <div data-md-component="skip">
       
         
-        <a href="#module-artiinternalpatches" class="md-skip">
+        <a href="#module-artiinternaldispatch" class="md-skip">
           Skip to content
         </a>
       
@@ -97,7 +97,7 @@
         <div class="md-header__topic" data-md-component="header-topic">
           <span class="md-ellipsis">
             
-              Patches
+              Dispatch
             
           </span>
         </div>
@@ -734,11 +734,71 @@
               
   
   
+    
   
-    <li class="md-nav__item">
-      <a href="../dispatch/" class="md-nav__link">
+  
+    <li class="md-nav__item md-nav__item--active">
+      
+      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
+      
+      
+        
+      
+      
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          Dispatch
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
+      <a href="./" class="md-nav__link md-nav__link--active">
         Dispatch
       </a>
+      
+        
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    Variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#multipledispatch" class="md-nav__link">
+    multipledispatch
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+    </ul>
+  
+</nav>
+      
     </li>
   
 
@@ -776,64 +836,11 @@
               
   
   
-    
   
-  
-    <li class="md-nav__item md-nav__item--active">
-      
-      <input class="md-nav__toggle md-toggle" data-md-toggle="toc" type="checkbox" id="__toc">
-      
-      
-        
-      
-      
-        <label class="md-nav__link md-nav__link--active" for="__toc">
-          Patches
-          <span class="md-nav__icon md-icon"></span>
-        </label>
-      
-      <a href="./" class="md-nav__link md-nav__link--active">
+    <li class="md-nav__item">
+      <a href="../patches/" class="md-nav__link">
         Patches
       </a>
-      
-        
-<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
-  
-  
-  
-    
-  
-  
-    <label class="md-nav__title" for="__toc">
-      <span class="md-nav__icon md-icon"></span>
-      Table of contents
-    </label>
-    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
-      
-        <li class="md-nav__item">
-  <a href="#functions" class="md-nav__link">
-    Functions
-  </a>
-  
-    <nav class="md-nav" aria-label="Functions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#patch_topologicalsorter_class_getitem" class="md-nav__link">
-    patch_TopologicalSorter_class_getitem
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-      
-    </ul>
-  
-</nav>
-      
     </li>
   
 
@@ -1297,6 +1304,13 @@
     <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
       
         <li class="md-nav__item">
+  <a href="#variables" class="md-nav__link">
+    Variables
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#functions" class="md-nav__link">
     Functions
   </a>
@@ -1305,8 +1319,8 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
-  <a href="#patch_topologicalsorter_class_getitem" class="md-nav__link">
-    patch_TopologicalSorter_class_getitem
+  <a href="#multipledispatch" class="md-nav__link">
+    multipledispatch
   </a>
   
 </li>
@@ -1328,76 +1342,229 @@
             <article class="md-content__inner md-typeset">
               
                 
-                  <a href="https://github.com/artigraph/artigraph/edit/golden/reference/arti/internal/patches.md" title="Edit this page" class="md-content__button md-icon">
+                  <a href="https://github.com/artigraph/artigraph/edit/golden/reference/arti/internal/dispatch.md" title="Edit this page" class="md-content__button md-icon">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M20.71 7.04c.39-.39.39-1.04 0-1.41l-2.34-2.34c-.37-.39-1.02-.39-1.41 0l-1.84 1.83 3.75 3.75M3 17.25V21h3.75L17.81 9.93l-3.75-3.75L3 17.25z"/></svg>
                   </a>
                 
                 
-                <h1 id="module-artiinternalpatches">Module arti.internal.patches</h1>
+                <h1 id="module-artiinternaldispatch">Module arti.internal.dispatch</h1>
 <p>None</p>
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">no_type_check</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">inspect</span>
 
-<span class="nd">@no_type_check</span>  <span class="c1"># The mypy errors vary based on python version (and we error for unused ignores), so just skip completely</span>
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
 
-<span class="k">def</span> <span class="nf">patch_TopologicalSorter_class_getitem</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Patch adding TopologicalSorter.__class_getitem__ to support subscription.</span>
+<span class="kn">import</span> <span class="nn">multimethod</span> <span class="k">as</span> <span class="nn">_multimethod</span>  <span class="c1"># Minimize name confusion</span>
 
-<span class="sd">    TopologicalSorter is considered Generic in typeshed (hence mypy expects a type arg),</span>
+<span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">lenient_issubclass</span><span class="p">,</span> <span class="n">tidy_signature</span>
 
-<span class="sd">    but is not at runtime.</span>
+<span class="n">RETURN</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;RETURN&quot;</span><span class="p">)</span>
 
-<span class="sd">    This has been fixed for 3.11+ (https://github.com/python/cpython/pull/28714).</span>
+<span class="n">REGISTERED</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;REGISTERED&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span>
+
+<span class="c1"># This may be less useful once mypy supports ParamSpecs - after that, we might be able to define</span>
+
+<span class="c1"># multidispatch with a ParamSpec and have mypy check the handlers&#39; arguments are covariant.</span>
+
+<span class="k">class</span> <span class="nc">_multipledispatch</span><span class="p">(</span><span class="n">_multimethod</span><span class="o">.</span><span class="n">multidispatch</span><span class="p">[</span><span class="n">RETURN</span><span class="p">]):</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Multiple dispatch for a set of functions based on parameter type.</span>
+
+<span class="sd">    Usage is similar to `@functools.singledispatch`. The original definition defines the &quot;spec&quot; that</span>
+
+<span class="sd">    subsequent handlers must follow, namely the name and (base)class of parameters.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="kn">from</span> <span class="nn">graphlib</span> <span class="kn">import</span> <span class="n">TopologicalSorter</span>
+    <span class="c1"># NOTE: We can&#39;t add extra (kw)args without also overriding __new__. However, `__new__` is</span>
 
-    <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">GenericAlias</span>
+    <span class="c1"># called for each *registered* func in the multimethod  internals (a bit confusing). Instead, we</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TopologicalSorter</span><span class="p">,</span> <span class="s2">&quot;__class_getitem__&quot;</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+    <span class="c1"># can just set attrs in a helper func below.</span>
 
-        <span class="n">TopologicalSorter</span><span class="o">.</span><span class="n">__class_getitem__</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">GenericAlias</span><span class="p">)</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">RETURN</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">canonical_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">discovery_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">assert</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">clean_signature</span> <span class="o">=</span> <span class="n">tidy_signature</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">signature</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__missing__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">types</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">RETURN</span><span class="p">]:</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">discovery_func</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">discovery_func</span><span class="p">()</span>
+
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__missing__</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+
+        <span class="c1"># multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same</span>
+
+        <span class="c1"># before looking up. Non-Generics pass through as is.</span>
+
+        <span class="n">args</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">_multimethod</span><span class="o">.</span><span class="n">subtype</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">)</span>  <span class="c1"># type: ignore[no-untyped-call]</span>
+
+        <span class="c1"># NOTE: multimethod doesn&#39;t override __contains__ (likely so __missing__ will still run), so</span>
+
+        <span class="c1"># &quot;args in self&quot; will be False when using subclasses of any arg.</span>
+
+        <span class="n">missing_error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No `</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">canonical_name</span><span class="si">}</span><span class="s2">` implementation found for: </span><span class="si">{</span><span class="n">args</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+
+            <span class="n">handler</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="bp">self</span><span class="p">[</span><span class="n">args</span><span class="p">])</span>
+
+        <span class="c1"># multimethod raises a TypeError instead of KeyError, as __call__.</span>
+
+        <span class="k">except</span> <span class="ne">TypeError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+
+            <span class="k">raise</span> <span class="n">missing_error</span> <span class="kn">from</span> <span class="nn">e</span>
+
+        <span class="c1"># Filter out the base &quot;NotImplementedError&quot; handler.</span>
+
+        <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">handler</span><span class="p">,</span> <span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">):</span>
+
+            <span class="k">raise</span> <span class="n">missing_error</span>
+
+        <span class="k">return</span> <span class="n">handler</span>
+
+    <span class="nd">@overload</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">__func</span><span class="p">:</span> <span class="n">REGISTERED</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">REGISTERED</span><span class="p">:</span>
+
+        <span class="o">...</span>
+
+    <span class="nd">@overload</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">REGISTERED</span><span class="p">],</span> <span class="n">REGISTERED</span><span class="p">]:</span>
+
+        <span class="o">...</span>
+
+    <span class="k">def</span> <span class="nf">register</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">REGISTERED</span><span class="p">],</span> <span class="n">REGISTERED</span><span class="p">]:</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s2">&quot;__annotations__&quot;</span><span class="p">):</span>
+
+            <span class="n">func</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">sig</span> <span class="o">=</span> <span class="n">tidy_signature</span><span class="p">(</span><span class="n">func</span><span class="p">,</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">func</span><span class="p">))</span>
+
+            <span class="n">spec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">clean_signature</span>
+
+            <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">set</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">parameters</span><span class="p">):</span>
+
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+
+                    <span class="sa">f</span><span class="s2">&quot;Expected `</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">` to have </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">spec</span><span class="o">.</span><span class="n">parameters</span><span class="p">))</span><span class="si">}</span><span class="s2"> parameters, got </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                <span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+
+                <span class="n">sig_param</span><span class="p">,</span> <span class="n">spec_param</span> <span class="o">=</span> <span class="n">sig</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">spec</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+
+                <span class="k">if</span> <span class="n">sig_param</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">spec_param</span><span class="o">.</span><span class="n">kind</span><span class="p">:</span>
+
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+
+                        <span class="sa">f</span><span class="s2">&quot;Expected the `</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` parameter to be </span><span class="si">{</span><span class="n">spec_param</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">sig_param</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                    <span class="p">)</span>
+
+                <span class="k">if</span> <span class="n">sig_param</span><span class="o">.</span><span class="n">annotation</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Any</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lenient_issubclass</span><span class="p">(</span>
+
+                    <span class="n">sig_param</span><span class="o">.</span><span class="n">annotation</span><span class="p">,</span> <span class="n">spec_param</span><span class="o">.</span><span class="n">annotation</span>
+
+                <span class="p">):</span>
+
+                    <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+
+                        <span class="sa">f</span><span class="s2">&quot;Expected the `</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` parameter to be a subclass of </span><span class="si">{</span><span class="n">spec_param</span><span class="o">.</span><span class="n">annotation</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">sig_param</span><span class="o">.</span><span class="n">annotation</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                    <span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">,</span> <span class="n">spec</span><span class="o">.</span><span class="n">return_annotation</span><span class="p">):</span>
+
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+
+                    <span class="sa">f</span><span class="s2">&quot;Expected the `</span><span class="si">{</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">` return to match </span><span class="si">{</span><span class="n">spec</span><span class="o">.</span><span class="n">return_annotation</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="n">sig</span><span class="o">.</span><span class="n">return_annotation</span><span class="si">}</span><span class="s2">&quot;</span>
+
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">register</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">))</span>
+
+<span class="k">def</span> <span class="nf">multipledispatch</span><span class="p">(</span>
+
+    <span class="n">canonical_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">discovery_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">RETURN</span><span class="p">]],</span> <span class="n">_multipledispatch</span><span class="p">[</span><span class="n">RETURN</span><span class="p">]]:</span>
+
+    <span class="k">def</span> <span class="nf">wrap</span><span class="p">(</span><span class="n">func</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">RETURN</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">_multipledispatch</span><span class="p">[</span><span class="n">RETURN</span><span class="p">]:</span>
+
+        <span class="c1"># The base handler is expected to `raise NotImplementedError`</span>
+
+        <span class="n">func</span><span class="o">.</span><span class="n">_abstract_</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># type: ignore[attr-defined]</span>
+
+        <span class="n">dispatch</span> <span class="o">=</span> <span class="n">_multipledispatch</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+
+        <span class="n">dispatch</span><span class="o">.</span><span class="n">canonical_name</span> <span class="o">=</span> <span class="n">canonical_name</span>
+
+        <span class="n">dispatch</span><span class="o">.</span><span class="n">discovery_func</span> <span class="o">=</span> <span class="n">discovery_func</span>
+
+        <span class="k">return</span> <span class="n">dispatch</span>
+
+    <span class="k">return</span> <span class="n">wrap</span>
 </code></pre></div>
 
 </details>
-<h2 id="functions">Functions</h2>
-<h3 id="patch_topologicalsorter_class_getitem">patch_TopologicalSorter_class_getitem</h3>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">patch_TopologicalSorter_class_getitem</span><span class="p">(</span>
-
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+<h2 id="variables">Variables</h2>
+<div class="codehilite"><pre><span></span><code><span class="n">REGISTERED</span>
 </code></pre></div>
 
-<p>Patch adding TopologicalSorter.<strong>class_getitem</strong> to support subscription.</p>
-<p>TopologicalSorter is considered Generic in typeshed (hence mypy expects a type arg),
-but is not at runtime.</p>
-<p>This has been fixed for 3.11+ (https://github.com/python/cpython/pull/28714).</p>
+<div class="codehilite"><pre><span></span><code><span class="n">RETURN</span>
+</code></pre></div>
+
+<h2 id="functions">Functions</h2>
+<h3 id="multipledispatch">multipledispatch</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">multipledispatch</span><span class="p">(</span>
+    <span class="n">canonical_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">discovery_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">~</span><span class="n">RETURN</span><span class="p">]],</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">dispatch</span><span class="o">.</span><span class="n">_multipledispatch</span><span class="p">[</span><span class="o">~</span><span class="n">RETURN</span><span class="p">]]</span>
+</code></pre></div>
+
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="nd">@no_type_check</span>  <span class="c1"># The mypy errors vary based on python version (and we error for unused ignores), so just skip completely</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">multipledispatch</span><span class="p">(</span>
 
-<span class="k">def</span> <span class="nf">patch_TopologicalSorter_class_getitem</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="nl">canonical_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">discovery_func</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Callable[[</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="k">None</span><span class="err">]]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span>
 
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Patch adding TopologicalSorter.__class_getitem__ to support subscription.</span>
+<span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Callable</span><span class="o">[</span><span class="n">[Callable[..., RETURN</span><span class="o">]</span><span class="err">]</span><span class="p">,</span><span class="w"> </span><span class="n">_multipledispatch</span><span class="o">[</span><span class="n">RETURN</span><span class="o">]</span><span class="err">]:</span>
 
-<span class="sd">    TopologicalSorter is considered Generic in typeshed (hence mypy expects a type arg),</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">wrap</span><span class="p">(</span><span class="nl">func</span><span class="p">:</span><span class="w"> </span><span class="n">Callable</span><span class="o">[</span><span class="n">..., RETURN</span><span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_multipledispatch</span><span class="o">[</span><span class="n">RETURN</span><span class="o">]</span><span class="err">:</span>
 
-<span class="sd">    but is not at runtime.</span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="n">handler</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">expected</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="err">`</span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="err">`</span>
 
-<span class="sd">    This has been fixed for 3.11+ (https://github.com/python/cpython/pull/28714).</span>
+<span class="w">        </span><span class="n">func</span><span class="p">.</span><span class="n">_abstract_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">True</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="o">[</span><span class="n">attr-defined</span><span class="o">]</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="w">        </span><span class="n">dispatch</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">_multipledispatch</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
-    <span class="kn">from</span> <span class="nn">graphlib</span> <span class="kn">import</span> <span class="n">TopologicalSorter</span>
+<span class="w">        </span><span class="n">dispatch</span><span class="p">.</span><span class="n">canonical_name</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">canonical_name</span>
 
-    <span class="kn">from</span> <span class="nn">types</span> <span class="kn">import</span> <span class="n">GenericAlias</span>
+<span class="w">        </span><span class="n">dispatch</span><span class="p">.</span><span class="n">discovery_func</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">discovery_func</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">TopologicalSorter</span><span class="p">,</span> <span class="s2">&quot;__class_getitem__&quot;</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">dispatch</span>
 
-        <span class="n">TopologicalSorter</span><span class="o">.</span><span class="n">__class_getitem__</span> <span class="o">=</span> <span class="nb">classmethod</span><span class="p">(</span><span class="n">GenericAlias</span><span class="p">)</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">wrap</span>
 </code></pre></div>
 
 </details>
@@ -1420,7 +1587,7 @@ but is not at runtime.</p>
     <div class="md-footer-nav">
       <nav class="md-footer-nav__inner md-grid">
         
-          <a href="../models/" title="Models" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+          <a href="../../formats/pickle/" title="Pickle" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
             <div class="md-flex__cell md-flex__cell--shrink">
               <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
             </div>
@@ -1429,19 +1596,19 @@ but is not at runtime.</p>
                 <span class="md-footer-nav__direction">
                   Previous
                 </span>
-                Models
+                Pickle
               </span>
             </div>
           </a>
         
         
-          <a href="../type_hints/" title="Type Hints" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
+          <a href="../" title="Index" class="md-flex md-footer-nav__link md-footer-nav__link--next" rel="next">
             <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
               <span class="md-flex__ellipsis">
                 <span class="md-footer-nav__direction">
                   Next
                 </span>
-                Type Hints
+                Index
               </span>
             </div>
             <div class="md-flex__cell md-flex__cell--shrink">

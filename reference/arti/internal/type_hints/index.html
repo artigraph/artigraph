@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.0">
+      <meta name="generator" content="mkdocs-1.2.4, mkdocs-material-7.3.0">
     
     
       
@@ -736,6 +736,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../dispatch/" class="md-nav__link">
+        Dispatch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../" class="md-nav__link">
         Index
       </a>
@@ -826,6 +840,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#discard_annotated" class="md-nav__link">
+    discard_Annotated
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#get_annotation_from_value" class="md-nav__link">
     get_annotation_from_value
   </a>
@@ -835,6 +856,13 @@
           <li class="md-nav__item">
   <a href="#get_class_type_vars" class="md-nav__link">
     get_class_type_vars
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_item_from_annotated" class="md-nav__link">
+    get_item_from_annotated
   </a>
   
 </li>
@@ -996,6 +1024,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../io/json_gcsfile_python/" class="md-nav__link">
+        Json Gcsfile Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../io/json_localfile_python/" class="md-nav__link">
         Json Localfile Python
       </a>
@@ -1012,6 +1054,20 @@
     <li class="md-nav__item">
       <a href="../../io/json_stringliteral_python/" class="md-nav__link">
         Json Stringliteral Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../io/pickle_gcsfile_python/" class="md-nav__link">
+        Pickle Gcsfile Python
       </a>
     </li>
   
@@ -1146,8 +1202,64 @@
   
   
     <li class="md-nav__item">
+      <a href="../../types/bigquery/" class="md-nav__link">
+        Bigquery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../types/" class="md-nav__link">
         Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/numpy/" class="md-nav__link">
+        Numpy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/pandas/" class="md-nav__link">
+        Pandas
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/pyarrow/" class="md-nav__link">
+        Pyarrow
       </a>
     </li>
   
@@ -1304,6 +1416,13 @@
       <ul class="md-nav__list">
         
           <li class="md-nav__item">
+  <a href="#discard_annotated" class="md-nav__link">
+    discard_Annotated
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#get_annotation_from_value" class="md-nav__link">
     get_annotation_from_value
   </a>
@@ -1313,6 +1432,13 @@
           <li class="md-nav__item">
   <a href="#get_class_type_vars" class="md-nav__link">
     get_class_type_vars
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_item_from_annotated" class="md-nav__link">
+    get_item_from_annotated
   </a>
   
 </li>
@@ -1430,8 +1556,6 @@
 
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_AnnotatedAlias</span>  <span class="c1"># type: ignore</span>
-
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
 
     <span class="n">TYPE_CHECKING</span><span class="p">,</span>
@@ -1439,6 +1563,10 @@
     <span class="n">Annotated</span><span class="p">,</span>
 
     <span class="n">Any</span><span class="p">,</span>
+
+    <span class="n">Literal</span><span class="p">,</span>
+
+    <span class="n">Optional</span><span class="p">,</span>
 
     <span class="n">TypeVar</span><span class="p">,</span>
 
@@ -1452,9 +1580,13 @@
 
     <span class="n">get_type_hints</span><span class="p">,</span>
 
-    <span class="n">no_type_check</span><span class="p">,</span>
+    <span class="n">overload</span><span class="p">,</span>
 
 <span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">arti.internal.utils</span> <span class="kn">import</span> <span class="n">one_or_none</span>
+
+<span class="n">_T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_T&quot;</span><span class="p">)</span>
 
 <span class="n">NoneType</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="kc">None</span><span class="p">))</span>  <span class="c1"># mypy otherwise treats type(None) as an object</span>
 
@@ -1462,15 +1594,11 @@
 
     <span class="c1"># If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the</span>
 
-    <span class="c1"># annotations.</span>
+    <span class="c1"># metadata.</span>
+
+    <span class="n">klass</span> <span class="o">=</span> <span class="n">discard_Annotated</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
 
     <span class="n">klass_origin</span><span class="p">,</span> <span class="n">klass_args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">klass</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">klass_origin</span> <span class="ow">is</span> <span class="n">Annotated</span><span class="p">:</span>
-
-        <span class="n">klass</span> <span class="o">=</span> <span class="n">klass_args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-        <span class="n">klass_origin</span><span class="p">,</span> <span class="n">klass_args</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">klass</span><span class="p">),</span> <span class="n">get_args</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
 
@@ -1558,9 +1686,13 @@
 
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;The origin conditions don&#39;t cover all cases!&quot;</span><span class="p">)</span>
 
+<span class="k">def</span> <span class="nf">discard_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+
+    <span class="k">return</span> <span class="n">get_args</span><span class="p">(</span><span class="n">type_</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span> <span class="k">else</span> <span class="n">type_</span>
+
 <span class="k">def</span> <span class="nf">get_class_type_vars</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 
-    <span class="sd">&quot;&quot;&quot;Get the bound type variables from a class</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the bound type variables from a class</span>
 
 <span class="sd">    NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.</span>
 
@@ -1572,7 +1704,7 @@
 
     <span class="k">else</span><span class="p">:</span>
 
-        <span class="n">bases</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">__orig_bases__</span>  <span class="c1"># type: ignore</span>
+        <span class="n">bases</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">__orig_bases__</span>  <span class="c1"># type: ignore[attr-defined]</span>
 
     <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
 
@@ -1592,6 +1724,52 @@
 
     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">klass</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> must subclass a subscripted Generic&quot;</span><span class="p">)</span>
 
+<span class="nd">@overload</span>
+
+<span class="k">def</span> <span class="nf">get_item_from_annotated</span><span class="p">(</span>
+
+    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">klass</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">is_subclass</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">True</span><span class="p">]</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">]]:</span>
+
+    <span class="o">...</span>
+
+<span class="nd">@overload</span>
+
+<span class="k">def</span> <span class="nf">get_item_from_annotated</span><span class="p">(</span>
+
+    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">klass</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">is_subclass</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="kc">False</span><span class="p">]</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_T</span><span class="p">]:</span>
+
+    <span class="o">...</span>
+
+<span class="nd">@overload</span>
+
+<span class="k">def</span> <span class="nf">get_item_from_annotated</span><span class="p">(</span>
+
+    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">klass</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">is_subclass</span><span class="p">:</span> <span class="nb">bool</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">_T</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">]]]:</span>
+
+    <span class="o">...</span>
+
+<span class="k">def</span> <span class="nf">get_item_from_annotated</span><span class="p">(</span>
+
+    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">klass</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">is_subclass</span><span class="p">:</span> <span class="nb">bool</span>
+
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">_T</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="n">_T</span><span class="p">]]]:</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">_</span><span class="p">,</span> <span class="o">*</span><span class="n">hints</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+    <span class="n">checker</span> <span class="o">=</span> <span class="n">lenient_issubclass</span> <span class="k">if</span> <span class="n">is_subclass</span> <span class="k">else</span> <span class="nb">isinstance</span>
+
+    <span class="k">return</span> <span class="n">one_or_none</span><span class="p">([</span><span class="n">hint</span> <span class="k">for</span> <span class="n">hint</span> <span class="ow">in</span> <span class="n">hints</span> <span class="k">if</span> <span class="n">checker</span><span class="p">(</span><span class="n">hint</span><span class="p">,</span> <span class="n">klass</span><span class="p">)],</span> <span class="n">item_name</span><span class="o">=</span><span class="n">klass</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+
 <span class="k">def</span> <span class="nf">get_annotation_from_value</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="n">NoneType</span><span class="p">,</span> <span class="nb">bool</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">str</span><span class="p">)):</span>
@@ -1608,9 +1786,9 @@
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
 
-                <span class="k">return</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">first_type</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+                <span class="k">return</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">first_type</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>  <span class="c1"># type: ignore[valid-type]</span>
 
-            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="n">first_type</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)[</span><span class="n">first_type</span><span class="p">]</span>  <span class="c1"># type: ignore[index]</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
 
@@ -1624,7 +1802,7 @@
 
         <span class="p">):</span>
 
-            <span class="k">return</span> <span class="nb">dict</span><span class="p">[</span><span class="n">first_key_type</span><span class="p">,</span> <span class="n">first_value_type</span><span class="p">]</span>  <span class="c1"># type: ignore</span>
+            <span class="k">return</span> <span class="nb">dict</span><span class="p">[</span><span class="n">first_key_type</span><span class="p">,</span> <span class="n">first_value_type</span><span class="p">]</span>  <span class="c1"># type: ignore[valid-type]</span>
 
         <span class="c1"># TODO: Implement with TypedDict to support Struct types...?</span>
 
@@ -1632,7 +1810,15 @@
 
 <span class="k">def</span> <span class="nf">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">class_or_tuple</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">))</span> <span class="ow">or</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span> <span class="ow">or</span> <span class="n">klass</span> <span class="ow">is</span> <span class="n">Any</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+
+        <span class="nb">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">GenericAlias</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">))</span>
+
+        <span class="ow">or</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
+
+        <span class="ow">or</span> <span class="n">klass</span> <span class="ow">is</span> <span class="n">Any</span>
+
+    <span class="p">):</span>
 
         <span class="k">return</span> <span class="kc">False</span>
 
@@ -1718,7 +1904,7 @@
 
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="o">.</span><span class="n">Signature</span><span class="p">:</span>
 
-    <span class="sd">&quot;&quot;&quot;Convenience wrapper around `inspect.signature`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convenience wrapper around `inspect.signature`.</span>
 
 <span class="sd">    The returned Signature will have `cls`/`self` parameters removed if `remove_owner` is `True` and</span>
 
@@ -1778,8 +1964,6 @@
 
     <span class="c1"># (and error) on other python versions.</span>
 
-    <span class="nd">@no_type_check</span>
-
     <span class="k">def</span> <span class="nf">is_union</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
         <span class="c1"># `Union[int, str]` or `int | str`</span>
@@ -1788,13 +1972,13 @@
 
 <span class="k">def</span> <span class="nf">is_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
-    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_AnnotatedAlias</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span> <span class="ow">is</span> <span class="n">Annotated</span>
 
 <span class="k">def</span> <span class="nf">is_generic_alias</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_GenericAlias</span>  <span class="c1"># type: ignore</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_GenericAlias</span>  <span class="c1"># type: ignore[attr-defined]</span>
 
-    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_GenericAlias</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="p">(</span><span class="n">_GenericAlias</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">GenericAlias</span><span class="p">))</span>
 
 <span class="k">def</span> <span class="nf">is_optional_hint</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
@@ -1813,6 +1997,20 @@
 </code></pre></div>
 
 <h2 id="functions">Functions</h2>
+<h3 id="discard_annotated">discard_Annotated</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">discard_Annotated</span><span class="p">(</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">discard_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span><span class="w"> </span><span class="kr">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kr">Any</span><span class="o">:</span>
+
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">type_</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="nf">if</span><span class="w"> </span><span class="n">is_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span><span class="w"> </span><span class="n">else</span><span class="w"> </span><span class="n">type_</span>
+</code></pre></div>
+
+</details>
 <h3 id="get_annotation_from_value">get_annotation_from_value</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_annotation_from_value</span><span class="p">(</span>
     <span class="n">value</span><span class="p">:</span> <span class="n">Any</span>
@@ -1821,43 +2019,43 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">get_annotation_from_value</span><span class="p">(</span><span class="k">value</span><span class="err">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ow">Any</span><span class="err">:</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">get_annotation_from_value</span><span class="p">(</span><span class="k">value</span><span class="err">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ow">Any</span><span class="err">:</span>
 
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">NoneType</span><span class="p">,</span><span class="w"> </span><span class="n">bool</span><span class="p">,</span><span class="w"> </span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="nc">date</span><span class="p">,</span><span class="w"> </span><span class="nc">datetime</span><span class="p">,</span><span class="w"> </span><span class="nc">float</span><span class="p">,</span><span class="w"> </span><span class="nc">int</span><span class="p">,</span><span class="w"> </span><span class="nf">str</span><span class="p">))</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">NoneType</span><span class="p">,</span><span class="w"> </span><span class="n">bool</span><span class="p">,</span><span class="w"> </span><span class="n">bytes</span><span class="p">,</span><span class="w"> </span><span class="nc">date</span><span class="p">,</span><span class="w"> </span><span class="nc">datetime</span><span class="p">,</span><span class="w"> </span><span class="nc">float</span><span class="p">,</span><span class="w"> </span><span class="nc">int</span><span class="p">,</span><span class="w"> </span><span class="nf">str</span><span class="p">))</span><span class="err">:</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">value</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">value</span><span class="p">)</span>
 
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span><span class="w"> </span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="k">set</span><span class="p">,</span><span class="w"> </span><span class="n">frozenset</span><span class="p">))</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="n">tuple</span><span class="p">,</span><span class="w"> </span><span class="n">list</span><span class="p">,</span><span class="w"> </span><span class="k">set</span><span class="p">,</span><span class="w"> </span><span class="n">frozenset</span><span class="p">))</span><span class="err">:</span>
 
-<span class="w">        </span><span class="k">first</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="k">value</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="k">first</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">tail</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="k">value</span><span class="p">)</span>
 
-<span class="w">        </span><span class="n">first_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">first</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">first_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">first</span><span class="p">)</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">all</span><span class="p">(</span><span class="n">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">first_type</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">tail</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">all</span><span class="p">(</span><span class="n">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">first_type</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">tail</span><span class="p">)</span><span class="err">:</span>
 
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="n">tuple</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="n">tuple</span><span class="p">)</span><span class="err">:</span>
 
-<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">tuple</span><span class="o">[</span><span class="n">first_type, ...</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="w"></span>
+<span class="w">                </span><span class="k">return</span><span class="w"> </span><span class="n">tuple</span><span class="o">[</span><span class="n">first_type, ...</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="o">[</span><span class="n">valid-type</span><span class="o">]</span>
 
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">value</span><span class="p">)</span><span class="o">[</span><span class="n">first_type</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">type</span><span class="p">(</span><span class="k">value</span><span class="p">)</span><span class="o">[</span><span class="n">first_type</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="o">[</span><span class="n">index</span><span class="o">]</span>
 
-<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="n">dict</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="k">value</span><span class="p">,</span><span class="w"> </span><span class="n">dict</span><span class="p">)</span><span class="err">:</span>
 
-<span class="w">        </span><span class="n">items</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">value</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="w"></span>
+<span class="w">        </span><span class="n">items</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">value</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
 
-<span class="w">        </span><span class="n">first_key_type</span><span class="p">,</span><span class="w"> </span><span class="n">first_value_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">first_key_type</span><span class="p">,</span><span class="w"> </span><span class="n">first_value_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">type</span><span class="p">(</span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="n">items</span><span class="p">)</span><span class="o">[</span><span class="n">0</span><span class="o">]</span><span class="p">)</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">all</span><span class="p">(</span><span class="w"></span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">all</span><span class="p">(</span>
 
-<span class="w">            </span><span class="n">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">first_key_type</span><span class="p">)</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">first_value_type</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">items</span><span class="w"></span>
+<span class="w">            </span><span class="n">isinstance</span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">first_key_type</span><span class="p">)</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">first_value_type</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="p">(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">items</span>
 
-<span class="w">        </span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<span class="w">        </span><span class="p">)</span><span class="err">:</span>
 
-<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">dict</span><span class="o">[</span><span class="n">first_key_type, first_value_type</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="w"></span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">dict</span><span class="o">[</span><span class="n">first_key_type, first_value_type</span><span class="o">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="o">[</span><span class="n">valid-type</span><span class="o">]</span>
 
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Implement</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">TypedDict</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="n">Struct</span><span class="w"> </span><span class="n">types</span><span class="p">...</span><span class="vm">?</span><span class="w"></span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Implement</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">TypedDict</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="n">Struct</span><span class="w"> </span><span class="n">types</span><span class="p">...</span><span class="vm">?</span>
 
-<span class="w">    </span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Unable to determine type of {value}&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Unable to determine type of {value}&quot;</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -1871,39 +2069,68 @@
 <p>NOTE: Only vars from the <em>first</em> Generic in the mro <em>with all variables bound</em> will be returned.</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">get_class_type_vars</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span> <span class="n">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">tuple</span><span class="p">[</span><span class="n">type</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">get_class_type_vars</span><span class="p">(</span><span class="n">klass</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">tuple</span><span class="p">[</span><span class="n">type</span><span class="p">,</span><span class="w"> </span><span class="o">...</span><span class="p">]:</span>
 
-    <span class="sd">&quot;&quot;&quot;Get the bound type variables from a class</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the bound type variables from a class</span>
 
 <span class="sd">    NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">if</span> <span class="n">is_generic_alias</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="n">is_generic_alias</span><span class="p">(</span><span class="n">klass</span><span class="p">):</span>
 
-        <span class="n">bases</span> <span class="o">=</span> <span class="p">(</span><span class="n">klass</span><span class="p">,)</span>
+<span class="w">        </span><span class="n">bases</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">klass</span><span class="p">,)</span>
 
-    <span class="k">else</span><span class="p">:</span>
+<span class="w">    </span><span class="k">else</span><span class="p">:</span>
 
-        <span class="n">bases</span> <span class="o">=</span> <span class="n">klass</span><span class="o">.</span><span class="n">__orig_bases__</span>  <span class="c1"># type: ignore</span>
+<span class="w">        </span><span class="n">bases</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">klass</span><span class="o">.</span><span class="n">__orig_bases__</span><span class="w">  </span><span class="c1"># type: ignore[attr-defined]</span>
 
-    <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
+<span class="w">    </span><span class="k">for</span><span class="w"> </span><span class="n">base</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">bases</span><span class="p">:</span>
 
-        <span class="n">base_origin</span> <span class="o">=</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+<span class="w">        </span><span class="n">base_origin</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_origin</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">base_origin</span> <span class="k">is</span> <span class="n">None</span><span class="p">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">base_origin</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">None</span><span class="p">:</span>
 
-            <span class="k">continue</span>
+<span class="w">            </span><span class="k">continue</span>
 
-        <span class="n">args</span> <span class="o">=</span> <span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
+<span class="w">        </span><span class="n">args</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">any</span><span class="p">(</span><span class="n">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">)</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">):</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">any</span><span class="p">(</span><span class="n">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="n">TypeVar</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">arg</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">args</span><span class="p">):</span>
 
-            <span class="k">continue</span>
+<span class="w">            </span><span class="k">continue</span>
 
-        <span class="k">return</span> <span class="n">args</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">args</span>
 
-    <span class="n">raise</span> <span class="n">TypeError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{klass.__name__} must subclass a subscripted Generic&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="n">raise</span><span class="w"> </span><span class="n">TypeError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{klass.__name__} must subclass a subscripted Generic&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h3 id="get_item_from_annotated">get_item_from_annotated</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_item_from_annotated</span><span class="p">(</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">klass</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="o">~</span><span class="n">_T</span><span class="p">],</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">is_subclass</span><span class="p">:</span> <span class="nb">bool</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="o">~</span><span class="n">_T</span><span class="p">,</span> <span class="nb">type</span><span class="p">[</span><span class="o">~</span><span class="n">_T</span><span class="p">],</span> <span class="n">NoneType</span><span class="p">]</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span>
+
+<span class="w">    </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="nl">klass</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="o">[</span><span class="n">_T</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">is_subclass</span><span class="p">:</span><span class="w"> </span><span class="n">bool</span>
+
+<span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Union[_T, type[_T</span><span class="o">]</span><span class="err">]]:</span>
+
+<span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">is_Annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span><span class="err">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">None</span>
+
+<span class="w">    </span><span class="n">_</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">checker</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">lenient_issubclass</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">is_subclass</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="n">isinstance</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">one_or_none</span><span class="p">(</span><span class="o">[</span><span class="n">hint for hint in hints if checker(hint, klass)</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">item_name</span><span class="o">=</span><span class="n">klass</span><span class="p">.</span><span class="n">__name__</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -1915,9 +2142,9 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span> <span class="kr">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">bool</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">is_Annotated</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span><span class="w"> </span><span class="kr">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">bool</span><span class="o">:</span>
 
-    <span class="kr">return</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_AnnotatedAlias</span><span class="p">)</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">Annotated</span>
 </code></pre></div>
 
 </details>
@@ -1931,9 +2158,9 @@
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">is_generic_alias</span><span class="p">(</span><span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
 
-    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_GenericAlias</span>  <span class="c1"># type: ignore</span>
+    <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">_GenericAlias</span>  <span class="c1"># type: ignore[attr-defined]</span>
 
-    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">_GenericAlias</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="p">(</span><span class="n">_GenericAlias</span><span class="p">,</span> <span class="n">types</span><span class="o">.</span><span class="n">GenericAlias</span><span class="p">))</span>
 </code></pre></div>
 
 </details>
@@ -1945,11 +2172,11 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">is_optional_hint</span><span class="p">(</span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">bool</span><span class="p">:</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">is_optional_hint</span><span class="p">(</span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">bool</span><span class="p">:</span>
 
-<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">x</span><span class="o">]</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">represented</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ow">Union</span><span class="o">[</span><span class="n">x, NoneType</span><span class="o">]</span><span class="w"></span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">x</span><span class="o">]</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">represented</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="ow">Union</span><span class="o">[</span><span class="n">x, NoneType</span><span class="o">]</span>
 
-<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">is_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">))</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">NoneType</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span><span class="w"></span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">is_union</span><span class="p">(</span><span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">))</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">NoneType</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -1961,13 +2188,11 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@no_type_check</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">is_union</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span><span class="w"> </span><span class="kr">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">bool</span><span class="o">:</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">is_union</span><span class="p">(</span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">bool</span><span class="p">:</span><span class="w"></span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="err">`</span><span class="n">Union</span><span class="p">[</span><span class="n">int</span><span class="p">,</span><span class="w"> </span><span class="n">str</span><span class="p">]</span><span class="err">`</span><span class="w"> </span><span class="kr">or</span><span class="w"> </span><span class="err">`</span><span class="n">int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">str</span><span class="err">`</span>
 
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="err">`</span><span class="ow">Union</span><span class="o">[</span><span class="n">int, str</span><span class="o">]</span><span class="err">`</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="err">`</span><span class="nc">int</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="nf">str</span><span class="err">`</span><span class="w"></span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type_</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">Union</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">type_</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">types</span><span class="p">.</span><span class="n">UnionType</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">noqa</span><span class="p">:</span><span class="w"> </span><span class="n">E721</span><span class="w"></span>
+<span class="w">        </span><span class="kr">return</span><span class="w"> </span><span class="n">type_</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">Union</span><span class="w"> </span><span class="kr">or</span><span class="w"> </span><span class="n">type_</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">types</span><span class="p">.</span><span class="n">UnionType</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="n">noqa</span><span class="o">:</span><span class="w"> </span><span class="n">E721</span>
 </code></pre></div>
 
 </details>
@@ -1979,9 +2204,9 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">is_union_hint</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span> <span class="kr">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">bool</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">is_union_hint</span><span class="p">(</span><span class="n">type_</span><span class="o">:</span><span class="w"> </span><span class="kr">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">bool</span><span class="o">:</span>
 
-    <span class="kr">return</span> <span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span> <span class="n">is</span> <span class="n">Union</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="n">get_origin</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">Union</span>
 </code></pre></div>
 
 </details>
@@ -1994,25 +2219,33 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="o">:</span> <span class="kr">Any</span><span class="p">,</span> <span class="n">class_or_tuple</span><span class="o">:</span> <span class="n">Union</span><span class="p">[</span><span class="kr">type</span><span class="p">,</span> <span class="n">tuple</span><span class="p">[</span><span class="kr">type</span><span class="p">,</span> <span class="p">...]])</span> <span class="o">-&gt;</span> <span class="n">bool</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="o">:</span><span class="w"> </span><span class="kr">Any</span><span class="p">,</span><span class="w"> </span><span class="n">class_or_tuple</span><span class="o">:</span><span class="w"> </span><span class="n">Union</span><span class="p">[</span><span class="kr">type</span><span class="p">,</span><span class="w"> </span><span class="n">tuple</span><span class="p">[</span><span class="kr">type</span><span class="p">,</span><span class="w"> </span><span class="p">...]])</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">bool</span><span class="o">:</span>
 
-    <span class="nf">if</span> <span class="kr">not</span> <span class="p">(</span><span class="n">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="p">(</span><span class="kr">type</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">))</span> <span class="kr">or</span> <span class="n">is_Annotated</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span> <span class="kr">or</span> <span class="n">klass</span> <span class="n">is</span> <span class="kr">Any</span><span class="p">)</span><span class="o">:</span>
+<span class="w">    </span><span class="nf">if</span><span class="w"> </span><span class="kr">not</span><span class="w"> </span><span class="p">(</span>
 
-        <span class="kr">return</span> <span class="kr">False</span>
+<span class="w">        </span><span class="n">isinstance</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span><span class="w"> </span><span class="p">(</span><span class="kr">type</span><span class="p">,</span><span class="w"> </span><span class="n">types</span><span class="p">.</span><span class="n">GenericAlias</span><span class="p">,</span><span class="w"> </span><span class="n">TypeVar</span><span class="p">))</span>
 
-    <span class="nf">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">class_or_tuple</span><span class="p">,</span> <span class="n">tuple</span><span class="p">)</span><span class="o">:</span>
+<span class="w">        </span><span class="kr">or</span><span class="w"> </span><span class="n">is_Annotated</span><span class="p">(</span><span class="n">klass</span><span class="p">)</span>
 
-        <span class="kr">return</span> <span class="kr">any</span><span class="p">(</span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">subtype</span><span class="p">)</span> <span class="n">for</span> <span class="n">subtype</span> <span class="kr">in</span> <span class="n">class_or_tuple</span><span class="p">)</span>
+<span class="w">        </span><span class="kr">or</span><span class="w"> </span><span class="n">klass</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="kr">Any</span>
 
-    <span class="n">check_type</span> <span class="o">=</span> <span class="n">class_or_tuple</span>
+<span class="w">    </span><span class="p">)</span><span class="o">:</span>
 
-    <span class="err">#</span> <span class="n">NOTE</span><span class="o">:</span> <span class="n">py</span> <span class="mf">3.10</span> <span class="n">supports</span> <span class="n">issubclass</span> <span class="n">with</span> <span class="n">Unions</span> <span class="p">(</span><span class="n">eg</span><span class="o">:</span> <span class="err">`</span><span class="n">issubclass</span><span class="p">(</span><span class="n">str</span><span class="p">,</span> <span class="n">str</span> <span class="o">|</span> <span class="n">int</span><span class="p">)</span><span class="err">`</span><span class="p">)</span>
+<span class="w">        </span><span class="kr">return</span><span class="w"> </span><span class="kr">False</span>
 
-    <span class="nf">if</span> <span class="n">is_union_hint</span><span class="p">(</span><span class="n">check_type</span><span class="p">)</span><span class="o">:</span>
+<span class="w">    </span><span class="nf">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">class_or_tuple</span><span class="p">,</span><span class="w"> </span><span class="n">tuple</span><span class="p">)</span><span class="o">:</span>
 
-        <span class="kr">return</span> <span class="kr">any</span><span class="p">(</span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">subtype</span><span class="p">)</span> <span class="n">for</span> <span class="n">subtype</span> <span class="kr">in</span> <span class="n">get_args</span><span class="p">(</span><span class="n">check_type</span><span class="p">))</span>
+<span class="w">        </span><span class="kr">return</span><span class="w"> </span><span class="kr">any</span><span class="p">(</span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span><span class="w"> </span><span class="n">subtype</span><span class="p">)</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">subtype</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">class_or_tuple</span><span class="p">)</span>
 
-    <span class="kr">return</span> <span class="n">_check_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">check_type</span><span class="p">)</span>
+<span class="w">    </span><span class="n">check_type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">class_or_tuple</span>
+
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">NOTE</span><span class="o">:</span><span class="w"> </span><span class="n">py</span><span class="w"> </span><span class="mf">3.10</span><span class="w"> </span><span class="n">supports</span><span class="w"> </span><span class="n">issubclass</span><span class="w"> </span><span class="n">with</span><span class="w"> </span><span class="n">Unions</span><span class="w"> </span><span class="p">(</span><span class="n">eg</span><span class="o">:</span><span class="w"> </span><span class="err">`</span><span class="n">issubclass</span><span class="p">(</span><span class="n">str</span><span class="p">,</span><span class="w"> </span><span class="n">str</span><span class="w"> </span><span class="o">|</span><span class="w"> </span><span class="n">int</span><span class="p">)</span><span class="err">`</span><span class="p">)</span>
+
+<span class="w">    </span><span class="nf">if</span><span class="w"> </span><span class="n">is_union_hint</span><span class="p">(</span><span class="n">check_type</span><span class="p">)</span><span class="o">:</span>
+
+<span class="w">        </span><span class="kr">return</span><span class="w"> </span><span class="kr">any</span><span class="p">(</span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span><span class="w"> </span><span class="n">subtype</span><span class="p">)</span><span class="w"> </span><span class="n">for</span><span class="w"> </span><span class="n">subtype</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">get_args</span><span class="p">(</span><span class="n">check_type</span><span class="p">))</span>
+
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="n">_check_issubclass</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span><span class="w"> </span><span class="n">check_type</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -2031,21 +2264,21 @@
 <code>tuple[...]</code> converted to <code>tuple(...)</code> in the <code>return_annotation</code>.</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">signature</span><span class="p">(</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">signature</span><span class="p">(</span>
 
-    <span class="n">fn</span><span class="o">:</span> <span class="n">Callable</span><span class="err">[</span><span class="p">...,</span> <span class="k">Any</span><span class="err">]</span><span class="p">,</span>
+<span class="w">    </span><span class="n">fn</span><span class="o">:</span><span class="w"> </span><span class="n">Callable</span><span class="err">[</span><span class="p">...,</span><span class="w"> </span><span class="k">Any</span><span class="err">]</span><span class="p">,</span>
 
-    <span class="o">*</span><span class="p">,</span>
+<span class="w">    </span><span class="o">*</span><span class="p">,</span>
 
-    <span class="n">follow_wrapped</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">True</span><span class="p">,</span>
+<span class="w">    </span><span class="n">follow_wrapped</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span>
 
-    <span class="n">force_tuple_return</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">False</span><span class="p">,</span>
+<span class="w">    </span><span class="n">force_tuple_return</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span>
 
-    <span class="n">remove_owner</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">True</span><span class="p">,</span>
+<span class="w">    </span><span class="n">remove_owner</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span>
 
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="o">:</span>
+<span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="o">:</span>
 
-    <span class="s2">&quot;</span><span class="se">&quot;&quot;</span><span class="s2">Convenience wrapper around `inspect.signature`.</span>
+<span class="w">    </span><span class="s2">&quot;</span><span class="se">&quot;&quot;</span><span class="s2">Convenience wrapper around `inspect.signature`.</span>
 
 <span class="s2">    The returned Signature will have `cls`/`self` parameters removed if `remove_owner` is `True` and</span>
 
@@ -2053,17 +2286,17 @@
 
 <span class="s2">    </span><span class="se">&quot;&quot;</span><span class="s2">&quot;</span>
 
-    <span class="k">return</span> <span class="n">tidy_signature</span><span class="p">(</span>
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">tidy_signature</span><span class="p">(</span>
 
-        <span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span>
+<span class="w">        </span><span class="n">fn</span><span class="o">=</span><span class="n">fn</span><span class="p">,</span>
 
-        <span class="n">sig</span><span class="o">=</span><span class="n">inspect</span><span class="p">.</span><span class="n">signature</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">follow_wrapped</span><span class="o">=</span><span class="n">follow_wrapped</span><span class="p">),</span>
+<span class="w">        </span><span class="n">sig</span><span class="o">=</span><span class="n">inspect</span><span class="p">.</span><span class="n">signature</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span><span class="w"> </span><span class="n">follow_wrapped</span><span class="o">=</span><span class="n">follow_wrapped</span><span class="p">),</span>
 
-        <span class="n">force_tuple_return</span><span class="o">=</span><span class="n">force_tuple_return</span><span class="p">,</span>
+<span class="w">        </span><span class="n">force_tuple_return</span><span class="o">=</span><span class="n">force_tuple_return</span><span class="p">,</span>
 
-        <span class="n">remove_owner</span><span class="o">=</span><span class="n">remove_owner</span><span class="p">,</span>
+<span class="w">        </span><span class="n">remove_owner</span><span class="o">=</span><span class="n">remove_owner</span><span class="p">,</span>
 
-    <span class="p">)</span>
+<span class="w">    </span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -2079,47 +2312,47 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">def</span> <span class="n">tidy_signature</span><span class="p">(</span>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">tidy_signature</span><span class="p">(</span>
 
-    <span class="n">fn</span><span class="o">:</span> <span class="n">Callable</span><span class="p">[...,</span> <span class="kr">Any</span><span class="p">],</span>
+<span class="w">    </span><span class="n">fn</span><span class="o">:</span><span class="w"> </span><span class="n">Callable</span><span class="p">[...,</span><span class="w"> </span><span class="kr">Any</span><span class="p">],</span>
 
-    <span class="n">sig</span><span class="o">:</span> <span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="p">,</span>
+<span class="w">    </span><span class="n">sig</span><span class="o">:</span><span class="w"> </span><span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="p">,</span>
 
-    <span class="o">*</span><span class="p">,</span>
+<span class="w">    </span><span class="o">*</span><span class="p">,</span>
 
-    <span class="n">force_tuple_return</span><span class="o">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kr">False</span><span class="p">,</span>
+<span class="w">    </span><span class="n">force_tuple_return</span><span class="o">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">False</span><span class="p">,</span>
 
-    <span class="n">remove_owner</span><span class="o">:</span> <span class="n">bool</span> <span class="o">=</span> <span class="kr">False</span><span class="p">,</span>
+<span class="w">    </span><span class="n">remove_owner</span><span class="o">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">False</span><span class="p">,</span>
 
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="o">:</span>
+<span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">inspect</span><span class="p">.</span><span class="n">Signature</span><span class="o">:</span>
 
-    <span class="n">type_hints</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">include_extras</span><span class="o">=</span><span class="kr">True</span><span class="p">)</span>
+<span class="w">    </span><span class="n">type_hints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_type_hints</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span><span class="w"> </span><span class="n">include_extras</span><span class="o">=</span><span class="kr">True</span><span class="p">)</span>
 
-    <span class="n">sig</span> <span class="o">=</span> <span class="n">sig</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">return_annotation</span><span class="o">=</span><span class="n">type_hints</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;return&quot;</span><span class="p">,</span> <span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span><span class="p">))</span>
+<span class="w">    </span><span class="n">sig</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">sig</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">return_annotation</span><span class="o">=</span><span class="n">type_hints</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="s">&quot;return&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span><span class="p">))</span>
 
-    <span class="kr">return</span> <span class="n">sig</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span>
+<span class="w">    </span><span class="kr">return</span><span class="w"> </span><span class="n">sig</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span>
 
-        <span class="n">parameters</span><span class="o">=</span><span class="p">[</span>
+<span class="w">        </span><span class="n">parameters</span><span class="o">=</span><span class="p">[</span>
 
-            <span class="n">p</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">annotation</span><span class="o">=</span><span class="n">type_hints</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="p">.</span><span class="n">annotation</span><span class="p">))</span>
+<span class="w">            </span><span class="n">p</span><span class="p">.</span><span class="n">replace</span><span class="p">(</span><span class="n">annotation</span><span class="o">=</span><span class="n">type_hints</span><span class="p">.</span><span class="n">get</span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">p</span><span class="p">.</span><span class="n">annotation</span><span class="p">))</span>
 
-            <span class="n">for</span> <span class="n">p</span> <span class="kr">in</span> <span class="n">sig</span><span class="p">.</span><span class="n">parameters</span><span class="p">.</span><span class="n">values</span><span class="p">()</span>
+<span class="w">            </span><span class="n">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="n">sig</span><span class="p">.</span><span class="n">parameters</span><span class="p">.</span><span class="n">values</span><span class="p">()</span>
 
-            <span class="nf">if</span> <span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">name</span> <span class="kr">not</span> <span class="kr">in</span> <span class="p">(</span><span class="s">&quot;cls&quot;</span><span class="p">,</span> <span class="s">&quot;self&quot;</span><span class="p">)</span> <span class="nf">if</span> <span class="n">remove_owner</span> <span class="n">else</span> <span class="kr">True</span><span class="p">)</span>
+<span class="w">            </span><span class="nf">if</span><span class="w"> </span><span class="p">(</span><span class="n">p</span><span class="p">.</span><span class="n">name</span><span class="w"> </span><span class="kr">not</span><span class="w"> </span><span class="kr">in</span><span class="w"> </span><span class="p">(</span><span class="s">&quot;cls&quot;</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;self&quot;</span><span class="p">)</span><span class="w"> </span><span class="nf">if</span><span class="w"> </span><span class="n">remove_owner</span><span class="w"> </span><span class="n">else</span><span class="w"> </span><span class="kr">True</span><span class="p">)</span>
 
-        <span class="p">],</span>
+<span class="w">        </span><span class="p">],</span>
 
-        <span class="n">return_annotation</span><span class="o">=</span><span class="p">(</span>
+<span class="w">        </span><span class="n">return_annotation</span><span class="o">=</span><span class="p">(</span>
 
-            <span class="n">sig</span><span class="p">.</span><span class="n">empty</span>
+<span class="w">            </span><span class="n">sig</span><span class="p">.</span><span class="n">empty</span>
 
-            <span class="nf">if</span> <span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span> <span class="n">is</span> <span class="n">sig</span><span class="p">.</span><span class="n">empty</span>
+<span class="w">            </span><span class="nf">if</span><span class="w"> </span><span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span><span class="w"> </span><span class="n">is</span><span class="w"> </span><span class="n">sig</span><span class="p">.</span><span class="n">empty</span>
 
-            <span class="n">else</span> <span class="n">_tidy_return</span><span class="p">(</span><span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span><span class="p">,</span> <span class="n">force_tuple_return</span><span class="o">=</span><span class="n">force_tuple_return</span><span class="p">)</span>
+<span class="w">            </span><span class="n">else</span><span class="w"> </span><span class="n">_tidy_return</span><span class="p">(</span><span class="n">sig</span><span class="p">.</span><span class="n">return_annotation</span><span class="p">,</span><span class="w"> </span><span class="n">force_tuple_return</span><span class="o">=</span><span class="n">force_tuple_return</span><span class="p">)</span>
 
-        <span class="p">),</span>
+<span class="w">        </span><span class="p">),</span>
 
-    <span class="p">)</span>
+<span class="w">    </span><span class="p">)</span>
 </code></pre></div>
 
 </details>

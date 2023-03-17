@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.0">
+      <meta name="generator" content="mkdocs-1.2.4, mkdocs-material-7.3.0">
     
     
       
@@ -736,6 +736,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../dispatch/" class="md-nav__link">
+        Dispatch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../" class="md-nav__link">
         Index
       </a>
@@ -786,6 +800,26 @@
   <a href="#variables" class="md-nav__link">
     Variables
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_field_default" class="md-nav__link">
+    get_field_default
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1045,6 +1079,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../io/json_gcsfile_python/" class="md-nav__link">
+        Json Gcsfile Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../io/json_localfile_python/" class="md-nav__link">
         Json Localfile Python
       </a>
@@ -1061,6 +1109,20 @@
     <li class="md-nav__item">
       <a href="../../io/json_stringliteral_python/" class="md-nav__link">
         Json Stringliteral Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../io/pickle_gcsfile_python/" class="md-nav__link">
+        Pickle Gcsfile Python
       </a>
     </li>
   
@@ -1195,8 +1257,64 @@
   
   
     <li class="md-nav__item">
+      <a href="../../types/bigquery/" class="md-nav__link">
+        Bigquery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../types/" class="md-nav__link">
         Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/numpy/" class="md-nav__link">
+        Numpy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/pandas/" class="md-nav__link">
+        Pandas
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/pyarrow/" class="md-nav__link">
+        Pyarrow
       </a>
     </li>
   
@@ -1341,6 +1459,26 @@
   <a href="#variables" class="md-nav__link">
     Variables
   </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#functions" class="md-nav__link">
+    Functions
+  </a>
+  
+    <nav class="md-nav" aria-label="Functions">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#get_field_default" class="md-nav__link">
+    get_field_default
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
   
 </li>
       
@@ -1522,7 +1660,7 @@
 
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">cached_property</span><span class="p">,</span> <span class="n">partial</span>
 
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="p">(</span>
 
@@ -1554,7 +1692,7 @@
 
 <span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">is_union</span><span class="p">,</span> <span class="n">lenient_issubclass</span>
 
-<span class="kn">from</span> <span class="nn">arti.internal.utils</span> <span class="kn">import</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">classproperty</span><span class="p">,</span> <span class="n">frozendict</span>
+<span class="kn">from</span> <span class="nn">arti.internal.utils</span> <span class="kn">import</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">frozendict</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
 
@@ -1654,9 +1792,15 @@
 
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing handler for </span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
 
+    <span class="c1"># Models are immutable, so we convert all Mappings to frozendicts.</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">frozendict</span><span class="p">):</span>
 
         <span class="n">value</span> <span class="o">=</span> <span class="n">frozendict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+
+        <span class="n">type_</span> <span class="o">=</span> <span class="n">frozendict</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">type_</span><span class="p">):</span>
 
@@ -1734,7 +1878,7 @@
 
     <span class="k">def</span> <span class="nf">_strict_types</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="n">ModelField</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 
-        <span class="sd">&quot;&quot;&quot;Check that the value is a stricter instance of the declared type annotation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that the value is a stricter instance of the declared type annotation.</span>
 
 <span class="sd">        Pydantic will attempt to *parse* values (eg: &quot;5&quot; -&gt; 5), but we&#39;d prefer stricter values for</span>
 
@@ -1790,7 +1934,9 @@
 
         <span class="n">frozen</span> <span class="o">=</span> <span class="kc">True</span>
 
-        <span class="n">keep_untouched</span> <span class="o">=</span> <span class="p">(</span><span class="n">cached_property</span><span class="p">,</span> <span class="n">classproperty</span><span class="p">)</span>
+        <span class="n">json_encoders</span> <span class="o">=</span> <span class="p">{</span><span class="n">frozendict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">}</span>
+
+        <span class="n">keep_untouched</span> <span class="o">=</span> <span class="p">(</span><span class="n">cached_property</span><span class="p">,)</span>
 
         <span class="n">smart_union</span> <span class="o">=</span> <span class="kc">True</span>
 
@@ -1842,7 +1988,7 @@
 
     <span class="nd">@staticmethod</span>
 
-    <span class="k">def</span> <span class="nf">_fingerprint_json_encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_fingerprint_json_encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">encoder</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">pydantic_json_encoder</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 
         <span class="kn">from</span> <span class="nn">arti.fingerprints</span> <span class="kn">import</span> <span class="n">Fingerprint</span>
 
@@ -1854,7 +2000,7 @@
 
             <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">fingerprint</span>
 
-        <span class="k">return</span> <span class="n">pydantic_json_encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
     <span class="nd">@property</span>
 
@@ -1890,7 +2036,7 @@
 
             <span class="n">data</span><span class="p">,</span>
 
-            <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_json_encoder</span><span class="p">,</span>
+            <span class="n">default</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_json_encoder</span><span class="p">,</span> <span class="n">encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__json_encoder__</span><span class="p">),</span>
 
         <span class="p">)</span>
 
@@ -1917,6 +2063,10 @@
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Type&quot;</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="n">type_</span>
+
+<span class="k">def</span> <span class="nf">get_field_default</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">field</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]:</span>
+
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">__fields__</span><span class="p">[</span><span class="n">field</span><span class="p">]</span><span class="o">.</span><span class="n">default</span>
 </code></pre></div>
 
 </details>
@@ -1924,6 +2074,22 @@
 <div class="codehilite"><pre><span></span><code><span class="n">TYPE_CHECKING</span>
 </code></pre></div>
 
+<h2 id="functions">Functions</h2>
+<h3 id="get_field_default">get_field_default</h3>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_field_default</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">],</span>
+    <span class="n">field</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="n">def</span><span class="w"> </span><span class="n">get_field_default</span><span class="p">(</span><span class="nl">model</span><span class="p">:</span><span class="w"> </span><span class="n">type</span><span class="o">[</span><span class="n">Model</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="nl">field</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Any</span><span class="o">]</span><span class="err">:</span>
+
+<span class="w">    </span><span class="k">return</span><span class="w"> </span><span class="n">model</span><span class="p">.</span><span class="n">__fields__</span><span class="o">[</span><span class="n">field</span><span class="o">]</span><span class="p">.</span><span class="k">default</span>
+</code></pre></div>
+
+</details>
 <h2 id="classes">Classes</h2>
 <h3 id="model">Model</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span>
@@ -1934,75 +2100,75 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="n">Model</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="n">Model</span><span class="p">(</span><span class="n">BaseModel</span><span class="p">):</span>
 
-    <span class="c1"># A model can be marked _abstract_ to prevent direct instantiation, such as when it is intended</span>
+<span class="w">    </span><span class="c1"># A model can be marked _abstract_ to prevent direct instantiation, such as when it is intended</span>
 
-    <span class="c1"># as a base class for other models with arbitrary data. As the subclasses of an _abstract_ model</span>
+<span class="w">    </span><span class="c1"># as a base class for other models with arbitrary data. As the subclasses of an _abstract_ model</span>
 
-    <span class="c1"># have unknown fields (varying per subclass), we don&#39;t have targets to mark abstract with</span>
+<span class="w">    </span><span class="c1"># have unknown fields (varying per subclass), we don&#39;t have targets to mark abstract with</span>
 
-    <span class="c1"># abc.ABC nor typing.Protocol. See [1] for more context.</span>
+<span class="w">    </span><span class="c1"># abc.ABC nor typing.Protocol. See [1] for more context.</span>
 
-    <span class="c1">#</span>
+<span class="w">    </span><span class="c1">#</span>
 
-    <span class="c1"># 1: https://github.com/artigraph/artigraph/pull/60#discussion_r669089086</span>
+<span class="w">    </span><span class="c1"># 1: https://github.com/artigraph/artigraph/pull/60#discussion_r669089086</span>
 
-    <span class="n">_abstract_</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb nb-Type">bool</span><span class="p">]</span> <span class="o">=</span> <span class="n">True</span>
+<span class="w">    </span><span class="n">_abstract_</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="p">[</span><span class="nb nb-Type">bool</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">True</span>
 
-    <span class="n">_class_key_</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="k">class_name</span><span class="p">()</span>
+<span class="w">    </span><span class="n">_class_key_</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">class_name</span><span class="p">()</span>
 
-    <span class="n">_fingerprint_excludes_</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">None</span>
+<span class="w">    </span><span class="n">_fingerprint_excludes_</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">None</span>
 
-    <span class="n">_fingerprint_includes_</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="n">None</span>
+<span class="w">    </span><span class="n">_fingerprint_includes_</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="n">frozenset</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">None</span>
 
-    <span class="err">@</span><span class="n">classmethod</span>
+<span class="w">    </span><span class="err">@</span><span class="n">classmethod</span>
 
-    <span class="n">def</span> <span class="n">__init_subclass__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">None</span><span class="p">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">__init_subclass__</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">None</span><span class="p">:</span>
 
-        <span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="w">        </span><span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">__init_subclass__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="c1"># Default _abstract_ to False if not set explicitly on the class. __dict__ is read-only.</span>
+<span class="w">        </span><span class="c1"># Default _abstract_ to False if not set explicitly on the class. __dict__ is read-only.</span>
 
-        <span class="n">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span> <span class="n">cls</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span> <span class="n">False</span><span class="p">))</span>
+<span class="w">        </span><span class="n">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">False</span><span class="p">))</span>
 
-        <span class="n">field_names</span> <span class="o">=</span> <span class="n">set</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
+<span class="w">        </span><span class="n">field_names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">set</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_fingerprint_excludes_</span> <span class="ow">and</span> <span class="p">(</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">cls</span><span class="o">.</span><span class="n">_fingerprint_excludes_</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="p">(</span>
 
-            <span class="n">unknown_excludes</span> <span class="p">:</span><span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_fingerprint_excludes_</span> <span class="o">-</span> <span class="n">field_names</span>
+<span class="w">            </span><span class="n">unknown_excludes</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="o">.</span><span class="n">_fingerprint_excludes_</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">field_names</span>
 
-        <span class="p">):</span>
+<span class="w">        </span><span class="p">):</span>
 
-            <span class="n">raise</span> <span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Unknown `_fingerprint_excludes_` field(s): {unknown_excludes}&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Unknown `_fingerprint_excludes_` field(s): {unknown_excludes}&quot;</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_fingerprint_includes_</span> <span class="ow">and</span> <span class="p">(</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">cls</span><span class="o">.</span><span class="n">_fingerprint_includes_</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="p">(</span>
 
-            <span class="n">unknown_includes</span> <span class="p">:</span><span class="o">=</span> <span class="n">cls</span><span class="o">.</span><span class="n">_fingerprint_includes_</span> <span class="o">-</span> <span class="n">field_names</span>
+<span class="w">            </span><span class="n">unknown_includes</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="o">.</span><span class="n">_fingerprint_includes_</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">field_names</span>
 
-        <span class="p">):</span>
+<span class="w">        </span><span class="p">):</span>
 
-            <span class="n">raise</span> <span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Unknown `_fingerprint_includes_` field(s): {unknown_includes}&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;Unknown `_fingerprint_includes_` field(s): {unknown_includes}&quot;</span><span class="p">)</span>
 
-    <span class="err">@</span><span class="n">root_validator</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="n">True</span><span class="p">)</span>
+<span class="w">    </span><span class="err">@</span><span class="n">root_validator</span><span class="p">(</span><span class="n">pre</span><span class="o">=</span><span class="n">True</span><span class="p">)</span>
 
-    <span class="err">@</span><span class="n">classmethod</span>
+<span class="w">    </span><span class="err">@</span><span class="n">classmethod</span>
 
-    <span class="n">def</span> <span class="n">_block_abstract_instance</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="n">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_block_abstract_instance</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">values</span><span class="p">:</span><span class="w"> </span><span class="n">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">Any</span><span class="p">])</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">Any</span><span class="p">]:</span>
 
-        <span class="k">if</span> <span class="n">cls</span><span class="o">.</span><span class="n">_abstract_</span><span class="p">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">cls</span><span class="o">.</span><span class="n">_abstract_</span><span class="p">:</span>
 
-            <span class="n">raise</span> <span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{cls} cannot be instantiated directly!&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{cls} cannot be instantiated directly!&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">values</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">values</span>
 
-    <span class="err">@</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="n">pre</span><span class="o">=</span><span class="n">True</span><span class="p">)</span>
+<span class="w">    </span><span class="err">@</span><span class="n">validator</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">pre</span><span class="o">=</span><span class="n">True</span><span class="p">)</span>
 
-    <span class="err">@</span><span class="n">classmethod</span>
+<span class="w">    </span><span class="err">@</span><span class="n">classmethod</span>
 
-    <span class="n">def</span> <span class="n">_strict_types</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="n">ModelField</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_strict_types</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">,</span><span class="w"> </span><span class="n">field</span><span class="p">:</span><span class="w"> </span><span class="n">ModelField</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Any</span><span class="p">:</span>
 
-        <span class="sd">&quot;&quot;&quot;Check that the value is a stricter instance of the declared type annotation.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check that the value is a stricter instance of the declared type annotation.</span>
 
 <span class="sd">        Pydantic will attempt to *parse* values (eg: &quot;5&quot; -&gt; 5), but we&#39;d prefer stricter values for</span>
 
@@ -2010,181 +2176,183 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
 
-        <span class="c1"># `field.type_` points to the *inner* type (eg: `int`-&gt;`int`; `tuple[int, ...]` -&gt; `int`)</span>
+<span class="w">        </span><span class="c1"># `field.type_` points to the *inner* type (eg: `int`-&gt;`int`; `tuple[int, ...]` -&gt; `int`)</span>
 
-        <span class="c1"># while `field.outer_type_` will (mostly) include the full spec and match the `value` we</span>
+<span class="w">        </span><span class="c1"># while `field.outer_type_` will (mostly) include the full spec and match the `value` we</span>
 
-        <span class="c1"># received. The caveat is the `field.outer_type_` will never be wrapped in `Optional`</span>
+<span class="w">        </span><span class="c1"># received. The caveat is the `field.outer_type_` will never be wrapped in `Optional`</span>
 
-        <span class="c1"># (though nested fields like `tuple[tuple[Optional[int]]]` would). Hence, we pull the</span>
+<span class="w">        </span><span class="c1"># (though nested fields like `tuple[tuple[Optional[int]]]` would). Hence, we pull the</span>
 
-        <span class="c1"># `field.outer_type_`, but add back the `Optional` wrapping if necessary.</span>
+<span class="w">        </span><span class="c1"># `field.outer_type_`, but add back the `Optional` wrapping if necessary.</span>
 
-        <span class="n">type_</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">outer_type_</span>
+<span class="w">        </span><span class="n">type_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">field</span><span class="o">.</span><span class="n">outer_type_</span>
 
-        <span class="k">if</span> <span class="n">field</span><span class="o">.</span><span class="n">allow_none</span><span class="p">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">field</span><span class="o">.</span><span class="n">allow_none</span><span class="p">:</span>
 
-            <span class="n">type_</span> <span class="o">=</span> <span class="n">Optional</span><span class="p">[</span><span class="n">type_</span><span class="p">]</span>
+<span class="w">            </span><span class="n">type_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Optional</span><span class="p">[</span><span class="n">type_</span><span class="p">]</span>
 
-        <span class="k">return</span> <span class="n">_check_types</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">type_</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">_check_types</span><span class="p">(</span><span class="n">value</span><span class="p">,</span><span class="w"> </span><span class="n">type_</span><span class="p">)</span>
 
-    <span class="c1"># By default, pydantic just compares models by their dict representation, causing models of</span>
+<span class="w">    </span><span class="c1"># By default, pydantic just compares models by their dict representation, causing models of</span>
 
-    <span class="c1"># different types but same fields (eg: Int8 and Int16) to be equivalent. This can be removed if</span>
+<span class="w">    </span><span class="c1"># different types but same fields (eg: Int8 and Int16) to be equivalent. This can be removed if</span>
 
-    <span class="c1"># [1] is merged+released.</span>
+<span class="w">    </span><span class="c1"># [1] is merged+released.</span>
 
-    <span class="c1">#</span>
+<span class="w">    </span><span class="c1">#</span>
 
-    <span class="c1"># 1: https://github.com/samuelcolvin/pydantic/pull/3066</span>
+<span class="w">    </span><span class="c1"># 1: https://github.com/samuelcolvin/pydantic/pull/3066</span>
 
-    <span class="n">def</span> <span class="n">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb nb-Type">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">other</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="p">:</span>
 
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__class__</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">__class__</span> <span class="ow">and</span> <span class="n">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span> <span class="o">==</span> <span class="n">tuple</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span>
 
-    <span class="c1"># Omitting unpassed args in repr by default</span>
+<span class="w">    </span><span class="c1"># Omitting unpassed args in repr by default</span>
 
-    <span class="n">def</span> <span class="n">__repr_args__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">__repr_args__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Sequence</span><span class="p">[</span><span class="n">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span><span class="w"> </span><span class="n">Any</span><span class="p">]]:</span>
 
-        <span class="k">return</span> <span class="p">[(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">__repr_args__</span><span class="p">()</span> <span class="k">if</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields_set__</span><span class="p">]</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="p">[(</span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="p">)</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">k</span><span class="p">,</span><span class="w"> </span><span class="n">v</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">__repr_args__</span><span class="p">()</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">k</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__fields_set__</span><span class="p">]</span>
 
-    <span class="n">def</span> <span class="n">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nb">str</span><span class="p">:</span>
 
-        <span class="k">return</span> <span class="n">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">repr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
-    <span class="k">class</span> <span class="n">Config</span><span class="p">:</span>
+<span class="w">    </span><span class="k">class</span><span class="w"> </span><span class="n">Config</span><span class="p">:</span>
 
-        <span class="n">extra</span> <span class="o">=</span> <span class="n">Extra</span><span class="o">.</span><span class="n">forbid</span>
+<span class="w">        </span><span class="n">extra</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Extra</span><span class="o">.</span><span class="n">forbid</span>
 
-        <span class="n">frozen</span> <span class="o">=</span> <span class="n">True</span>
+<span class="w">        </span><span class="n">frozen</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">True</span>
 
-        <span class="n">keep_untouched</span> <span class="o">=</span> <span class="p">(</span><span class="n">cached_property</span><span class="p">,</span> <span class="n">classproperty</span><span class="p">)</span>
+<span class="w">        </span><span class="n">json_encoders</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">{</span><span class="n">frozendict</span><span class="p">:</span><span class="w"> </span><span class="n">dict</span><span class="p">}</span>
 
-        <span class="n">smart_union</span> <span class="o">=</span> <span class="n">True</span>
+<span class="w">        </span><span class="n">keep_untouched</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">cached_property</span><span class="p">,)</span>
 
-        <span class="n">validate_assignment</span> <span class="o">=</span> <span class="n">True</span>  <span class="c1"># Unused with frozen, unless that is overridden in subclass.</span>
+<span class="w">        </span><span class="n">smart_union</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">True</span>
 
-    <span class="n">def</span> <span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">_Model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">deep</span><span class="p">:</span> <span class="nb nb-Type">bool</span> <span class="o">=</span> <span class="n">False</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb nb-Type">bool</span> <span class="o">=</span> <span class="n">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Model</span><span class="p">:</span>
+<span class="w">        </span><span class="n">validate_assignment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">True</span><span class="w">  </span><span class="c1"># Unused with frozen, unless that is overridden in subclass.</span>
 
-        <span class="n">copy</span> <span class="o">=</span> <span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">validate</span><span class="p">:</span>
+<span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">validate</span><span class="p">:</span>
 
-            <span class="c1"># is normal `.copy` behavior).</span>
+<span class="w">            </span><span class="c1"># NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as</span>
 
-            <span class="c1">#</span>
+<span class="w">            </span><span class="c1"># is normal `.copy` behavior).</span>
 
-            <span class="c1"># To reduce `repr` noise, we&#39;ll reset .__fields_set__ to those of the pre-validation copy</span>
+<span class="w">            </span><span class="c1">#</span>
 
-            <span class="c1"># (which includes those originally set + updated).</span>
+<span class="w">            </span><span class="c1"># To reduce `repr` noise, we&#39;ll reset .__fields_set__ to those of the pre-validation copy</span>
 
-            <span class="n">fields_set</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">__fields_set__</span>
+<span class="w">            </span><span class="c1"># (which includes those originally set + updated).</span>
 
-            <span class="n">copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
+<span class="w">            </span><span class="n">fields_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="o">.</span><span class="n">__fields_set__</span>
 
-                <span class="n">dict</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="n">False</span><span class="p">,</span> <span class="n">by_alias</span><span class="o">=</span><span class="n">False</span><span class="p">,</span> <span class="n">exclude_unset</span><span class="o">=</span><span class="n">False</span><span class="p">))</span>
+<span class="w">            </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span>
 
-            <span class="p">)</span>
+<span class="w">                </span><span class="n">dict</span><span class="p">(</span><span class="n">copy</span><span class="o">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="n">False</span><span class="p">,</span><span class="w"> </span><span class="n">by_alias</span><span class="o">=</span><span class="n">False</span><span class="p">,</span><span class="w"> </span><span class="n">exclude_unset</span><span class="o">=</span><span class="n">False</span><span class="p">))</span>
 
-            <span class="c1"># Use object.__setattr__ to bypass frozen model assignment errors</span>
+<span class="w">            </span><span class="p">)</span>
 
-            <span class="n">object</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="s2">&quot;__fields_set__&quot;</span><span class="p">,</span> <span class="n">set</span><span class="p">(</span><span class="n">fields_set</span><span class="p">))</span>
+<span class="w">            </span><span class="c1"># Use object.__setattr__ to bypass frozen model assignment errors</span>
 
-            <span class="c1"># Copy over the private attributes, which are missing after validation (since we&#39;re only</span>
+<span class="w">            </span><span class="n">object</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;__fields_set__&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">set</span><span class="p">(</span><span class="n">fields_set</span><span class="p">))</span>
 
-            <span class="c1"># passing the fields).</span>
+<span class="w">            </span><span class="c1"># Copy over the private attributes, which are missing after validation (since we&#39;re only</span>
 
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__private_attributes__</span><span class="p">:</span>
+<span class="w">            </span><span class="c1"># passing the fields).</span>
 
-                <span class="k">if</span> <span class="p">(</span><span class="n">value</span> <span class="p">:</span><span class="o">=</span> <span class="n">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">Undefined</span><span class="p">))</span> <span class="k">is</span> <span class="ow">not</span> <span class="n">Undefined</span><span class="p">:</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__private_attributes__</span><span class="p">:</span>
 
-                    <span class="k">if</span> <span class="n">deep</span><span class="p">:</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="n">value</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="n">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">Undefined</span><span class="p">))</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">Undefined</span><span class="p">:</span>
 
-                        <span class="n">value</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="n">deep</span><span class="p">:</span>
 
-                    <span class="n">object</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+<span class="w">                        </span><span class="n">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deepcopy</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">copy</span>
+<span class="w">                    </span><span class="n">object</span><span class="o">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="p">)</span>
 
-    <span class="err">@</span><span class="n">staticmethod</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">copy</span>
 
-    <span class="n">def</span> <span class="n">_fingerprint_json_encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+<span class="w">    </span><span class="err">@</span><span class="n">staticmethod</span>
 
-        <span class="n">from</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span> <span class="n">import</span> <span class="n">Fingerprint</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_fingerprint_json_encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pydantic_json_encoder</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Any</span><span class="p">:</span>
 
-        <span class="k">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Fingerprint</span><span class="p">):</span>
+<span class="w">        </span><span class="n">from</span><span class="w"> </span><span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="w"> </span><span class="n">import</span><span class="w"> </span><span class="n">Fingerprint</span>
 
-            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">key</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">):</span>
 
-        <span class="k">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">obj</span><span class="o">.</span><span class="n">key</span>
 
-            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">fingerprint</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">Model</span><span class="p">):</span>
 
-        <span class="k">return</span> <span class="n">pydantic_json_encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">obj</span><span class="o">.</span><span class="n">fingerprint</span>
 
-    <span class="err">@</span><span class="n">property</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
-    <span class="n">def</span> <span class="n">fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="err">@</span><span class="n">property</span>
 
-        <span class="n">from</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span> <span class="n">import</span> <span class="n">Fingerprint</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
 
-        <span class="c1"># `.json` cannot be used, even with a custom encoder, because it calls `.dict`, which</span>
+<span class="w">        </span><span class="n">from</span><span class="w"> </span><span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="w"> </span><span class="n">import</span><span class="w"> </span><span class="n">Fingerprint</span>
 
-        <span class="c1"># converts the sub-models to dicts. Instead, we want to access `.fingerprint` (in the</span>
+<span class="w">        </span><span class="c1"># `.json` cannot be used, even with a custom encoder, because it calls `.dict`, which</span>
 
-        <span class="c1"># decoder).</span>
+<span class="w">        </span><span class="c1"># converts the sub-models to dicts. Instead, we want to access `.fingerprint` (in the</span>
 
-        <span class="n">data</span> <span class="o">=</span> <span class="n">dict</span><span class="p">(</span>
+<span class="w">        </span><span class="c1"># decoder).</span>
 
-            <span class="n">sorted</span><span class="p">(</span>  <span class="c1"># Sort to ensure stability</span>
+<span class="w">        </span><span class="n">data</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">dict</span><span class="p">(</span>
 
-                <span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">(</span>
+<span class="w">            </span><span class="n">sorted</span><span class="p">(</span><span class="w">  </span><span class="c1"># Sort to ensure stability</span>
 
-                    <span class="n">exclude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_excludes_</span><span class="p">,</span>
+<span class="w">                </span><span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">(</span>
 
-                    <span class="n">include</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_includes_</span><span class="p">,</span>
+<span class="w">                    </span><span class="n">exclude</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_excludes_</span><span class="p">,</span>
 
-                <span class="p">),</span>
+<span class="w">                    </span><span class="n">include</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_includes_</span><span class="p">,</span>
 
-                <span class="n">key</span><span class="o">=</span><span class="n">lambda</span> <span class="n">kv</span><span class="p">:</span> <span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+<span class="w">                </span><span class="p">),</span>
 
-            <span class="p">)</span>
+<span class="w">                </span><span class="n">key</span><span class="o">=</span><span class="n">lambda</span><span class="w"> </span><span class="n">kv</span><span class="p">:</span><span class="w"> </span><span class="n">kv</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
 
-        <span class="p">)</span>
+<span class="w">            </span><span class="p">)</span>
 
-        <span class="n">json_repr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__config__</span><span class="o">.</span><span class="n">json_dumps</span><span class="p">(</span>
+<span class="w">        </span><span class="p">)</span>
 
-            <span class="n">data</span><span class="p">,</span>
+<span class="w">        </span><span class="n">json_repr</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__config__</span><span class="o">.</span><span class="n">json_dumps</span><span class="p">(</span>
 
-            <span class="n">default</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_json_encoder</span><span class="p">,</span>
+<span class="w">            </span><span class="n">data</span><span class="p">,</span>
 
-        <span class="p">)</span>
+<span class="w">            </span><span class="n">default</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_json_encoder</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__json_encoder__</span><span class="p">),</span>
 
-        <span class="k">return</span> <span class="n">Fingerprint</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{self._class_key_}:{json_repr}&quot;</span><span class="p">)</span>
+<span class="w">        </span><span class="p">)</span>
 
-    <span class="c1"># Filter out non-fields from ._iter (and thus .dict, .json, etc), such as `@cached_property`</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Fingerprint</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{self._class_key_}:{json_repr}&quot;</span><span class="p">)</span>
 
-    <span class="c1"># after access (which just gets cached in .__dict__).</span>
+<span class="w">    </span><span class="c1"># Filter out non-fields from ._iter (and thus .dict, .json, etc), such as `@cached_property`</span>
 
-    <span class="n">def</span> <span class="n">_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="n">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">None</span><span class="p">,</span> <span class="n">None</span><span class="p">]:</span>
+<span class="w">    </span><span class="c1"># after access (which just gets cached in .__dict__).</span>
 
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">_iter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_iter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">args</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Generator</span><span class="p">[</span><span class="n">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">Any</span><span class="p">],</span><span class="w"> </span><span class="n">None</span><span class="p">,</span><span class="w"> </span><span class="n">None</span><span class="p">]:</span>
 
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">_iter</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
 
-                <span class="nb">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span>
+<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span><span class="p">:</span>
 
-    <span class="err">@</span><span class="n">classmethod</span>
+<span class="w">                </span><span class="nb">yield</span><span class="w"> </span><span class="n">key</span><span class="p">,</span><span class="w"> </span><span class="n">value</span>
 
-    <span class="n">def</span> <span class="n">_pydantic_type_system_post_field_conversion_hook_</span><span class="p">(</span>
+<span class="w">    </span><span class="err">@</span><span class="n">classmethod</span>
 
-        <span class="n">cls</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="nb nb-Type">bool</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_pydantic_type_system_post_field_conversion_hook_</span><span class="p">(</span>
 
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Type&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">type_</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">required</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span>
 
-        <span class="k">return</span> <span class="n">type_</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s2">&quot;Type&quot;</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type_</span>
 </code></pre></div>
 
 </details>
@@ -2198,22 +2366,28 @@
 <ul>
 <li>arti.annotations.Annotation</li>
 <li>arti.types.Type</li>
+<li>arti.types._ContainerMixin</li>
 <li>arti.types._NamedMixin</li>
+<li>arti.types._TimeMixin</li>
 <li>arti.types.TypeSystem</li>
 <li>arti.formats.Format</li>
-<li>arti.partitions.PartitionKey</li>
+<li>arti.statistics.Statistic</li>
 <li>arti.fingerprints.Fingerprint</li>
+<li>arti.partitions.PartitionKey</li>
 <li>arti.storage._StorageMixin</li>
 <li>arti.storage.StoragePartition</li>
 <li>arti.storage.Storage</li>
-<li>arti.artifacts.BaseArtifact</li>
-<li>arti.versions.Version</li>
+<li>arti.artifacts.Artifact</li>
+<li>arti.backends.Backend</li>
 <li>arti.views.View</li>
+<li>arti.versions.Version</li>
 <li>arti.producers.Producer</li>
 <li>arti.producers.ProducerOutput</li>
-<li>arti.backends.Backend</li>
 <li>arti.graphs.Graph</li>
+<li>arti.graphs.GraphSnapshot</li>
 <li>arti.executors.Executor</li>
+<li>arti.thresholds.Threshold</li>
+<li>arti.storage.google.cloud.storage._GCSMixin</li>
 </ul>
 <h4 id="class-variables">Class variables</h4>
 <div class="codehilite"><pre><span></span><code><span class="n">Config</span>
@@ -2369,49 +2543,49 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code>    <span class="n">def</span> <span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span> <span class="n">_Model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">deep</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">False</span><span class="p">,</span> <span class="n">validate</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">:</span> <span class="k">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
 
-        <span class="n">copy</span> <span class="o">=</span> <span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">validate</span><span class="o">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span>
 
-            <span class="c1"># NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as</span>
+<span class="w">            </span><span class="c1"># NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as</span>
 
-            <span class="c1"># is normal `.copy` behavior).</span>
+<span class="w">            </span><span class="c1"># is normal `.copy` behavior).</span>
 
-            <span class="c1">#</span>
+<span class="w">            </span><span class="c1">#</span>
 
-            <span class="c1"># To reduce `repr` noise, we&#39;ll reset .__fields_set__ to those of the pre-validation copy</span>
+<span class="w">            </span><span class="c1"># To reduce `repr` noise, we&#39;ll reset .__fields_set__ to those of the pre-validation copy</span>
 
-            <span class="c1"># (which includes those originally set + updated).</span>
+<span class="w">            </span><span class="c1"># (which includes those originally set + updated).</span>
 
-            <span class="n">fields_set</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">__fields_set__</span>
+<span class="w">            </span><span class="n">fields_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">__fields_set__</span>
 
-            <span class="n">copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">validate</span><span class="p">(</span>
+<span class="w">            </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">validate</span><span class="p">(</span>
 
-                <span class="n">dict</span><span class="p">(</span><span class="n">copy</span><span class="p">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="no">False</span><span class="p">,</span> <span class="n">by_alias</span><span class="o">=</span><span class="no">False</span><span class="p">,</span> <span class="n">exclude_unset</span><span class="o">=</span><span class="no">False</span><span class="p">))</span>
+<span class="w">                </span><span class="n">dict</span><span class="p">(</span><span class="n">copy</span><span class="p">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">by_alias</span><span class="o">=</span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">exclude_unset</span><span class="o">=</span><span class="no">False</span><span class="p">))</span>
 
-            <span class="p">)</span>
+<span class="w">            </span><span class="p">)</span>
 
-            <span class="c1"># Use object.__setattr__ to bypass frozen model assignment errors</span>
+<span class="w">            </span><span class="c1"># Use object.__setattr__ to bypass frozen model assignment errors</span>
 
-            <span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="s2">&quot;__fields_set__&quot;</span><span class="p">,</span> <span class="kt">set</span><span class="p">(</span><span class="n">fields_set</span><span class="p">))</span>
+<span class="w">            </span><span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;__fields_set__&quot;</span><span class="p">,</span><span class="w"> </span><span class="kt">set</span><span class="p">(</span><span class="n">fields_set</span><span class="p">))</span>
 
-            <span class="c1"># Copy over the private attributes, which are missing after validation (since we&#39;re only</span>
+<span class="w">            </span><span class="c1"># Copy over the private attributes, which are missing after validation (since we&#39;re only</span>
 
-            <span class="c1"># passing the fields).</span>
+<span class="w">            </span><span class="c1"># passing the fields).</span>
 
-            <span class="k">for</span> <span class="k">name</span> <span class="k">in</span> <span class="n">self</span><span class="p">.</span><span class="n">__private_attributes__</span><span class="o">:</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="k">name</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">__private_attributes__</span><span class="o">:</span>
 
-                <span class="k">if</span> <span class="p">(</span><span class="k">value</span> <span class="o">:=</span> <span class="n">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="k">name</span><span class="p">,</span> <span class="k">Undefined</span><span class="p">))</span> <span class="k">is</span> <span class="k">not</span> <span class="k">Undefined</span><span class="o">:</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">value</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">name</span><span class="p">,</span><span class="w"> </span><span class="k">Undefined</span><span class="p">))</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">Undefined</span><span class="o">:</span>
 
-                    <span class="k">if</span> <span class="n">deep</span><span class="o">:</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span>
 
-                        <span class="k">value</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="k">value</span><span class="p">)</span>
+<span class="w">                        </span><span class="k">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deepcopy</span><span class="p">(</span><span class="k">value</span><span class="p">)</span>
 
-                    <span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="k">name</span><span class="p">,</span> <span class="k">value</span><span class="p">)</span>
+<span class="w">                    </span><span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span><span class="w"> </span><span class="k">name</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">copy</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">copy</span>
 </code></pre></div>
 
 </details>
@@ -2419,10 +2593,10 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">dict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">by_alias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_defaults</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exclude_unset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_none</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2434,10 +2608,10 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">json</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">by_alias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_defaults</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exclude_unset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_none</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>

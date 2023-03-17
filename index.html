@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.0">
+      <meta name="generator" content="mkdocs-1.2.4, mkdocs-material-7.3.0">
     
     
       
@@ -791,6 +791,20 @@
   
   
     <li class="md-nav__item">
+      <a href="reference/arti/internal/dispatch/" class="md-nav__link">
+        Dispatch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="reference/arti/internal/" class="md-nav__link">
         Index
       </a>
@@ -908,6 +922,20 @@
   
   
     <li class="md-nav__item">
+      <a href="reference/arti/io/json_gcsfile_python/" class="md-nav__link">
+        Json Gcsfile Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="reference/arti/io/json_localfile_python/" class="md-nav__link">
         Json Localfile Python
       </a>
@@ -924,6 +952,20 @@
     <li class="md-nav__item">
       <a href="reference/arti/io/json_stringliteral_python/" class="md-nav__link">
         Json Stringliteral Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/arti/io/pickle_gcsfile_python/" class="md-nav__link">
+        Pickle Gcsfile Python
       </a>
     </li>
   
@@ -1058,8 +1100,64 @@
   
   
     <li class="md-nav__item">
+      <a href="reference/arti/types/bigquery/" class="md-nav__link">
+        Bigquery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="reference/arti/types/" class="md-nav__link">
         Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/arti/types/numpy/" class="md-nav__link">
+        Numpy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/arti/types/pandas/" class="md-nav__link">
+        Pandas
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="reference/arti/types/pyarrow/" class="md-nav__link">
+        Pyarrow
       </a>
     </li>
   
@@ -1277,7 +1375,7 @@
 
 
 <span class="k">class</span> <span class="nc">Transactions</span><span class="p">(</span><span class="n">Artifact</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Transactions partitioned by day.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Transactions partitioned by day.&quot;&quot;&quot;</span>
 
     <span class="nb">type</span> <span class="o">=</span> <span class="n">Collection</span><span class="p">(</span>
         <span class="n">element</span><span class="o">=</span><span class="n">Struct</span><span class="p">(</span><span class="n">fields</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="n">Int64</span><span class="p">(),</span> <span class="s2">&quot;date&quot;</span><span class="p">:</span> <span class="n">Date</span><span class="p">(),</span> <span class="s2">&quot;amount&quot;</span><span class="p">:</span> <span class="n">Float64</span><span class="p">()}),</span>
@@ -1286,7 +1384,7 @@
 
 
 <span class="k">class</span> <span class="nc">TotalSpend</span><span class="p">(</span><span class="n">Artifact</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Aggregate spend over all time.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Aggregate spend over all time.&quot;&quot;&quot;</span>
 
     <span class="nb">type</span> <span class="o">=</span> <span class="n">Float64</span><span class="p">()</span>
     <span class="nb">format</span> <span class="o">=</span> <span class="n">JSON</span><span class="p">()</span>
@@ -1312,20 +1410,20 @@
 </code></pre></div>
 
 <p>The full example can be run easily with <code>docker run --rm artigraph/example-spend</code>:</p>
-<div class="codehilite"><pre><span></span><code><span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="n">Writing</span> <span class="n">mock</span> <span class="n">Transactions</span> <span class="n">data</span><span class="o">:</span>
-<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span>      <span class="sr">/usr/src/app/transactions/</span><span class="mi">2021</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">01</span><span class="o">.</span><span class="na">json</span><span class="o">:</span> <span class="o">[{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="mi">1</span><span class="o">,</span> <span class="s1">&#39;amount&#39;</span><span class="o">:</span> <span class="mf">9.95</span><span class="o">},</span> <span class="o">{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="mi">2</span><span class="o">,</span> <span class="s1">&#39;amount&#39;</span><span class="o">:</span> <span class="mf">7.5</span><span class="o">}]</span>
-<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span>      <span class="sr">/usr/src/app/transactions/</span><span class="mi">2021</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">02</span><span class="o">.</span><span class="na">json</span><span class="o">:</span> <span class="o">[{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="mi">3</span><span class="o">,</span> <span class="s1">&#39;amount&#39;</span><span class="o">:</span> <span class="mf">5.0</span><span class="o">},</span> <span class="o">{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="mi">4</span><span class="o">,</span> <span class="s1">&#39;amount&#39;</span><span class="o">:</span> <span class="mf">12.0</span><span class="o">},</span> <span class="o">{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span> <span class="mi">4</span><span class="o">,</span> <span class="s1">&#39;amount&#39;</span><span class="o">:</span> <span class="mf">7.55</span><span class="o">}]</span>
-<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="n">Building</span> <span class="n">aggregate_transactions</span><span class="o">(</span><span class="n">transactions</span><span class="o">=</span><span class="n">Transactions</span><span class="o">(</span><span class="n">format</span><span class="o">=</span><span class="n">JSON</span><span class="o">(),</span> <span class="n">storage</span><span class="o">=</span><span class="n">LocalFile</span><span class="o">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/usr/src/app/transactions/{date.iso}.json&#39;</span><span class="o">),</span> <span class="n">annotations</span><span class="o">=(</span><span class="n">Vendor</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Acme&#39;</span><span class="o">),)))...</span>
-<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="n">Build</span> <span class="n">finished</span><span class="o">.</span>
-<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="n">Final</span> <span class="n">Spend</span> <span class="n">data</span><span class="o">:</span>
-<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span>      <span class="sr">/tmp/test-graph/spend/7564053533177891797/s</span><span class="n">pend</span><span class="o">.</span><span class="na">json</span><span class="o">:</span> <span class="mf">42.0</span>
+<div class="codehilite"><pre><span></span><code><span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="n">Writing</span><span class="w"> </span><span class="n">mock</span><span class="w"> </span><span class="n">Transactions</span><span class="w"> </span><span class="n">data</span><span class="o">:</span>
+<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="w">      </span><span class="sr">/usr/src/app/transactions/</span><span class="mi">2021</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">01</span><span class="o">.</span><span class="na">json</span><span class="o">:</span><span class="w"> </span><span class="o">[{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span><span class="w"> </span><span class="mi">1</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;amount&#39;</span><span class="o">:</span><span class="w"> </span><span class="mf">9.95</span><span class="o">},</span><span class="w"> </span><span class="o">{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span><span class="w"> </span><span class="mi">2</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;amount&#39;</span><span class="o">:</span><span class="w"> </span><span class="mf">7.5</span><span class="o">}]</span>
+<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="w">      </span><span class="sr">/usr/src/app/transactions/</span><span class="mi">2021</span><span class="o">-</span><span class="mi">10</span><span class="o">-</span><span class="mi">02</span><span class="o">.</span><span class="na">json</span><span class="o">:</span><span class="w"> </span><span class="o">[{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span><span class="w"> </span><span class="mi">3</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;amount&#39;</span><span class="o">:</span><span class="w"> </span><span class="mf">5.0</span><span class="o">},</span><span class="w"> </span><span class="o">{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span><span class="w"> </span><span class="mi">4</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;amount&#39;</span><span class="o">:</span><span class="w"> </span><span class="mf">12.0</span><span class="o">},</span><span class="w"> </span><span class="o">{</span><span class="s1">&#39;id&#39;</span><span class="o">:</span><span class="w"> </span><span class="mi">4</span><span class="o">,</span><span class="w"> </span><span class="s1">&#39;amount&#39;</span><span class="o">:</span><span class="w"> </span><span class="mf">7.55</span><span class="o">}]</span>
+<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="n">Building</span><span class="w"> </span><span class="n">aggregate_transactions</span><span class="o">(</span><span class="n">transactions</span><span class="o">=</span><span class="n">Transactions</span><span class="o">(</span><span class="n">format</span><span class="o">=</span><span class="n">JSON</span><span class="o">(),</span><span class="w"> </span><span class="n">storage</span><span class="o">=</span><span class="n">LocalFile</span><span class="o">(</span><span class="n">path</span><span class="o">=</span><span class="s1">&#39;/usr/src/app/transactions/{date.iso}.json&#39;</span><span class="o">),</span><span class="w"> </span><span class="n">annotations</span><span class="o">=(</span><span class="n">Vendor</span><span class="o">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Acme&#39;</span><span class="o">),)))...</span>
+<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="n">Build</span><span class="w"> </span><span class="n">finished</span><span class="o">.</span>
+<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="n">Final</span><span class="w"> </span><span class="n">Spend</span><span class="w"> </span><span class="n">data</span><span class="o">:</span>
+<span class="n">INFO</span><span class="o">:</span><span class="n">root</span><span class="o">:</span><span class="w">      </span><span class="sr">/tmp/test-graph/spend/7564053533177891797/s</span><span class="n">pend</span><span class="o">.</span><span class="na">json</span><span class="o">:</span><span class="w"> </span><span class="mf">42.0</span>
 </code></pre></div>
 
 <h2 id="community">Community</h2>
 <p>Everyone is welcome to join the community - learn more in out <a href="SUPPORT/">support</a> and <a href="CONTRIBUTING/">contributing</a> pages!</p>
 <h2 id="presentations">Presentations</h2>
 <ul>
-<li>2022-01-27: Requesting Sandbox Incubation with <a href="https://lfaidata.foundation/">LF AI &amp; Data</a> (<a href="https://docs.google.com/presentation/d/1KLM9r0L5sTbpb_UPR5nx4fil-7fO-UnmhTeatSiaN3Y">deck</a>, <a href="https://wiki.lfaidata.foundation/download/attachments/7733341/GMT20220127-140219_Recording_3840x2160.mp4?version=1&amp;modificationDate=1643716019000&amp;api=v2">presentation</a>)</li>
+<li>2022-01-27: Requesting Sandbox Incubation with <a href="https://lfaidata.foundation/">LF AI &amp; Data</a> (<a href="https://docs.google.com/presentation/d/1KLM9r0L5sTbpb_UPR5nx4fil-7fO-UnmhTeatSiaN3Y">deck</a>, <a href="https://wiki.lfaidata.foundation/download/attachments/7733341/GMT20220127-140219_Recording_3840x2160.mp4?version=1&amp;modificationDate=1643716019000&amp;api=v2">presentation</a> @ 6m35s)</li>
 </ul>
                 
               

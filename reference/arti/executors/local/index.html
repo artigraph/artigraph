@@ -10,7 +10,7 @@
       
       
       <link rel="icon" href="../../../../assets/images/favicon.png">
-      <meta name="generator" content="mkdocs-1.2.3, mkdocs-material-7.3.0">
+      <meta name="generator" content="mkdocs-1.2.4, mkdocs-material-7.3.0">
     
     
       
@@ -768,6 +768,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#build_producer_partition" class="md-nav__link">
+    build_producer_partition
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#copy" class="md-nav__link">
     copy
   </a>
@@ -777,6 +784,20 @@
           <li class="md-nav__item">
   <a href="#dict" class="md-nav__link">
     dict
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discover_producer_partitions" class="md-nav__link">
+    discover_producer_partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_producer_inputs" class="md-nav__link">
+    get_producer_inputs
   </a>
   
 </li>
@@ -921,6 +942,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../internal/dispatch/" class="md-nav__link">
+        Dispatch
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../internal/" class="md-nav__link">
         Index
       </a>
@@ -1038,6 +1073,20 @@
   
   
     <li class="md-nav__item">
+      <a href="../../io/json_gcsfile_python/" class="md-nav__link">
+        Json Gcsfile Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../io/json_localfile_python/" class="md-nav__link">
         Json Localfile Python
       </a>
@@ -1054,6 +1103,20 @@
     <li class="md-nav__item">
       <a href="../../io/json_stringliteral_python/" class="md-nav__link">
         Json Stringliteral Python
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../io/pickle_gcsfile_python/" class="md-nav__link">
+        Pickle Gcsfile Python
       </a>
     </li>
   
@@ -1188,8 +1251,64 @@
   
   
     <li class="md-nav__item">
+      <a href="../../types/bigquery/" class="md-nav__link">
+        Bigquery
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
       <a href="../../types/" class="md-nav__link">
         Index
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/numpy/" class="md-nav__link">
+        Numpy
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/pandas/" class="md-nav__link">
+        Pandas
+      </a>
+    </li>
+  
+
+            
+          
+            
+              
+  
+  
+  
+    <li class="md-nav__item">
+      <a href="../../types/pyarrow/" class="md-nav__link">
+        Pyarrow
       </a>
     </li>
   
@@ -1452,6 +1571,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#build_producer_partition" class="md-nav__link">
+    build_producer_partition
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#copy" class="md-nav__link">
     copy
   </a>
@@ -1461,6 +1587,20 @@
           <li class="md-nav__item">
   <a href="#dict" class="md-nav__link">
     dict
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#discover_producer_partitions" class="md-nav__link">
+    discover_producer_partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#get_producer_inputs" class="md-nav__link">
+    get_producer_inputs
   </a>
   
 </li>
@@ -1508,33 +1648,17 @@
 
 <span class="kn">from</span> <span class="nn">graphlib</span> <span class="kn">import</span> <span class="n">TopologicalSorter</span>
 
-<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span>
-
 <span class="kn">from</span> <span class="nn">arti.artifacts</span> <span class="kn">import</span> <span class="n">Artifact</span>
-
-<span class="kn">from</span> <span class="nn">arti.backends</span> <span class="kn">import</span> <span class="n">Backend</span>
 
 <span class="kn">from</span> <span class="nn">arti.executors</span> <span class="kn">import</span> <span class="n">Executor</span>
 
-<span class="kn">from</span> <span class="nn">arti.graphs</span> <span class="kn">import</span> <span class="n">Graph</span>
+<span class="kn">from</span> <span class="nn">arti.graphs</span> <span class="kn">import</span> <span class="n">GraphSnapshot</span>
 
 <span class="kn">from</span> <span class="nn">arti.producers</span> <span class="kn">import</span> <span class="n">Producer</span>
 
-<span class="kn">from</span> <span class="nn">arti.storage</span> <span class="kn">import</span> <span class="n">InputFingerprints</span>
-
-<span class="c1"># TODO: Factor this code out to reusable helpers/better homes.</span>
-
-<span class="c1">#   - Perhaps a lot of the _build_producer logic can live in a few Producer methods. We</span>
-
-<span class="c1">#   still want to expose each partition-to-build as a parallelizable unit of execution,</span>
-
-<span class="c1">#   so maybe one Producer method kicks out all to-be-built partitions+metadata, and then</span>
-
-<span class="c1">#   Executor can parallelize the `.build`.</span>
-
 <span class="k">class</span> <span class="nc">LocalExecutor</span><span class="p">(</span><span class="n">Executor</span><span class="p">):</span>
 
-    <span class="c1"># TODO: Separate .map and .build steps so we can:</span>
+    <span class="c1"># TODO: Should we separate .map and .build steps so we can:</span>
 
     <span class="c1"># - add &quot;sync&quot; / &quot;dry run&quot; sort of things</span>
 
@@ -1548,185 +1672,13 @@
 
     <span class="c1"># `.map` should describe how to &quot;converge&quot; by returning the same outputs as a prior call).</span>
 
-    <span class="k">def</span> <span class="nf">_build_producer</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">GraphSnapshot</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="bp">self</span><span class="p">,</span>
+        <span class="c1"># NOTE: Raw Artifacts will already be discovered and linked in the backend to this snapshot.</span>
 
-        <span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">,</span>
+        <span class="k">with</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span> <span class="k">as</span> <span class="n">backend</span><span class="p">:</span>
 
-        <span class="n">backend</span><span class="p">:</span> <span class="n">Backend</span><span class="p">,</span>
-
-        <span class="n">producer</span><span class="p">:</span> <span class="n">Producer</span><span class="p">,</span>
-
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-
-        <span class="n">input_partitions</span> <span class="o">=</span> <span class="p">{</span>
-
-            <span class="n">name</span><span class="p">:</span> <span class="n">backend</span><span class="o">.</span><span class="n">read_graph_partitions</span><span class="p">(</span>
-
-                <span class="n">graph</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">graph</span><span class="o">.</span><span class="n">get_snapshot_id</span><span class="p">(),</span> <span class="n">graph</span><span class="o">.</span><span class="n">artifact_to_key</span><span class="p">[</span><span class="n">artifact</span><span class="p">],</span> <span class="n">artifact</span>
-
-            <span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">artifact</span> <span class="ow">in</span> <span class="n">producer</span><span class="o">.</span><span class="n">inputs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-
-        <span class="p">}</span>
-
-        <span class="n">partition_dependencies</span> <span class="o">=</span> <span class="n">producer</span><span class="o">.</span><span class="n">map</span><span class="p">(</span>
-
-            <span class="o">**</span><span class="p">{</span>
-
-                <span class="n">name</span><span class="p">:</span> <span class="n">partitions</span>
-
-                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">partitions</span> <span class="ow">in</span> <span class="n">input_partitions</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">producer</span><span class="o">.</span><span class="n">_map_input_metadata_</span>
-
-            <span class="p">}</span>
-
-        <span class="p">)</span>
-
-        <span class="c1"># TODO: Need to validate the partition_dependencies against the Producer&#39;s</span>
-
-        <span class="c1"># partitioning scheme and such (basically, check user error). eg: if output is</span>
-
-        <span class="c1"># not partitioned, we expect only 1 entry in partition_dependencies</span>
-
-        <span class="c1"># (NotPartitioned).</span>
-
-        <span class="n">partition_input_fingerprints</span> <span class="o">=</span> <span class="n">InputFingerprints</span><span class="p">(</span>
-
-            <span class="p">{</span>
-
-                <span class="n">composite_key</span><span class="p">:</span> <span class="n">producer</span><span class="o">.</span><span class="n">compute_input_fingerprint</span><span class="p">(</span><span class="n">dependency_partitions</span><span class="p">)</span>
-
-                <span class="k">for</span> <span class="n">composite_key</span><span class="p">,</span> <span class="n">dependency_partitions</span> <span class="ow">in</span> <span class="n">partition_dependencies</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-
-            <span class="p">}</span>
-
-        <span class="p">)</span>
-
-        <span class="n">output_artifacts</span> <span class="o">=</span> <span class="n">graph</span><span class="o">.</span><span class="n">producer_outputs</span><span class="p">[</span><span class="n">producer</span><span class="p">]</span>
-
-        <span class="c1"># NOTE: The output partitions may be built, but not yet associated with this snapshot_id</span>
-
-        <span class="c1"># (eg: raw input data changed, but no changes trickled into this specific Producer). Hence</span>
-
-        <span class="c1"># we&#39;ll fetch all StoragePartitions for this Storage, filtered to the PKs and</span>
-
-        <span class="c1"># input_fingerprints we&#39;ve computed *are* for this Graph - and then link them to the graph.</span>
-
-        <span class="n">existing_output_partitions</span> <span class="o">=</span> <span class="p">{</span>
-
-            <span class="n">output</span><span class="p">:</span> <span class="n">backend</span><span class="o">.</span><span class="n">read_artifact_partitions</span><span class="p">(</span><span class="n">output</span><span class="p">,</span> <span class="n">partition_input_fingerprints</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">output_artifacts</span>
-
-        <span class="p">}</span>
-
-        <span class="k">for</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">partitions</span> <span class="ow">in</span> <span class="n">existing_output_partitions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
-            <span class="n">backend</span><span class="o">.</span><span class="n">write_graph_partitions</span><span class="p">(</span>
-
-                <span class="n">graph</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-
-                <span class="n">graph</span><span class="o">.</span><span class="n">get_snapshot_id</span><span class="p">(),</span>
-
-                <span class="n">graph</span><span class="o">.</span><span class="n">artifact_to_key</span><span class="p">[</span><span class="n">artifact</span><span class="p">],</span>
-
-                <span class="n">artifact</span><span class="p">,</span>
-
-                <span class="n">partitions</span><span class="p">,</span>
-
-            <span class="p">)</span>
-
-        <span class="c1"># TODO: Guarantee all outputs have the same set of identified partitions. Currently, this</span>
-
-        <span class="c1"># pretends a partition is built for all outputs if _any_ are built for that partition.</span>
-
-        <span class="n">existing_output_keys</span> <span class="o">=</span> <span class="p">{</span>
-
-            <span class="n">partition</span><span class="o">.</span><span class="n">keys</span> <span class="k">for</span> <span class="n">partition</span> <span class="ow">in</span> <span class="n">chain</span><span class="o">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">existing_output_partitions</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-
-        <span class="p">}</span>
-
-        <span class="k">for</span> <span class="n">output_partition_key</span><span class="p">,</span> <span class="n">dependencies</span> <span class="ow">in</span> <span class="n">partition_dependencies</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-
-            <span class="k">if</span> <span class="n">output_partition_key</span> <span class="ow">in</span> <span class="n">existing_output_keys</span><span class="p">:</span>
-
-                <span class="n">pk_str</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot; for: </span><span class="si">{</span><span class="nb">dict</span><span class="p">(</span><span class="n">output_partition_key</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">output_partition_key</span> <span class="k">else</span> <span class="s2">&quot;.&quot;</span>
-
-                <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Skipping existing </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">producer</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> output</span><span class="si">{</span><span class="n">pk_str</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-                <span class="k">continue</span>
-
-            <span class="c1"># TODO: Catch DispatchError and give a nicer error... maybe add this to our</span>
-
-            <span class="c1"># @dispatch wrapper (eg: msg arg, or even fn that returns the message to</span>
-
-            <span class="c1"># raise).</span>
-
-            <span class="n">arguments</span> <span class="o">=</span> <span class="p">{</span>
-
-                <span class="n">name</span><span class="p">:</span> <span class="n">graph</span><span class="o">.</span><span class="n">read</span><span class="p">(</span>
-
-                    <span class="n">artifact</span><span class="o">=</span><span class="n">producer</span><span class="o">.</span><span class="n">inputs</span><span class="p">[</span><span class="n">name</span><span class="p">],</span>
-
-                    <span class="n">storage_partitions</span><span class="o">=</span><span class="n">partition_dependencies</span><span class="p">[</span><span class="n">output_partition_key</span><span class="p">][</span><span class="n">name</span><span class="p">],</span>
-
-                    <span class="c1"># TODO: We&#39;ll probably need to update Producer._build_input_views_</span>
-
-                    <span class="c1"># to hold *instances* (either objects set in Annotated or init</span>
-
-                    <span class="c1"># during Producer.__init_subclass__)</span>
-
-                    <span class="n">view</span><span class="o">=</span><span class="n">view_class</span><span class="p">(),</span>
-
-                <span class="p">)</span>
-
-                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">view_class</span> <span class="ow">in</span> <span class="n">producer</span><span class="o">.</span><span class="n">_build_input_views_</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-
-            <span class="p">}</span>
-
-            <span class="n">outputs</span> <span class="o">=</span> <span class="n">producer</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">producer</span><span class="o">.</span><span class="n">_output_metadata_</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-
-                <span class="n">outputs</span> <span class="o">=</span> <span class="p">(</span><span class="n">outputs</span><span class="p">,)</span>
-
-            <span class="n">validation_passed</span><span class="p">,</span> <span class="n">validation_message</span> <span class="o">=</span> <span class="n">producer</span><span class="o">.</span><span class="n">validate_outputs</span><span class="p">(</span><span class="o">*</span><span class="n">outputs</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">validation_passed</span><span class="p">:</span>
-
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">validation_message</span><span class="p">)</span>
-
-            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">output</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">outputs</span><span class="p">):</span>
-
-                <span class="n">graph</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
-
-                    <span class="n">output</span><span class="p">,</span>
-
-                    <span class="n">artifact</span><span class="o">=</span><span class="n">output_artifacts</span><span class="p">[</span><span class="n">i</span><span class="p">],</span>
-
-                    <span class="n">input_fingerprint</span><span class="o">=</span><span class="n">partition_input_fingerprints</span><span class="p">[</span><span class="n">output_partition_key</span><span class="p">],</span>
-
-                    <span class="n">keys</span><span class="o">=</span><span class="n">output_partition_key</span><span class="p">,</span>
-
-                    <span class="n">view</span><span class="o">=</span><span class="n">producer</span><span class="o">.</span><span class="n">_output_metadata_</span><span class="p">[</span><span class="n">i</span><span class="p">][</span><span class="mi">1</span><span class="p">](),</span>
-
-                <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">build</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-
-        <span class="c1"># NOTE: Raw Artifacts will already be discovered and linked in the backend to this graph</span>
-
-        <span class="c1"># snapshot.</span>
-
-        <span class="k">assert</span> <span class="n">graph</span><span class="o">.</span><span class="n">snapshot_id</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-
-        <span class="k">with</span> <span class="n">graph</span><span class="o">.</span><span class="n">backend</span><span class="o">.</span><span class="n">connect</span><span class="p">()</span> <span class="k">as</span> <span class="n">backend</span><span class="p">:</span>
-
-            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">TopologicalSorter</span><span class="p">(</span><span class="n">graph</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span><span class="o">.</span><span class="n">static_order</span><span class="p">():</span>
+            <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">TopologicalSorter</span><span class="p">(</span><span class="n">snapshot</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">dependencies</span><span class="p">)</span><span class="o">.</span><span class="n">static_order</span><span class="p">():</span>
 
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Artifact</span><span class="p">):</span>
 
@@ -1740,7 +1692,47 @@
 
                     <span class="n">logging</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Building </span><span class="si">{</span><span class="n">node</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">_build_producer</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+                    <span class="n">input_partitions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_producer_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+
+                    <span class="p">(</span>
+
+                        <span class="n">partition_dependencies</span><span class="p">,</span>
+
+                        <span class="n">partition_input_fingerprints</span><span class="p">,</span>
+
+                    <span class="p">)</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">compute_dependencies</span><span class="p">(</span><span class="n">input_partitions</span><span class="p">)</span>
+
+                    <span class="n">existing_keys</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">discover_producer_partitions</span><span class="p">(</span>
+
+                        <span class="n">snapshot</span><span class="p">,</span>
+
+                        <span class="n">backend</span><span class="p">,</span>
+
+                        <span class="n">node</span><span class="p">,</span>
+
+                        <span class="n">partition_input_fingerprints</span><span class="o">=</span><span class="n">partition_input_fingerprints</span><span class="p">,</span>
+
+                    <span class="p">)</span>
+
+                    <span class="k">for</span> <span class="n">partition_key</span><span class="p">,</span> <span class="n">dependencies</span> <span class="ow">in</span> <span class="n">partition_dependencies</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+
+                        <span class="bp">self</span><span class="o">.</span><span class="n">build_producer_partition</span><span class="p">(</span>
+
+                            <span class="n">snapshot</span><span class="p">,</span>
+
+                            <span class="n">backend</span><span class="p">,</span>
+
+                            <span class="n">node</span><span class="p">,</span>
+
+                            <span class="n">existing_partition_keys</span><span class="o">=</span><span class="n">existing_keys</span><span class="p">,</span>
+
+                            <span class="n">input_fingerprint</span><span class="o">=</span><span class="n">partition_input_fingerprints</span><span class="p">[</span><span class="n">partition_key</span><span class="p">],</span>
+
+                            <span class="n">partition_dependencies</span><span class="o">=</span><span class="n">dependencies</span><span class="p">,</span>
+
+                            <span class="n">partition_key</span><span class="o">=</span><span class="n">partition_key</span><span class="p">,</span>
+
+                        <span class="p">)</span>
 
                 <span class="k">else</span><span class="p">:</span>
 
@@ -1760,221 +1752,89 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="n">LocalExecutor</span><span class="p">(</span><span class="n">Executor</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="n">LocalExecutor</span><span class="p">(</span><span class="n">Executor</span><span class="p">)</span><span class="err">:</span>
 
-<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Separate</span><span class="w"> </span><span class="p">.</span><span class="k">map</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="p">.</span><span class="n">build</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="nl">can</span><span class="p">:</span><span class="w"></span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Should</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">separate</span><span class="w"> </span><span class="p">.</span><span class="k">map</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="p">.</span><span class="n">build</span><span class="w"> </span><span class="n">steps</span><span class="w"> </span><span class="n">so</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="nl">can</span><span class="p">:</span>
 
-<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">add</span><span class="w"> </span><span class="ss">&quot;sync&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="ss">&quot;dry run&quot;</span><span class="w"> </span><span class="n">sort</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">things</span><span class="w"></span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="k">add</span><span class="w"> </span><span class="ss">&quot;sync&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="ss">&quot;dry run&quot;</span><span class="w"> </span><span class="n">sort</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">things</span>
 
-<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">parallelize</span><span class="w"> </span><span class="n">build</span><span class="w"></span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">parallelize</span><span class="w"> </span><span class="n">build</span>
 
-<span class="w">    </span><span class="err">#</span><span class="w"></span>
+<span class="w">    </span><span class="err">#</span>
 
-<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">We</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">still</span><span class="w"> </span><span class="n">want</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">repeat</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="p">.</span><span class="k">map</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">future</span><span class="p">,</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">wanted</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="ow">some</span><span class="w"> </span><span class="n">sort</span><span class="w"> </span><span class="k">of</span><span class="w"></span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">We</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">still</span><span class="w"> </span><span class="n">want</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">repeat</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="p">.</span><span class="k">map</span><span class="w"> </span><span class="n">phase</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">future</span><span class="p">,</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">we</span><span class="w"> </span><span class="n">wanted</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="ow">some</span><span class="w"> </span><span class="n">sort</span><span class="w"> </span><span class="k">of</span>
 
-<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">iterated</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">cyclic</span><span class="w"> </span><span class="n">Producers</span><span class="w"> </span><span class="p">(</span><span class="nl">eg</span><span class="p">:</span><span class="w"> </span><span class="k">first</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="n">feeds</span><span class="w"> </span><span class="k">into</span><span class="w"> </span><span class="k">second</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="k">case</span><span class="p">,</span><span class="w"></span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">iterated</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">cyclic</span><span class="w"> </span><span class="n">Producers</span><span class="w"> </span><span class="p">(</span><span class="nl">eg</span><span class="p">:</span><span class="w"> </span><span class="k">first</span><span class="w"> </span><span class="n">pass</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="n">feeds</span><span class="w"> </span><span class="k">into</span><span class="w"> </span><span class="k">second</span><span class="w"> </span><span class="n">run</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="k">case</span><span class="p">,</span>
 
-<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="err">`</span><span class="p">.</span><span class="k">map</span><span class="err">`</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="k">describe</span><span class="w"> </span><span class="n">how</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="ss">&quot;converge&quot;</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">returning</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">outputs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">prior</span><span class="w"> </span><span class="k">call</span><span class="p">).</span><span class="w"></span>
+<span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="err">`</span><span class="p">.</span><span class="k">map</span><span class="err">`</span><span class="w"> </span><span class="n">should</span><span class="w"> </span><span class="k">describe</span><span class="w"> </span><span class="n">how</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="ss">&quot;converge&quot;</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="n">returning</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="n">outputs</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">prior</span><span class="w"> </span><span class="k">call</span><span class="p">).</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_build_producer</span><span class="p">(</span><span class="w"></span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">build</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">NOTE</span><span class="p">:</span><span class="w"> </span><span class="n">Raw</span><span class="w"> </span><span class="n">Artifacts</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">discovered</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">linked</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span>
 
-<span class="w">        </span><span class="nl">graph</span><span class="p">:</span><span class="w"> </span><span class="n">Graph</span><span class="p">,</span><span class="w"></span>
+<span class="w">        </span><span class="k">with</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="k">connect</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nl">backend</span><span class="p">:</span>
 
-<span class="w">        </span><span class="nl">backend</span><span class="p">:</span><span class="w"> </span><span class="n">Backend</span><span class="p">,</span><span class="w"></span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">node</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">TopologicalSorter</span><span class="p">(</span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">dependencies</span><span class="p">).</span><span class="n">static_order</span><span class="p">()</span><span class="err">:</span>
 
-<span class="w">        </span><span class="nl">producer</span><span class="p">:</span><span class="w"> </span><span class="n">Producer</span><span class="p">,</span><span class="w"></span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">Artifact</span><span class="p">)</span><span class="err">:</span>
 
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
+<span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Compute</span><span class="w"> </span><span class="k">Statistics</span><span class="w"> </span><span class="p">(</span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">computed</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">partition</span><span class="p">)</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">check</span>
 
-<span class="w">        </span><span class="n">input_partitions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{</span><span class="w"></span>
+<span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="n">Thresholds</span><span class="w"> </span><span class="p">(</span><span class="k">every</span><span class="w"> </span><span class="nc">time</span><span class="p">,</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">they</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">changed</span><span class="p">,</span><span class="w"> </span><span class="k">dynamic</span><span class="p">,</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">overridden</span><span class="p">).</span>
 
-<span class="w">            </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">backend</span><span class="p">.</span><span class="n">read_graph_partitions</span><span class="p">(</span><span class="w"></span>
+<span class="w">                    </span><span class="n">pass</span>
 
-<span class="w">                </span><span class="n">graph</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="n">get_snapshot_id</span><span class="p">(),</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span><span class="w"></span>
+<span class="w">                </span><span class="n">elif</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">Producer</span><span class="p">)</span><span class="err">:</span>
 
-<span class="w">            </span><span class="p">)</span><span class="w"></span>
+<span class="w">                    </span><span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Building {node}...&quot;</span><span class="p">)</span>
 
-<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">inputs</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="w"></span>
+<span class="w">                    </span><span class="n">input_partitions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">get_producer_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">,</span><span class="w"> </span><span class="n">backend</span><span class="p">,</span><span class="w"> </span><span class="n">node</span><span class="p">)</span>
 
-<span class="w">        </span><span class="err">}</span><span class="w"></span>
+<span class="w">                    </span><span class="p">(</span>
 
-<span class="w">        </span><span class="n">partition_dependencies</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="k">map</span><span class="p">(</span><span class="w"></span>
+<span class="w">                        </span><span class="n">partition_dependencies</span><span class="p">,</span>
 
-<span class="w">            </span><span class="o">**</span><span class="err">{</span><span class="w"></span>
+<span class="w">                        </span><span class="n">partition_input_fingerprints</span><span class="p">,</span>
 
-<span class="w">                </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">partitions</span><span class="w"></span>
+<span class="w">                    </span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="p">.</span><span class="n">compute_dependencies</span><span class="p">(</span><span class="n">input_partitions</span><span class="p">)</span>
 
-<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">input_partitions</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="w"></span>
+<span class="w">                    </span><span class="n">existing_keys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">discover_producer_partitions</span><span class="p">(</span>
 
-<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">name</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">_map_input_metadata_</span><span class="w"></span>
+<span class="w">                        </span><span class="n">snapshot</span><span class="p">,</span>
 
-<span class="w">            </span><span class="err">}</span><span class="w"></span>
+<span class="w">                        </span><span class="n">backend</span><span class="p">,</span>
 
-<span class="w">        </span><span class="p">)</span><span class="w"></span>
+<span class="w">                        </span><span class="n">node</span><span class="p">,</span>
 
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Need</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">validate</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">partition_dependencies</span><span class="w"> </span><span class="n">against</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">Producer</span><span class="s1">&#39;s</span>
+<span class="w">                        </span><span class="n">partition_input_fingerprints</span><span class="o">=</span><span class="n">partition_input_fingerprints</span><span class="p">,</span>
 
-<span class="s1">        # partitioning scheme and such (basically, check user error). eg: if output is</span>
+<span class="w">                    </span><span class="p">)</span>
 
-<span class="s1">        # not partitioned, we expect only 1 entry in partition_dependencies</span>
+<span class="w">                    </span><span class="k">for</span><span class="w"> </span><span class="n">partition_key</span><span class="p">,</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">partition_dependencies</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="err">:</span>
 
-<span class="s1">        # (NotPartitioned).</span>
+<span class="w">                        </span><span class="n">self</span><span class="p">.</span><span class="n">build_producer_partition</span><span class="p">(</span>
 
-<span class="s1">        partition_input_fingerprints = InputFingerprints(</span>
+<span class="w">                            </span><span class="n">snapshot</span><span class="p">,</span>
 
-<span class="s1">            {</span>
+<span class="w">                            </span><span class="n">backend</span><span class="p">,</span>
 
-<span class="s1">                composite_key: producer.compute_input_fingerprint(dependency_partitions)</span>
+<span class="w">                            </span><span class="n">node</span><span class="p">,</span>
 
-<span class="s1">                for composite_key, dependency_partitions in partition_dependencies.items()</span>
+<span class="w">                            </span><span class="n">existing_partition_keys</span><span class="o">=</span><span class="n">existing_keys</span><span class="p">,</span>
 
-<span class="s1">            }</span>
+<span class="w">                            </span><span class="n">input_fingerprint</span><span class="o">=</span><span class="n">partition_input_fingerprints</span><span class="o">[</span><span class="n">partition_key</span><span class="o">]</span><span class="p">,</span>
 
-<span class="s1">        )</span>
+<span class="w">                            </span><span class="n">partition_dependencies</span><span class="o">=</span><span class="n">dependencies</span><span class="p">,</span>
 
-<span class="s1">        output_artifacts = graph.producer_outputs[producer]</span>
+<span class="w">                            </span><span class="n">partition_key</span><span class="o">=</span><span class="n">partition_key</span><span class="p">,</span>
 
-<span class="s1">        # NOTE: The output partitions may be built, but not yet associated with this snapshot_id</span>
+<span class="w">                        </span><span class="p">)</span>
 
-<span class="s1">        # (eg: raw input data changed, but no changes trickled into this specific Producer). Hence</span>
+<span class="w">                </span><span class="k">else</span><span class="err">:</span>
 
-<span class="s1">        # we&#39;</span><span class="n">ll</span><span class="w"> </span><span class="k">fetch</span><span class="w"> </span><span class="ow">all</span><span class="w"> </span><span class="n">StoragePartitions</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">Storage</span><span class="p">,</span><span class="w"> </span><span class="n">filtered</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">PKs</span><span class="w"> </span><span class="ow">and</span><span class="w"></span>
+<span class="w">                    </span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="p">()</span>
 
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">input_fingerprints</span><span class="w"> </span><span class="n">we</span><span class="s1">&#39;ve computed *are* for this Graph - and then link them to the graph.</span>
-
-<span class="s1">        existing_output_partitions = {</span>
-
-<span class="s1">            output: backend.read_artifact_partitions(output, partition_input_fingerprints)</span>
-
-<span class="s1">            for output in output_artifacts</span>
-
-<span class="s1">        }</span>
-
-<span class="s1">        for artifact, partitions in existing_output_partitions.items():</span>
-
-<span class="s1">            backend.write_graph_partitions(</span>
-
-<span class="s1">                graph.name,</span>
-
-<span class="s1">                graph.get_snapshot_id(),</span>
-
-<span class="s1">                graph.artifact_to_key[artifact],</span>
-
-<span class="s1">                artifact,</span>
-
-<span class="s1">                partitions,</span>
-
-<span class="s1">            )</span>
-
-<span class="s1">        # TODO: Guarantee all outputs have the same set of identified partitions. Currently, this</span>
-
-<span class="s1">        # pretends a partition is built for all outputs if _any_ are built for that partition.</span>
-
-<span class="s1">        existing_output_keys = {</span>
-
-<span class="s1">            partition.keys for partition in chain.from_iterable(existing_output_partitions.values())</span>
-
-<span class="s1">        }</span>
-
-<span class="s1">        for output_partition_key, dependencies in partition_dependencies.items():</span>
-
-<span class="s1">            if output_partition_key in existing_output_keys:</span>
-
-<span class="s1">                pk_str = f&quot; for: {dict(output_partition_key)}&quot; if output_partition_key else &quot;.&quot;</span>
-
-<span class="s1">                logging.info(f&quot;Skipping existing {type(producer).__name__} output{pk_str}&quot;)</span>
-
-<span class="s1">                continue</span>
-
-<span class="s1">            # TODO: Catch DispatchError and give a nicer error... maybe add this to our</span>
-
-<span class="s1">            # @dispatch wrapper (eg: msg arg, or even fn that returns the message to</span>
-
-<span class="s1">            # raise).</span>
-
-<span class="s1">            arguments = {</span>
-
-<span class="s1">                name: graph.read(</span>
-
-<span class="s1">                    artifact=producer.inputs[name],</span>
-
-<span class="s1">                    storage_partitions=partition_dependencies[output_partition_key][name],</span>
-
-<span class="s1">                    # TODO: We&#39;</span><span class="n">ll</span><span class="w"> </span><span class="n">probably</span><span class="w"> </span><span class="n">need</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">update</span><span class="w"> </span><span class="n">Producer</span><span class="p">.</span><span class="n">_build_input_views_</span><span class="w"></span>
-
-<span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="k">hold</span><span class="w"> </span><span class="o">*</span><span class="n">instances</span><span class="o">*</span><span class="w"> </span><span class="p">(</span><span class="n">either</span><span class="w"> </span><span class="n">objects</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">Annotated</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">init</span><span class="w"></span>
-
-<span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="n">during</span><span class="w"> </span><span class="n">Producer</span><span class="p">.</span><span class="n">__init_subclass__</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">                    </span><span class="k">view</span><span class="o">=</span><span class="n">view_class</span><span class="p">(),</span><span class="w"></span>
-
-<span class="w">                </span><span class="p">)</span><span class="w"></span>
-
-<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">view_class</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">_build_input_views_</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="w"></span>
-
-<span class="w">            </span><span class="err">}</span><span class="w"></span>
-
-<span class="w">            </span><span class="n">outputs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="nf">len</span><span class="p">(</span><span class="n">producer</span><span class="p">.</span><span class="n">_output_metadata_</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">                </span><span class="n">outputs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">outputs</span><span class="p">,)</span><span class="w"></span>
-
-<span class="w">            </span><span class="n">validation_passed</span><span class="p">,</span><span class="w"> </span><span class="n">validation_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">validate_outputs</span><span class="p">(</span><span class="o">*</span><span class="n">outputs</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nl">validation_passed</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">                </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">validation_message</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">enumerate</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">                </span><span class="n">graph</span><span class="p">.</span><span class="k">write</span><span class="p">(</span><span class="w"></span>
-
-<span class="w">                    </span><span class="k">output</span><span class="p">,</span><span class="w"></span>
-
-<span class="w">                    </span><span class="n">artifact</span><span class="o">=</span><span class="n">output_artifacts</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="p">,</span><span class="w"></span>
-
-<span class="w">                    </span><span class="n">input_fingerprint</span><span class="o">=</span><span class="n">partition_input_fingerprints</span><span class="o">[</span><span class="n">output_partition_key</span><span class="o">]</span><span class="p">,</span><span class="w"></span>
-
-<span class="w">                    </span><span class="n">keys</span><span class="o">=</span><span class="n">output_partition_key</span><span class="p">,</span><span class="w"></span>
-
-<span class="w">                    </span><span class="k">view</span><span class="o">=</span><span class="n">producer</span><span class="p">.</span><span class="n">_output_metadata_</span><span class="o">[</span><span class="n">i</span><span class="o">][</span><span class="n">1</span><span class="o">]</span><span class="p">(),</span><span class="w"></span>
-
-<span class="w">                </span><span class="p">)</span><span class="w"></span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">build</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph</span><span class="p">:</span><span class="w"> </span><span class="n">Graph</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">NOTE</span><span class="p">:</span><span class="w"> </span><span class="n">Raw</span><span class="w"> </span><span class="n">Artifacts</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">discovered</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">linked</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">graph</span><span class="w"></span>
-
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="w"></span>
-
-<span class="w">        </span><span class="n">assert</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="n">snapshot_id</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="w"></span>
-
-<span class="w">        </span><span class="k">with</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="k">connect</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nl">backend</span><span class="p">:</span><span class="w"></span>
-
-<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">node</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">TopologicalSorter</span><span class="p">(</span><span class="n">graph</span><span class="p">.</span><span class="n">dependencies</span><span class="p">).</span><span class="n">static_order</span><span class="p">()</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">Artifact</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Compute</span><span class="w"> </span><span class="k">Statistics</span><span class="w"> </span><span class="p">(</span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">computed</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">partition</span><span class="p">)</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">check</span><span class="w"></span>
-
-<span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="n">Thresholds</span><span class="w"> </span><span class="p">(</span><span class="k">every</span><span class="w"> </span><span class="nc">time</span><span class="p">,</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">they</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">changed</span><span class="p">,</span><span class="w"> </span><span class="k">dynamic</span><span class="p">,</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">overridden</span><span class="p">).</span><span class="w"></span>
-
-<span class="w">                    </span><span class="n">pass</span><span class="w"></span>
-
-<span class="w">                </span><span class="n">elif</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">Producer</span><span class="p">)</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">                    </span><span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Building {node}...&quot;</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">                    </span><span class="n">self</span><span class="p">.</span><span class="n">_build_producer</span><span class="p">(</span><span class="n">graph</span><span class="p">,</span><span class="w"> </span><span class="n">backend</span><span class="p">,</span><span class="w"> </span><span class="n">node</span><span class="p">)</span><span class="w"></span>
-
-<span class="w">                </span><span class="k">else</span><span class="err">:</span><span class="w"></span>
-
-<span class="w">                    </span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="p">()</span><span class="w"></span>
-
-<span class="w">        </span><span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="ss">&quot;Build finished.&quot;</span><span class="p">)</span><span class="w"></span>
+<span class="w">        </span><span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="ss">&quot;Build finished.&quot;</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -2072,43 +1932,181 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="build">build</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">build</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">graph</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">Graph</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">graphs</span><span class="o">.</span><span class="n">GraphSnapshot</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code>    <span class="n">def</span> <span class="kr">build</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span> <span class="nf">graph</span><span class="o">:</span> <span class="nf">Graph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">None</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">build</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-        <span class="err">#</span> <span class="n">NOTE</span><span class="o">:</span> <span class="n">Raw</span> <span class="n">Artifacts</span> <span class="n">will</span> <span class="n">already</span> <span class="n">be</span> <span class="n">discovered</span> <span class="kr">and</span> <span class="n">linked</span> <span class="kr">in</span> <span class="n">the</span> <span class="n">backend</span> <span class="n">to</span> <span class="n">this</span> <span class="nf">graph</span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">NOTE</span><span class="p">:</span><span class="w"> </span><span class="n">Raw</span><span class="w"> </span><span class="n">Artifacts</span><span class="w"> </span><span class="n">will</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">discovered</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">linked</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">backend</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span>
 
-        <span class="err">#</span> <span class="n">snapshot</span><span class="p">.</span>
+<span class="w">        </span><span class="k">with</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="k">connect</span><span class="p">()</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nl">backend</span><span class="p">:</span>
 
-        <span class="kr">assert</span> <span class="nf">graph</span><span class="p">.</span><span class="n">snapshot_id</span> <span class="n">is</span> <span class="kr">not</span> <span class="n">None</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">node</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">TopologicalSorter</span><span class="p">(</span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">dependencies</span><span class="p">).</span><span class="n">static_order</span><span class="p">()</span><span class="err">:</span>
 
-        <span class="n">with</span> <span class="nf">graph</span><span class="p">.</span><span class="n">backend</span><span class="p">.</span><span class="n">connect</span><span class="p">()</span> <span class="kr">as</span> <span class="n">backend</span><span class="o">:</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">Artifact</span><span class="p">)</span><span class="err">:</span>
 
-            <span class="n">for</span> <span class="n">node</span> <span class="kr">in</span> <span class="n">TopologicalSorter</span><span class="p">(</span><span class="nf">graph</span><span class="p">.</span><span class="n">dependencies</span><span class="p">).</span><span class="n">static_order</span><span class="p">()</span><span class="o">:</span>
+<span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Compute</span><span class="w"> </span><span class="k">Statistics</span><span class="w"> </span><span class="p">(</span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">already</span><span class="w"> </span><span class="n">computed</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">partition</span><span class="p">)</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">check</span>
 
-                <span class="nf">if</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Artifact</span><span class="p">)</span><span class="o">:</span>
+<span class="w">                    </span><span class="err">#</span><span class="w"> </span><span class="n">Thresholds</span><span class="w"> </span><span class="p">(</span><span class="k">every</span><span class="w"> </span><span class="nc">time</span><span class="p">,</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="n">they</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">changed</span><span class="p">,</span><span class="w"> </span><span class="k">dynamic</span><span class="p">,</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">overridden</span><span class="p">).</span>
 
-                    <span class="err">#</span> <span class="n">TODO</span><span class="o">:</span> <span class="n">Compute</span> <span class="n">Statistics</span> <span class="p">(</span><span class="nf">if</span> <span class="kr">not</span> <span class="n">already</span> <span class="n">computed</span> <span class="n">for</span> <span class="n">the</span> <span class="kr">partition</span><span class="p">)</span> <span class="kr">and</span> <span class="n">check</span>
+<span class="w">                    </span><span class="n">pass</span>
 
-                    <span class="err">#</span> <span class="n">Thresholds</span> <span class="p">(</span><span class="n">every</span> <span class="n">time</span><span class="p">,</span> <span class="kr">as</span> <span class="n">they</span> <span class="n">may</span> <span class="n">be</span> <span class="n">changed</span><span class="p">,</span> <span class="n">dynamic</span><span class="p">,</span> <span class="kr">or</span> <span class="n">overridden</span><span class="p">).</span>
+<span class="w">                </span><span class="n">elif</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span><span class="w"> </span><span class="n">Producer</span><span class="p">)</span><span class="err">:</span>
 
-                    <span class="n">pass</span>
+<span class="w">                    </span><span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Building {node}...&quot;</span><span class="p">)</span>
 
-                <span class="n">elif</span> <span class="n">isinstance</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">Producer</span><span class="p">)</span><span class="o">:</span>
+<span class="w">                    </span><span class="n">input_partitions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">get_producer_inputs</span><span class="p">(</span><span class="n">snapshot</span><span class="p">,</span><span class="w"> </span><span class="n">backend</span><span class="p">,</span><span class="w"> </span><span class="n">node</span><span class="p">)</span>
 
-                    <span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="s">&quot;Building {node}...&quot;</span><span class="p">)</span>
+<span class="w">                    </span><span class="p">(</span>
 
-                    <span class="kr">self</span><span class="p">.</span><span class="n">_build_producer</span><span class="p">(</span><span class="nf">graph</span><span class="p">,</span> <span class="n">backend</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+<span class="w">                        </span><span class="n">partition_dependencies</span><span class="p">,</span>
 
-                <span class="n">else</span><span class="o">:</span>
+<span class="w">                        </span><span class="n">partition_input_fingerprints</span><span class="p">,</span>
 
-                    <span class="n">raise</span> <span class="n">NotImplementedError</span><span class="p">()</span>
+<span class="w">                    </span><span class="p">)</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">node</span><span class="p">.</span><span class="n">compute_dependencies</span><span class="p">(</span><span class="n">input_partitions</span><span class="p">)</span>
 
-        <span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="s">&quot;Build finished.&quot;</span><span class="p">)</span>
+<span class="w">                    </span><span class="n">existing_keys</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">discover_producer_partitions</span><span class="p">(</span>
+
+<span class="w">                        </span><span class="n">snapshot</span><span class="p">,</span>
+
+<span class="w">                        </span><span class="n">backend</span><span class="p">,</span>
+
+<span class="w">                        </span><span class="n">node</span><span class="p">,</span>
+
+<span class="w">                        </span><span class="n">partition_input_fingerprints</span><span class="o">=</span><span class="n">partition_input_fingerprints</span><span class="p">,</span>
+
+<span class="w">                    </span><span class="p">)</span>
+
+<span class="w">                    </span><span class="k">for</span><span class="w"> </span><span class="n">partition_key</span><span class="p">,</span><span class="w"> </span><span class="n">dependencies</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">partition_dependencies</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="err">:</span>
+
+<span class="w">                        </span><span class="n">self</span><span class="p">.</span><span class="n">build_producer_partition</span><span class="p">(</span>
+
+<span class="w">                            </span><span class="n">snapshot</span><span class="p">,</span>
+
+<span class="w">                            </span><span class="n">backend</span><span class="p">,</span>
+
+<span class="w">                            </span><span class="n">node</span><span class="p">,</span>
+
+<span class="w">                            </span><span class="n">existing_partition_keys</span><span class="o">=</span><span class="n">existing_keys</span><span class="p">,</span>
+
+<span class="w">                            </span><span class="n">input_fingerprint</span><span class="o">=</span><span class="n">partition_input_fingerprints</span><span class="o">[</span><span class="n">partition_key</span><span class="o">]</span><span class="p">,</span>
+
+<span class="w">                            </span><span class="n">partition_dependencies</span><span class="o">=</span><span class="n">dependencies</span><span class="p">,</span>
+
+<span class="w">                            </span><span class="n">partition_key</span><span class="o">=</span><span class="n">partition_key</span><span class="p">,</span>
+
+<span class="w">                        </span><span class="p">)</span>
+
+<span class="w">                </span><span class="k">else</span><span class="err">:</span>
+
+<span class="w">                    </span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="p">()</span>
+
+<span class="w">        </span><span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="ss">&quot;Build finished.&quot;</span><span class="p">)</span>
+</code></pre></div>
+
+</details>
+<h4 id="build_producer_partition">build_producer_partition</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">build_producer_partition</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="s1">&#39;GraphSnapshot&#39;</span><span class="p">,</span>
+    <span class="n">connection</span><span class="p">:</span> <span class="s1">&#39;Connection&#39;</span><span class="p">,</span>
+    <span class="n">producer</span><span class="p">:</span> <span class="s1">&#39;Producer&#39;</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">existing_partition_keys</span><span class="p">:</span> <span class="s1">&#39;set[CompositeKey]&#39;</span><span class="p">,</span>
+    <span class="n">input_fingerprint</span><span class="p">:</span> <span class="s1">&#39;Fingerprint&#39;</span><span class="p">,</span>
+    <span class="n">partition_dependencies</span><span class="p">:</span> <span class="s1">&#39;frozendict[str, StoragePartitions]&#39;</span><span class="p">,</span>
+    <span class="n">partition_key</span><span class="p">:</span> <span class="s1">&#39;CompositeKey&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">build_producer_partition</span><span class="p">(</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span>
+
+<span class="w">        </span><span class="k">connection</span><span class="err">:</span><span class="w"> </span><span class="k">Connection</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">producer</span><span class="p">:</span><span class="w"> </span><span class="n">Producer</span><span class="p">,</span>
+
+<span class="w">        </span><span class="o">*</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">existing_partition_keys</span><span class="p">:</span><span class="w"> </span><span class="k">set</span><span class="o">[</span><span class="n">CompositeKey</span><span class="o">]</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">input_fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">partition_dependencies</span><span class="p">:</span><span class="w"> </span><span class="n">frozendict</span><span class="o">[</span><span class="n">str, StoragePartitions</span><span class="o">]</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">partition_key</span><span class="p">:</span><span class="w"> </span><span class="n">CompositeKey</span><span class="p">,</span>
+
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Should</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="ss">&quot;skip if exists&quot;</span><span class="w"> </span><span class="n">live</span><span class="w"> </span><span class="n">here</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">higher</span><span class="w"> </span><span class="n">up</span><span class="vm">?</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">partition_key</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="nl">existing_partition_keys</span><span class="p">:</span>
+
+<span class="w">            </span><span class="n">pk_str</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">f</span><span class="ss">&quot; for: {dict(partition_key)}&quot;</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">partition_key</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="ss">&quot;.&quot;</span>
+
+<span class="w">            </span><span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Skipping existing {type(producer).__name__} output{pk_str}&quot;</span><span class="p">)</span>
+
+<span class="w">            </span><span class="k">return</span>
+
+<span class="w">        </span><span class="n">logging</span><span class="p">.</span><span class="n">info</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Building {producer} output for {partition_key}...&quot;</span><span class="p">)</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Catch</span><span class="w"> </span><span class="n">DispatchError</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">give</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="n">nicer</span><span class="w"> </span><span class="n">error</span><span class="p">...</span><span class="w"> </span><span class="n">maybe</span><span class="w"> </span><span class="k">add</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">our</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nv">@dispatch</span><span class="w"> </span><span class="n">wrapper</span><span class="w"> </span><span class="p">(</span><span class="nl">eg</span><span class="p">:</span><span class="w"> </span><span class="n">msg</span><span class="w"> </span><span class="n">arg</span><span class="p">,</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">even</span><span class="w"> </span><span class="n">fn</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="k">returns</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">message</span><span class="w"> </span><span class="k">to</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">raise</span><span class="p">).</span>
+
+<span class="w">        </span><span class="n">arguments</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{</span>
+
+<span class="w">            </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="k">read</span><span class="p">(</span>
+
+<span class="w">                </span><span class="n">artifact</span><span class="o">=</span><span class="n">producer</span><span class="p">.</span><span class="n">inputs</span><span class="o">[</span><span class="n">name</span><span class="o">]</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">storage_partitions</span><span class="o">=</span><span class="n">partition_dependencies</span><span class="o">[</span><span class="n">name</span><span class="o">]</span><span class="p">,</span>
+
+<span class="w">                </span><span class="k">view</span><span class="o">=</span><span class="k">view</span><span class="p">,</span>
+
+<span class="w">            </span><span class="p">)</span>
+
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="k">view</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">_build_inputs_</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
+
+<span class="w">        </span><span class="err">}</span>
+
+<span class="w">        </span><span class="n">outputs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">build</span><span class="p">(</span><span class="o">**</span><span class="n">arguments</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="nf">len</span><span class="p">(</span><span class="n">producer</span><span class="p">.</span><span class="n">_outputs_</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="err">:</span>
+
+<span class="w">            </span><span class="n">outputs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">(</span><span class="n">outputs</span><span class="p">,)</span>
+
+<span class="w">        </span><span class="n">validation_passed</span><span class="p">,</span><span class="w"> </span><span class="n">validation_message</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">validate_outputs</span><span class="p">(</span><span class="o">*</span><span class="n">outputs</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nl">validation_passed</span><span class="p">:</span>
+
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">validation_message</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">i</span><span class="p">,</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">enumerate</span><span class="p">(</span><span class="n">outputs</span><span class="p">)</span><span class="err">:</span>
+
+<span class="w">            </span><span class="n">snapshot</span><span class="p">.</span><span class="k">write</span><span class="p">(</span>
+
+<span class="w">                </span><span class="k">output</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">artifact</span><span class="o">=</span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">producer_outputs</span><span class="o">[</span><span class="n">producer</span><span class="o">][</span><span class="n">i</span><span class="o">]</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">input_fingerprint</span><span class="o">=</span><span class="n">input_fingerprint</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">keys</span><span class="o">=</span><span class="n">partition_key</span><span class="p">,</span>
+
+<span class="w">                </span><span class="k">view</span><span class="o">=</span><span class="n">producer</span><span class="p">.</span><span class="n">_outputs_</span><span class="o">[</span><span class="n">i</span><span class="o">]</span><span class="p">,</span>
+
+<span class="w">            </span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -2183,49 +2181,49 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code>    <span class="n">def</span> <span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span> <span class="n">_Model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">deep</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">False</span><span class="p">,</span> <span class="n">validate</span><span class="o">:</span> <span class="kt">bool</span> <span class="o">=</span> <span class="no">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="o">:</span> <span class="k">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
 
-        <span class="n">copy</span> <span class="o">=</span> <span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+<span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">validate</span><span class="o">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span>
 
-            <span class="c1"># NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as</span>
+<span class="w">            </span><span class="c1"># NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as</span>
 
-            <span class="c1"># is normal `.copy` behavior).</span>
+<span class="w">            </span><span class="c1"># is normal `.copy` behavior).</span>
 
-            <span class="c1">#</span>
+<span class="w">            </span><span class="c1">#</span>
 
-            <span class="c1"># To reduce `repr` noise, we&#39;ll reset .__fields_set__ to those of the pre-validation copy</span>
+<span class="w">            </span><span class="c1"># To reduce `repr` noise, we&#39;ll reset .__fields_set__ to those of the pre-validation copy</span>
 
-            <span class="c1"># (which includes those originally set + updated).</span>
+<span class="w">            </span><span class="c1"># (which includes those originally set + updated).</span>
 
-            <span class="n">fields_set</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">__fields_set__</span>
+<span class="w">            </span><span class="n">fields_set</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">__fields_set__</span>
 
-            <span class="n">copy</span> <span class="o">=</span> <span class="n">copy</span><span class="p">.</span><span class="n">validate</span><span class="p">(</span>
+<span class="w">            </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">validate</span><span class="p">(</span>
 
-                <span class="n">dict</span><span class="p">(</span><span class="n">copy</span><span class="p">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="no">False</span><span class="p">,</span> <span class="n">by_alias</span><span class="o">=</span><span class="no">False</span><span class="p">,</span> <span class="n">exclude_unset</span><span class="o">=</span><span class="no">False</span><span class="p">))</span>
+<span class="w">                </span><span class="n">dict</span><span class="p">(</span><span class="n">copy</span><span class="p">.</span><span class="n">_iter</span><span class="p">(</span><span class="n">to_dict</span><span class="o">=</span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">by_alias</span><span class="o">=</span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">exclude_unset</span><span class="o">=</span><span class="no">False</span><span class="p">))</span>
 
-            <span class="p">)</span>
+<span class="w">            </span><span class="p">)</span>
 
-            <span class="c1"># Use object.__setattr__ to bypass frozen model assignment errors</span>
+<span class="w">            </span><span class="c1"># Use object.__setattr__ to bypass frozen model assignment errors</span>
 
-            <span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="s2">&quot;__fields_set__&quot;</span><span class="p">,</span> <span class="kt">set</span><span class="p">(</span><span class="n">fields_set</span><span class="p">))</span>
+<span class="w">            </span><span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;__fields_set__&quot;</span><span class="p">,</span><span class="w"> </span><span class="kt">set</span><span class="p">(</span><span class="n">fields_set</span><span class="p">))</span>
 
-            <span class="c1"># Copy over the private attributes, which are missing after validation (since we&#39;re only</span>
+<span class="w">            </span><span class="c1"># Copy over the private attributes, which are missing after validation (since we&#39;re only</span>
 
-            <span class="c1"># passing the fields).</span>
+<span class="w">            </span><span class="c1"># passing the fields).</span>
 
-            <span class="k">for</span> <span class="k">name</span> <span class="k">in</span> <span class="n">self</span><span class="p">.</span><span class="n">__private_attributes__</span><span class="o">:</span>
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="k">name</span><span class="w"> </span><span class="k">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">__private_attributes__</span><span class="o">:</span>
 
-                <span class="k">if</span> <span class="p">(</span><span class="k">value</span> <span class="o">:=</span> <span class="n">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span> <span class="k">name</span><span class="p">,</span> <span class="k">Undefined</span><span class="p">))</span> <span class="k">is</span> <span class="k">not</span> <span class="k">Undefined</span><span class="o">:</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">value</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="n">getattr</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">name</span><span class="p">,</span><span class="w"> </span><span class="k">Undefined</span><span class="p">))</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">not</span><span class="w"> </span><span class="k">Undefined</span><span class="o">:</span>
 
-                    <span class="k">if</span> <span class="n">deep</span><span class="o">:</span>
+<span class="w">                    </span><span class="k">if</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span>
 
-                        <span class="k">value</span> <span class="o">=</span> <span class="n">deepcopy</span><span class="p">(</span><span class="k">value</span><span class="p">)</span>
+<span class="w">                        </span><span class="k">value</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">deepcopy</span><span class="p">(</span><span class="k">value</span><span class="p">)</span>
 
-                    <span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span> <span class="k">name</span><span class="p">,</span> <span class="k">value</span><span class="p">)</span>
+<span class="w">                    </span><span class="n">object</span><span class="p">.</span><span class="n">__setattr__</span><span class="p">(</span><span class="n">copy</span><span class="p">,</span><span class="w"> </span><span class="k">name</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">copy</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">copy</span>
 </code></pre></div>
 
 </details>
@@ -2233,10 +2231,10 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">dict</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">by_alias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_defaults</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exclude_unset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_none</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
@@ -2244,14 +2242,124 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </code></pre></div>
 
 <p>Generate a dictionary representation of the model, optionally specifying which fields to include or exclude.</p>
+<h4 id="discover_producer_partitions">discover_producer_partitions</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">discover_producer_partitions</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="s1">&#39;GraphSnapshot&#39;</span><span class="p">,</span>
+    <span class="n">connection</span><span class="p">:</span> <span class="s1">&#39;Connection&#39;</span><span class="p">,</span>
+    <span class="n">producer</span><span class="p">:</span> <span class="s1">&#39;Producer&#39;</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">partition_input_fingerprints</span><span class="p">:</span> <span class="s1">&#39;InputFingerprints&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;set[CompositeKey]&#39;</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">discover_producer_partitions</span><span class="p">(</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span>
+
+<span class="w">        </span><span class="k">connection</span><span class="err">:</span><span class="w"> </span><span class="k">Connection</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">producer</span><span class="p">:</span><span class="w"> </span><span class="n">Producer</span><span class="p">,</span>
+
+<span class="w">        </span><span class="o">*</span><span class="p">,</span>
+
+<span class="w">        </span><span class="nl">partition_input_fingerprints</span><span class="p">:</span><span class="w"> </span><span class="n">InputFingerprints</span><span class="p">,</span>
+
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">set</span><span class="o">[</span><span class="n">CompositeKey</span><span class="o">]</span><span class="err">:</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">NOTE</span><span class="p">:</span><span class="w"> </span><span class="n">The</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="n">partitions</span><span class="w"> </span><span class="n">may</span><span class="w"> </span><span class="n">be</span><span class="w"> </span><span class="n">built</span><span class="p">,</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">yet</span><span class="w"> </span><span class="n">associated</span><span class="w"> </span><span class="k">with</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">GraphSnapshot</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="p">(</span><span class="nl">eg</span><span class="p">:</span><span class="w"> </span><span class="n">raw</span><span class="w"> </span><span class="k">input</span><span class="w"> </span><span class="k">data</span><span class="w"> </span><span class="n">changed</span><span class="p">,</span><span class="w"> </span><span class="n">but</span><span class="w"> </span><span class="k">no</span><span class="w"> </span><span class="n">changes</span><span class="w"> </span><span class="n">trickled</span><span class="w"> </span><span class="k">into</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="k">specific</span><span class="w"> </span><span class="n">Producer</span><span class="p">).</span><span class="w"> </span><span class="n">Hence</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">we</span><span class="s1">&#39;ll fetch all StoragePartitions for each Storage, filtered to the PKs and</span>
+
+<span class="s1">        # input_fingerprints we&#39;</span><span class="n">ve</span><span class="w"> </span><span class="n">computed</span><span class="w"> </span><span class="o">*</span><span class="k">are</span><span class="o">*</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">this</span><span class="w"> </span><span class="n">snapshot</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="k">then</span><span class="w"> </span><span class="n">link</span><span class="w"> </span><span class="n">them</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">the</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span>
+
+<span class="w">        </span><span class="n">existing_output_partitions</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{</span>
+
+<span class="w">            </span><span class="k">output</span><span class="err">:</span><span class="w"> </span><span class="k">connection</span><span class="p">.</span><span class="n">read_artifact_partitions</span><span class="p">(</span><span class="k">output</span><span class="p">,</span><span class="w"> </span><span class="n">partition_input_fingerprints</span><span class="p">)</span>
+
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="k">output</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">producer_outputs</span><span class="o">[</span><span class="n">producer</span><span class="o">]</span>
+
+<span class="w">        </span><span class="err">}</span>
+
+<span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">existing_output_partitions</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="err">:</span>
+
+<span class="w">            </span><span class="k">connection</span><span class="p">.</span><span class="n">write_graph_partitions</span><span class="p">(</span>
+
+<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">name</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">id</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">artifact</span><span class="p">,</span>
+
+<span class="w">                </span><span class="n">partitions</span><span class="p">,</span>
+
+<span class="w">            </span><span class="p">)</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Guarantee</span><span class="w"> </span><span class="ow">all</span><span class="w"> </span><span class="n">outputs</span><span class="w"> </span><span class="n">have</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">same</span><span class="w"> </span><span class="k">set</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">identified</span><span class="w"> </span><span class="n">partitions</span><span class="p">.</span><span class="w"> </span><span class="n">Currently</span><span class="p">,</span><span class="w"> </span><span class="n">this</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">pretends</span><span class="w"> </span><span class="n">a</span><span class="w"> </span><span class="k">partition</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="n">built</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="ow">all</span><span class="w"> </span><span class="n">outputs</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">_any_</span><span class="w"> </span><span class="k">are</span><span class="w"> </span><span class="n">built</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">that</span><span class="w"> </span><span class="k">partition</span><span class="p">.</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="err">{</span>
+
+<span class="w">            </span><span class="k">partition</span><span class="p">.</span><span class="n">keys</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">partition</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">chain</span><span class="p">.</span><span class="n">from_iterable</span><span class="p">(</span><span class="n">existing_output_partitions</span><span class="p">.</span><span class="k">values</span><span class="p">())</span>
+
+<span class="w">        </span><span class="err">}</span>
+</code></pre></div>
+
+</details>
+<h4 id="get_producer_inputs">get_producer_inputs</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_producer_inputs</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="s1">&#39;GraphSnapshot&#39;</span><span class="p">,</span>
+    <span class="n">connection</span><span class="p">:</span> <span class="s1">&#39;Connection&#39;</span><span class="p">,</span>
+    <span class="n">producer</span><span class="p">:</span> <span class="s1">&#39;Producer&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;InputPartitions&#39;</span>
+</code></pre></div>
+
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_producer_inputs</span><span class="p">(</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span><span class="w"> </span><span class="k">connection</span><span class="err">:</span><span class="w"> </span><span class="k">Connection</span><span class="p">,</span><span class="w"> </span><span class="nl">producer</span><span class="p">:</span><span class="w"> </span><span class="n">Producer</span>
+
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">InputPartitions</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">InputPartitions</span><span class="p">(</span>
+
+<span class="w">            </span><span class="err">{</span>
+
+<span class="w">                </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="k">connection</span><span class="p">.</span><span class="n">read_graph_partitions</span><span class="p">(</span>
+
+<span class="w">                    </span><span class="n">snapshot</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span>
+
+<span class="w">                </span><span class="p">)</span>
+
+<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">producer</span><span class="p">.</span><span class="n">inputs</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
+
+<span class="w">            </span><span class="err">}</span>
+
+<span class="w">        </span><span class="p">)</span>
+</code></pre></div>
+
+</details>
 <h4 id="json">json</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">json</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">)]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">include</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;AbstractSetIntStr&#39;</span><span class="p">),</span> <span class="n">ForwardRef</span><span class="p">(</span><span class="s1">&#39;MappingIntStrAny&#39;</span><span class="p">),</span> <span class="n">NoneType</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">by_alias</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">skip_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">skip_defaults</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">bool</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">exclude_unset</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_defaults</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">exclude_none</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
