@@ -97,10 +97,11 @@ NodeDependencies = frozendict[Node, frozenset[Node]]
 class Graph(Model):
     """Graph stores a web of Artifacts connected by Producers."""
 
-    _fingerprint_excludes_ = frozenset(["backend"])
-
     name: str
-    backend: Backend = Field(default_factory=MemoryBackend)
+    # The Backend *itself* should not affect the results of a Graph build, though the contents
+    # certainly may (eg: stored annotations), so we avoid serializing it. This also prevent
+    # embedding any credentials.
+    backend: Backend[Any] = Field(default_factory=MemoryBackend, exclude=True)
     path_tags: frozendict[str, str] = frozendict()
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
@@ -231,8 +232,8 @@ class Graph(Model):
                 storage_partitions = artifact.storage.discover_partitions()
             else:
                 snapshot = snapshot or self.snapshot()
-                with self.backend.connect() as backend:
-                    storage_partitions = backend.read_graph_partitions(
+                with self.backend.connect() as conn:
+                    storage_partitions = conn.read_graph_partitions(
                         snapshot.name, snapshot.id, key, artifact
                     )
         return io.read(
@@ -276,12 +277,12 @@ class Graph(Model):
         ).with_content_fingerprint()
         # TODO: Should we only do this in bulk? We might want the backends to transparently batch
         # requests, but that's not so friendly with the transient ".connect".
-        with self.backend.connect() as backend:
-            backend.write_artifact_partitions(artifact, (storage_partition,))
+        with self.backend.connect() as conn:
+            conn.write_artifact_partitions(artifact, (storage_partition,))
             # Skip linking this partition to the snapshot if it affects raw Artifacts (which would
             # trigger an id change).
             if snapshot is not None and artifact.producer_output is not None:
-                backend.write_graph_partitions(
+                conn.write_graph_partitions(
                     snapshot.name, snapshot.id, key, artifact, (storage_partition,)
                 )
         return cast(StoragePartition, storage_partition)
@@ -303,7 +304,7 @@ class GraphSnapshot(Model):
         return self.graph.artifacts
 
     @property
-    def backend(self) -> Backend:
+    def backend(self) -> Backend[Any]:
         return self.graph.backend
 
     @property
@@ -349,9 +350,9 @@ class GraphSnapshot(Model):
             raise ValueError("Fingerprint is empty!")
         snapshot = cls(graph=graph, id=snapshot_id)
         # Write the discovered partitions (if not already known) and link to this new snapshot.
-        with snapshot.backend.connect() as backend:
+        with snapshot.backend.connect() as conn:
             for key, partitions in known_artifact_partitions.items():
-                backend.write_artifact_and_graph_partitions(
+                conn.write_artifact_and_graph_partitions(
                     snapshot.artifacts[key], partitions, snapshot.name, snapshot.id, key
                 )
         return snapshot
@@ -365,15 +366,15 @@ class GraphSnapshot(Model):
         return self
 
     def tag(self, tag: str, overwrite: bool = False) -> None:
-        with self.backend.connect() as backend:
-            backend.write_graph_tag(self.name, self.id, tag, overwrite)
+        with self.backend.connect() as conn:
+            conn.write_graph_tag(self.name, self.id, tag, overwrite)
 
     # TODO: We need to implement building a Graph(Snapshot) by pulling *all* info from the Backend.
     #
     # @classmethod
     # def from_tag(cls, name: str, tag: str, *, backend: Backend) -> GraphSnapshot:
-    #     with backend.connect() as backend:
-    #         snapshot_id = backend.read_graph_tag(name, tag)})
+    #     with backend.connect() as conn:
+    #         snapshot_id = conn.read_graph_tag(name, tag)})
 
     def read(
         self,

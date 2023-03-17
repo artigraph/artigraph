@@ -6,7 +6,7 @@ import abc
 import logging
 from itertools import chain
 
-from arti.backends import Backend
+from arti.backends import Connection
 from arti.fingerprints import Fingerprint
 from arti.graphs import GraphSnapshot
 from arti.internal.models import Model
@@ -22,11 +22,11 @@ class Executor(Model):
         raise NotImplementedError()
 
     def get_producer_inputs(
-        self, snapshot: GraphSnapshot, backend: Backend, producer: Producer
+        self, snapshot: GraphSnapshot, connection: Connection, producer: Producer
     ) -> InputPartitions:
         return InputPartitions(
             {
-                name: backend.read_graph_partitions(
+                name: connection.read_graph_partitions(
                     snapshot.name, snapshot.id, snapshot.graph.artifact_to_key[artifact], artifact
                 )
                 for name, artifact in producer.inputs.items()
@@ -36,7 +36,7 @@ class Executor(Model):
     def discover_producer_partitions(
         self,
         snapshot: GraphSnapshot,
-        backend: Backend,
+        connection: Connection,
         producer: Producer,
         *,
         partition_input_fingerprints: InputFingerprints,
@@ -47,11 +47,11 @@ class Executor(Model):
         # input_fingerprints we've computed *are* for this snapshot - and then link them to the
         # snapshot.
         existing_output_partitions = {
-            output: backend.read_artifact_partitions(output, partition_input_fingerprints)
+            output: connection.read_artifact_partitions(output, partition_input_fingerprints)
             for output in snapshot.graph.producer_outputs[producer]
         }
         for artifact, partitions in existing_output_partitions.items():
-            backend.write_graph_partitions(
+            connection.write_graph_partitions(
                 snapshot.name,
                 snapshot.id,
                 snapshot.graph.artifact_to_key[artifact],
@@ -67,7 +67,7 @@ class Executor(Model):
     def build_producer_partition(
         self,
         snapshot: GraphSnapshot,
-        backend: Backend,
+        connection: Connection,
         producer: Producer,
         *,
         existing_partition_keys: set[CompositeKey],
