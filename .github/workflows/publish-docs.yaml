@@ -13,8 +13,8 @@ jobs:
         python-version: 3.10.8
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade poetry
-        poetry install
+        python -m pip install --upgrade "pip==23.0" "poetry==1.4.0"
+        poetry install --all-extras --no-interaction
     - name: Publish with Portray
       run: |
         # Fetch the gh-pages branch so portray commits on top of existing commits.
