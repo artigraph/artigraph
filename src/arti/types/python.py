@@ -21,7 +21,6 @@ _generate(artigraph=arti.types.Binary, system=bytes)
 # NOTE: issubclass(bool, int) is True, so set higher priority
 _generate(artigraph=arti.types.Boolean, system=bool, priority=int(1e9))
 _generate(artigraph=arti.types.Date, system=datetime.date)
-_generate(artigraph=arti.types.Null, system=NoneType)
 _generate(artigraph=arti.types.String, system=str)
 for _precision in (16, 32, 64):
     _generate(
@@ -35,6 +34,18 @@ for _precision in (8, 16, 32, 64):
         system=int,
         priority=_precision,
     )
+
+
+@python_type_system.register_adapter
+class PyNone(_ScalarClassTypeAdapter):
+    # Python represents None types in type hints with the `None` value (not `NoneType`).
+
+    artigraph = arti.types.Null
+    system = None
+
+    @classmethod
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
+        return type_ is None
 
 
 @python_type_system.register_adapter
