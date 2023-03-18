@@ -5,7 +5,6 @@ from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_type_
 import pytest
 
 from arti import Type
-from arti.internal.type_hints import NoneType
 from arti.types import (
     Boolean,
     Collection,
@@ -122,8 +121,8 @@ def test_python_map() -> None:
 
 
 def test_python_null() -> None:
-    assert isinstance(python_type_system.to_artigraph(NoneType, hints={}), Null)
-    assert python_type_system.to_system(Null(), hints={}) is NoneType
+    assert isinstance(python_type_system.to_artigraph(None, hints={}), Null)
+    assert python_type_system.to_system(Null(), hints={}) is None
 
 
 @pytest.mark.parametrize(

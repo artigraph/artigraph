@@ -43,6 +43,8 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
         return check_type is Any
     if check_type is Any:
         return True
+    if check_type is None:
+        return klass is NoneType
     # eg: issubclass(tuple, tuple)
     if klass_origin is None and check_type_origin is None:
         return issubclass(klass, check_type)
@@ -130,7 +132,9 @@ def get_item_from_annotated(
 
 
 def get_annotation_from_value(value: Any) -> Any:
-    if isinstance(value, (NoneType, bool, bytes, date, datetime, float, int, str)):
+    if value is None:
+        return None
+    if isinstance(value, (bool, bytes, date, datetime, float, int, str)):
         return type(value)
     if isinstance(value, (tuple, list, set, frozenset)):
         first, *tail = tuple(value)

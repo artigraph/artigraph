@@ -1,6 +1,5 @@
 from datetime import date, datetime
 
-from arti.internal.type_hints import NoneType
 from arti.types.python import python_type_system
 from arti.views import View
 
@@ -36,7 +35,7 @@ class List(PythonBuiltin):
 
 
 class Null(PythonBuiltin):
-    python_type = NoneType
+    python_type = None
 
 
 class Str(PythonBuiltin):

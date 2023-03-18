@@ -3,7 +3,6 @@ from datetime import date, datetime
 
 from arti import Artifact, View, read, write
 from arti.formats.pickle import Pickle
-from arti.internal.type_hints import NoneType
 from arti.internal.utils import named_temporary_file
 from arti.storage.local import LocalFilePartition
 from arti.views.python import Date, Datetime, Dict, Float, Int, Null, Str
@@ -11,13 +10,13 @@ from arti.views.python import Date, Datetime, Dict, Float, Int, Null, Str
 
 def test_python_View() -> None:
     for val, view_class, python_type in [
+        ("", Str, str),
+        (1, Int, int),
+        (1.0, Float, float),
+        (None, Null, None),
         (date(1970, 1, 1), Date, date),
         (datetime(1970, 1, 1, 0), Datetime, datetime),
-        (dict(a=1), Dict, dict[str, int]),
-        (1.0, Float, float),
-        (1, Int, int),
-        (None, Null, NoneType),
-        ("", Str, str),
+        ({"a": 1}, Dict, dict[str, int]),
     ]:
         view = View.from_annotation(python_type, mode="READWRITE")
         assert isinstance(view, view_class)

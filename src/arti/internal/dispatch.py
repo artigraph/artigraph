@@ -34,7 +34,7 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
             self.discovery_func()
         return super().__missing__(types)
 
-    def lookup(self, *args: type[Any]) -> Callable[..., Any]:
+    def lookup(self, *args: Optional[type[Any]]) -> Callable[..., Any]:
         # multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same
         # before looking up. Non-Generics pass through as is.
         args = tuple(_multimethod.subtype(arg) for arg in args)  # type: ignore[no-untyped-call]

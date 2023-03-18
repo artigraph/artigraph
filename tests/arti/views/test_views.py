@@ -1,4 +1,4 @@
-from typing import Annotated, ClassVar
+from typing import Annotated, ClassVar, Optional
 
 import pytest
 from pydantic import ValidationError
@@ -11,7 +11,7 @@ from arti.types.python import python_type_system
 def MockView() -> type[View]:
     class V(View):
         _abstract_ = True
-        _by_python_type_: ClassVar[dict[type, type[View]]] = {}
+        _by_python_type_: ClassVar[dict[Optional[type], type[View]]] = {}
 
         # NOTE: The type hint is needed to fix https://github.com/pydantic/pydantic/issues/1777#issuecomment-1465026331
         type_system: ClassVar[TypeSystem] = python_type_system
