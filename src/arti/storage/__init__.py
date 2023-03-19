@@ -4,14 +4,14 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
-from typing import Any, ClassVar, Generic, Optional, Self, TypeVar
+from typing import Any, ClassVar, Generic, Optional, TypeVar
 
 from pydantic import Field, validator
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
 from arti.internal.models import Model
-from arti.internal.type_hints import get_class_type_vars, lenient_issubclass
+from arti.internal.type_hints import Self, get_class_type_vars, lenient_issubclass
 from arti.internal.utils import frozendict
 from arti.partitions import CompositeKey, CompositeKeyTypes, InputFingerprints, PartitionKey
 from arti.storage._internal import partial_format, strip_partition_indexes

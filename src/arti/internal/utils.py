@@ -9,10 +9,11 @@ from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Mu
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
-from typing import IO, Any, ClassVar, Optional, Self, SupportsIndex, TypeVar, Union, cast
+from typing import IO, Any, ClassVar, Optional, SupportsIndex, TypeVar, Union, cast
 
 from box import Box
 
+from arti.internal.type_hints import Self
 from arti.internal.vendored.setuptools import find_namespace_packages
 
 _K = TypeVar("_K")

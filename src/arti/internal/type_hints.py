@@ -18,8 +18,6 @@ from typing import (
     overload,
 )
 
-from arti.internal.utils import one_or_none
-
 _T = TypeVar("_T")
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
@@ -124,6 +122,8 @@ def get_item_from_annotated(
 def get_item_from_annotated(
     annotation: Any, klass: type[_T], *, is_subclass: bool
 ) -> Optional[Union[_T, type[_T]]]:
+    from arti.internal.utils import one_or_none
+
     if not is_Annotated(annotation):
         return None
     _, *hints = get_args(annotation)
@@ -227,6 +227,10 @@ def signature(
 #
 # Focusing on  3.9+ (for now)
 
+if sys.version_info < (3, 11):  # pragma: no cover
+    from typing_extensions import Self as Self  # noqa: F401
+else:  # pragma: no cover
+    from typing import Self as Self  # noqa: F401
 
 if sys.version_info < (3, 10):  # pragma: no cover
 
