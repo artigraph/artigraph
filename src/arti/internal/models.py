@@ -150,6 +150,17 @@ class Model(BaseModel):
     def __eq__(self, other: Any) -> bool:
         return self.__class__ == other.__class__ and tuple(self._iter()) == tuple(other._iter())
 
+    def __hash__(self) -> int:
+        # Override the default __hash__ to match the fingerprint, which notably excludes
+        # `cached_property`s.
+        #
+        # If `cached_property`s are included, the hash will be different before and after caching,
+        # which wrecks havoc if a model is a key in a dict (`key in mydict` will be `False`...).
+        #
+        # This is only safe as the models are (mostly) frozen.
+        assert (key := self.fingerprint.key) is not None
+        return key
+
     # Omitting unpassed args in repr by default
     def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
         return [(k, v) for k, v in super().__repr_args__() if k in self.__fields_set__]
@@ -196,6 +207,8 @@ class Model(BaseModel):
             return obj.key
         if isinstance(obj, Model):
             return obj.fingerprint
+        if lenient_issubclass(obj, Model):
+            return obj._class_key_  # eg: View.artifact_class
         return encoder(obj)
 
     @property
@@ -217,6 +230,7 @@ class Model(BaseModel):
         json_repr = self.__config__.json_dumps(
             data,
             default=partial(self._fingerprint_json_encoder, encoder=self.__json_encoder__),
+            sort_keys=True,
         )
         return Fingerprint.from_string(f"{self._class_key_}:{json_repr}")
 
