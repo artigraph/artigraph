@@ -2,14 +2,16 @@ import pickle
 import re
 from pathlib import Path
 from typing import Annotated, cast
+from unittest.mock import PropertyMock, patch
 
 import pytest
 from box import BoxError
 
-from arti import Artifact, CompositeKey, Fingerprint, Graph, View, producer
+from arti import Artifact, CompositeKey, Fingerprint, Graph, GraphSnapshot, View, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
 from arti.internal.utils import frozendict
+from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2
 from tests.arti.dummies import Num as _Num
@@ -60,7 +62,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     with Graph(name="Test") as g:
         g.artifacts.x = 1
         g.artifacts.y = Num(storage=LocalFile(path=str(tmp_path / "y.json")))
-        g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y)  # type: ignore[call-arg]
+        g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y).out()  # type: ignore[call-arg]
         # Changes to `phase` will cause a new GraphSnapshot. However, since `phase` isn't an input
         # to `add`, we *shouldn't* have to recompute `z` - assuming the backend properly stores
         # storage->storage_partitions separate from the set of storage_partitions associated with a
@@ -72,7 +74,9 @@ def test_Graph_literals(tmp_path: Path) -> None:
     assert isinstance(y, Artifact)
     assert isinstance(z, Artifact)
     assert isinstance(phase, Artifact)
+    assert isinstance(x.storage, StringLiteral)
     assert x.storage.value == "1"
+    assert isinstance(z.storage, StringLiteral)
     assert z.storage.value is None
 
     # Ensure we can read raw Artifacts, even if others are not populated yet.
@@ -89,14 +93,14 @@ def test_Graph_literals(tmp_path: Path) -> None:
     assert g.read(z, annotation=int) == 2
     assert n_add_runs == 1
     with g.backend.connect() as conn:
-        assert len(conn.read_graph_partitions(g.name, s.id, "z", z)) == 1
+        assert len(conn.read_snapshot_partitions(s, "z", z)) == 1
         assert len(conn.read_artifact_partitions(z)) == 1
     # A subsequent build shouldn't require a rerun, ensuring we properly lookup existing literals.
     s = g.build()
     assert g.read(z, annotation=int) == 2
     assert n_add_runs == 1
     with g.backend.connect() as conn:
-        assert len(conn.read_graph_partitions(g.name, s.id, "z", z)) == 1
+        assert len(conn.read_snapshot_partitions(s, "z", z)) == 1
         assert len(conn.read_artifact_partitions(z)) == 1
     # Changing an input should trigger a rerun. There will still only be 1 z literal for this graph,
     # but now 2 overall for the storage (with different `input_fingerprint`s).
@@ -105,7 +109,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     assert g.read(z, annotation=int) == 3
     assert n_add_runs == 2
     with g.backend.connect() as conn:
-        assert len(conn.read_graph_partitions(g.name, s.id, "z", z)) == 1
+        assert len(conn.read_snapshot_partitions(s, "z", z)) == 1
         assert len(conn.read_artifact_partitions(z)) == 2
     # After getting a new GraphSnapshot, but no changes to `add`s inputs, ensure we properly lookup
     # existing literals - even though the GraphSnapshot will change, the input_fingerprint for `z`
@@ -115,7 +119,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     assert g.read(z, annotation=int) == 3
     assert n_add_runs == 2
     with g.backend.connect() as conn:
-        assert len(conn.read_graph_partitions(g.name, s.id, "z", z)) == 1
+        assert len(conn.read_snapshot_partitions(s, "z", z)) == 1
         assert len(conn.read_artifact_partitions(z)) == 2
 
 
@@ -142,6 +146,12 @@ def test_Graph_snapshot() -> None:
     assert s.id == Fingerprint.combine(*id_components)
     # Ensure order independence
     assert s.id == Fingerprint.combine(*reversed(id_components))
+
+    # Ensure metadata is written
+    with g.backend.connect() as conn:
+        assert conn.read_graph(g.name, g.fingerprint) == g
+        assert conn.read_snapshot(s.name, s.fingerprint) == s
+        assert conn.read_snapshot_partitions(s, "a", s.artifacts.a)
 
 
 def test_Graph_snapshot_missing_input_artifact(tmp_path: Path) -> None:
@@ -179,8 +189,7 @@ def test_Graph_tagging(tmp_path: Path) -> None:
     g.write(1, artifact=g.artifacts.x)
     s1 = g.build()
     s1.tag(tag)
-    with g.backend.connect() as conn:
-        assert conn.read_graph_tag(g.name, tag) == s1.id
+    assert GraphSnapshot.from_tag(g.name, tag, connectable=g.backend) == s1
 
     g.write(2, artifact=g.artifacts.x)
     s2 = g.build()
@@ -188,17 +197,16 @@ def test_Graph_tagging(tmp_path: Path) -> None:
 
     with pytest.raises(
         ValueError,
-        match=re.escape(f"Existing `{tag}` tag for Graph `{g.name}` points to Fingerprint"),
+        match=re.escape(f"Existing `{tag}` tag for Graph `{g.name}` points to GraphSnapshot"),
     ):
         s2.tag(tag)
 
     s2.tag(tag, overwrite=True)
     with g.backend.connect() as conn:
-        assert conn.read_graph_tag(g.name, tag) == s2.id
+        assert GraphSnapshot.from_tag(g.name, tag, connectable=conn) == s2
 
-    with pytest.raises(ValueError, match=re.escape("No known `fake` tag for Graph `Test`")):
-        with g.backend.connect() as conn:
-            conn.read_graph_tag(g.name, "fake")
+    with pytest.raises(ValueError, match=re.escape("No known `fake` tag for GraphSnapshot `Test`")):
+        GraphSnapshot.from_tag(g.name, "fake", connectable=g.backend)
 
 
 def test_Graph_build(tmp_path: Path) -> None:
@@ -347,10 +355,16 @@ def test_Graph_producer_output(graph: Graph) -> None:
 
 
 def test_Graph_read_write(tmp_path: Path) -> None:
+    @producer()
+    def plus1(i: int) -> int:
+        return i + 1
+
     with Graph(name="test") as g:
         g.artifacts.i = Num(storage=LocalFile(path=str(tmp_path / "i.json")))
+        g.artifacts.j = plus1(i=g.artifacts.i).out()  # type: ignore[call-arg]
 
-    i = g.artifacts.i
+    i, j = g.artifacts.i, g.artifacts.j
+    assert isinstance(j, Artifact)
     # Test write
     storage_partition = g.write(5, artifact=i)
     assert isinstance(storage_partition, LocalFilePartition)
@@ -358,12 +372,15 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     assert storage_partition.input_fingerprint == Fingerprint.empty()
     assert storage_partition.keys == CompositeKey()
     assert storage_partition.path.endswith(i.format.extension)
+
     # Once snapshotted, writing to the raw Artifacts would result in a different snapshot.
     with pytest.raises(
         ValueError,
         match=re.escape("Writing to a raw Artifact (`i`) with a GraphSnapshot is not supported."),
     ):
         g.snapshot().write(10, artifact=i)
+    g.snapshot().write(5, artifact=j, input_fingerprint=Fingerprint.from_int(1))
+
     # Test read
     assert g.read(i, annotation=int) == 5
     assert g.read(i, view=View.from_annotation(int, mode="READ")) == 5
@@ -372,6 +389,22 @@ def test_Graph_read_write(tmp_path: Path) -> None:
         g.read(i)
     with pytest.raises(ValueError, match="Only one of `annotation` or `view` may be passed"):
         g.read(i, annotation=int, view=View.from_annotation(int, mode="READ"))
+    assert g.read(j, annotation=int) == 5
+
+    # Test that we can use an existing connection
+    with g.backend.connect() as conn, patch.object(
+        type(g.backend), "connect", new_callable=PropertyMock
+    ) as connect_mock:
+        g.write(10, artifact=i, connection=conn)
+        assert g.read(i, annotation=int, connection=conn) == 10
+
+        s = g.snapshot(connection=conn)
+        s.write(10, artifact=j, connection=conn, input_fingerprint=Fingerprint.from_int(1))
+        assert s.read(j, annotation=int, connection=conn) == 10
+
+        assert not connect_mock.called
+        g.backend.connect()  # Confirm we are mocking correctly
+        assert connect_mock.called
 
 
 def test_Graph_references(graph: Graph) -> None:
