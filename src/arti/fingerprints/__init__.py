@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import operator
@@ -13,8 +15,8 @@ from arti.internal.utils import int64, uint64
 
 def _gen_fingerprint_binop(
     op: Callable[[int, int], int]
-) -> "Callable[[Fingerprint, Union[int, Fingerprint]], Fingerprint]":
-    def _fingerprint_binop(self: "Fingerprint", other: "Union[int, Fingerprint]") -> "Fingerprint":
+) -> Callable[[Fingerprint, Union[int, Fingerprint]], Fingerprint]:
+    def _fingerprint_binop(self: Fingerprint, other: Union[int, Fingerprint]) -> Fingerprint:
         if isinstance(other, int):
             other = Fingerprint.from_int(other)
         if isinstance(other, Fingerprint):
@@ -43,24 +45,24 @@ class Fingerprint(Model):
 
     key: Optional[int64]
 
-    def combine(self, *others: "Fingerprint") -> "Fingerprint":
+    def combine(self, *others: Fingerprint) -> Fingerprint:
         return reduce(operator.xor, others, self)
 
     @classmethod
-    def empty(cls) -> "Fingerprint":
+    def empty(cls) -> Fingerprint:
         """Return a Fingerprint that, when combined, will return Fingerprint.empty()"""
         return cls(key=None)
 
     @classmethod
-    def from_int(cls, x: int, /) -> "Fingerprint":
+    def from_int(cls, x: int, /) -> Fingerprint:
         return cls.from_int64(int64(x))
 
     @classmethod
-    def from_int64(cls, x: int64, /) -> "Fingerprint":
+    def from_int64(cls, x: int64, /) -> Fingerprint:
         return cls(key=x)
 
     @classmethod
-    def from_string(cls, x: str, /) -> "Fingerprint":
+    def from_string(cls, x: str, /) -> Fingerprint:
         """Fingerprint an arbitrary string.
 
         Fingerprints using Farmhash Fingerprint64, converted to int64 via two's complement.
@@ -68,11 +70,11 @@ class Fingerprint(Model):
         return cls.from_uint64(uint64(farmhash.fingerprint64(x)))
 
     @classmethod
-    def from_uint64(cls, x: uint64, /) -> "Fingerprint":
+    def from_uint64(cls, x: uint64, /) -> Fingerprint:
         return cls.from_int64(int64(x))
 
     @classmethod
-    def identity(cls) -> "Fingerprint":
+    def identity(cls) -> Fingerprint:
         """Return a Fingerprint that, when combined, will return the other Fingerprint."""
         return cls(key=int64(0))
 

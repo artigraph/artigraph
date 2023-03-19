@@ -9,7 +9,7 @@ from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, Mu
 from contextlib import contextmanager
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
-from typing import IO, Any, ClassVar, Optional, SupportsIndex, TypeVar, Union, cast
+from typing import IO, Any, ClassVar, Optional, Self, SupportsIndex, TypeVar, Union, cast
 
 from box import Box
 
@@ -133,88 +133,86 @@ class _int(int):
         return str(int(self))
 
     # Stock magics.
-    #
-    # Using "self: TypeVar" so mypy will detect the returned subclass (rather than _int).
 
-    def __add__(self: _int_sub, x: int) -> _int_sub:
+    def __add__(self, x: int) -> Self:
         return type(self)(super().__add__(x))
 
-    def __and__(self: _int_sub, n: int) -> _int_sub:
+    def __and__(self, n: int) -> Self:
         return type(self)(super().__and__(n))
 
-    def __ceil__(self: _int_sub) -> _int_sub:
+    def __ceil__(self) -> Self:
         return type(self)(super().__ceil__())
 
-    def __floor__(self: _int_sub) -> _int_sub:
+    def __floor__(self) -> Self:
         return type(self)(super().__floor__())
 
-    def __floordiv__(self: _int_sub, x: int) -> _int_sub:
+    def __floordiv__(self, x: int) -> Self:
         return type(self)(super().__floordiv__(x))
 
-    def __invert__(self: _int_sub) -> _int_sub:
+    def __invert__(self) -> Self:
         return type(self)(super().__invert__())
 
-    def __lshift__(self: _int_sub, n: int) -> _int_sub:
+    def __lshift__(self, n: int) -> Self:
         return type(self)(super().__lshift__(n))
 
-    def __mod__(self: _int_sub, x: int) -> _int_sub:
+    def __mod__(self, x: int) -> Self:
         return type(self)(super().__mod__(x))
 
-    def __mul__(self: _int_sub, x: int) -> _int_sub:
+    def __mul__(self, x: int) -> Self:
         return type(self)(super().__mul__(x))
 
-    def __neg__(self: _int_sub) -> _int_sub:
+    def __neg__(self) -> Self:
         return type(self)(super().__neg__())
 
-    def __or__(self: _int_sub, n: int) -> _int_sub:
+    def __or__(self, n: int) -> Self:
         return type(self)(super().__or__(n))
 
-    def __pos__(self: _int_sub) -> _int_sub:
+    def __pos__(self) -> Self:
         return type(self)(super().__pos__())
 
-    def __radd__(self: _int_sub, x: int) -> _int_sub:
+    def __radd__(self, x: int) -> Self:
         return type(self)(super().__radd__(x))
 
-    def __rand__(self: _int_sub, n: int) -> _int_sub:
+    def __rand__(self, n: int) -> Self:
         return type(self)(super().__rand__(n))
 
-    def __rfloordiv__(self: _int_sub, x: int) -> _int_sub:
+    def __rfloordiv__(self, x: int) -> Self:
         return type(self)(super().__rfloordiv__(x))
 
-    def __rlshift__(self: _int_sub, n: int) -> _int_sub:
+    def __rlshift__(self, n: int) -> Self:
         return type(self)(super().__rlshift__(n))
 
-    def __rmod__(self: _int_sub, x: int) -> _int_sub:
+    def __rmod__(self, x: int) -> Self:
         return type(self)(super().__rmod__(x))
 
-    def __rmul__(self: _int_sub, x: int) -> _int_sub:
+    def __rmul__(self, x: int) -> Self:
         return type(self)(super().__rmul__(x))
 
-    def __ror__(self: _int_sub, n: int) -> _int_sub:
+    def __ror__(self, n: int) -> Self:
         return type(self)(super().__ror__(n))
 
-    def __round__(self: _int_sub, ndigits: SupportsIndex = 0) -> _int_sub:
+    def __round__(self, ndigits: SupportsIndex = 0) -> Self:
         return type(self)(super().__round__(ndigits))
 
-    def __rrshift__(self: _int_sub, n: int) -> _int_sub:
+    def __rrshift__(self, n: int) -> Self:
         return type(self)(super().__rrshift__(n))
 
-    def __rshift__(self: _int_sub, n: int) -> _int_sub:
+    def __rshift__(self, n: int) -> Self:
         return type(self)(super().__rshift__(n))
 
-    def __rsub__(self: _int_sub, x: int) -> _int_sub:
+    def __rsub__(self, x: int) -> Self:
         return type(self)(super().__rsub__(x))
 
-    def __rxor__(self: _int_sub, n: int) -> _int_sub:
+    def __rxor__(self, n: int) -> Self:
         return type(self)(super().__rxor__(n))
 
-    def __sub__(self: _int_sub, x: int) -> _int_sub:
+    def __sub__(self, x: int) -> Self:
         return type(self)(super().__sub__(x))
 
-    def __trunc__(self: _int_sub) -> _int_sub:
+    def __trunc__(self) -> Self:
         return type(self)(super().__trunc__())
 
-    def __xor__(self: _int_sub, n: int) -> _int_sub:
+    def __xor__(self, n: int) -> Self:
         return type(self)(super().__xor__(n))
 
 
@@ -298,9 +296,6 @@ def qname(val: Union[object, type]) -> str:
     return type(val).__qualname__
 
 
-_Self = TypeVar("_Self")
-
-
 class NoCopyMixin:
     """Mixin to bypass (deep)copying.
 
@@ -308,10 +303,10 @@ class NoCopyMixin:
     preferring immutable data structures and Pydantic models, which (deep)copy often.
     """
 
-    def __copy__(self: _Self) -> _Self:
+    def __copy__(self) -> Self:
         return self  # pragma: no cover
 
-    def __deepcopy__(self: _Self, memo: Any) -> _Self:
+    def __deepcopy__(self, memo: Any) -> Self:
         return self  # pragma: no cover
 
 

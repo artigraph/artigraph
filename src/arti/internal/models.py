@@ -8,6 +8,7 @@ from typing import (
     ClassVar,
     Literal,
     Optional,
+    Self,
     TypeVar,
     get_args,
     get_origin,
@@ -164,7 +165,7 @@ class Model(BaseModel):
         smart_union = True
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
 
-    def copy(self: _Model, *, deep: bool = False, validate: bool = True, **kwargs: Any) -> _Model:
+    def copy(self, *, deep: bool = False, validate: bool = True, **kwargs: Any) -> Self:
         copy = super().copy(deep=deep, **kwargs)
         if validate:
             # NOTE: We set exclude_unset=False so that all existing defaulted fields are reused (as
