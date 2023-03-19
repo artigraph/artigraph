@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from collections.abc import Generator, Mapping, Sequence
 from copy import deepcopy
 from functools import cached_property, partial
@@ -9,10 +11,12 @@ from typing import (
     Literal,
     Optional,
     TypeVar,
+    Union,
     get_args,
     get_origin,
 )
 
+from box import Box
 from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField, Undefined
 from pydantic.json import pydantic_encoder as pydantic_json_encoder
@@ -21,6 +25,8 @@ from arti.internal.type_hints import Self, is_union, lenient_issubclass
 from arti.internal.utils import class_name, frozendict
 
 if TYPE_CHECKING:
+    from pydantic.typing import AbstractSetIntStr, MappingIntStrAny
+
     from arti.fingerprints import Fingerprint
     from arti.types import Type
 
@@ -211,7 +217,7 @@ class Model(BaseModel):
         return encoder(obj)
 
     @property
-    def fingerprint(self) -> "Fingerprint":
+    def fingerprint(self) -> Fingerprint:
         from arti.fingerprints import Fingerprint
 
         # `.json` cannot be used, even with a custom encoder, because it calls `.dict`, which
@@ -233,6 +239,36 @@ class Model(BaseModel):
         )
         return Fingerprint.from_string(f"{self._class_key_}:{json_repr}")
 
+    @classmethod
+    def _get_value(
+        cls,
+        v: Any,
+        to_dict: bool,
+        by_alias: bool,
+        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]],
+        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]],
+        exclude_unset: bool,
+        exclude_defaults: bool,
+        exclude_none: bool,
+    ) -> Any:
+        new = super()._get_value(
+            v,
+            to_dict=to_dict,
+            by_alias=by_alias,
+            include=include,
+            exclude=exclude,
+            exclude_unset=exclude_unset,
+            exclude_defaults=exclude_defaults,
+            exclude_none=exclude_none,
+        )
+        # Copying dict subclasses doesn't preserve the subclass[1]. Further, we have extra Box
+        # configuration (namely frozen_box=True) we need to preserve.
+        #
+        # 1: https://github.com/pydantic/pydantic/issues/5225
+        if isinstance(v, Box):
+            return v.__class__(new, **v._Box__box_config())
+        return new
+
     # Filter out non-fields from ._iter (and thus .dict, .json, etc), such as `@cached_property`
     # after access (which just gets cached in .__dict__).
     def _iter(self, *args: Any, **kwargs: Any) -> Generator[tuple[str, Any], None, None]:
@@ -242,8 +278,8 @@ class Model(BaseModel):
 
     @classmethod
     def _pydantic_type_system_post_field_conversion_hook_(
-        cls, type_: "Type", *, name: str, required: bool
-    ) -> "Type":
+        cls, type_: Type, *, name: str, required: bool
+    ) -> Type:
         return type_
 
 

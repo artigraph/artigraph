@@ -9,7 +9,7 @@ from graphlib import TopologicalSorter
 from types import TracebackType
 from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union, cast
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field, PrivateAttr, validator
 
 import arti
 from arti import io
@@ -105,6 +105,7 @@ class Graph(Model):
     """Graph stores a web of Artifacts connected by Producers."""
 
     name: str
+    artifacts: ArtifactBox = Field(default_factory=lambda: ArtifactBox(**BOX_KWARGS[SEALED]))
     # The Backend *itself* should not affect the results of a Graph build, though the contents
     # certainly may (eg: stored annotations), so we avoid serializing it. This also prevent
     # embedding any credentials.
@@ -113,8 +114,12 @@ class Graph(Model):
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
     _status: Optional[bool] = PrivateAttr(None)
-    _artifacts: ArtifactBox = PrivateAttr(default_factory=lambda: ArtifactBox(**BOX_KWARGS[SEALED]))
     _artifact_to_key: frozendict[Artifact, str] = PrivateAttr(frozendict())
+
+    @validator("artifacts")
+    @classmethod
+    def _convert_artifacts(cls, artifacts: ArtifactBox) -> ArtifactBox:
+        return ArtifactBox(artifacts, **BOX_KWARGS[SEALED])
 
     def __enter__(self) -> Graph:
         if arti.context.graph is not None:
@@ -135,15 +140,12 @@ class Graph(Model):
         TopologicalSorter(self.dependencies).prepare()
 
     def _toggle(self, status: bool) -> None:
+        # The Graph object is "frozen", so we must bypass the assignment checks.
+        object.__setattr__(self, "artifacts", ArtifactBox(self.artifacts, **BOX_KWARGS[status]))
         self._status = status
-        self._artifacts = ArtifactBox(self.artifacts, **BOX_KWARGS[status])
         self._artifact_to_key = frozendict(
             {artifact: key for key, artifact in self.artifacts.walk()}
         )
-
-    @property
-    def artifacts(self) -> ArtifactBox:
-        return self._artifacts
 
     @property
     def artifact_to_key(self) -> frozendict[Artifact, str]:
