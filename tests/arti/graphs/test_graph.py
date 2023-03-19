@@ -10,6 +10,7 @@ from box import BoxError
 from arti import Artifact, CompositeKey, Fingerprint, Graph, GraphSnapshot, View, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
+from arti.graphs import ArtifactBox
 from arti.internal.utils import frozendict
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
@@ -43,11 +44,29 @@ def test_Graph(graph: Graph) -> None:
     assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
     assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
     # NOTE: We may need to occasionally update this, but ensure graph.backend is not included.
-    assert graph.fingerprint == Fingerprint.from_int(4705012302096346878)
+    assert graph.fingerprint == Fingerprint.from_int(3139813064524317498)
 
 
 def test_Graph_pickle(graph: Graph) -> None:
     assert graph == pickle.loads(pickle.dumps(graph))
+
+
+def test_Graph_copy(graph: Graph) -> None:
+    # There are a few edge cases in pydantic when copying a model with a mapping subclass field[1], so
+    # double check things are ok under various conditions.
+    #
+    # 1: https://github.com/pydantic/pydantic/issues/5225
+    for copy in [
+        graph.copy(),
+        graph.copy(exclude={"backend"}),
+        graph.copy(include=set(graph.__fields__)),
+    ]:
+        assert graph == copy
+        assert isinstance(copy.artifacts, ArtifactBox)
+        assert graph.artifacts == copy.artifacts
+        assert graph.fingerprint == copy.fingerprint
+        assert hash(graph) == hash(copy)
+        assert hash(copy) == copy.fingerprint.key
 
 
 def test_Graph_literals(tmp_path: Path) -> None:
@@ -147,6 +166,7 @@ def test_Graph_snapshot() -> None:
     # Ensure order independence
     assert s.id == Fingerprint.combine(*reversed(id_components))
 
+    assert g.backend is s.backend  # Ensure the backend is not copied
     # Ensure metadata is written
     with g.backend.connect() as conn:
         assert conn.read_graph(g.name, g.fingerprint) == g
