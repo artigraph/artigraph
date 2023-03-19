@@ -7,7 +7,7 @@ from typing import Any, Optional
 from arti.formats import Format
 from arti.internal.dispatch import multipledispatch
 from arti.internal.utils import import_submodules
-from arti.storage import StoragePartition, _StoragePartition
+from arti.storage import StoragePartition, StoragePartitionVar
 from arti.types import Type, is_partitioned
 from arti.views import View
 
@@ -51,8 +51,8 @@ def read(
 
 @multipledispatch("io.write", discovery_func=_discover)  # type: ignore[arg-type]
 def _write(
-    data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
-) -> Optional[_StoragePartition]:
+    data: Any, type_: Type, format: Format, storage_partition: StoragePartitionVar, view: View
+) -> Optional[StoragePartitionVar]:
     raise NotImplementedError(
         f"Writing {type(view)} view into {type(format)} format in {type(storage_partition)} storage is not implemented."
     )
@@ -62,8 +62,8 @@ register_writer = _write.register
 
 
 def write(
-    data: Any, type_: Type, format: Format, storage_partition: _StoragePartition, view: View
-) -> _StoragePartition:
+    data: Any, type_: Type, format: Format, storage_partition: StoragePartitionVar, view: View
+) -> StoragePartitionVar:
     if (updated := _write(data, type_, format, storage_partition, view)) is not None:
         return updated
     return storage_partition

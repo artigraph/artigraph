@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 from contextlib import nullcontext
-from typing import Annotated, Any, ClassVar, Literal, Optional, Union
+from typing import Annotated, Any, ClassVar, Generic, Literal, Optional, TypeVar, Union
 
 import pytest
 from pydantic import Field, PrivateAttr, ValidationError
@@ -21,6 +21,13 @@ class Concrete(Model):
 
 class Sub(Model):
     x: int
+
+
+SomeVar = TypeVar("SomeVar")
+
+
+class SomeGeneric(Model, Generic[SomeVar]):
+    x: SomeVar
 
 
 def test_Model() -> None:
@@ -201,6 +208,18 @@ def test_Model_static_types_complex(
         data = {"x": value}
         # Ensure data can be round-tripped to (at the least) confirm dict keys are checked.
         assert dict(M(**data)) == data
+
+
+def test_Model_static_types_generics() -> None:
+    assert SomeGeneric[Any](x=1)
+    assert SomeGeneric[int](x=1)
+    assert SomeGeneric[str](x="hi")
+
+
+@pytest.mark.xfail(reason="TypeVar checking isn't implemented yet")
+def test_Model_static_types_generics_mismatch() -> None:
+    with pytest.raises(ValueError):
+        SomeGeneric[int](x="hi")
 
 
 def test_Model_equality() -> None:

@@ -70,8 +70,12 @@ def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
                 raise ValueError(f"expected a subclass of {args[0]}, got: {value}")
             return value
         if set(args) == {Any}:
-            return _check_types(value, origin)
-        raise NotImplementedError(f"Missing handler for {type_} with {value}!")
+            return _check_types(value, origin)  # pragma: no cover
+        if isinstance(value, origin):  # Other Generic args can't really be checked generally
+            return value
+        raise ValueError(f"expected a instance of {origin}, got: {value}")  # pragma: no cover
+    if isinstance(type_, TypeVar):
+        return value  # TODO: Check __bound__, __covariant__, __contravariant__
     # Models are immutable, so we convert all Mappings to frozendicts.
     if isinstance(value, Mapping) and not isinstance(value, frozendict):
         value = frozendict(value)

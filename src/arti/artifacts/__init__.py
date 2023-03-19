@@ -12,7 +12,7 @@ from arti.formats import Format
 from arti.internal.models import Model, get_field_default
 from arti.internal.type_hints import get_annotation_from_value
 from arti.statistics import Statistic
-from arti.storage import Storage
+from arti.storage import Storage, StoragePartition
 from arti.types import Type
 
 if TYPE_CHECKING:
@@ -34,7 +34,7 @@ class Artifact(Model):
 
     type: Type
     format: Format = Field(default_factory=Format.get_default)
-    storage: Storage[Any] = Field(default_factory=Storage.get_default)
+    storage: Storage[StoragePartition] = Field(default_factory=Storage.get_default)
 
     annotations: tuple[Annotation, ...] = ()
     statistics: tuple[Statistic, ...] = ()

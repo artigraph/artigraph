@@ -12,7 +12,7 @@ from arti.backends import Backend, Connection
 from arti.fingerprints import Fingerprint
 from arti.internal.utils import NoCopyMixin
 from arti.partitions import InputFingerprints
-from arti.storage import AnyStorage, StoragePartition, StoragePartitions
+from arti.storage import Storage, StoragePartition, StoragePartitions
 
 
 def _ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePartition]:
@@ -21,7 +21,7 @@ def _ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePart
 
 
 _GraphSnapshotPartitions = dict[str, dict[Fingerprint, dict[str, set[StoragePartition]]]]
-_StoragePartitions = dict[AnyStorage, set[StoragePartition]]
+_StoragePartitions = dict[Storage[StoragePartition], set[StoragePartition]]
 
 
 class _NoCopyContainer(NoCopyMixin):

@@ -14,7 +14,7 @@ from pydantic import Field, PrivateAttr
 import arti
 from arti import io
 from arti.artifacts import Artifact
-from arti.backends import Backend
+from arti.backends import Backend, Connection
 from arti.backends.memory import MemoryBackend
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
@@ -101,7 +101,7 @@ class Graph(Model):
     # The Backend *itself* should not affect the results of a Graph build, though the contents
     # certainly may (eg: stored annotations), so we avoid serializing it. This also prevent
     # embedding any credentials.
-    backend: Backend[Any] = Field(default_factory=MemoryBackend, exclude=True)
+    backend: Backend[Connection] = Field(default_factory=MemoryBackend, exclude=True)
     path_tags: frozendict[str, str] = frozendict()
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
@@ -285,7 +285,7 @@ class Graph(Model):
                 conn.write_graph_partitions(
                     snapshot.name, snapshot.id, key, artifact, (storage_partition,)
                 )
-        return cast(StoragePartition, storage_partition)
+        return storage_partition
 
 
 class GraphSnapshot(Model):
@@ -304,7 +304,7 @@ class GraphSnapshot(Model):
         return self.graph.artifacts
 
     @property
-    def backend(self) -> Backend[Any]:
+    def backend(self) -> Backend[Connection]:
         return self.graph.backend
 
     @property

@@ -1,9 +1,13 @@
+from __future__ import annotations
+
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from abc import abstractmethod
 from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Generic, TypeVar
+from typing import Any, Callable, Generic, TypeVar
+
+from pydantic.fields import ModelField
 
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
@@ -94,8 +98,19 @@ class Connection:
         """Tag a Graph Snapshot ID with an arbitrary name."""
         raise NotImplementedError()
 
+    @classmethod
+    def __get_validators__(cls) -> list[Callable[[Any, ModelField], Any]]:
+        """Return an empty list of "validators".
 
-ConnectionVar = TypeVar("ConnectionVar", bound=Connection)
+        Allows using a Connection (which is not a model) as a field in other models without setting
+        `arbitrary_types_allowed` (which applies broadly). [1].
+
+        1: https://docs.pydantic.dev/usage/types/#generic-classes-as-types
+        """
+        return []
+
+
+ConnectionVar = TypeVar("ConnectionVar", bound=Connection, covariant=True)
 
 
 class Backend(Model, Generic[ConnectionVar]):

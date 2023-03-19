@@ -7,9 +7,8 @@ from typing import Any
 import pytest
 from pydantic import validator
 
-from arti import Annotation, Artifact, Format, Statistic, Type
+from arti import Annotation, Artifact, Format, Statistic, Storage, StoragePartition, Type
 from arti.formats.json import JSON
-from arti.storage import AnyStorage
 from arti.storage.literal import StringLiteral
 from arti.types import (
     Binary,
@@ -110,7 +109,7 @@ def test_Artifact_validation() -> None:
         class BadFormatArtifact(Artifact):
             type: Type = Int64()
             format: Format = BadFormat()
-            storage: AnyStorage = DummyStorage()
+            storage: Storage[StoragePartition] = DummyStorage()
 
         BadFormatArtifact()
 
@@ -119,14 +118,14 @@ def test_Artifact_validation() -> None:
         class BadStorageArtifact(Artifact):
             type: Type = Int64()
             format: Format = DummyFormat()
-            storage: AnyStorage = BadStorage()
+            storage: Storage[StoragePartition] = BadStorage()
 
         BadStorageArtifact()
 
     class GoodArtifact(Artifact):
         type: Type = Int64()
         format: Format = DummyFormat()
-        storage: AnyStorage = DummyStorage()
+        storage: Storage[StoragePartition] = DummyStorage()
 
     GoodArtifact()
 

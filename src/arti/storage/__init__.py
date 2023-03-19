@@ -1,8 +1,10 @@
+from __future__ import annotations
+
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
-from typing import Any, ClassVar, Generic, Optional, TypeVar
+from typing import Any, ClassVar, Generic, Optional, Self, TypeVar
 
 from pydantic import Field, validator
 
@@ -46,9 +48,7 @@ class StoragePartition(_StorageMixin, Model):
             cls._check_keys(PartitionKey.types_from(values["type"]), keys)
         return keys
 
-    def with_content_fingerprint(
-        self: "_StoragePartition", keep_existing: bool = True
-    ) -> "_StoragePartition":
+    def with_content_fingerprint(self, keep_existing: bool = True) -> Self:
         if keep_existing and not self.content_fingerprint.is_empty:
             return self
         return self.copy(update={"content_fingerprint": self.compute_content_fingerprint()})
@@ -60,13 +60,12 @@ class StoragePartition(_StorageMixin, Model):
         )
 
 
-_StoragePartition = TypeVar("_StoragePartition", bound=StoragePartition)
-
-
+StoragePartitionVar = TypeVar("StoragePartitionVar", bound=StoragePartition)
+StoragePartitionVar_co = TypeVar("StoragePartitionVar_co", bound=StoragePartition, covariant=True)
 StoragePartitions = tuple[StoragePartition, ...]
 
 
-class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
+class Storage(_StorageMixin, Model, Generic[StoragePartitionVar_co]):
     """Storage is a data reference identifying 1 or more partitions of data.
 
     Storage fields should have defaults set with placeholders for tags and partition
@@ -84,7 +83,7 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
     partition_name_component_sep: ClassVar[str] = "_"
     segment_sep: ClassVar[str] = os.sep
 
-    storage_partition_type: ClassVar[type[_StoragePartition]]  # type: ignore[misc]
+    storage_partition_type: ClassVar[type[StoragePartitionVar_co]]  # type: ignore[misc]
 
     type: Optional[Type] = Field(None, repr=False)
     format: Optional[Format] = Field(None, repr=False)
@@ -132,7 +131,7 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
         )
 
     @classmethod
-    def get_default(cls) -> "AnyStorage":
+    def get_default(cls) -> Storage[StoragePartition]:
         from arti.storage.literal import StringLiteral
 
         return StringLiteral()  # TODO: Support some sort of configurable defaults.
@@ -140,7 +139,7 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
     @abc.abstractmethod
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> tuple[_StoragePartition, ...]:
+    ) -> tuple[StoragePartitionVar_co, ...]:
         raise NotImplementedError()
 
     def generate_partition(
@@ -148,7 +147,7 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
         keys: CompositeKey = CompositeKey(),
         input_fingerprint: Fingerprint = Fingerprint.empty(),
         with_content_fingerprint: bool = True,
-    ) -> _StoragePartition:
+    ) -> StoragePartitionVar_co:
         self._check_keys(self.key_types, keys)
         format_kwargs = dict[Any, Any](keys)
         if input_fingerprint.is_empty:
@@ -192,12 +191,12 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
         return partial_format(spec, **placeholder_values)
 
     def resolve_templates(
-        self: "_Storage",
+        self,
         graph_name: Optional[str] = None,
         input_fingerprint: Optional[Fingerprint] = None,
         names: Optional[tuple[str, ...]] = None,
         path_tags: Optional[frozendict[str, str]] = None,
-    ) -> "_Storage":
+    ) -> Self:
         values = {}
         if graph_name is not None:
             values["graph_name"] = graph_name
@@ -233,11 +232,3 @@ class Storage(_StorageMixin, Model, Generic[_StoragePartition]):
                 if (new := self._resolve_field(name, original, values)) != original
             }
         )
-
-
-AnyStorage = Storage[Any]
-
-# mypy doesn't (yet?) support nested TypeVars[1], so mark internal as Any.
-#
-# 1: https://github.com/python/mypy/issues/2756
-_Storage = TypeVar("_Storage", bound=AnyStorage)
