@@ -5,15 +5,19 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from abc import abstractmethod
 from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import Any, Callable, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
 
 from pydantic.fields import ModelField
 
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
+from arti.internal.type_hints import Self
 from arti.partitions import InputFingerprints
 from arti.storage import StoragePartitions
+
+if TYPE_CHECKING:
+    from arti.graphs import Graph, GraphSnapshot
 
 # TODO: Consider adding CRUD methods for "everything"?
 #
@@ -41,7 +45,7 @@ class Connection:
         If `input_fingerprints` is provided, the returned partitions will be filtered accordingly.
 
         NOTE: The returned partitions may not be associated with any particular Graph, unless
-        `input_fingerprints` is provided matching those for a Graph snapshot.
+        `input_fingerprints` is provided matching those for a GraphSnapshot.
         """
         raise NotImplementedError()
 
@@ -50,53 +54,81 @@ class Connection:
         """Add more partitions for a Storage spec."""
         raise NotImplementedError()
 
-    # Artifact partitions for a specific GraphSnapshot
+    # Graph
 
     @abstractmethod
-    def read_graph_partitions(
-        self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str, artifact: Artifact
-    ) -> StoragePartitions:
-        """Read the known Partitions for the named Artifact in a specific Graph snapshot."""
+    def read_graph(self, name: str, fingerprint: Fingerprint) -> Graph:
+        """Fetch an instance of the named Graph."""
         raise NotImplementedError()
 
     @abstractmethod
-    def write_graph_partitions(
+    def write_graph(self, graph: Graph) -> None:
+        """Write the Graph and all linked Artifacts and Producers to the database."""
+        raise NotImplementedError()
+
+    # GraphSnapshot
+
+    @abstractmethod
+    def read_snapshot(self, name: str, fingerprint: Fingerprint) -> GraphSnapshot:
+        """Fetch an instance of the named GraphSnapshot."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_snapshot(self, snapshot: GraphSnapshot) -> None:
+        """Write the GraphSnapshot to the database."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def read_snapshot_tag(self, name: str, tag: str) -> GraphSnapshot:
+        """Fetch the GraphSnapshot for the named tag."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_snapshot_tag(
+        self, snapshot: GraphSnapshot, tag: str, overwrite: bool = False
+    ) -> None:
+        """Stamp a GraphSnapshot with an arbitrary tag."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def read_snapshot_partitions(
+        self, snapshot: GraphSnapshot, artifact_key: str, artifact: Artifact
+    ) -> StoragePartitions:
+        """Read the known Partitions for the named Artifact in a specific GraphSnapshot."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_snapshot_partitions(
         self,
-        graph_name: str,
-        graph_snapshot_id: Fingerprint,
+        snapshot: GraphSnapshot,
         artifact_key: str,
         artifact: Artifact,
         partitions: StoragePartitions,
     ) -> None:
-        """Link the Partitions to the named Artifact in a specific Graph snapshot."""
+        """Link the Partitions to the named Artifact in a specific GraphSnapshot."""
         raise NotImplementedError()
+
+    # Helpers
 
     def write_artifact_and_graph_partitions(
         self,
+        snapshot: GraphSnapshot,
+        artifact_key: str,
         artifact: Artifact,
         partitions: StoragePartitions,
-        graph_name: str,
-        graph_snapshot_id: Fingerprint,
-        artifact_key: str,
     ) -> None:
         self.write_artifact_partitions(artifact, partitions)
-        self.write_graph_partitions(
-            graph_name, graph_snapshot_id, artifact_key, artifact, partitions
-        )
+        self.write_snapshot_partitions(snapshot, artifact_key, artifact, partitions)
 
-    # GraphSnapshot Tagging
+    @contextmanager
+    def connect(self) -> Iterator[Self]:
+        """Return self
 
-    @abstractmethod
-    def read_graph_tag(self, graph_name: str, tag: str) -> Fingerprint:
-        """Fetch the Snapshot ID for the named tag."""
-        raise NotImplementedError()
-
-    @abstractmethod
-    def write_graph_tag(
-        self, graph_name: str, graph_snapshot_id: Fingerprint, tag: str, overwrite: bool = False
-    ) -> None:
-        """Tag a Graph Snapshot ID with an arbitrary name."""
-        raise NotImplementedError()
+        This makes it easier to work with an Optional connection, eg:
+            with (connection or backend).connect() as conn:
+                ...
+        """
+        yield self
 
     @classmethod
     def __get_validators__(cls) -> list[Callable[[Any, ModelField], Any]]:

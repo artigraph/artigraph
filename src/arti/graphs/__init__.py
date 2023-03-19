@@ -154,7 +154,7 @@ class Graph(Model):
         return self.snapshot().build(executor)
 
     @requires_sealed
-    def snapshot(self) -> GraphSnapshot:
+    def snapshot(self, *, connection: Optional[Connection] = None) -> GraphSnapshot:
         """Identify a "unique" ID for this Graph at this point in time.
 
         The ID aims to encode the structure of the Graph plus a _snapshot_ of the raw Artifact data
@@ -164,7 +164,7 @@ class Graph(Model):
         NOTE: There is currently a gap (and thus race condition) between when the Graph ID is
         computed and when we read raw Artifacts data during Producer builds.
         """
-        return GraphSnapshot.from_graph(self)
+        return GraphSnapshot.from_graph(self, connection=connection)
 
     @cached_property
     @requires_sealed
@@ -216,6 +216,7 @@ class Graph(Model):
         storage_partitions: Optional[Sequence[StoragePartition]] = None,
         view: Optional[View] = None,
         snapshot: Optional[GraphSnapshot] = None,
+        connection: Optional[Connection] = None,
     ) -> Any:
         key = self.artifact_to_key[artifact]
         if annotation is None and view is None:
@@ -239,10 +240,8 @@ class Graph(Model):
                 storage_partitions = artifact.storage.discover_partitions()
             else:
                 snapshot = snapshot or self.snapshot()
-                with self.backend.connect() as conn:
-                    storage_partitions = conn.read_graph_partitions(
-                        snapshot.name, snapshot.id, key, artifact
-                    )
+                with (connection or self.backend).connect() as conn:
+                    storage_partitions = conn.read_snapshot_partitions(snapshot, key, artifact)
         return io.read(
             type_=artifact.type,
             format=artifact.format,
@@ -260,6 +259,7 @@ class Graph(Model):
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
         snapshot: Optional[GraphSnapshot] = None,
+        connection: Optional[Connection] = None,
     ) -> StoragePartition:
         key = self.artifact_to_key[artifact]
         if snapshot is not None and artifact.producer_output is None:
@@ -284,14 +284,12 @@ class Graph(Model):
         ).with_content_fingerprint()
         # TODO: Should we only do this in bulk? We might want the backends to transparently batch
         # requests, but that's not so friendly with the transient ".connect".
-        with self.backend.connect() as conn:
+        with (connection or self.backend).connect() as conn:
             conn.write_artifact_partitions(artifact, (storage_partition,))
             # Skip linking this partition to the snapshot if it affects raw Artifacts (which would
             # trigger an id change).
             if snapshot is not None and artifact.producer_output is not None:
-                conn.write_graph_partitions(
-                    snapshot.name, snapshot.id, key, artifact, (storage_partition,)
-                )
+                conn.write_snapshot_partitions(snapshot, key, artifact, (storage_partition,))
         return storage_partition
 
 
@@ -319,7 +317,7 @@ class GraphSnapshot(Model):
         return self.graph.name
 
     @classmethod  # TODO: Should this use a (TTL) cache? Raw data changes (especially in tests) still need to be detected.
-    def from_graph(cls, graph: Graph) -> GraphSnapshot:
+    def from_graph(cls, graph: Graph, *, connection: Optional[Connection] = None) -> GraphSnapshot:
         """Snapshot the Graph and all existing raw data.
 
         NOTE: There is currently a gap (and thus race condition) between when the Graph ID is
@@ -357,10 +355,12 @@ class GraphSnapshot(Model):
             raise ValueError("Fingerprint is empty!")
         snapshot = cls(graph=graph, id=snapshot_id)
         # Write the discovered partitions (if not already known) and link to this new snapshot.
-        with snapshot.backend.connect() as conn:
+        with (connection or snapshot.backend).connect() as conn:
+            conn.write_graph(graph)
+            conn.write_snapshot(snapshot)
             for key, partitions in known_artifact_partitions.items():
                 conn.write_artifact_and_graph_partitions(
-                    snapshot.artifacts[key], partitions, snapshot.name, snapshot.id, key
+                    snapshot, key, snapshot.artifacts[key], partitions
                 )
         return snapshot
 
@@ -372,16 +372,18 @@ class GraphSnapshot(Model):
         executor.build(self)
         return self
 
-    def tag(self, tag: str, overwrite: bool = False) -> None:
-        with self.backend.connect() as conn:
-            conn.write_graph_tag(self.name, self.id, tag, overwrite)
+    def tag(
+        self, tag: str, *, overwrite: bool = False, connection: Optional[Connection] = None
+    ) -> None:
+        with (connection or self.backend).connect() as conn:
+            conn.write_snapshot_tag(self, tag, overwrite)
 
-    # TODO: We need to implement building a Graph(Snapshot) by pulling *all* info from the Backend.
-    #
-    # @classmethod
-    # def from_tag(cls, name: str, tag: str, *, backend: Backend) -> GraphSnapshot:
-    #     with backend.connect() as conn:
-    #         snapshot_id = conn.read_graph_tag(name, tag)})
+    @classmethod
+    def from_tag(
+        cls, name: str, tag: str, *, connectable: Union[Backend[Connection], Connection]
+    ) -> GraphSnapshot:
+        with connectable.connect() as conn:
+            return conn.read_snapshot_tag(name, tag)
 
     def read(
         self,
@@ -390,6 +392,7 @@ class GraphSnapshot(Model):
         annotation: Optional[Any] = None,
         storage_partitions: Optional[Sequence[StoragePartition]] = None,
         view: Optional[View] = None,
+        connection: Optional[Connection] = None,
     ) -> Any:
         return self.graph.read(
             artifact,
@@ -397,6 +400,7 @@ class GraphSnapshot(Model):
             storage_partitions=storage_partitions,
             view=view,
             snapshot=self,
+            connection=connection,
         )
 
     def write(
@@ -407,6 +411,7 @@ class GraphSnapshot(Model):
         input_fingerprint: Fingerprint = Fingerprint.empty(),
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
+        connection: Optional[Connection] = None,
     ) -> StoragePartition:
         return self.graph.write(
             data,
@@ -415,4 +420,5 @@ class GraphSnapshot(Model):
             keys=keys,
             view=view,
             snapshot=self,
+            connection=connection,
         )

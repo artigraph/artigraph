@@ -12,12 +12,14 @@ from arti import (
     Backend,
     Connection,
     Fingerprint,
+    Graph,
+    GraphSnapshot,
+    InputFingerprints,
     Storage,
     StoragePartition,
     StoragePartitions,
 )
 from arti.internal.utils import NoCopyMixin
-from arti.partitions import InputFingerprints
 
 
 def _ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePartition]:
@@ -25,7 +27,12 @@ def _ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePart
         yield partition.with_content_fingerprint(keep_existing=True)
 
 
-_GraphSnapshotPartitions = dict[str, dict[Fingerprint, dict[str, set[StoragePartition]]]]
+_Graphs = dict[str, dict[Fingerprint, Graph]]
+_GraphSnapshots = dict[str, dict[Fingerprint, GraphSnapshot]]
+_GraphSnapshotPartitions = dict[
+    GraphSnapshot, dict[str, set[StoragePartition]]
+]  # ...[snapshot][artifact_key]
+_SnapshotTags = dict[str, dict[str, GraphSnapshot]]  # ...[name][tag]
 _StoragePartitions = dict[Storage[StoragePartition], set[StoragePartition]]
 
 
@@ -41,13 +48,16 @@ class _NoCopyContainer(NoCopyMixin):
     """
 
     def __init__(self) -> None:
-        # `container.graph_snapshot_partitions` tracks all the partitions for a *specific* "run" of a graph.
-        # `container.storage_partitions` tracks all partitions, across all graphs. This separation is important
-        # to allow for Literals to be used even after a snapshot_id change.
-        self.graph_snapshot_partitions: _GraphSnapshotPartitions = defaultdict(
-            partial(defaultdict, partial(defaultdict, set[StoragePartition]))  # type: ignore[arg-type]
+        # NOTE: lambdas are not pickleable, so use partial for any nested defaultdicts.
+        self.graphs: _Graphs = defaultdict(dict)
+        self.snapshots: _GraphSnapshots = defaultdict(dict)
+        # `container.snapshot_partitions` tracks all the partitions for a *specific* GraphSnapshot.
+        # `container.storage_partitions` tracks all partitions, across all snapshots. This
+        # separation is important to allow for Literals to be used even after a snapshot change.
+        self.snapshot_partitions: _GraphSnapshotPartitions = defaultdict(
+            partial(defaultdict, set[StoragePartition])  # type: ignore[arg-type]
         )
-        self.graph_tags: dict[str, dict[str, Fingerprint]] = defaultdict(dict)
+        self.snapshot_tags: _SnapshotTags = defaultdict(dict)
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartition])
 
 
@@ -78,39 +88,50 @@ class MemoryConnection(Connection):
             _ensure_fingerprinted(partitions)
         )
 
-    def read_graph_partitions(
-        self, graph_name: str, graph_snapshot_id: Fingerprint, artifact_key: str, artifact: Artifact
-    ) -> StoragePartitions:
-        return tuple(
-            self.container.graph_snapshot_partitions[graph_name][graph_snapshot_id][artifact_key]
-        )
+    def read_graph(self, name: str, fingerprint: Fingerprint) -> Graph:
+        return self.container.graphs[name][fingerprint]
 
-    def write_graph_partitions(
+    def write_graph(self, graph: Graph) -> None:
+        self.container.graphs[graph.name][graph.fingerprint] = graph
+
+    def read_snapshot(self, name: str, fingerprint: Fingerprint) -> GraphSnapshot:
+        return self.container.snapshots[name][fingerprint]
+
+    def write_snapshot(self, snapshot: GraphSnapshot) -> None:
+        self.container.snapshots[snapshot.name][snapshot.fingerprint] = snapshot
+
+    def read_snapshot_tag(self, name: str, tag: str) -> GraphSnapshot:
+        if tag not in self.container.snapshot_tags[name]:
+            raise ValueError(f"No known `{tag}` tag for GraphSnapshot `{name}`")
+        return self.container.snapshot_tags[name][tag]
+
+    def write_snapshot_tag(
+        self, snapshot: GraphSnapshot, tag: str, overwrite: bool = False
+    ) -> None:
+        """Read the known Partitions for the named Artifact in a specific GraphSnapshot."""
+        if (
+            existing := self.container.snapshot_tags[snapshot.name].get(tag)
+        ) is not None and not overwrite:
+            raise ValueError(
+                f"Existing `{tag}` tag for Graph `{snapshot.name}` points to {existing}"
+            )
+        self.container.snapshot_tags[snapshot.name][tag] = snapshot
+
+    def read_snapshot_partitions(
+        self, snapshot: GraphSnapshot, artifact_key: str, artifact: Artifact
+    ) -> StoragePartitions:
+        return tuple(self.container.snapshot_partitions[snapshot][artifact_key])
+
+    def write_snapshot_partitions(
         self,
-        graph_name: str,
-        graph_snapshot_id: Fingerprint,
+        snapshot: GraphSnapshot,
         artifact_key: str,
         artifact: Artifact,
         partitions: StoragePartitions,
     ) -> None:
-        self.container.graph_snapshot_partitions[graph_name][graph_snapshot_id][
-            artifact_key
-        ].update(_ensure_fingerprinted(partitions))
-
-    def read_graph_tag(self, graph_name: str, tag: str) -> Fingerprint:
-        if tag not in self.container.graph_tags[graph_name]:
-            raise ValueError(f"No known `{tag}` tag for Graph `{graph_name}`")
-        return self.container.graph_tags[graph_name][tag]
-
-    def write_graph_tag(
-        self, graph_name: str, graph_snapshot_id: Fingerprint, tag: str, overwrite: bool = False
-    ) -> None:
-        """Read the known Partitions for the named Artifact in a specific Graph snapshot."""
-        if (
-            existing := self.container.graph_tags[graph_name].get(tag)
-        ) is not None and not overwrite:
-            raise ValueError(f"Existing `{tag}` tag for Graph `{graph_name}` points to {existing}")
-        self.container.graph_tags[graph_name][tag] = graph_snapshot_id
+        self.container.snapshot_partitions[snapshot][artifact_key].update(
+            _ensure_fingerprinted(partitions)
+        )
 
 
 class MemoryBackend(Backend[MemoryConnection]):
