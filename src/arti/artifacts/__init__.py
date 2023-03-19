@@ -60,7 +60,9 @@ class Artifact(Model):
 
     @validator("storage", always=True)
     @classmethod
-    def validate_storage(cls, storage: Storage[Any], values: dict[str, Any]) -> Storage[Any]:
+    def validate_storage(
+        cls, storage: Storage[StoragePartition], values: dict[str, Any]
+    ) -> Storage[StoragePartition]:
         return storage.copy(
             update={name: values[name] for name in ["type", "format"] if name in values}
         ).resolve_templates()

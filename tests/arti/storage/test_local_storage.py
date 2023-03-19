@@ -3,11 +3,10 @@ import re
 from datetime import date
 from itertools import repeat
 from pathlib import Path
-from typing import Any
 
 import pytest
 
-from arti import CompositeKey, Fingerprint, InputFingerprints, Storage
+from arti import CompositeKey, Fingerprint, InputFingerprints
 from arti.partitions import DateKey
 from arti.storage.local import LocalFile, LocalFilePartition
 from arti.types import Collection, Date, String, Struct
@@ -27,7 +26,7 @@ def date_keys() -> list[CompositeKey]:
     ]
 
 
-def generate_partition_files(storage: Storage[Any], input_fingerprints: InputFingerprints) -> None:
+def generate_partition_files(storage: LocalFile, input_fingerprints: InputFingerprints) -> None:
     for pk, input_fingerprint in input_fingerprints.items():
         partition = storage.generate_partition(
             pk, input_fingerprint, with_content_fingerprint=False
