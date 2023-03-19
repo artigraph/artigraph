@@ -7,12 +7,17 @@ from functools import partial
 
 from pydantic import PrivateAttr
 
-from arti.artifacts import Artifact
-from arti.backends import Backend, Connection
-from arti.fingerprints import Fingerprint
+from arti import (
+    Artifact,
+    Backend,
+    Connection,
+    Fingerprint,
+    Storage,
+    StoragePartition,
+    StoragePartitions,
+)
 from arti.internal.utils import NoCopyMixin
 from arti.partitions import InputFingerprints
-from arti.storage import Storage, StoragePartition, StoragePartitions
 
 
 def _ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePartition]:

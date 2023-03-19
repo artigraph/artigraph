@@ -15,7 +15,6 @@ import arti
 from arti import io
 from arti.artifacts import Artifact
 from arti.backends import Backend, Connection
-from arti.backends.memory import MemoryBackend
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import TypedBox, frozendict
@@ -26,11 +25,19 @@ from arti.types import is_partitioned
 from arti.views import View
 
 if TYPE_CHECKING:
+    from arti.backends.memory import MemoryBackend
     from arti.executors import Executor
 else:
     from arti.internal.patches import patch_TopologicalSorter_class_getitem
 
     patch_TopologicalSorter_class_getitem()
+
+
+def _get_memory_backend() -> MemoryBackend:
+    # Avoid importing non-root modules upon import
+    from arti.backends.memory import MemoryBackend
+
+    return MemoryBackend()
 
 
 SEALED: Literal[True] = True
@@ -101,7 +108,7 @@ class Graph(Model):
     # The Backend *itself* should not affect the results of a Graph build, though the contents
     # certainly may (eg: stored annotations), so we avoid serializing it. This also prevent
     # embedding any credentials.
-    backend: Backend[Connection] = Field(default_factory=MemoryBackend, exclude=True)
+    backend: Backend[Connection] = Field(default_factory=_get_memory_backend, exclude=True)
     path_tags: frozendict[str, str] = frozendict()
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
