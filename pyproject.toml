@@ -125,6 +125,7 @@ extension-pkg-whitelist = [
 [tool.pylint.message_control]
 docstring-min-length=10
 disable = """
+    fixme,
     import-outside-toplevel,
     invalid-name,
     line-too-long,
