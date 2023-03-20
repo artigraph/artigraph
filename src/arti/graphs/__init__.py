@@ -7,7 +7,7 @@ from collections.abc import Callable, Sequence
 from functools import cached_property, wraps
 from graphlib import TopologicalSorter
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union, cast
+from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union
 
 from pydantic import Field, PrivateAttr, validator
 
@@ -65,16 +65,12 @@ def requires_sealed(fn: Callable[..., _Return]) -> Callable[..., _Return]:
 
 
 class ArtifactBox(TypedBox[Artifact]):
-    def _TypedBox__cast_value(self, item: str, artifact: Any) -> Artifact:
-        artifact = super()._TypedBox__cast_value(item, artifact)  # type: ignore[misc]
-        storage_template_values = dict[str, Any]()
+    def _TypedBox__cast_value(self, item: str, value: Any) -> Artifact:
+        artifact: Artifact = super()._TypedBox__cast_value(item, value)  # type: ignore[misc]
+        storage = artifact.storage
         if (graph := arti.context.graph) is not None:
-            storage_template_values.update(
-                {
-                    "graph_name": graph.name,
-                    "names": (*self._box_config["box_namespace"], item),
-                    "path_tags": graph.path_tags,
-                }
+            storage = storage._visit_graph(graph)._visit_names(
+                (*self._box_config["box_namespace"], item)
             )
         # Require an {input_fingerprint} template in the Storage if this Artifact is being generated
         # by a Producer. Otherwise, strip the {input_fingerprint} template (if set) for "raw"
@@ -84,17 +80,12 @@ class ArtifactBox(TypedBox[Artifact]):
         # copying the instance and setting the `producer_output` attribute). We won't know the
         # "final" instance until assignment here to the Graph.
         if artifact.producer_output is None:
-            storage_template_values["input_fingerprint"] = Fingerprint.empty()
+            storage = storage._visit_input_fingerprint(Fingerprint.empty())
         elif not artifact.storage.includes_input_fingerprint_template:
             raise ValueError(
                 "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
             )
-        return cast(
-            Artifact,
-            artifact.copy(
-                update={"storage": artifact.storage.resolve_templates(**storage_template_values)}
-            ),
-        )
+        return artifact.copy(update={"storage": storage})
 
 
 Node = Union[Artifact, Producer]

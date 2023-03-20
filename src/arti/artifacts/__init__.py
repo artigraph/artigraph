@@ -55,19 +55,21 @@ class Artifact(Model):
 
     @validator("format", always=True)
     @classmethod
-    def validate_format(cls, format: Format, values: dict[str, Any]) -> Format:
-        if "type" in values:
-            return format.copy(update={"type": values["type"]})
+    def _validate_format(cls, format: Format, values: dict[str, Any]) -> Format:
+        if (type_ := values.get("type")) is not None:
+            return format._visit_type(type_)
         return format
 
     @validator("storage", always=True)
     @classmethod
-    def validate_storage(
+    def _validate_storage(
         cls, storage: Storage[StoragePartition], values: dict[str, Any]
     ) -> Storage[StoragePartition]:
-        return storage.copy(
-            update={name: values[name] for name in ["type", "format"] if name in values}
-        ).resolve_templates()
+        if (type_ := values.get("type")) is not None:
+            storage = storage._visit_type(type_)
+        if (format_ := values.get("format")) is not None:
+            storage = storage._visit_format(format_)
+        return storage
 
     @validator("annotations", "statistics", always=True, pre=True)
     @classmethod
