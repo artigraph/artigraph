@@ -16,11 +16,13 @@ def test_GCSFile() -> None:
 
 
 def test_GCSFile_discover_partitions(gcs: GCSFileSystem, gcs_bucket: str) -> None:
-    storage = GCSFile(
-        bucket=gcs_bucket,
-        path="{i.key}",
-        format=DummyFormat(),
-        type=Collection(element=Struct(fields={"i": Int32()}), partition_by=("i",)),
+    storage = (
+        GCSFile(
+            bucket=gcs_bucket,
+            path="{i.key}",
+        )
+        ._visit_type(Collection(element=Struct(fields={"i": Int32()}), partition_by=("i",)))
+        ._visit_format(DummyFormat())
     )
     expected_keys = {CompositeKey(i=Int32Key(key=i)) for i in [0, 1]}
     gcs.pipe({storage.qualified_path.format(**keys): b"data" for keys in expected_keys})

@@ -5,7 +5,6 @@ from datetime import date, datetime
 from typing import Any
 
 import pytest
-from pydantic import validator
 
 from arti import Annotation, Artifact, Format, Statistic, Storage, StoragePartition, Type
 from arti.formats.json import JSON
@@ -90,14 +89,10 @@ def test_Artifact_validation() -> None:
             raise ValueError("Format - Boo!")
 
     class BadStorage(DummyStorage):
-        @validator("type")
-        @classmethod
-        def validate_type(cls, type_: Type) -> Type:
+        def _visit_type(self, type_: Type) -> Self:
             raise ValueError("Storage - Boo!")
 
-        @validator("format")
-        @classmethod
-        def validate_format(cls, format: Format) -> Format:
+        def _visit_format(self, format: Format) -> Self:
             raise ValueError("Storage - Boo!")
 
     with pytest.raises(ValueError, match="type\n  field required"):

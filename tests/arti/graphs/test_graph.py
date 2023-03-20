@@ -44,7 +44,7 @@ def test_Graph(graph: Graph) -> None:
     assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
     assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
     # NOTE: We may need to occasionally update this, but ensure graph.backend is not included.
-    assert graph.fingerprint == Fingerprint.from_int(3139813064524317498)
+    assert graph.fingerprint == Fingerprint.from_int(-2341774225960394121)
 
 
 def test_Graph_pickle(graph: Graph) -> None:

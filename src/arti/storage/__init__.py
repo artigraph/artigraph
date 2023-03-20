@@ -4,9 +4,9 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
-from typing import Any, ClassVar, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, Optional, TypeVar
 
-from pydantic import Field, validator
+from pydantic import PrivateAttr
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
@@ -17,36 +17,14 @@ from arti.partitions import CompositeKey, CompositeKeyTypes, InputFingerprints, 
 from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
 
-
-class _StorageMixin(Model):
-    @property
-    def key_types(self) -> CompositeKeyTypes:
-        if self.type is None:  # type: ignore[attr-defined]
-            raise ValueError(f"{self}.type is not set")
-        return PartitionKey.types_from(self.type)  # type: ignore[attr-defined]
-
-    @classmethod
-    def _check_keys(cls, key_types: CompositeKeyTypes, keys: CompositeKey) -> None:
-        # TODO: Confirm the key names and types align
-        if key_types and not keys:
-            raise ValueError(f"Expected partition keys {tuple(key_types)} but none were passed")
-        if keys and not key_types:
-            raise ValueError(f"Expected no partition keys but got: {keys}")
+if TYPE_CHECKING:
+    from arti.graphs import Graph
 
 
-class StoragePartition(_StorageMixin, Model):
-    type: Type = Field(repr=False)
-    format: Format = Field(repr=False)
+class StoragePartition(Model):
     keys: CompositeKey = CompositeKey()
     input_fingerprint: Fingerprint = Fingerprint.empty()
     content_fingerprint: Fingerprint = Fingerprint.empty()
-
-    @validator("keys")
-    @classmethod
-    def validate_keys(cls, keys: CompositeKey, values: dict[str, Any]) -> CompositeKey:
-        if "type" in values:
-            cls._check_keys(PartitionKey.types_from(values["type"]), keys)
-        return keys
 
     def with_content_fingerprint(self, keep_existing: bool = True) -> Self:
         if keep_existing and not self.content_fingerprint.is_empty:
@@ -65,7 +43,7 @@ StoragePartitionVar_co = TypeVar("StoragePartitionVar_co", bound=StoragePartitio
 StoragePartitions = tuple[StoragePartition, ...]
 
 
-class Storage(_StorageMixin, Model, Generic[StoragePartitionVar_co]):
+class Storage(Model, Generic[StoragePartitionVar_co]):
     """Storage is a data reference identifying 1 or more partitions of data.
 
     Storage fields should have defaults set with placeholders for tags and partition
@@ -74,6 +52,7 @@ class Storage(_StorageMixin, Model, Generic[StoragePartitionVar_co]):
     """
 
     _abstract_ = True
+    storage_partition_type: ClassVar[type[StoragePartitionVar_co]]  # type: ignore[misc]
 
     # These separators are used in the default resolve_* helpers to format metadata into
     # the storage fields.
@@ -83,21 +62,7 @@ class Storage(_StorageMixin, Model, Generic[StoragePartitionVar_co]):
     partition_name_component_sep: ClassVar[str] = "_"
     segment_sep: ClassVar[str] = os.sep
 
-    storage_partition_type: ClassVar[type[StoragePartitionVar_co]]  # type: ignore[misc]
-
-    type: Optional[Type] = Field(None, repr=False)
-    format: Optional[Format] = Field(None, repr=False)
-
-    @validator("type")
-    @classmethod
-    def validate_type(cls, type_: Type) -> Type:
-        # TODO: Check support for the types and partitioning on the specified field(s).
-        return type_
-
-    @validator("format")
-    @classmethod
-    def validate_format(cls, format: Format) -> Format:
-        return format
+    _key_types: Optional[CompositeKeyTypes] = PrivateAttr(None)
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -120,6 +85,58 @@ class Storage(_StorageMixin, Model, Generic[StoragePartitionVar_co]):
                 f"{cls.__name__} fields must match {cls.storage_partition_type.__name__} ({expected_field_types}), got: {fields}"
             )
 
+    @classmethod
+    def get_default(cls) -> Storage[StoragePartition]:
+        from arti.storage.literal import StringLiteral
+
+        return StringLiteral()  # TODO: Support some sort of configurable defaults.
+
+    def _visit_type(self, type_: Type) -> Self:
+        # TODO: Check support for the types and partitioning on the specified field(s).
+        copy = self.copy()
+        copy._key_types = PartitionKey.types_from(type_)
+        assert copy.key_types is not None
+        key_component_specs = {
+            f"{name}{self.partition_name_component_sep}{component_name}": f"{{{name}.{component_spec}}}"
+            for name, pk in copy.key_types.items()
+            for component_name, component_spec in pk.default_key_components.items()
+        }
+        return copy.resolve(
+            partition_key_spec=self.segment_sep.join(
+                f"{name}{self.key_value_sep}{spec}" for name, spec in key_component_specs.items()
+            )
+        )
+
+    def _visit_format(self, format_: Format) -> Self:
+        return self.resolve(extension=format_.extension)
+
+    def _visit_graph(self, graph: Graph) -> Self:
+        return self.resolve(
+            graph_name=graph.name,
+            path_tags=self.segment_sep.join(
+                f"{tag}{self.key_value_sep}{value}" for tag, value in graph.path_tags.items()
+            ),
+        )
+
+    def _visit_input_fingerprint(self, input_fingerprint: Fingerprint) -> Self:
+        input_fingerprint_key = str(input_fingerprint.key)
+        if input_fingerprint.is_empty:
+            input_fingerprint_key = ""
+        return self.resolve(input_fingerprint=input_fingerprint_key)
+
+    def _visit_names(self, names: tuple[str, ...]) -> Self:
+        return self.resolve(name=names[-1] if names else "", names=self.segment_sep.join(names))
+
+    @property
+    def includes_input_fingerprint_template(self) -> bool:
+        return any("{input_fingerprint}" in val for val in self._format_fields.values())
+
+    @property
+    def key_types(self) -> CompositeKeyTypes:
+        if self._key_types is None:
+            raise ValueError("`key_types` have not been set yet.")
+        return self._key_types
+
     @property
     def _format_fields(self) -> frozendict[str, str]:
         return frozendict(
@@ -131,10 +148,12 @@ class Storage(_StorageMixin, Model, Generic[StoragePartitionVar_co]):
         )
 
     @classmethod
-    def get_default(cls) -> Storage[StoragePartition]:
-        from arti.storage.literal import StringLiteral
-
-        return StringLiteral()  # TODO: Support some sort of configurable defaults.
+    def _check_keys(cls, key_types: CompositeKeyTypes, keys: CompositeKey) -> None:
+        # TODO: Confirm the key names and types align
+        if key_types and not keys:
+            raise ValueError(f"Expected partition keys {tuple(key_types)} but none were passed")
+        if keys and not key_types:
+            raise ValueError(f"Expected no partition keys but got: {keys}")
 
     @abc.abstractmethod
     def discover_partitions(
@@ -173,10 +192,6 @@ class Storage(_StorageMixin, Model, Generic[StoragePartitionVar_co]):
             partition = partition.with_content_fingerprint()
         return partition
 
-    @property
-    def includes_input_fingerprint_template(self) -> bool:
-        return any("{input_fingerprint}" in val for val in self._format_fields.values())
-
     def _resolve_field(self, name: str, spec: str, placeholder_values: dict[str, str]) -> str:
         for placeholder, value in placeholder_values.items():
             if not value:
@@ -190,39 +205,7 @@ class Storage(_StorageMixin, Model, Generic[StoragePartitionVar_co]):
                     raise ValueError(f"{self}.{name} was empty after removing unused templates")
         return partial_format(spec, **placeholder_values)
 
-    def resolve_templates(
-        self,
-        graph_name: Optional[str] = None,
-        input_fingerprint: Optional[Fingerprint] = None,
-        names: Optional[tuple[str, ...]] = None,
-        path_tags: Optional[frozendict[str, str]] = None,
-    ) -> Self:
-        values = {}
-        if graph_name is not None:
-            values["graph_name"] = graph_name
-        if input_fingerprint is not None:
-            input_fingerprint_key = str(input_fingerprint.key)
-            if input_fingerprint.is_empty:
-                input_fingerprint_key = ""
-            values["input_fingerprint"] = input_fingerprint_key
-        if names is not None:
-            values["name"] = names[-1] if names else ""
-            values["names"] = self.segment_sep.join(names)
-        if path_tags is not None:
-            values["path_tags"] = self.segment_sep.join(
-                f"{tag}{self.key_value_sep}{value}" for tag, value in path_tags.items()
-            )
-        if self.format is not None:
-            values["extension"] = self.format.extension
-        if self.type is not None:
-            key_component_specs = {
-                f"{name}{self.partition_name_component_sep}{component_name}": f"{{{name}.{component_spec}}}"
-                for name, pk in self.key_types.items()
-                for component_name, component_spec in pk.default_key_components.items()
-            }
-            values["partition_key_spec"] = self.segment_sep.join(
-                f"{name}{self.key_value_sep}{spec}" for name, spec in key_component_specs.items()
-            )
+    def resolve(self, **values: str) -> Self:
         return self.copy(
             update={
                 name: new

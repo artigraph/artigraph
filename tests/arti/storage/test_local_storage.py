@@ -9,7 +9,7 @@ import pytest
 from arti import CompositeKey, Fingerprint, InputFingerprints
 from arti.partitions import DateKey
 from arti.storage.local import LocalFile, LocalFilePartition
-from arti.types import Collection, Date, String, Struct
+from arti.types import Collection, Date, Struct
 from tests.arti.dummies import DummyFormat
 
 
@@ -37,10 +37,10 @@ def generate_partition_files(storage: LocalFile, input_fingerprints: InputFinger
 
 
 def test_local_partitioning(tmp_path: Path, date_keys: list[CompositeKey]) -> None:
-    storage = LocalFile(
-        format=DummyFormat(),
-        path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"),
-        type=Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)),
+    storage = (
+        LocalFile(path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"))
+        ._visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
+        ._visit_format(DummyFormat())
     )
     generate_partition_files(
         storage, InputFingerprints(zip(date_keys, repeat(Fingerprint.empty())))
@@ -56,17 +56,21 @@ def test_local_partitioning(tmp_path: Path, date_keys: list[CompositeKey]) -> No
 
 def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[CompositeKey]) -> None:
     for year in {k["date"].Y for k in date_keys}:  # type: ignore[attr-defined]
-        storage = LocalFile(
-            format=DummyFormat(),
-            path=str(
-                tmp_path
-                / str(year)
-                / ("{date.Y[" + str(year) + "]}")
-                / "{date.m}"
-                / "{date.d}"
-                / "test"
-            ),
-            type=Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)),
+        storage = (
+            LocalFile(
+                path=str(
+                    tmp_path
+                    / str(year)
+                    / ("{date.Y[" + str(year) + "]}")
+                    / "{date.m}"
+                    / "{date.d}"
+                    / "test"
+                )
+            )
+            ._visit_type(
+                Collection(element=Struct(fields={"date": Date()}), partition_by=("date",))
+            )
+            ._visit_format(DummyFormat())
         )
         # Generate files for *all* years - we want discover_partitions to do the filtering.
         generate_partition_files(
@@ -85,10 +89,14 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[CompositeKe
 def test_local_partitioning_with_input_fingerprints(
     tmp_path: Path, date_keys: list[CompositeKey]
 ) -> None:
-    storage = LocalFile(
-        format=DummyFormat(),
-        path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "{input_fingerprint}" / "test"),
-        type=Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)),
+    storage = (
+        LocalFile(
+            path=str(
+                tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "{input_fingerprint}" / "test"
+            ),
+        )
+        ._visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
+        ._visit_format(DummyFormat())
     )
     input_fingerprint = Fingerprint.from_int(42)
     input_fingerprints = InputFingerprints(zip(date_keys, repeat(input_fingerprint)))
@@ -105,8 +113,9 @@ def test_local_partitioning_with_input_fingerprints(
 
 def test_local_partitioning_errors(tmp_path: Path) -> None:
     storage = LocalFile(
-        path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"),
-        type=Collection(element=Struct(fields={"data_date": Date()}), partition_by=("data_date",)),
+        path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test")
+    )._visit_type(
+        Collection(element=Struct(fields={"data_date": Date()}), partition_by=("data_date",))
     )
     with pytest.raises(
         ValueError,
@@ -121,9 +130,7 @@ def test_local_file_partition_fingerprint(tmp_path: Path) -> None:
     with path.open("w") as f:
         f.write("hello world")
 
-    partition = LocalFilePartition(
-        keys={}, path=str(path), type=String(), format=DummyFormat()
-    ).with_content_fingerprint()
+    partition = LocalFilePartition(keys={}, path=str(path)).with_content_fingerprint()
     assert partition.content_fingerprint == Fingerprint.from_string(
         hashlib.sha256(text.encode()).hexdigest()
     )

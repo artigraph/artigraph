@@ -27,9 +27,7 @@ def test_python_View() -> None:
 
         binary = pickle.dumps(val)
         with named_temporary_file("w+b") as f:
-            test_storage_partition = LocalFilePartition(
-                format=test_format, path=f.name, type=view.type
-            )
+            test_storage_partition = LocalFilePartition(path=f.name)
 
             f.write(binary)
             f.seek(0)
