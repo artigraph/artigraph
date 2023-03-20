@@ -1,4 +1,7 @@
+from __future__ import annotations
+
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
+
 import builtins
 from typing import Any, ClassVar, Literal, Optional, get_origin
 
@@ -21,7 +24,7 @@ class View(Model):
     """
 
     _abstract_ = True
-    _by_python_type_: "ClassVar[dict[Optional[type], type[View]]]" = {}
+    _by_python_type_: ClassVar[dict[Optional[type], type[View]]] = {}
 
     priority: ClassVar[int] = 0  # Set priority of this view for its python_type. Higher is better.
     python_type: ClassVar[Optional[type]]
@@ -83,7 +86,7 @@ class View(Model):
         return {"artifact_class": artifact_class, "type": type_}
 
     @classmethod  # TODO: Use typing.Self for return, pending mypy support
-    def get_class_for(cls, annotation: Any) -> builtins.type["View"]:
+    def get_class_for(cls, annotation: Any) -> builtins.type[View]:
         view_class = get_item_from_annotated(annotation, cls, is_subclass=True)
         if view_class is None:
             # We've already searched for a View instance in the original Annotated args, so just
@@ -103,7 +106,7 @@ class View(Model):
         return view_class
 
     @classmethod  # TODO: Use typing.Self for return, pending mypy support
-    def from_annotation(cls, annotation: Any, *, mode: MODE) -> "View":
+    def from_annotation(cls, annotation: Any, *, mode: MODE) -> View:
         view_class = cls.get_class_for(annotation)
         view = view_class(mode=mode, **cls._get_kwargs_from_annotation(annotation))
         view.check_annotation_compatibility(annotation)

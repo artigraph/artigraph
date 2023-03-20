@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from typing import ClassVar, Optional
@@ -29,7 +31,7 @@ class Format(Model):
         return type_
 
     @classmethod
-    def get_default(cls) -> "Format":
+    def get_default(cls) -> Format:
         from arti.formats.json import JSON
 
         return JSON()  # TODO: Support some sort of configurable defaults.
