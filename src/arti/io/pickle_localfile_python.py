@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pickle
 from collections.abc import Sequence
 from itertools import chain

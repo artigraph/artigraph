@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Optional
 
 from arti.fingerprints import Fingerprint

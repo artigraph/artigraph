@@ -7,6 +7,8 @@ Type hints have been added to pass `mypy` strict mode.
 
 1: https://github.com/pypa/setuptools/tree/c65e3380b0a18c92a0fc2d2b770b17cfaaec054b
 """
+from __future__ import annotations
+
 import os
 from collections.abc import Callable, Generator, Iterable
 from fnmatch import fnmatchcase

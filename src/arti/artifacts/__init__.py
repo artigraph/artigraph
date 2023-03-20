@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import json
@@ -43,7 +45,7 @@ class Artifact(Model):
     #
     # ProducerOutput is a ForwardRef/cyclic import. Quote the entire hint to force full resolution
     # during `.update_forward_refs`, rather than `Optional[ForwardRef("ProducerOutput")]`.
-    producer_output: "Optional[ProducerOutput]" = Field(None, repr=False)
+    producer_output: Optional[ProducerOutput] = Field(None, repr=False)
 
     # NOTE: Narrow the fields that affect the fingerprint to minimize changes (which trigger
     # recompute). Importantly, avoid fingerprinting the `.producer_output` (ie: the *upstream*
@@ -73,7 +75,7 @@ class Artifact(Model):
         return tuple(chain(get_field_default(cls, field.name) or (), value))
 
     @classmethod
-    def cast(cls, value: Any) -> "Artifact":
+    def cast(cls, value: Any) -> Artifact:
         """Attempt to convert an arbitrary value to an appropriate Artifact instance.
 
         `Artifact.cast` is used to convert values assigned to an `ArtifactBox` (such as
