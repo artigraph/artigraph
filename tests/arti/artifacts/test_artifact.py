@@ -9,6 +9,7 @@ from pydantic import validator
 
 from arti import Annotation, Artifact, Format, Statistic, Storage, StoragePartition, Type
 from arti.formats.json import JSON
+from arti.internal.type_hints import Self
 from arti.storage.literal import StringLiteral
 from arti.types import (
     Binary,
@@ -85,9 +86,7 @@ def test_cast_literals_errors(value: Any) -> None:
 
 def test_Artifact_validation() -> None:
     class BadFormat(DummyFormat):
-        @validator("type")
-        @classmethod
-        def validate_type(cls, type_: Type) -> Type:
+        def _visit_type(self, type_: Type) -> Self:
             raise ValueError("Format - Boo!")
 
     class BadStorage(DummyStorage):

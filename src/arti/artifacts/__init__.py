@@ -54,8 +54,8 @@ class Artifact(Model):
     @validator("format", always=True)
     @classmethod
     def validate_format(cls, format: Format, values: dict[str, Any]) -> Format:
-        if "type" in values:
-            return format.copy(update={"type": values["type"]})
+        if (type_ := values.get("type")) is not None:
+            return format._visit_type(type_)
         return format
 
     @validator("storage", always=True)

@@ -1,10 +1,9 @@
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
-from typing import ClassVar, Optional
-
-from pydantic import Field, validator
+from typing import ClassVar
 
 from arti.internal.models import Model
+from arti.internal.type_hints import Self
 from arti.types import Type, TypeSystem
 
 
@@ -19,14 +18,11 @@ class Format(Model):
     type_system: ClassVar[TypeSystem]
 
     extension: str = ""
-    type: Optional[Type] = Field(None, repr=False)
 
-    @validator("type")
-    @classmethod
-    def validate_type(cls, type_: Type) -> Type:
+    def _visit_type(self, type_: Type) -> Self:
         # Ensure our type system can handle the provided type.
-        cls.type_system.to_system(type_, hints={})
-        return type_
+        self.type_system.to_system(type_, hints={})
+        return self
 
     @classmethod
     def get_default(cls) -> "Format":
