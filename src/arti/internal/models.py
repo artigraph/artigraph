@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from arti.types import Type
 
 
-def _check_types(value: Any, type_: type) -> Any:  # noqa: C901
+def _check_types(value: Any, type_: type) -> Any:
     mismatch_error = ValueError(f"expected an instance of {type_}, got: {value}")
 
     if type_ is Any:
@@ -111,7 +111,7 @@ class Model(BaseModel):
     def __init_subclass__(cls, **kwargs: Any) -> None:
         super().__init_subclass__(**kwargs)
         # Default _abstract_ to False if not set explicitly on the class. __dict__ is read-only.
-        setattr(cls, "_abstract_", cls.__dict__.get("_abstract_", False))
+        cls._abstract_ = cls.__dict__.get("_abstract_", False)
         field_names = set(cls.__fields__)
         if cls._fingerprint_excludes_ and (
             unknown_excludes := cls._fingerprint_excludes_ - field_names

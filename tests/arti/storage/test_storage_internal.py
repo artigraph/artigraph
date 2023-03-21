@@ -21,22 +21,22 @@ from arti.storage._internal import (
 PathPlaceholders = dict[str, tuple[Optional[Fingerprint], CompositeKey]]
 
 
-@pytest.fixture
+@pytest.fixture()
 def PKs() -> dict[str, type[PartitionKey]]:
     return {"x": Int8Key, "y": Int8Key}
 
 
-@pytest.fixture
+@pytest.fixture()
 def spec() -> str:
     return "/p/{x.key}/{y.hex}"
 
 
-@pytest.fixture
+@pytest.fixture()
 def paths() -> set[str]:
     return {"/p/1/0x1", "/p/2/0x2", "/p/3/0x3"}
 
 
-@pytest.fixture
+@pytest.fixture()
 def paths_to_placeholders() -> PathPlaceholders:
     return {
         "/p/1/0x1": (Fingerprint.empty(), frozendict({"x": Int8Key(key=1), "y": Int8Key(key=1)})),
@@ -47,7 +47,7 @@ def paths_to_placeholders() -> PathPlaceholders:
 
 @pytest.mark.parametrize(
     ("spec", "key"),
-    (
+    [
         ("baseline", None),
         ("{}", None),
         ("{a}", "a"),
@@ -58,7 +58,7 @@ def paths_to_placeholders() -> PathPlaceholders:
         ("{a[b].c[d]}", "a"),
         ("{a[b].c[d]:2d}", "a"),
         ("hello {world}", "world"),
-    ),
+    ],
 )
 def test_FormatPlaceholder(spec: str, key: str) -> None:
     if key:
@@ -70,10 +70,10 @@ def test_FormatPlaceholder(spec: str, key: str) -> None:
 
 @pytest.mark.parametrize(
     ("key", "partition_key_types", "attribute"),
-    (
+    [
         ("test", CompositeKeyTypes(test=Int8Key), "key"),
         ("test", CompositeKeyTypes(test=Int8Key), "hex"),
-    ),
+    ],
 )
 def test_WildcardPlaceholder(
     key: str, partition_key_types: CompositeKeyTypes, attribute: str
@@ -139,13 +139,13 @@ def test_FormatDict() -> None:
 
 @pytest.mark.parametrize(
     ("spec", "expected", "kwargs"),
-    (
+    [
         ("baseline", "baseline", {}),
         ("{a}", "a", {"a": "a"}),
         ("{a}", "{a}", {}),
         ("{hello} {world}", "hello {world}", {"hello": "hello"}),
         ("{hello} {wo[rld]}", "hello {wo[rld]}", {"hello": "hello"}),
-    ),
+    ],
 )
 def test_partial_format(spec: str, expected: str, kwargs: dict[str, str]) -> None:
     assert partial_format(spec, **kwargs) == expected
@@ -160,11 +160,11 @@ def test_partial_format_positional_args() -> None:
 
 @pytest.mark.parametrize(
     ("spec", "expected"),
-    (
+    [
         ("baseline", "baseline"),
         ("{a}", "{a}"),
         ("{a[b]}", "{a}"),
-    ),
+    ],
 )
 def test_strip_partition_indexes(spec: str, expected: str) -> None:
     assert strip_partition_indexes(spec) == expected

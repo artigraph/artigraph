@@ -94,7 +94,8 @@ class DataFrameAdapter(TypeAdapter):
 
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
-        assert isinstance(type_, cls.artigraph) and isinstance(type_.element, Struct)
+        assert isinstance(type_, cls.artigraph)
+        assert isinstance(type_.element, Struct)
         # NOTE: We automatically wrap the sub-types as List(...) to match the SeriesAdapter.
         return pd.DataFrame(
             {

@@ -58,13 +58,7 @@ def test_Model_copy_private_attributes() -> None:
     assert orig._stuff == {"a": ["value"]}
 
 
-@pytest.mark.parametrize(
-    ["validate"],
-    [
-        (False,),
-        (True,),
-    ],
-)
+@pytest.mark.parametrize("validate", [False, True])
 def test_Model_copy_private_attributes_validation(validate: bool) -> None:
     orig = Sneaky(x=1)
     orig._stuff["a"].append("value")
@@ -218,7 +212,7 @@ def test_Model_static_types_generics() -> None:
 
 @pytest.mark.xfail(reason="TypeVar checking isn't implemented yet")
 def test_Model_static_types_generics_mismatch() -> None:
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="junk"):
         SomeGeneric[int](x="hi")
 
 

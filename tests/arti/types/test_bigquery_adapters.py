@@ -32,7 +32,7 @@ from arti.types import (
 from arti.types.bigquery import BIGQUERY_HINT_FIELD_NAME, bigquery_type_system
 
 
-@pytest.fixture
+@pytest.fixture()
 def bigquery_table() -> bigquery.Table:
     table = bigquery.Table(
         "project.dataset.table",
@@ -83,7 +83,7 @@ def bigquery_table() -> bigquery.Table:
     return table
 
 
-@pytest.fixture
+@pytest.fixture()
 def arti_collection() -> Collection:
     return Collection(
         name="project.dataset.table",
@@ -122,7 +122,7 @@ def test_bigquery_type_system_comprehensive(
 
 
 @pytest.mark.parametrize(
-    ["mutate", "msg"],
+    ("mutate", "msg"),
     [
         (
             lambda tbl: setattr(
@@ -159,7 +159,7 @@ def test_bigquery_type_system_to_system_not_implemented_errors(
 
 
 @pytest.mark.parametrize(
-    ["update", "error_type", "msg"],
+    ("update", "error_type", "msg"),
     [
         (
             {"partition_by": ("int64",)},
@@ -229,7 +229,7 @@ def test_bigquery_type_system_table_name(arti_collection: Collection) -> None:
 
 
 @pytest.mark.parametrize(
-    ["arti_type", "bq_field_type", "reverse_arti_type"],
+    ("arti_type", "bq_field_type", "reverse_arti_type"),
     [
         (Int8, "INTEGER", Int64),
         (Int16, "INTEGER", Int64),
@@ -262,11 +262,11 @@ def test_bigquery_type_system_description() -> None:
 
 
 @pytest.mark.parametrize(
-    ["arti_nullable", "bq_mode"],
-    (
-        [False, "REQUIRED"],
-        [True, "NULLABLE"],
-    ),
+    ("arti_nullable", "bq_mode"),
+    [
+        (False, "REQUIRED"),
+        (True, "NULLABLE"),
+    ],
 )
 def test_bigquery_type_system_nullable(arti_nullable: bool, bq_mode: str) -> None:
     arti_type = String(nullable=arti_nullable)

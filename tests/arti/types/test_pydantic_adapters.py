@@ -81,7 +81,7 @@ _scalar_type_mapping = {
 }
 
 
-def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # noqa: C901
+def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:
     assert isinstance(generated, Struct)
     assert generated.name == model.__name__
     for k, expected_field in model.__fields__.items():
@@ -96,9 +96,8 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
                         compare_model_to_type(sub_type, sub_spec)
                     else:
                         expected_spec_type = _scalar_type_mapping.get(sub_type)
-                        assert expected_spec_type is not None and isinstance(
-                            sub_spec, expected_spec_type
-                        )
+                        assert expected_spec_type is not None
+                        assert isinstance(sub_spec, expected_spec_type)
             elif lenient_issubclass(expected_origin, (list, tuple)):
                 # We currently only support sequence-like tuples
                 if lenient_issubclass(expected_origin, tuple):
@@ -110,9 +109,8 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
                     compare_model_to_type(sub_type, sub_spec)
                 else:
                     expected_spec_type = _scalar_type_mapping.get(sub_type)
-                    assert expected_spec_type is not None and isinstance(
-                        sub_spec, expected_spec_type
-                    )
+                    assert expected_spec_type is not None
+                    assert isinstance(sub_spec, expected_spec_type)
             elif expected_origin is Literal:
                 assert isinstance(spec, Enum)
                 assert isinstance(spec.type, String)
@@ -127,9 +125,7 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
             raise NotImplementedError(f"Don't know how to check {expected_type}")
 
 
-def compare_model_to_generated(  # noqa: C901
-    model: type[BaseModel], generated: type[BaseModel]
-) -> None:
+def compare_model_to_generated(model: type[BaseModel], generated: type[BaseModel]) -> None:
     assert issubclass(generated, BaseModel)
     assert generated.__name__ == model.__name__
     for k, expected_field in model.__fields__.items():
@@ -169,13 +165,7 @@ def compare_model_to_generated(  # noqa: C901
             raise NotImplementedError(f"Don't know how to check {expected_type}")
 
 
-@pytest.mark.parametrize(
-    ("model",),
-    (
-        (MyModel,),
-        (NestedModel,),
-    ),
-)
+@pytest.mark.parametrize("model", [MyModel, NestedModel])
 def test_pydantic_type_system(model: type[BaseModel]) -> None:
     arti_type = pydantic_type_system.to_artigraph(model, hints={})
     compare_model_to_type(model, arti_type)

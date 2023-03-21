@@ -126,12 +126,12 @@ def test_python_null() -> None:
 
 
 @pytest.mark.parametrize(
-    ["arti", "py"],
-    (
+    ("arti", "py"),
+    [
         (Int64(nullable=True), Optional[int]),
         (Float64(nullable=True), Optional[float]),
         (Enum(type=Int64(), items=(1, 2, 3), nullable=True), Optional[Literal[1, 2, 3]]),
-    ),
+    ],
 )
 def test_python_optional(arti: Type, py: Any) -> None:
     for a, p in [

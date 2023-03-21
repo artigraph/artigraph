@@ -23,7 +23,7 @@ from arti.types.numpy import numpy_type_system
 
 
 @pytest.mark.parametrize(
-    ["arti_type", "np_type"],
+    ("arti_type", "np_type"),
     [
         pytest.param(Binary(), np.bytes_, id="bytes_"),
         pytest.param(Boolean(), np.bool_, id="bool"),

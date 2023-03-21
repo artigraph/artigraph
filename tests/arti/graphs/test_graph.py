@@ -14,16 +14,15 @@ from arti.graphs import ArtifactBox
 from arti.internal.utils import frozendict
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
-from tests.arti.dummies import A1, A2, A3, A4, P1, P2
+from tests.arti.dummies import A1, A2, A3, A4, P1, P2, div
 from tests.arti.dummies import Num as _Num
-from tests.arti.dummies import div
 
 
 class Num(_Num):
     storage: LocalFile
 
 
-@pytest.fixture
+@pytest.fixture()
 def graph() -> Graph:
     # NOTE: .out() supports strict Artifact subclass mypy typing with the mypy_plugin, but Producers
     # also support simple iteration (eg: `a, b = MyProducer(...)`).

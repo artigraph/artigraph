@@ -53,10 +53,10 @@ def test_frozendict() -> None:
     assert frozendict(a=5)
     assert frozendict(a=5, b=10)
     assert frozendict(a=5, b=frozendict(b=10))
-    assert frozendict(dict(a=5))
-    assert frozendict(dict(a=5), b=10)
+    assert frozendict({"a": 5})
+    assert frozendict({"a": 5}, b=10)
     with pytest.raises(TypeError, match="unhashable type: 'dict'"):
-        frozendict(a=5, b=dict(b=10))
+        frozendict(a=5, b={"b": 10})
 
 
 def test_frozendict_immutability() -> None:
@@ -74,8 +74,8 @@ def test_frozendict_hash() -> None:
 
 
 def test_frozendict_union() -> None:
-    assert dict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
-    assert frozendict(a=5) | dict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
+    assert {"a": 5} | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
+    assert frozendict(a=5) | {"b": 10} == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
     assert frozendict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)
 
 
@@ -124,19 +124,19 @@ class _I(_int):
 
 
 @pytest.mark.parametrize(
-    ["op"],
-    (
-        (op.add,),
-        (op.and_,),
-        (op.floordiv,),
-        (op.lshift,),
-        (op.mod,),
-        (op.mul,),
-        (op.or_,),
-        (op.rshift,),
-        (op.sub,),
-        (op.xor,),
-    ),
+    "op",
+    [
+        op.add,
+        op.and_,
+        op.floordiv,
+        op.lshift,
+        op.mod,
+        op.mul,
+        op.or_,
+        op.rshift,
+        op.sub,
+        op.xor,
+    ],
 )
 def test__int_binary(op: Callable[..., Any]) -> None:
     i, _i = 123, _I(123)
@@ -148,16 +148,16 @@ def test__int_binary(op: Callable[..., Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    ["op"],
-    (
-        (math.ceil,),
-        (math.floor,),
-        (math.trunc,),
-        (op.invert,),
-        (op.neg,),
-        (op.pos,),
-        (partial(round, ndigits=-1),),
-    ),
+    "op",
+    [
+        math.ceil,
+        math.floor,
+        math.trunc,
+        op.invert,
+        op.neg,
+        op.pos,
+        partial(round, ndigits=-1),
+    ],
 )
 def test__int_unary(op: Callable[..., Any]) -> None:
     output, expected = op(_I(123)), op(123)
@@ -169,23 +169,17 @@ def test__int_repr() -> None:
     assert repr(_I(5)) == "_I(5)"
 
 
-@pytest.mark.parametrize(
-    ["typ"],
-    (
-        (int64,),
-        (uint64,),
-    ),
-)
-def test_sizedint(typ: type[Union[int64, uint64]]) -> None:
-    low, high = typ(typ._min), typ(typ._max)
+@pytest.mark.parametrize("type_", [int64, uint64])
+def test_sizedint(type_: type[Union[int64, uint64]]) -> None:
+    low, high = type_(type_._min), type_(type_._max)
 
-    assert low == typ._min
-    assert high == typ._max
+    assert low == type_._min
+    assert high == type_._max
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         low - 1
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError):  # noqa: PT011
         high + 1
 
 
@@ -196,13 +190,7 @@ def test_sizedint_cast() -> None:
     assert uint64(int64(5)) == uint64(5)
 
 
-@pytest.mark.parametrize(
-    ["mode"],
-    (
-        ("w+",),
-        ("wb",),
-    ),
-)
+@pytest.mark.parametrize("mode", ["w+", "wb"])
 def test_named_temporary_file(mode: str) -> None:
     with named_temporary_file(mode=mode) as f:
         assert f.mode == mode

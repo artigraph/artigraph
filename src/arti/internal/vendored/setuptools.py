@@ -80,7 +80,7 @@ class PackageFinder:
         All the packages found in 'where' that pass the 'include' filter, but
         not the 'exclude' filter.
         """
-        for root, dirs, files in os.walk(where, followlinks=True):
+        for root, dirs, _files in os.walk(where, followlinks=True):
             # Copy dirs to iterate over it, then empty dirs.
             all_dirs = dirs[:]
             dirs[:] = []

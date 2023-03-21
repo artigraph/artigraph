@@ -69,7 +69,8 @@ class View(Model):
         artifact_class = get_item_from_annotated(
             annotation, Artifact, is_subclass=True
         ) or get_field_default(cls, "artifact_class")
-        assert artifact_class is not None and issubclass(artifact_class, Artifact)
+        assert artifact_class is not None
+        assert issubclass(artifact_class, Artifact)
         # Try to extract or infer the Type. We prefer: an explicit Type in the annotation, followed
         # by an Artifact's default type, falling back to inferring a Type from the type hint.
         type_ = get_item_from_annotated(annotation, Type, is_subclass=False)

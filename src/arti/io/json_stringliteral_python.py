@@ -31,9 +31,8 @@ def _read_json_stringliteral_python(
                 _read_json_literal(storage_partition) for storage_partition in storage_partitions
             )
         )
-    else:
-        assert len(storage_partitions) == 1  # Better error handled in base read
-        return _read_json_literal(storage_partitions[0])
+    assert len(storage_partitions) == 1  # Better error handled in base read
+    return _read_json_literal(storage_partitions[0])
 
 
 @register_writer
