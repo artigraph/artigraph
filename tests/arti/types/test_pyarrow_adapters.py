@@ -21,7 +21,7 @@ from arti.types.pyarrow import pyarrow_type_system
 
 
 @pytest.mark.parametrize(
-    ["arti_type", "pa_type"],
+    ("arti_type", "pa_type"),
     [
         pytest.param(Binary(), pa.binary(), id="binary"),
         pytest.param(Binary(byte_size=5), pa.binary(5), id="binary[5]"),

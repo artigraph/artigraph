@@ -61,16 +61,15 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
         # The builtin mutable containers (list, dict, etc) are invariant (klass_args ==
         # check_type_args), but the interfaces (Mapping, Sequence, etc) and immutable containers are
         # covariant.
-        if check_type_args:
-            if not (
-                len(klass_args) == len(check_type_args)
-                and all(
-                    # check subclass OR things like "..."
-                    lenient_issubclass(klass_arg, check_type_arg) or klass_arg is check_type_arg
-                    for (klass_arg, check_type_arg) in zip(klass_args, check_type_args)
-                )
-            ):
-                return False
+        if check_type_args and not (
+            len(klass_args) == len(check_type_args)
+            and all(
+                # check subclass OR things like "..."
+                lenient_issubclass(klass_arg, check_type_arg) or klass_arg is check_type_arg
+                for (klass_arg, check_type_arg) in zip(klass_args, check_type_args)
+            )
+        ):
+            return False
         return lenient_issubclass(klass_origin, check_type_origin)
     # Shouldn't happen, but need to explicitly say "x is not None" to narrow mypy types.
     raise NotImplementedError("The origin conditions don't cover all cases!")
@@ -230,9 +229,9 @@ def signature(
 # Focusing on  3.9+ (for now)
 
 if sys.version_info < (3, 11):  # pragma: no cover
-    from typing_extensions import Self as Self  # noqa: F401
+    from typing_extensions import Self as Self
 else:  # pragma: no cover
-    from typing import Self as Self  # noqa: F401
+    from typing import Self as Self
 
 if sys.version_info < (3, 10):  # pragma: no cover
 

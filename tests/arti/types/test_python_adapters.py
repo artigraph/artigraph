@@ -126,7 +126,7 @@ def test_python_null() -> None:
 
 
 @pytest.mark.parametrize(
-    ["arti", "py"],
+    ("arti", "py"),
     (
         (Int64(nullable=True), Optional[int]),
         (Float64(nullable=True), Optional[float]),

@@ -8,7 +8,7 @@ from arti.types.pandas import pandas_type_system
 
 
 @pytest.mark.parametrize(
-    ["arti_type", "pd_type"],
+    ("arti_type", "pd_type"),
     [
         pytest.param(
             List(element=Struct(fields={"float64": Float64(), "int64": Int64(), "str": String()})),

@@ -59,7 +59,7 @@ def test_Model_copy_private_attributes() -> None:
 
 
 @pytest.mark.parametrize(
-    ["validate"],
+    "validate",
     [
         (False,),
         (True,),

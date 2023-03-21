@@ -21,22 +21,22 @@ from arti.storage._internal import (
 PathPlaceholders = dict[str, tuple[Optional[Fingerprint], CompositeKey]]
 
 
-@pytest.fixture
+@pytest.fixture()
 def PKs() -> dict[str, type[PartitionKey]]:
     return {"x": Int8Key, "y": Int8Key}
 
 
-@pytest.fixture
+@pytest.fixture()
 def spec() -> str:
     return "/p/{x.key}/{y.hex}"
 
 
-@pytest.fixture
+@pytest.fixture()
 def paths() -> set[str]:
     return {"/p/1/0x1", "/p/2/0x2", "/p/3/0x3"}
 
 
-@pytest.fixture
+@pytest.fixture()
 def paths_to_placeholders() -> PathPlaceholders:
     return {
         "/p/1/0x1": (Fingerprint.empty(), frozendict({"x": Int8Key(key=1), "y": Int8Key(key=1)})),

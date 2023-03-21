@@ -13,7 +13,7 @@ def test_GitCommit() -> None:
 
 
 @pytest.mark.parametrize(
-    ["major", "minor", "patch", "fingerprint"],
+    ("major", "minor", "patch", "fingerprint"),
     (
         (0, 0, 0, -4875916080982812485),
         (0, 0, 1, -6022020963282911891),

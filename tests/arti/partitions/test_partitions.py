@@ -99,7 +99,7 @@ def test_DateKey() -> None:
 
 
 @pytest.mark.parametrize(
-    ["IntKey", "matching_type"],
+    ("IntKey", "matching_type"),
     (
         (Int8Key, Int8),
         (Int16Key, Int16),

@@ -35,7 +35,7 @@ def test_cast() -> None:
 
 
 @pytest.mark.parametrize(
-    ["value", "expected_type"],
+    ("value", "expected_type"),
     [
         ("hi", String()),
         (5, Int64()),
@@ -55,9 +55,9 @@ def test_cast_literals(value: Any, expected_type: Type) -> None:
     assert artifact.storage.value == json.dumps(value)
 
 
-@pytest.mark.xfail
+@pytest.mark.xfail()
 @pytest.mark.parametrize(
-    ["value", "expected_type"],
+    ("value", "expected_type"),
     [
         (b"hi", Binary()),
         (date(1970, 1, 1), Date()),
@@ -70,7 +70,7 @@ def test_cast_literals_not_yet_implemented(value: Any, expected_type: Type) -> N
 
 
 @pytest.mark.parametrize(
-    ["value"],
+    "value",
     [
         ((1, "a"),),
         ({"a": "b", 1: 2},),

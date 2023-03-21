@@ -53,10 +53,10 @@ def test_frozendict() -> None:
     assert frozendict(a=5)
     assert frozendict(a=5, b=10)
     assert frozendict(a=5, b=frozendict(b=10))
-    assert frozendict(dict(a=5))
-    assert frozendict(dict(a=5), b=10)
+    assert frozendict({"a": 5})
+    assert frozendict({"a": 5}, b=10)
     with pytest.raises(TypeError, match="unhashable type: 'dict'"):
-        frozendict(a=5, b=dict(b=10))
+        frozendict(a=5, b={"b": 10})
 
 
 def test_frozendict_immutability() -> None:
@@ -74,8 +74,8 @@ def test_frozendict_hash() -> None:
 
 
 def test_frozendict_union() -> None:
-    assert dict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
-    assert frozendict(a=5) | dict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
+    assert {"a": 5} | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
+    assert frozendict(a=5) | {"b": 10} == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
     assert frozendict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)
 
 
@@ -124,7 +124,7 @@ class _I(_int):
 
 
 @pytest.mark.parametrize(
-    ["op"],
+    "op",
     (
         (op.add,),
         (op.and_,),
@@ -148,7 +148,7 @@ def test__int_binary(op: Callable[..., Any]) -> None:
 
 
 @pytest.mark.parametrize(
-    ["op"],
+    "op",
     (
         (math.ceil,),
         (math.floor,),
@@ -170,7 +170,7 @@ def test__int_repr() -> None:
 
 
 @pytest.mark.parametrize(
-    ["typ"],
+    "typ",
     (
         (int64,),
         (uint64,),
@@ -197,7 +197,7 @@ def test_sizedint_cast() -> None:
 
 
 @pytest.mark.parametrize(
-    ["mode"],
+    "mode",
     (
         ("w+",),
         ("wb",),

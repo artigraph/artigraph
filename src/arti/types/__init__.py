@@ -7,9 +7,8 @@ from collections.abc import Iterable, Iterator, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional
 
-from pydantic import PrivateAttr
+from pydantic import PrivateAttr, validator
 from pydantic import __version__ as pydantic_version
-from pydantic import validator
 
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
@@ -372,7 +371,7 @@ class TypeSystem(Model):
 
     @property
     def _priority_sorted_adapters(self) -> Iterator[type[TypeAdapter]]:
-        return reversed(sorted(self._adapter_by_key.values(), key=attrgetter("priority")))
+        return sorted(self._adapter_by_key.values(), key=attrgetter("priority"), reverse=True)
 
     def to_artigraph(
         self, type_: Any, *, hints: dict[str, Any], root_type_system: Optional[TypeSystem] = None

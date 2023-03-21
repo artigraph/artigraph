@@ -81,7 +81,7 @@ _scalar_type_mapping = {
 }
 
 
-def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # noqa: C901
+def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:
     assert isinstance(generated, Struct)
     assert generated.name == model.__name__
     for k, expected_field in model.__fields__.items():
@@ -96,7 +96,8 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
                         compare_model_to_type(sub_type, sub_spec)
                     else:
                         expected_spec_type = _scalar_type_mapping.get(sub_type)
-                        assert expected_spec_type is not None and isinstance(
+                        assert expected_spec_type is not None
+                        assert isinstance(
                             sub_spec, expected_spec_type
                         )
             elif lenient_issubclass(expected_origin, (list, tuple)):
@@ -110,7 +111,8 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
                     compare_model_to_type(sub_type, sub_spec)
                 else:
                     expected_spec_type = _scalar_type_mapping.get(sub_type)
-                    assert expected_spec_type is not None and isinstance(
+                    assert expected_spec_type is not None
+                    assert isinstance(
                         sub_spec, expected_spec_type
                     )
             elif expected_origin is Literal:
@@ -127,7 +129,7 @@ def compare_model_to_type(model: type[BaseModel], generated: Type) -> None:  # n
             raise NotImplementedError(f"Don't know how to check {expected_type}")
 
 
-def compare_model_to_generated(  # noqa: C901
+def compare_model_to_generated(
     model: type[BaseModel], generated: type[BaseModel]
 ) -> None:
     assert issubclass(generated, BaseModel)
@@ -170,7 +172,7 @@ def compare_model_to_generated(  # noqa: C901
 
 
 @pytest.mark.parametrize(
-    ("model",),
+    "model",
     (
         (MyModel,),
         (NestedModel,),

@@ -83,7 +83,7 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[CompositeKe
             assert set(partition.keys) == {"date"}
             assert partition.keys in date_keys
             assert isinstance(partition.keys["date"], DateKey)
-            assert partition.keys["date"].Y == year
+            assert year == partition.keys["date"].Y
 
 
 def test_local_partitioning_with_input_fingerprints(

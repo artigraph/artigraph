@@ -248,9 +248,8 @@ class uint64(_int):
 @contextmanager
 def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any], None, None]:
     """Minimal alternative to tempfile.NamedTemporaryFile that can be re-opened on Windows."""
-    with TemporaryDirectory() as d:
-        with open(os.path.join(d, "contents"), mode=mode) as f:
-            yield f
+    with TemporaryDirectory() as d, open(os.path.join(d, "contents"), mode=mode) as f:
+        yield f
 
 
 def one_or_none(values: Optional[list[_V]], *, item_name: str) -> Optional[_V]:
@@ -346,6 +345,7 @@ class TypedBox(Box, MutableMapping[str, Union[_V, MutableMapping[str, _V]]]):
         if key == "__orig_class__":
             return object.__setattr__(self, key, value)
         super().__setattr__(key, value)
+        return None
 
     def __cast_value(self, item: str, value: Any) -> _V:
         if isinstance(value, self.__target_type__):
@@ -371,7 +371,7 @@ class TypedBox(Box, MutableMapping[str, Union[_V, MutableMapping[str, _V]]]):
 
     def walk(self, root: tuple[str, ...] = ()) -> Iterator[tuple[str, _V]]:
         for k, v in self.items():
-            subroot = root + (k,)
+            subroot = (*root, k)
             if isinstance(v, TypedBox):
                 yield from v.walk(root=subroot)
             else:

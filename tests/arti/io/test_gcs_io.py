@@ -16,7 +16,7 @@ class PartitionedNum(Num):
 
 
 @pytest.mark.parametrize(
-    ["format"],
+    "format",
     [
         (JSON(),),
         (Pickle(),),
@@ -41,7 +41,7 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
 
 
 @pytest.mark.parametrize(
-    ["format"],
+    "format",
     [
         (JSON(),),
         (Pickle(),),
@@ -54,7 +54,7 @@ def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
             keys=CompositeKey(i=Int64Key(key=i)),
             input_fingerprint=Fingerprint.empty(),
             with_content_fingerprint=False,
-        ): dict(i=i)
+        ): {"i": i}
         for i in [1, 2]
     }
     view = View.from_annotation(Annotated[list, a.type], mode="READWRITE")

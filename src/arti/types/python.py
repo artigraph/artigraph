@@ -96,7 +96,8 @@ class PyTuple(PyValueContainer):
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         origin, args = get_origin(type_), get_args(type_)
         assert origin is not None
-        assert len(args) == 2 and args[1] is ...
+        assert len(args) == 2
+        assert args[1] is ...
         return super().to_artigraph(origin[args[0]], hints=hints, type_system=type_system)
 
     @classmethod
@@ -140,7 +141,7 @@ class PyLiteral(TypeAdapter):
         if is_union(origin):
             assert not is_optional_hint(type_)  # Should be handled by PyOptional
             # We only support Enums currently, so all subtypes must be Literal
-            if non_literals := [sub for sub in items if not get_origin(sub) is Literal]:
+            if non_literals := [sub for sub in items if get_origin(sub) is not Literal]:
                 raise NotImplementedError(
                     f"Only Union[Literal[...], ...] (enums) are currently supported, got invalid subtypes: {non_literals}"
                 )

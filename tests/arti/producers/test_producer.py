@@ -396,13 +396,13 @@ def test_Producer_build_outputs_check() -> None:
         match=r"BadProducer.map - must be implemented when the `build` outputs are partitioned",
     ):
 
-        class BadProducer(Producer):  # noqa: F811
+        class BadProducer(Producer):
             @staticmethod
             def build() -> Annotated[list[dict], C]:  # type: ignore[empty-body,type-arg]
                 pass
 
 
-def test_Producer_bad_signature() -> None:  # noqa: C901
+def test_Producer_bad_signature() -> None:
     # pylint: disable=function-redefined
 
     # Ensure no error if _abstract_
@@ -649,7 +649,7 @@ class Numbers(Artifact):
 
 
 @pytest.mark.parametrize(
-    ["annotation", "type_", "artifact_class"],
+    ("annotation", "type_", "artifact_class"),
     (
         pytest.param(list[int], numbers_type, Artifact, id="simple"),
         pytest.param(

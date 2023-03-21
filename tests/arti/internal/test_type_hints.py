@@ -14,7 +14,7 @@ from arti.internal.type_hints import (
     lenient_issubclass,
 )
 
-Tuple = getattr(typing, "Tuple")  # Work around https://github.com/asottile/pyupgrade/issues/574
+Tuple = typing.Tuple  # Work around https://github.com/asottile/pyupgrade/issues/574
 
 
 class MyTuple(tuple):  # type: ignore[type-arg]
@@ -182,7 +182,7 @@ def test_is_optional_hint() -> None:
 
 
 @pytest.mark.parametrize(
-    ["hint", "should_match"],
+    ("hint", "should_match"),
     (
         (Literal[5], False),
         (Optional[int], True),
