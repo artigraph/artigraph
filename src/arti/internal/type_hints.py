@@ -84,10 +84,7 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
 
     NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.
     """
-    if is_generic_alias(klass):
-        bases = (klass,)
-    else:
-        bases = klass.__orig_bases__  # type: ignore[attr-defined]
+    bases = (klass,) if is_generic_alias(klass) else klass.__orig_bases__  # type: ignore[attr-defined]
     for base in bases:
         base_origin = get_origin(base)
         if base_origin is None:

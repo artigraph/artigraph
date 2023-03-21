@@ -3,7 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from abc import abstractmethod
-from collections.abc import Iterable, Iterator, Mapping
+from collections.abc import Iterable, Mapping
 from operator import attrgetter
 from typing import Any, ClassVar, Literal, Optional
 
@@ -370,7 +370,7 @@ class TypeSystem(Model):
         return register(self._adapter_by_key, adapter.key, adapter)
 
     @property
-    def _priority_sorted_adapters(self) -> Iterator[type[TypeAdapter]]:
+    def _priority_sorted_adapters(self) -> list[type[TypeAdapter]]:
         return sorted(self._adapter_by_key.values(), key=attrgetter("priority"), reverse=True)
 
     def to_artigraph(

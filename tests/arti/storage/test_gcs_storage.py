@@ -30,5 +30,7 @@ def test_GCSFile_discover_partitions(gcs: GCSFileSystem, gcs_bucket: str) -> Non
         assert partition.keys in expected_keys
         assert partition.qualified_path == storage.qualified_path.format(**partition.keys)
         assert partition.content_fingerprint == Fingerprint.from_string(
-            base64.b64encode(hashlib.md5(b"data").digest()).decode()
+            base64.b64encode(
+                hashlib.md5(b"data").digest()  # noqa: S324 (GCS only provides md5)
+            ).decode()
         )

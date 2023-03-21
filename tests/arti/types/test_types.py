@@ -163,7 +163,7 @@ def test_Collection_partitioned() -> None:
         Collection(element=Int32(), cluster_by=("x",))
 
 
-@pytest.mark.parametrize("param", (("partition_by",), ("cluster_by",)))
+@pytest.mark.parametrize("param", ["partition_by", "cluster_by"])
 def test_Collection_field_references(param: str) -> None:
     match = re.escape("unknown field(s): {'z'}")
 

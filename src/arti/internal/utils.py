@@ -2,11 +2,11 @@ from __future__ import annotations
 
 import importlib
 import inspect
-import os.path
 import pkgutil
 import threading
 from collections.abc import Callable, Generator, Iterable, Iterator, Mapping, MutableMapping
 from contextlib import contextmanager
+from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
 from typing import IO, Any, ClassVar, Optional, SupportsIndex, TypeVar, Union, cast
@@ -110,7 +110,7 @@ def import_submodules(
     path_names = {p: name for p in path}
     path_names.update(
         {
-            os.sep.join([path, *name.split(".")]): f"{root_name}.{name}"
+            str(Path(path).joinpath(*name.split("."))): f"{root_name}.{name}"
             for path, root_name in path_names.items()
             for name in find_namespace_packages(path)
         }
@@ -248,7 +248,7 @@ class uint64(_int):
 @contextmanager
 def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any], None, None]:
     """Minimal alternative to tempfile.NamedTemporaryFile that can be re-opened on Windows."""
-    with TemporaryDirectory() as d, open(os.path.join(d, "contents"), mode=mode) as f:
+    with TemporaryDirectory() as d, (Path(d) / "contents").open(mode=mode) as f:
         yield f
 
 

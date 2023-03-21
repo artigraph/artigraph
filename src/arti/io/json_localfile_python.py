@@ -34,9 +34,8 @@ def _read_json_localfile_python(
                 _read_json_file(storage_partition.path) for storage_partition in storage_partitions
             )
         )
-    else:
-        assert len(storage_partitions) == 1  # Better error handled in base read
-        return _read_json_file(storage_partitions[0].path)
+    assert len(storage_partitions) == 1  # Better error handled in base read
+    return _read_json_file(storage_partitions[0].path)
 
 
 @register_writer

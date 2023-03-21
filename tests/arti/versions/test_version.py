@@ -14,7 +14,7 @@ def test_GitCommit() -> None:
 
 @pytest.mark.parametrize(
     ("major", "minor", "patch", "fingerprint"),
-    (
+    [
         (0, 0, 0, -4875916080982812485),
         (0, 0, 1, -6022020963282911891),
         (0, 1, 0, -612532240571011082),
@@ -26,7 +26,7 @@ def test_GitCommit() -> None:
         (1, 1, 1, -9142586270102516767),
         (2, 0, 0, 6920640749119438759),
         (2, 5, 5, 6920640749119438759),
-    ),
+    ],
 )
 def test_SemVer(major: int, minor: int, patch: int, fingerprint: int) -> None:
     assert SemVer(major=major, minor=minor, patch=patch).fingerprint == fingerprint

@@ -14,8 +14,6 @@ from arti.internal.type_hints import (
     lenient_issubclass,
 )
 
-Tuple = typing.Tuple  # Work around https://github.com/asottile/pyupgrade/issues/574
-
 
 class MyTuple(tuple):  # type: ignore[type-arg]
     pass
@@ -38,13 +36,13 @@ def test_get_class_type_vars() -> None:
         pass
 
     # Test it works directly with GenericAlias
-    get_class_type_vars(Base[int, int]) == (int, int)
+    assert get_class_type_vars(Base[int, int]) == (int, int)
 
     # Test it works with fully subscripted subclasses
     class Sub(Base[int, int]):
         pass
 
-    get_class_type_vars(Sub) == (int, int)
+    assert get_class_type_vars(Sub) == (int, int)
 
     # Test it works with fully subscripted subclasses up the MRO
     class Mixin:
@@ -53,7 +51,7 @@ def test_get_class_type_vars() -> None:
     class SubWithMixin(Mixin, Sub):
         pass
 
-    get_class_type_vars(SubWithMixin) == (int, int)
+    assert get_class_type_vars(SubWithMixin) == (int, int)
 
     # And finally, check error cases
     with pytest.raises(TypeError, match="Base must subclass a subscripted Generic"):
@@ -62,14 +60,14 @@ def test_get_class_type_vars() -> None:
 
 @pytest.mark.parametrize(
     ("annotation", "klass", "is_subclass", "expected"),
-    (
+    [
         (int, int, True, None),
         (int, int, False, None),
         (Annotated[int, 5], int, False, 5),
         (Annotated[int, 5], int, True, None),
         (Annotated[int, int], int, False, None),
         (Annotated[int, int], int, True, int),
-    ),
+    ],
 )
 def test_get_item_from_annotated(
     annotation: Any, klass: type, is_subclass: bool, expected: Any
@@ -79,7 +77,7 @@ def test_get_item_from_annotated(
 
 @pytest.mark.parametrize(
     ("klass", "class_or_tuple"),
-    (
+    [
         (Annotated[int, 5], Annotated[int, 5]),
         (Annotated[int, 5], int),
         (Annotated[list[int], 5], Annotated[list, 5]),
@@ -108,7 +106,7 @@ def test_get_item_from_annotated(
         (list[int], Annotated[list[int], 5]),
         (str, Any),
         (str, Union[int, str]),
-        (tuple, Tuple),
+        (tuple, typing.Tuple),
         (tuple, TupleVar),
         (tuple, UnboundVar),
         (tuple, tuple),
@@ -116,12 +114,12 @@ def test_get_item_from_annotated(
         (tuple[MyTuple[int]], tuple[tuple[int]]),  # type: ignore[type-arg]
         (tuple[int], Sequence),
         (tuple[int], Sequence[int]),
-        (tuple[int], Tuple),
+        (tuple[int], typing.Tuple),
         (tuple[int], tuple),
         (tuple[int], tuple[int]),
         (tuple[tuple[int]], tuple),
         (tuple[tuple[int]], tuple[tuple[int]]),
-    ),
+    ],
 )
 def test_lenient_issubclass_true(
     klass: type, class_or_tuple: Union[type, tuple[type, ...]]
@@ -131,7 +129,7 @@ def test_lenient_issubclass_true(
 
 @pytest.mark.parametrize(
     ("klass", "class_or_tuple"),
-    (
+    [
         (Any, bool),
         (MyTypedDict, dict[str, int]),  # Might implement in the future
         (MyTypedDict, dict[str, str]),
@@ -154,8 +152,8 @@ def test_lenient_issubclass_true(
         # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for these (but
         # oddly, `issubclass(tuple[int], tuple)` does not).
         (Optional[int], int),
-        (Tuple[int], tuple),
-    ),
+        (typing.Tuple[int], tuple),
+    ],
 )
 def test_lenient_issubclass_false(
     klass: type, class_or_tuple: Union[type, tuple[type, ...]]
@@ -183,11 +181,11 @@ def test_is_optional_hint() -> None:
 
 @pytest.mark.parametrize(
     ("hint", "should_match"),
-    (
+    [
         (Literal[5], False),
         (Optional[int], True),
         (Union[int, str], True),
-    ),
+    ],
 )
 def test_is_union(hint: Any, should_match: bool) -> None:
     if should_match:

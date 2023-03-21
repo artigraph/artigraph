@@ -15,13 +15,7 @@ class PartitionedNum(Num):
     type = Collection(element=Struct(fields={"i": Int64()}), partition_by=("i",))
 
 
-@pytest.mark.parametrize(
-    "format",
-    [
-        (JSON(),),
-        (Pickle(),),
-    ],
-)
+@pytest.mark.parametrize("format", [JSON(), Pickle()])
 def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
     a, n = Num(format=format, storage=GCSFile(bucket=gcs_bucket, path="file")), 5
     view = View.from_annotation(Annotated[int, a.type], mode="READWRITE")
@@ -40,13 +34,7 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
         io.read(a.type, a.format, partitions * 2, view=view)
 
 
-@pytest.mark.parametrize(
-    "format",
-    [
-        (JSON(),),
-        (Pickle(),),
-    ],
-)
+@pytest.mark.parametrize("format", [JSON(), Pickle()])
 def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
     a = PartitionedNum(format=format, storage=GCSFile(bucket=gcs_bucket, path="{i.key}"))
     data: dict[StoragePartition, dict[str, int]] = {

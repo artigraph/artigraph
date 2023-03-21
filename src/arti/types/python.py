@@ -21,7 +21,7 @@ _generate = partial(_ScalarClassTypeAdapter.generate, type_system=python_type_sy
 
 _generate(artigraph=arti.types.Binary, system=bytes)
 # NOTE: issubclass(bool, int) is True, so set higher priority
-_generate(artigraph=arti.types.Boolean, system=bool, priority=int(1e9))
+_generate(artigraph=arti.types.Boolean, system=bool, priority=1000)
 _generate(artigraph=arti.types.Date, system=datetime.date)
 _generate(artigraph=arti.types.String, system=str)
 for _precision in (16, 32, 64):
@@ -54,6 +54,7 @@ class PyNone(_ScalarClassTypeAdapter):
 class PyDatetime(_ScalarClassTypeAdapter):
     artigraph = arti.types.Timestamp
     system = datetime.datetime
+    priority = 1  # Prioritize above Date (isinstance(datetime, date) is True)
 
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:

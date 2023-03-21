@@ -650,7 +650,7 @@ class Numbers(Artifact):
 
 @pytest.mark.parametrize(
     ("annotation", "type_", "artifact_class"),
-    (
+    [
         pytest.param(list[int], numbers_type, Artifact, id="simple"),
         pytest.param(
             Annotated[list[int], numbers_type],
@@ -670,7 +670,7 @@ class Numbers(Artifact):
             Numbers,
             id="annotated-Type-and-Artifact",
         ),
-    ),
+    ],
 )
 def test_Producer_type_inference(
     annotation: Any, type_: Type, artifact_class: type[Artifact]

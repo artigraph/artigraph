@@ -14,6 +14,7 @@ from arti.types import (
     Map,
     String,
     Struct,
+    Time,
     Timestamp,
     Type,
 )
@@ -44,6 +45,10 @@ from arti.types.pyarrow import pyarrow_type_system
             pa.struct([pa.field("a", pa.int8()), pa.field("b", pa.int8(), nullable=False)]),
             id="struct",
         ),
+        pytest.param(Time(precision="second"), pa.time32("s"), id="time32[s]"),
+        pytest.param(Time(precision="millisecond"), pa.time32("ms"), id="time32[ms]"),
+        pytest.param(Time(precision="microsecond"), pa.time64("us"), id="time64[us]"),
+        pytest.param(Time(precision="nanosecond"), pa.time64("ns"), id="time64[ns]"),
         # tz must be set to UTC for Timestamp
         pytest.param(
             Timestamp(precision="microsecond"), pa.timestamp("us", tz="UTC"), id="timestamp[us]"

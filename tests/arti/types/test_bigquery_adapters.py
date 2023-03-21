@@ -263,10 +263,10 @@ def test_bigquery_type_system_description() -> None:
 
 @pytest.mark.parametrize(
     ("arti_nullable", "bq_mode"),
-    (
-        [False, "REQUIRED"],
-        [True, "NULLABLE"],
-    ),
+    [
+        (False, "REQUIRED"),
+        (True, "NULLABLE"),
+    ],
 )
 def test_bigquery_type_system_nullable(arti_nullable: bool, bq_mode: str) -> None:
     arti_type = String(nullable=arti_nullable)

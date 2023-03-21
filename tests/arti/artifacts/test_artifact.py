@@ -69,13 +69,7 @@ def test_cast_literals_not_yet_implemented(value: Any, expected_type: Type) -> N
     test_cast_literals(value, expected_type)
 
 
-@pytest.mark.parametrize(
-    "value",
-    [
-        ((1, "a"),),
-        ({"a": "b", 1: 2},),
-    ],
-)
+@pytest.mark.parametrize("value", [(1, "a"), {"a": "b", 1: 2}])
 def test_cast_literals_errors(value: Any) -> None:
     with pytest.raises(
         NotImplementedError, match=re.escape(f"Unable to determine type of {value}")

@@ -100,12 +100,12 @@ def test_DateKey() -> None:
 
 @pytest.mark.parametrize(
     ("IntKey", "matching_type"),
-    (
+    [
         (Int8Key, Int8),
         (Int16Key, Int16),
         (Int32Key, Int32),
         (Int64Key, Int64),
-    ),
+    ],
 )
 def test_IntKeys(IntKey: type[_IntKey], matching_type: type[Type]) -> None:
     assert IntKey.matching_type is matching_type

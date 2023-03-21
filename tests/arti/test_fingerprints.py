@@ -17,7 +17,7 @@ def test_Fingerprint() -> None:
     assert Fingerprint.from_uint64(uint64(int64(-5))) == -5
     assert Fingerprint.identity() == 0
 
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="is too large for int64"):
         Fingerprint.from_int(uint64._max)
 
     f1, f2 = Fingerprint(key=int64(1)), Fingerprint(key=int64(2))

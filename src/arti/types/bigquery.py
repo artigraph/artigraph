@@ -83,11 +83,11 @@ for _precision in (16, 32, 64):
     _gen_adapter(
         artigraph=getattr(types, f"Float{_precision}"),
         system=SqlTypeNames.FLOAT64,
+        priority=_precision,
     )
 for _precision in (8, 16, 32, 64):
     _gen_adapter(
-        artigraph=getattr(types, f"Int{_precision}"),
-        system=SqlTypeNames.INT64,
+        artigraph=getattr(types, f"Int{_precision}"), system=SqlTypeNames.INT64, priority=_precision
     )
 
 
@@ -191,9 +191,9 @@ class ListFieldTypeAdapter(TypeAdapter):
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
         if type_.nullable:
-            warnings.warn("BigQuery doesn't support nullable arrays")
+            warnings.warn("BigQuery doesn't support nullable arrays", stacklevel=2)
         if type_.element.nullable:
-            warnings.warn("BigQuery doesn't support nullable array elements")
+            warnings.warn("BigQuery doesn't support nullable array elements", stacklevel=2)
             type_ = type_.copy(update={"element": type_.element.copy(update={"nullable": False})})
         if isinstance(type_.element, types.List):
             raise ValueError("BigQuery doesn't support nested arrays")
@@ -207,6 +207,7 @@ class ListFieldTypeAdapter(TypeAdapter):
 class TableTypeAdapter(TypeAdapter):
     artigraph = types.Collection
     system = bigquery.Table
+    priority = ListFieldTypeAdapter.priority + 1
 
     @classmethod
     def to_artigraph(

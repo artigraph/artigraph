@@ -217,6 +217,7 @@ class StructTypeAdapter(_PyarrowTypeAdapter):
 class SchemaTypeAdapter(_PyarrowTypeAdapter):
     artigraph = types.Collection
     system = pa.schema
+    priority = ListTypeAdapter.priority + 1
 
     @classmethod
     def matches_artigraph(cls, type_: Type, *, hints: dict[str, Any]) -> bool:
@@ -290,7 +291,7 @@ class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
             raise ValueError(
                 f"{type_}.precision must be one of {tuple(cls.precision_to_unit)}, got {precision}"
             )
-        return cls.system(unit=unit)
+        return cls.system(unit)
 
 
 @pyarrow_type_system.register_adapter
@@ -354,7 +355,7 @@ class Time32TypeAdapter(_BaseSizedTimeTypeAdapter):
 @pyarrow_type_system.register_adapter
 class Time64TypeAdapter(_BaseSizedTimeTypeAdapter):
     precision_to_unit = {
-        "second": "us",
-        "millisecond": "ns",
+        "microsecond": "us",
+        "nanosecond": "ns",
     }
     system = pa.time64

@@ -115,7 +115,7 @@ def test_Storage_visit_names() -> None:
 
 @pytest.mark.parametrize(
     ("spec", "expected", "type"),
-    (
+    [
         (
             "/tmp/test/{partition_key_spec}",
             "/tmp/test",
@@ -136,7 +136,7 @@ def test_Storage_visit_names() -> None:
             "/tmp/test/{tag}/a_key={a.key}",
             Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",)),
         ),
-    ),
+    ],
 )
 def test_Storage_visit_type(spec: str, expected: str, type: Type) -> None:
     assert MockStorage(path=spec)._visit_type(type).path == expected
