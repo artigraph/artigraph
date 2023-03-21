@@ -88,15 +88,11 @@ pylint = ">=2.15.0"
 pytest = ">=7.1.2"
 pytest-benchmark = ">=3.4.1"
 pytest-cov = ">=3.0.0"
-pytest-sugar = ">=0.9.5"
+pytest-pretty = "*"
 pyupgrade = ">=2.37.3"
 sh = ">=2"
 typer = ">=0.6.1"
 types-pyfarmhash = ">=0.3.1"
-
-# This is not a real dep, but it has an upper bound on charset-normalizer, which poetry may prefer instead. Lower
-# versions of this raise warnings. This pin can be removed after the next release, which should loosen the bound.
-aiohttp = {version = ">=3.8.3", optional = true}
 
 [tool.poetry.extras]
 all = [

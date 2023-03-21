@@ -6,6 +6,8 @@ on:
     - golden
   workflow_dispatch:
 
+env:
+  COLUMNS: 120
 jobs:
   test:
     strategy:
