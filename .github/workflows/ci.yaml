@@ -54,7 +54,7 @@ jobs:
         files: coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
         token: ${{ vars.CODECOV_TOKEN }}
 
-  publish-pypi:
+  publish:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/golden') || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v'))
     needs: test
     runs-on: ubuntu-latest
@@ -88,6 +88,11 @@ jobs:
         poetry config repositories.test-pypi https://test.pypi.org/legacy/
         poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
         poetry publish -r 'pypi' -u '__token__' -p '${{ secrets.PYPI_TOKEN }}'
+
+        echo "Updating docs in GitHub Pages..."
+        git fetch origin gh-pages # Fetch the gh-pages branch so portray commits on top of existing commits.
+        git branch gh-pages origin/gh-pages
+        poetry run portray on_github_pages
 
         echo 'Bumping the patch version, marking as a prerelease, and pushing to the golden branch...'
         new_version="$(poetry version -s prepatch)"
