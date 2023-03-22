@@ -78,7 +78,7 @@ jobs:
     - name: Publish to TestPyPI
       if: github.event_name == 'push' && github.ref == 'refs/heads/golden'
       run: |
-        poetry version "$(echo "$(poetry version -s)+$(git rev-parse HEAD)")"
+        poetry version "$(echo "$(poetry version -s).dev$(date '+%s')")"
         poetry build
         poetry config repositories.test-pypi https://test.pypi.org/legacy/
         poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
