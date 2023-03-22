@@ -4,8 +4,9 @@ on:
   push:
     branches:
     - golden
+  release:
+    types: [published]
   workflow_dispatch:
-
 env:
   COLUMNS: 120
 jobs:
@@ -24,23 +25,11 @@ jobs:
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
+        cache: 'poetry'
         python-version: ${{ matrix.python-version }}
-    - name: Get pip cache dir
-      id: pip-cache
-      run: |
-        echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-
-    - name: pip cache
-      uses: actions/cache@v3
-      with:
-        path: ${{ steps.pip-cache.outputs.dir }}
-        key: pip-v0-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-        restore-keys: |
-          pip-v0-${{ runner.os }}-${{ matrix.python-version }}
-          pip-v0-${{ runner.os }}-
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade "pip==23.0" "poetry==1.4.1"
+        python -m pip install "poetry==1.4.1"
         poetry install --all-extras --no-interaction
     - name: code-checkers
       run: |
@@ -57,3 +46,44 @@ jobs:
         fail_ci_if_error: true
         files: coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
         token: ${{ vars.CODECOV_TOKEN }}
+
+  publish-pypi:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/golden') || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v'))
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        cache: 'poetry'
+        python-version: ${{ matrix.python-version }}
+    - name: Install dependencies and build dists
+      run: |
+        python -m pip install "poetry==1.4.1"
+        poetry install --all-extras --no-interaction
+    - name: Publish to TestPyPI
+      if: github.event_name == 'push' && github.ref == 'refs/heads/golden'
+      run: |
+        poetry version "$(echo "$(poetry version -s)+$(git rev-parse HEAD)")"
+        poetry build
+        poetry config repositories.test-pypi https://test.pypi.org/legacy/
+        poetry publish -r "test-pypi" -u "__token__" -p "${{ secrets.TEST_PYPI_TOKEN }}"
+    - name: Publish to PyPI and bump version
+      if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
+      run: |
+        echo "Setting the version to the GitHub release tag and publishing..."
+        version="$(echo '${{ github.event.release.tag_name }}' | tr -d 'v')"
+        poetry version "$version"
+        poetry build
+        poetry config repositories.test-pypi https://test.pypi.org/legacy/
+        poetry publish -r "test-pypi" -u "__token__" -p "${{ secrets.TEST_PYPI_TOKEN }}"
+        poetry publish -r "pypi" -u "__token__" -p "${{ secrets.PYPI_TOKEN }}"
+
+        echo "Bumping the patch version, marking as a prerelease, and pushing to the golden branch..."
+        new_version="$(poetry version -s prepatch)"
+        git add pyproject.toml
+        git config --global user.name "Artibot"
+        git config --global user.email "artibot@artigraph.dev"
+        git commit -s -m "Bump version to $new_version"
+        git push origin HEAD:golden
