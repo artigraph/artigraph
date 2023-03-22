@@ -18,7 +18,9 @@ jobs:
         python-version: ['3.9', '3.10', '3.11'] # NOTE: Quote to ensure trailing 0s aren't dropped
     runs-on: ${{ matrix.os }}
     env:
+      MYPY_CACHE_DIR: /tmp/mypy-cache
       OS: ${{ matrix.os }}
+      PRE_COMMIT_HOME: /tmp/pre-commit-cache
       PYTHON_VERSION: ${{ matrix.python-version }}
     steps:
     - uses: actions/checkout@v3
@@ -33,11 +35,13 @@ jobs:
       run: |
         poetry install --all-extras --no-interaction
         poetry env info
-    - name: Cache pre-commit hooks
+    - name: Cache mypy and pre-commit hooks
       uses: actions/cache@v3
       with:
-        path: "~/.cache/pre-commit/"
-        key: pre-commit-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}-v0 # NOTE: Bump to manually cache bust
+        path: |
+          "${{ env.MYPY_CACHE_DIR }}"
+          "${{ env.PRE_COMMIT_HOME }}"
+        key: checkers-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml,poetry.lock') }}-v0 # NOTE: Bump to manually cache bust
     - name: code-checkers
       run: |
         # Configure ruff to annotate commits and skip:
