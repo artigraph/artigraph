@@ -33,6 +33,11 @@ jobs:
       run: |
         poetry install --all-extras --no-interaction
         poetry env info
+    - name: Cache pre-commit hooks
+      uses: actions/cache@v3
+      with:
+        path: "~/.cache/pre-commit/"
+        key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}-v0 # NOTE: Bump to manually cache bust
     - name: code-checkers
       run: |
         # Configure ruff to annotate commits and skip:
