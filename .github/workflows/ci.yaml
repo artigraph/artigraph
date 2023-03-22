@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python-version: [3.9, 3.10, 3.11]
+        python-version: ['3.9', '3.10', '3.11'] # NOTE: Quote to ensure trailing 0s aren't dropped
     runs-on: ${{ matrix.os }}
     env:
       OS: ${{ matrix.os }}
@@ -23,7 +23,7 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install poetry
-      run: pipx install "poetry==1.4.1"
+      run: pipx install 'poetry==1.4.1'
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -41,7 +41,7 @@ jobs:
         RUFF_FORMAT=github SKIP=no-commit-to-branch,pytest poetry run pre-commit run -a
     - name: pytest
       run: |
-        poetry run pytest --cov-report="xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml"
+        poetry run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
     - uses: codecov/codecov-action@v3
       with:
         env_vars: OS,PYTHON_VERSION
@@ -56,12 +56,12 @@ jobs:
     steps:
     - uses: actions/checkout@v3
     - name: Install poetry
-      run: pipx install "poetry==1.4.1"
+      run: pipx install 'poetry==1.4.1'
     - name: Set up Python
       uses: actions/setup-python@v4
       with:
         cache: 'poetry'
-        python-version: 3.11
+        python-version: '3.11'
     - name: Install dependencies
       run: |
         poetry install --all-extras --no-interaction
@@ -72,22 +72,22 @@ jobs:
         poetry version "$(echo "$(poetry version -s)+$(git rev-parse HEAD)")"
         poetry build
         poetry config repositories.test-pypi https://test.pypi.org/legacy/
-        poetry publish -r "test-pypi" -u "__token__" -p "${{ secrets.TEST_PYPI_TOKEN }}"
+        poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
     - name: Publish to PyPI and bump version
       if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
       run: |
-        echo "Setting the version to the GitHub release tag and publishing..."
+        echo 'Setting the version to the GitHub release tag and publishing...'
         version="$(echo '${{ github.event.release.tag_name }}' | tr -d 'v')"
         poetry version "$version"
         poetry build
         poetry config repositories.test-pypi https://test.pypi.org/legacy/
-        poetry publish -r "test-pypi" -u "__token__" -p "${{ secrets.TEST_PYPI_TOKEN }}"
-        poetry publish -r "pypi" -u "__token__" -p "${{ secrets.PYPI_TOKEN }}"
+        poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
+        poetry publish -r 'pypi' -u '__token__' -p '${{ secrets.PYPI_TOKEN }}'
 
-        echo "Bumping the patch version, marking as a prerelease, and pushing to the golden branch..."
+        echo 'Bumping the patch version, marking as a prerelease, and pushing to the golden branch...'
         new_version="$(poetry version -s prepatch)"
         git add pyproject.toml
-        git config --global user.name "Artibot"
-        git config --global user.email "artibot@artigraph.dev"
+        git config --global user.name 'Artibot'
+        git config --global user.email 'artibot@artigraph.dev'
         git commit -s -m "Bump version to $new_version"
         git push origin HEAD:golden
