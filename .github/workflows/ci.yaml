@@ -37,7 +37,7 @@ jobs:
       uses: actions/cache@v3
       with:
         path: "~/.cache/pre-commit/"
-        key: pre-commit-${{ hashFiles('.pre-commit-config.yaml') }}-v0 # NOTE: Bump to manually cache bust
+        key: pre-commit-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}-v0 # NOTE: Bump to manually cache bust
     - name: code-checkers
       run: |
         # Configure ruff to annotate commits and skip:
