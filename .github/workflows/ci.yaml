@@ -41,7 +41,7 @@ jobs:
         path: |
           "${{ env.MYPY_CACHE_DIR }}"
           "${{ env.PRE_COMMIT_HOME }}"
-        key: checkers-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml,poetry.lock') }}-v0 # NOTE: Bump to manually cache bust
+        key: checkers-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml', 'poetry.lock') }}-v0 # NOTE: Bump to manually cache bust
     - name: code-checkers
       run: |
         # Configure ruff to annotate commits and skip:
