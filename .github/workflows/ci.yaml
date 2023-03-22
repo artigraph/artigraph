@@ -4,8 +4,9 @@ on:
   push:
     branches:
     - golden
+  release:
+    types: [published]
   workflow_dispatch:
-
 env:
   COLUMNS: 120
 jobs:
@@ -14,34 +15,33 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python-version: [3.9.16, 3.10.9, 3.11.1]
+        python-version: ['3.9', '3.10', '3.11'] # NOTE: Quote to ensure trailing 0s aren't dropped
     runs-on: ${{ matrix.os }}
     env:
+      MYPY_CACHE_DIR: /tmp/mypy-cache
       OS: ${{ matrix.os }}
+      PRE_COMMIT_HOME: /tmp/pre-commit-cache
       PYTHON_VERSION: ${{ matrix.python-version }}
     steps:
     - uses: actions/checkout@v3
+    - name: Install poetry
+      run: pipx install 'poetry==1.4.1'
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
+        cache: 'poetry'
         python-version: ${{ matrix.python-version }}
-    - name: Get pip cache dir
-      id: pip-cache
-      run: |
-        echo "dir=$(pip cache dir)" >> $GITHUB_OUTPUT
-
-    - name: pip cache
-      uses: actions/cache@v3
-      with:
-        path: ${{ steps.pip-cache.outputs.dir }}
-        key: pip-v0-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-        restore-keys: |
-          pip-v0-${{ runner.os }}-${{ matrix.python-version }}
-          pip-v0-${{ runner.os }}-
     - name: Install dependencies
       run: |
-        python -m pip install --upgrade "pip==23.0" "poetry==1.4.1"
         poetry install --all-extras --no-interaction
+        poetry env info
+    - name: Cache mypy and pre-commit hooks
+      uses: actions/cache@v3
+      with:
+        path: |
+          ${{ env.MYPY_CACHE_DIR }}
+          ${{ env.PRE_COMMIT_HOME }}
+        key: checkers-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml', 'poetry.lock') }}-v0 # NOTE: Bump to manually cache bust
     - name: code-checkers
       run: |
         # Configure ruff to annotate commits and skip:
@@ -50,10 +50,58 @@ jobs:
         RUFF_FORMAT=github SKIP=no-commit-to-branch,pytest poetry run pre-commit run -a
     - name: pytest
       run: |
-        poetry run pytest --cov-report="xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml"
-    - uses: codecov/codecov-action@v3.1.1
+        poetry run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
+    - uses: codecov/codecov-action@v3
       with:
         env_vars: OS,PYTHON_VERSION
         fail_ci_if_error: true
         files: coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
         token: ${{ vars.CODECOV_TOKEN }}
+
+  publish:
+    if: (github.event_name == 'push' && github.ref == 'refs/heads/golden') || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v'))
+    needs: test
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - name: Install poetry
+      run: pipx install 'poetry==1.4.1'
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        cache: 'poetry'
+        python-version: '3.11'
+    - name: Install dependencies
+      run: |
+        poetry install --all-extras --no-interaction
+        poetry env info
+    - name: Publish to TestPyPI
+      if: github.event_name == 'push' && github.ref == 'refs/heads/golden'
+      run: |
+        poetry version "$(echo "$(poetry version -s).dev$(date '+%s')")"
+        poetry build
+        poetry config repositories.test-pypi https://test.pypi.org/legacy/
+        poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
+    - name: Publish to PyPI and bump version
+      if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
+      run: |
+        echo 'Setting the version to the GitHub release tag and publishing...'
+        version="$(echo '${{ github.event.release.tag_name }}' | tr -d 'v')"
+        poetry version "$version"
+        poetry build
+        poetry config repositories.test-pypi https://test.pypi.org/legacy/
+        poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
+        poetry publish -r 'pypi' -u '__token__' -p '${{ secrets.PYPI_TOKEN }}'
+
+        echo "Updating docs in GitHub Pages..."
+        git fetch origin gh-pages # Fetch the gh-pages branch so portray commits on top of existing commits.
+        git branch gh-pages origin/gh-pages
+        poetry run portray on_github_pages
+
+        echo 'Bumping the patch version, marking as a prerelease, and pushing to the golden branch...'
+        new_version="$(poetry version -s prepatch)"
+        git add pyproject.toml
+        git config --global user.name 'Artibot'
+        git config --global user.email 'artibot@artigraph.dev'
+        git commit -s -m "Bump version to $new_version"
+        git push origin HEAD:golden

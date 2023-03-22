@@ -42,7 +42,7 @@ ignore_missing_imports = true
 
 [tool.poetry]
 name = "arti"
-version = "0.0.3"
+version = "0.0.3"  # DO NOT MODIFY - Set in CI during publish to match GitHub Release
 description = ""
 license = "Apache-2.0"
 authors = ["Jacob Hayes <jacob.r.hayes@gmail.com>"]
