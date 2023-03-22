@@ -1,6 +1,7 @@
 # artigraph
 
 [![pypi](https://img.shields.io/pypi/v/arti.svg)](https://pypi.python.org/pypi/arti)
+[![changelog](https://img.shields.io/github/v/release/artigraph/artigraph?label=changelog)](https://github.com/artigraph/artigraph/releases)
 [![downloads](https://pepy.tech/badge/arti/month)](https://pepy.tech/project/arti)
 [![versions](https://img.shields.io/pypi/pyversions/arti.svg)](https://github.com/artigraph/artigraph)
 [![license](https://img.shields.io/github/license/artigraph/artigraph.svg)](https://github.com/artigraph/artigraph/blob/golden/LICENSE)
