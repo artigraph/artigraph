@@ -30,7 +30,9 @@ jobs:
         cache: 'poetry'
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
-      run: poetry install --all-extras --no-interaction
+      run: |
+        poetry install --all-extras --no-interaction
+        poetry env info
     - name: code-checkers
       run: |
         # Configure ruff to annotate commits and skip:
@@ -61,7 +63,9 @@ jobs:
         cache: 'poetry'
         python-version: 3.11.2
     - name: Install dependencies
-      run: poetry install --all-extras --no-interaction
+      run: |
+        poetry install --all-extras --no-interaction
+        poetry env info
     - name: Publish to TestPyPI
       if: github.event_name == 'push' && github.ref == 'refs/heads/golden'
       run: |
