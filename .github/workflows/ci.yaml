@@ -84,6 +84,8 @@ jobs:
         poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
     - name: Publish to PyPI and bump version
       if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
+      env:
+        GH_TOKEN: ${{ github.token }}
       run: |
         echo 'Setting the version to the GitHub release tag and publishing...'
         version="$(echo '${{ github.event.release.tag_name }}' | tr -d 'v')"
@@ -98,10 +100,13 @@ jobs:
         git branch gh-pages origin/gh-pages
         poetry run portray on_github_pages
 
-        echo 'Bumping the patch version, marking as a prerelease, and pushing to the golden branch...'
+        echo 'Bumping the patch version, marking as a prerelease, and creating a bump PR...'
         new_version="$(poetry version -s prepatch)"
+        branch="bump-to-$new_version"
+        git switch -c "$branch"
         git add pyproject.toml
         git config --global user.name 'Artibot'
         git config --global user.email 'artibot@artigraph.dev'
-        git commit -s -m "Bump version to $new_version"
-        git push origin HEAD:golden
+        git commit -s -m "Bump to v$new_version"
+        git push -u origin "$branch"
+        gh pr create -B golden -b "Automatic version bump after a release." -t "Bump to v$new_version"
