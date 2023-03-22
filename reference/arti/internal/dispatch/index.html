@@ -1352,7 +1352,9 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">inspect</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">inspect</span>
 
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Callable</span>
 
@@ -1406,7 +1408,7 @@
 
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__missing__</span><span class="p">(</span><span class="n">types</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+    <span class="k">def</span> <span class="nf">lookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">Any</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
 
         <span class="c1"># multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same</span>
 
@@ -1536,10 +1538,10 @@
 <h2 id="functions">Functions</h2>
 <h3 id="multipledispatch">multipledispatch</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">multipledispatch</span><span class="p">(</span>
-    <span class="n">canonical_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">canonical_name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">discovery_func</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[],</span> <span class="kc">None</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[</span><span class="o">...</span><span class="p">,</span> <span class="o">~</span><span class="n">RETURN</span><span class="p">]],</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">dispatch</span><span class="o">.</span><span class="n">_multipledispatch</span><span class="p">[</span><span class="o">~</span><span class="n">RETURN</span><span class="p">]]</span>
+    <span class="n">discovery_func</span><span class="p">:</span> <span class="s1">&#39;Optional[Callable[[], None]]&#39;</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable[[Callable[..., RETURN]], _multipledispatch[RETURN]]&#39;</span>
 </code></pre></div>
 
 <details class="example">

@@ -3360,6 +3360,8 @@
 
     <span class="n">system</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">schema</span>
 
+    <span class="n">priority</span> <span class="o">=</span> <span class="n">ListTypeAdapter</span><span class="o">.</span><span class="n">priority</span> <span class="o">+</span> <span class="mi">1</span>
+
     <span class="nd">@classmethod</span>
 
     <span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -3488,7 +3490,7 @@
 
             <span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
 
 <span class="nd">@pyarrow_type_system</span><span class="o">.</span><span class="n">register_adapter</span>
 
@@ -3584,9 +3586,9 @@
 
     <span class="n">precision_to_unit</span> <span class="o">=</span> <span class="p">{</span>
 
-        <span class="s2">&quot;second&quot;</span><span class="p">:</span> <span class="s2">&quot;us&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;microsecond&quot;</span><span class="p">:</span> <span class="s2">&quot;us&quot;</span><span class="p">,</span>
 
-        <span class="s2">&quot;millisecond&quot;</span><span class="p">:</span> <span class="s2">&quot;ns&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;nanosecond&quot;</span><span class="p">:</span> <span class="s2">&quot;ns&quot;</span><span class="p">,</span>
 
     <span class="p">}</span>
 
@@ -3666,10 +3668,10 @@
 <h4 id="static-methods">Static methods</h4>
 <h4 id="matches_artigraph">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3833,10 +3835,10 @@
 <h4 id="static-methods_1">Static methods</h4>
 <h4 id="matches_artigraph_1">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3966,10 +3968,10 @@
 <h4 id="static-methods_2">Static methods</h4>
 <h4 id="matches_artigraph_2">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -4054,7 +4056,7 @@
 
 <span class="w">            </span><span class="p">)</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="k">system</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="k">system</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -4174,10 +4176,10 @@
 <h4 id="static-methods_3">Static methods</h4>
 <h4 id="matches_artigraph_3">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -4324,10 +4326,10 @@
 <h4 id="static-methods_4">Static methods</h4>
 <h4 id="matches_artigraph_4">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -4528,10 +4530,10 @@
 <h4 id="static-methods_5">Static methods</h4>
 <h4 id="matches_artigraph_5">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -4686,6 +4688,8 @@
 <span class="w">    </span><span class="n">artigraph</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">types</span><span class="p">.</span><span class="n">Collection</span>
 
 <span class="w">    </span><span class="k">system</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">pa</span><span class="p">.</span><span class="k">schema</span>
+
+<span class="w">    </span><span class="n">priority</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ListTypeAdapter</span><span class="p">.</span><span class="n">priority</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
@@ -5060,10 +5064,10 @@
 <h4 id="static-methods_7">Static methods</h4>
 <h4 id="matches_artigraph_7">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -5356,7 +5360,7 @@
 
 <span class="w">            </span><span class="p">)</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="k">system</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="k">system</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -5419,9 +5423,9 @@
 
 <span class="w">    </span><span class="n">precision_to_unit</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{</span>
 
-<span class="w">        </span><span class="ss">&quot;second&quot;</span><span class="err">:</span><span class="w"> </span><span class="ss">&quot;us&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">&quot;microsecond&quot;</span><span class="err">:</span><span class="w"> </span><span class="ss">&quot;us&quot;</span><span class="p">,</span>
 
-<span class="w">        </span><span class="ss">&quot;millisecond&quot;</span><span class="err">:</span><span class="w"> </span><span class="ss">&quot;ns&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="ss">&quot;nanosecond&quot;</span><span class="err">:</span><span class="w"> </span><span class="ss">&quot;ns&quot;</span><span class="p">,</span>
 
 <span class="w">    </span><span class="err">}</span>
 
@@ -5554,7 +5558,7 @@
 
 <span class="w">            </span><span class="p">)</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="k">system</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="n">unit</span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="k">system</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -5673,10 +5677,10 @@
 <h4 id="static-methods_10">Static methods</h4>
 <h4 id="matches_artigraph_10">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">

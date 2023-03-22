@@ -1684,7 +1684,9 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">__path__</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;pkgutil&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">extend_path</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="n">__path__</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;pkgutil&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">extend_path</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">operator</span>
 
@@ -1704,9 +1706,9 @@
 
     <span class="n">op</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span>
 
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Callable[[Fingerprint, Union[int, Fingerprint]], Fingerprint]&quot;</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Fingerprint</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Fingerprint</span><span class="p">]],</span> <span class="n">Fingerprint</span><span class="p">]:</span>
 
-    <span class="k">def</span> <span class="nf">_fingerprint_binop</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s2">&quot;Union[int, Fingerprint]&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_fingerprint_binop</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">Fingerprint</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Fingerprint</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
 
@@ -1750,13 +1752,13 @@
 
     <span class="n">key</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">int64</span><span class="p">]</span>
 
-    <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">others</span><span class="p">:</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">combine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">others</span><span class="p">:</span> <span class="n">Fingerprint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="o">.</span><span class="n">xor</span><span class="p">,</span> <span class="n">others</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">empty</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a Fingerprint that, when combined, will return Fingerprint.empty()&quot;&quot;&quot;</span>
 
@@ -1764,19 +1766,19 @@
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">from_int</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_int</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_int64</span><span class="p">(</span><span class="n">int64</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">from_int64</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">int64</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_int64</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">int64</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Fingerprint an arbitrary string.</span>
 
@@ -1788,13 +1790,13 @@
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">from_uint64</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">uint64</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">from_uint64</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">uint64</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_int64</span><span class="p">(</span><span class="n">int64</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">identity</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return a Fingerprint that, when combined, will return the other Fingerprint.&quot;&quot;&quot;</span>
 
@@ -1872,13 +1874,13 @@
 
 <span class="w">    </span><span class="k">key</span><span class="err">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">int64</span><span class="o">]</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">combine</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="nl">others</span><span class="p">:</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">combine</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="nl">others</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="p">.</span><span class="n">xor</span><span class="p">,</span><span class="w"> </span><span class="n">others</span><span class="p">,</span><span class="w"> </span><span class="n">self</span><span class="p">)</span>
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">empty</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">empty</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="ss">&quot;&quot;&quot;Return a Fingerprint that, when combined, will return Fingerprint.empty()&quot;&quot;&quot;</span>
 
@@ -1886,19 +1888,19 @@
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_int</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="nc">int</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_int</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="nc">int</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">from_int64</span><span class="p">(</span><span class="n">int64</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_int64</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">int64</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_int64</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">int64</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">(</span><span class="k">key</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_string</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_string</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="ss">&quot;&quot;&quot;Fingerprint an arbitrary string.</span>
 
@@ -1910,13 +1912,13 @@
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_uint64</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">uint64</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_uint64</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">uint64</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">from_int64</span><span class="p">(</span><span class="n">int64</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="k">identity</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="k">identity</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="ss">&quot;&quot;&quot;Return a Fingerprint that, when combined, will return the other Fingerprint.&quot;&quot;&quot;</span>
 
@@ -1991,7 +1993,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">empty</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">empty</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="ss">&quot;&quot;&quot;Return a Fingerprint that, when combined, will return Fingerprint.empty()&quot;&quot;&quot;</span>
 
@@ -2001,7 +2003,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="from_int">from_int</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_int</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;int&#39;</span><span class="p">,</span>
     <span class="o">/</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Fingerprint&#39;</span>
 </code></pre></div>
@@ -2010,7 +2012,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_int</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="nc">int</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_int</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="nc">int</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">from_int64</span><span class="p">(</span><span class="n">int64</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 </code></pre></div>
@@ -2018,7 +2020,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="from_int64">from_int64</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_int64</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">int64</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;int64&#39;</span><span class="p">,</span>
     <span class="o">/</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Fingerprint&#39;</span>
 </code></pre></div>
@@ -2027,7 +2029,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_int64</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">int64</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_int64</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">int64</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">(</span><span class="k">key</span><span class="o">=</span><span class="n">x</span><span class="p">)</span>
 </code></pre></div>
@@ -2041,7 +2043,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="from_string">from_string</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_string</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
     <span class="o">/</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Fingerprint&#39;</span>
 </code></pre></div>
@@ -2052,7 +2054,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_string</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_string</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="ss">&quot;&quot;&quot;Fingerprint an arbitrary string.</span>
 
@@ -2066,7 +2068,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="from_uint64">from_uint64</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_uint64</span><span class="p">(</span>
-    <span class="n">x</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">uint64</span><span class="p">,</span>
+    <span class="n">x</span><span class="p">:</span> <span class="s1">&#39;uint64&#39;</span><span class="p">,</span>
     <span class="o">/</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Fingerprint&#39;</span>
 </code></pre></div>
@@ -2075,7 +2077,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_uint64</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">uint64</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_uint64</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">x</span><span class="p">:</span><span class="w"> </span><span class="n">uint64</span><span class="p">,</span><span class="w"> </span><span class="o">/</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">from_int64</span><span class="p">(</span><span class="n">int64</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
 </code></pre></div>
@@ -2092,7 +2094,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="k">identity</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;Fingerprint&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="k">identity</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="ss">&quot;&quot;&quot;Return a Fingerprint that, when combined, will return the other Fingerprint.&quot;&quot;&quot;</span>
 
@@ -2177,7 +2179,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="nf">combine</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">others</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;Fingerprint&quot;</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">&quot;Fingerprint&quot;</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="nf">combine</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="n">others</span><span class="o">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Fingerprint</span><span class="o">:</span>
 
 <span class="w">        </span><span class="kr">return</span><span class="w"> </span><span class="n">reduce</span><span class="p">(</span><span class="n">operator</span><span class="p">.</span><span class="n">xor</span><span class="p">,</span><span class="w"> </span><span class="n">others</span><span class="p">,</span><span class="w"> </span><span class="kr">self</span><span class="p">)</span>
 </code></pre></div>
@@ -2185,12 +2187,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -2254,7 +2256,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

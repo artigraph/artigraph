@@ -829,13 +829,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#validate_type" class="md-nav__link">
-    validate_type
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#instance-variables" class="md-nav__link">
     Instance variables
   </a>
@@ -1543,13 +1536,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#validate_type" class="md-nav__link">
-    validate_type
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#instance-variables" class="md-nav__link">
     Instance variables
   </a>
@@ -1616,7 +1602,9 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">arti.formats</span> <span class="kn">import</span> <span class="n">Format</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">arti.formats</span> <span class="kn">import</span> <span class="n">Format</span>
 
 <span class="kn">from</span> <span class="nn">arti.types.python</span> <span class="kn">import</span> <span class="n">python_type_system</span>
 
@@ -1691,7 +1679,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code>    <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Format&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Format</span><span class="p">:</span>
 
         <span class="kn">from</span> <span class="nn">arti.formats.json</span> <span class="kn">import</span> <span class="n">JSON</span>
 
@@ -1756,28 +1744,6 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Model&#39;</span>
 </code></pre></div>
 
-<h4 id="validate_type">validate_type</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_type</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
-</code></pre></div>
-
-<details class="example">
-<summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@validator</span><span class="p">(</span><span class="ss">&quot;type&quot;</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nv">@classmethod</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">validate_type</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Type</span><span class="p">:</span>
-
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="n">Ensure</span><span class="w"> </span><span class="n">our</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="k">system</span><span class="w"> </span><span class="n">can</span><span class="w"> </span><span class="n">handle</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">provided</span><span class="w"> </span><span class="n">type</span><span class="p">.</span>
-
-<span class="w">        </span><span class="n">cls</span><span class="p">.</span><span class="n">type_system</span><span class="p">.</span><span class="n">to_system</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span><span class="w"> </span><span class="n">hints</span><span class="o">=</span><span class="err">{}</span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type_</span>
-</code></pre></div>
-
-</details>
 <h4 id="instance-variables">Instance variables</h4>
 <div class="codehilite"><pre><span></span><code><span class="n">fingerprint</span>
 </code></pre></div>
@@ -1785,12 +1751,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="methods">Methods</h4>
 <h4 id="copy">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -1854,7 +1820,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

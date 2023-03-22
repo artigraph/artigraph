@@ -4218,9 +4218,9 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">NoneType</span>
+<span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">date</span><span class="p">,</span> <span class="n">datetime</span>
 
 <span class="kn">from</span> <span class="nn">arti.types.python</span> <span class="kn">import</span> <span class="n">python_type_system</span>
 
@@ -4258,7 +4258,7 @@
 
 <span class="k">class</span> <span class="nc">Null</span><span class="p">(</span><span class="n">PythonBuiltin</span><span class="p">):</span>
 
-    <span class="n">python_type</span> <span class="o">=</span> <span class="n">NoneType</span>
+    <span class="n">python_type</span> <span class="o">=</span> <span class="kc">None</span>
 
 <span class="k">class</span> <span class="nc">Str</span><span class="p">(</span><span class="n">PythonBuiltin</span><span class="p">):</span>
 
@@ -4317,9 +4317,9 @@
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -4327,7 +4327,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -4347,15 +4347,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -4458,8 +4458,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -4489,8 +4489,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -4537,12 +4537,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -4606,7 +4606,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -4736,9 +4736,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation_1">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -4746,7 +4746,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -4766,15 +4766,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for_1">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -4877,8 +4877,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility_1">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -4908,8 +4908,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility_1">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -4956,12 +4956,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_1">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -5025,7 +5025,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -5155,9 +5155,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation_2">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -5165,7 +5165,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -5185,15 +5185,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for_2">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -5296,8 +5296,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility_2">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -5327,8 +5327,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility_2">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -5375,12 +5375,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_2">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -5444,7 +5444,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -5574,9 +5574,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation_3">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -5584,7 +5584,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -5604,15 +5604,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for_3">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -5715,8 +5715,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility_3">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -5746,8 +5746,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility_3">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -5794,12 +5794,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_3">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -5863,7 +5863,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -5993,9 +5993,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation_4">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -6003,7 +6003,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -6023,15 +6023,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for_4">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -6134,8 +6134,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility_4">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -6165,8 +6165,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility_4">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -6213,12 +6213,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_4">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -6282,7 +6282,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -6412,9 +6412,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation_5">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -6422,7 +6422,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -6442,15 +6442,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for_5">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -6553,8 +6553,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility_5">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -6584,8 +6584,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility_5">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -6632,12 +6632,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_5">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -6701,7 +6701,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -6792,7 +6792,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="n">Null</span>(<span class="n">PythonBuiltin</span>):
 
-    <span class="n">python_type</span> = <span class="n">NoneType</span>
+    <span class="n">python_type</span> = <span class="n">None</span>
 </code></pre></div>
 
 </details>
@@ -6831,9 +6831,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation_6">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -6841,7 +6841,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -6861,15 +6861,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for_6">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -6972,8 +6972,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility_6">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -7003,8 +7003,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility_6">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -7051,12 +7051,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_6">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -7120,7 +7120,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -7259,9 +7259,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation_7">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -7269,7 +7269,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -7289,15 +7289,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for_7">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -7400,8 +7400,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility_7">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -7431,8 +7431,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility_7">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -7479,12 +7479,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_7">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -7548,7 +7548,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -7678,9 +7678,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all passed values</p>
 <h4 id="from_annotation_8">from_annotation</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">from_annotation</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">mode</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;READ&#39;</span><span class="p">,</span> <span class="s1">&#39;WRITE&#39;</span><span class="p">,</span> <span class="s1">&#39;READWRITE&#39;</span><span class="p">]</span>
+    <span class="n">mode</span><span class="p">:</span> <span class="s1">&#39;MODE&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;View&#39;</span>
 </code></pre></div>
 
@@ -7688,7 +7688,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;View&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">from_annotation</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="nl">mode</span><span class="p">:</span><span class="w"> </span><span class="n">MODE</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">View</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="p">.</span><span class="n">get_class_for</span><span class="p">(</span><span class="n">annotation</span><span class="p">)</span>
 
@@ -7708,15 +7708,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <h4 id="get_class_for_8">get_class_for</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_class_for</span><span class="p">(</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">type</span><span class="p">[</span><span class="s1">&#39;View&#39;</span><span class="p">]</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;builtins.type[View]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@classmethod</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Use</span><span class="w"> </span><span class="n">typing</span><span class="p">.</span><span class="n">Self</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="k">return</span><span class="p">,</span><span class="w"> </span><span class="n">pending</span><span class="w"> </span><span class="n">mypy</span><span class="w"> </span><span class="n">support</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">&quot;View&quot;</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_class_for</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">annotation</span><span class="p">:</span><span class="w"> </span><span class="ow">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">builtins</span><span class="p">.</span><span class="n">type</span><span class="o">[</span><span class="n">View</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">view_class</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">get_item_from_annotated</span><span class="p">(</span><span class="n">annotation</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">is_subclass</span><span class="o">=</span><span class="k">True</span><span class="p">)</span>
 
@@ -7819,8 +7819,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_annotation_compatibility_8">check_annotation_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_annotation_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">annotation</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">annotation</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -7850,8 +7850,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="check_artifact_compatibility_8">check_artifact_compatibility</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">check_artifact_compatibility</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -7898,12 +7898,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_8">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -7967,7 +7967,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 

@@ -1131,20 +1131,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#validate_format" class="md-nav__link">
-    validate_format
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#validate_type" class="md-nav__link">
-    validate_type
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#instance-variables" class="md-nav__link">
     Instance variables
   </a>
@@ -1194,8 +1180,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#resolve_templates" class="md-nav__link">
-    resolve_templates
+  <a href="#resolve" class="md-nav__link">
+    resolve
   </a>
   
 </li>
@@ -1305,13 +1291,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#validate_keys" class="md-nav__link">
-    validate_keys
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#instance-variables_1" class="md-nav__link">
     Instance variables
   </a>
@@ -1356,47 +1335,6 @@
           <li class="md-nav__item">
   <a href="#with_content_fingerprint" class="md-nav__link">
     with_content_fingerprint
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#storagepartitions" class="md-nav__link">
-    StoragePartitions
-  </a>
-  
-    <nav class="md-nav" aria-label="StoragePartitions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ancestors-in-mro_2" class="md-nav__link">
-    Ancestors (in MRO)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#methods_2" class="md-nav__link">
-    Methods
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#count" class="md-nav__link">
-    count
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#index" class="md-nav__link">
-    index
   </a>
   
 </li>
@@ -1814,20 +1752,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#validate_format" class="md-nav__link">
-    validate_format
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#validate_type" class="md-nav__link">
-    validate_type
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#instance-variables" class="md-nav__link">
     Instance variables
   </a>
@@ -1877,8 +1801,8 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#resolve_templates" class="md-nav__link">
-    resolve_templates
+  <a href="#resolve" class="md-nav__link">
+    resolve
   </a>
   
 </li>
@@ -1988,13 +1912,6 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#validate_keys" class="md-nav__link">
-    validate_keys
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
   <a href="#instance-variables_1" class="md-nav__link">
     Instance variables
   </a>
@@ -2048,47 +1965,6 @@
   
 </li>
         
-          <li class="md-nav__item">
-  <a href="#storagepartitions" class="md-nav__link">
-    StoragePartitions
-  </a>
-  
-    <nav class="md-nav" aria-label="StoragePartitions">
-      <ul class="md-nav__list">
-        
-          <li class="md-nav__item">
-  <a href="#ancestors-in-mro_2" class="md-nav__link">
-    Ancestors (in MRO)
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#methods_2" class="md-nav__link">
-    Methods
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#count" class="md-nav__link">
-    count
-  </a>
-  
-</li>
-        
-          <li class="md-nav__item">
-  <a href="#index" class="md-nav__link">
-    index
-  </a>
-  
-</li>
-        
-      </ul>
-    </nav>
-  
-</li>
-        
       </ul>
     </nav>
   
@@ -2116,15 +1992,17 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">__path__</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;pkgutil&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">extend_path</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="n">__path__</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;pkgutil&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">extend_path</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
 
 <span class="kn">import</span> <span class="nn">abc</span>
 
 <span class="kn">import</span> <span class="nn">os</span>
 
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">Field</span><span class="p">,</span> <span class="n">validator</span>
+<span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">PrivateAttr</span>
 
 <span class="kn">from</span> <span class="nn">arti.fingerprints</span> <span class="kn">import</span> <span class="n">Fingerprint</span>
 
@@ -2132,7 +2010,7 @@
 
 <span class="kn">from</span> <span class="nn">arti.internal.models</span> <span class="kn">import</span> <span class="n">Model</span>
 
-<span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">get_class_type_vars</span><span class="p">,</span> <span class="n">lenient_issubclass</span>
+<span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">Self</span><span class="p">,</span> <span class="n">get_class_type_vars</span><span class="p">,</span> <span class="n">lenient_issubclass</span>
 
 <span class="kn">from</span> <span class="nn">arti.internal.utils</span> <span class="kn">import</span> <span class="n">frozendict</span>
 
@@ -2142,37 +2020,11 @@
 
 <span class="kn">from</span> <span class="nn">arti.types</span> <span class="kn">import</span> <span class="n">Type</span>
 
-<span class="k">class</span> <span class="nc">_StorageMixin</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
 
-    <span class="nd">@property</span>
+    <span class="kn">from</span> <span class="nn">arti.graphs</span> <span class="kn">import</span> <span class="n">Graph</span>
 
-    <span class="k">def</span> <span class="nf">key_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompositeKeyTypes</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># type: ignore[attr-defined]</span>
-
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="si">}</span><span class="s2">.type is not set&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">PartitionKey</span><span class="o">.</span><span class="n">types_from</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">type</span><span class="p">)</span>  <span class="c1"># type: ignore[attr-defined]</span>
-
-    <span class="nd">@classmethod</span>
-
-    <span class="k">def</span> <span class="nf">_check_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key_types</span><span class="p">:</span> <span class="n">CompositeKeyTypes</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">CompositeKey</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-
-        <span class="c1"># TODO: Confirm the key names and types align</span>
-
-        <span class="k">if</span> <span class="n">key_types</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
-
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected partition keys </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">key_types</span><span class="p">)</span><span class="si">}</span><span class="s2"> but none were passed&quot;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">keys</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">key_types</span><span class="p">:</span>
-
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected no partition keys but got: </span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-<span class="k">class</span> <span class="nc">StoragePartition</span><span class="p">(</span><span class="n">_StorageMixin</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
-
-    <span class="nb">type</span><span class="p">:</span> <span class="n">Type</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="nb">format</span><span class="p">:</span> <span class="n">Format</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">StoragePartition</span><span class="p">(</span><span class="n">Model</span><span class="p">):</span>
 
     <span class="n">keys</span><span class="p">:</span> <span class="n">CompositeKey</span> <span class="o">=</span> <span class="n">CompositeKey</span><span class="p">()</span>
 
@@ -2180,23 +2032,7 @@
 
     <span class="n">content_fingerprint</span><span class="p">:</span> <span class="n">Fingerprint</span> <span class="o">=</span> <span class="n">Fingerprint</span><span class="o">.</span><span class="n">empty</span><span class="p">()</span>
 
-    <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;keys&quot;</span><span class="p">)</span>
-
-    <span class="nd">@classmethod</span>
-
-    <span class="k">def</span> <span class="nf">validate_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">CompositeKey</span><span class="p">,</span> <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">CompositeKey</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="s2">&quot;type&quot;</span> <span class="ow">in</span> <span class="n">values</span><span class="p">:</span>
-
-            <span class="bp">cls</span><span class="o">.</span><span class="n">_check_keys</span><span class="p">(</span><span class="n">PartitionKey</span><span class="o">.</span><span class="n">types_from</span><span class="p">(</span><span class="n">values</span><span class="p">[</span><span class="s2">&quot;type&quot;</span><span class="p">]),</span> <span class="n">keys</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">keys</span>
-
-    <span class="k">def</span> <span class="nf">with_content_fingerprint</span><span class="p">(</span>
-
-        <span class="bp">self</span><span class="p">:</span> <span class="s2">&quot;_StoragePartition&quot;</span><span class="p">,</span> <span class="n">keep_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_StoragePartition&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">with_content_fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">keep_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 
         <span class="k">if</span> <span class="n">keep_existing</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">content_fingerprint</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
 
@@ -2214,11 +2050,13 @@
 
         <span class="p">)</span>
 
-<span class="n">_StoragePartition</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_StoragePartition&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">StoragePartition</span><span class="p">)</span>
+<span class="n">StoragePartitionVar</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;StoragePartitionVar&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">StoragePartition</span><span class="p">)</span>
+
+<span class="n">StoragePartitionVar_co</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;StoragePartitionVar_co&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="n">covariant</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">StoragePartitions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
 
-<span class="k">class</span> <span class="nc">Storage</span><span class="p">(</span><span class="n">_StorageMixin</span><span class="p">,</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">_StoragePartition</span><span class="p">]):</span>
+<span class="k">class</span> <span class="nc">Storage</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">Generic</span><span class="p">[</span><span class="n">StoragePartitionVar_co</span><span class="p">]):</span>
 
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Storage is a data reference identifying 1 or more partitions of data.</span>
 
@@ -2231,6 +2069,8 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="n">_abstract_</span> <span class="o">=</span> <span class="kc">True</span>
+
+    <span class="n">storage_partition_type</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">StoragePartitionVar_co</span><span class="p">]]</span>  <span class="c1"># type: ignore[misc]</span>
 
     <span class="c1"># These separators are used in the default resolve_* helpers to format metadata into</span>
 
@@ -2246,29 +2086,7 @@
 
     <span class="n">segment_sep</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">sep</span>
 
-    <span class="n">storage_partition_type</span><span class="p">:</span> <span class="n">ClassVar</span><span class="p">[</span><span class="nb">type</span><span class="p">[</span><span class="n">_StoragePartition</span><span class="p">]]</span>  <span class="c1"># type: ignore[misc]</span>
-
-    <span class="nb">type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Type</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="nb">format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Format</span><span class="p">]</span> <span class="o">=</span> <span class="n">Field</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="nb">repr</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-
-    <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span>
-
-    <span class="nd">@classmethod</span>
-
-    <span class="k">def</span> <span class="nf">validate_type</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">:</span>
-
-        <span class="c1"># TODO: Check support for the types and partitioning on the specified field(s).</span>
-
-        <span class="k">return</span> <span class="n">type_</span>
-
-    <span class="nd">@validator</span><span class="p">(</span><span class="s2">&quot;format&quot;</span><span class="p">)</span>
-
-    <span class="nd">@classmethod</span>
-
-    <span class="k">def</span> <span class="nf">validate_format</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Format</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Format</span><span class="p">:</span>
-
-        <span class="k">return</span> <span class="nb">format</span>
+    <span class="n">_key_types</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">CompositeKeyTypes</span><span class="p">]</span> <span class="o">=</span> <span class="n">PrivateAttr</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
 
@@ -2310,6 +2128,92 @@
 
             <span class="p">)</span>
 
+    <span class="nd">@classmethod</span>
+
+    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Storage</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">]:</span>
+
+        <span class="kn">from</span> <span class="nn">arti.storage.literal</span> <span class="kn">import</span> <span class="n">StringLiteral</span>
+
+        <span class="k">return</span> <span class="n">StringLiteral</span><span class="p">()</span>  <span class="c1"># TODO: Support some sort of configurable defaults.</span>
+
+    <span class="k">def</span> <span class="nf">_visit_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+
+        <span class="c1"># TODO: Check support for the types and partitioning on the specified field(s).</span>
+
+        <span class="n">copy</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="n">copy</span><span class="o">.</span><span class="n">_key_types</span> <span class="o">=</span> <span class="n">PartitionKey</span><span class="o">.</span><span class="n">types_from</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">copy</span><span class="o">.</span><span class="n">key_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="n">key_component_specs</span> <span class="o">=</span> <span class="p">{</span>
+
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">partition_name_component_sep</span><span class="si">}{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">component_spec</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
+
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pk</span> <span class="ow">in</span> <span class="n">copy</span><span class="o">.</span><span class="n">key_types</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+            <span class="k">for</span> <span class="n">component_name</span><span class="p">,</span> <span class="n">component_spec</span> <span class="ow">in</span> <span class="n">pk</span><span class="o">.</span><span class="n">default_key_components</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+        <span class="p">}</span>
+
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span>
+
+            <span class="n">partition_key_spec</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_value_sep</span><span class="si">}{</span><span class="n">spec</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">key_component_specs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+            <span class="p">)</span>
+
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_visit_format</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">format_</span><span class="p">:</span> <span class="n">Format</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">extension</span><span class="o">=</span><span class="n">format_</span><span class="o">.</span><span class="n">extension</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_visit_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span>
+
+            <span class="n">graph_name</span><span class="o">=</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+
+            <span class="n">path_tags</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tag</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_value_sep</span><span class="si">}{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">graph</span><span class="o">.</span><span class="n">path_tags</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+            <span class="p">),</span>
+
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_visit_input_fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_fingerprint</span><span class="p">:</span> <span class="n">Fingerprint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+
+        <span class="n">input_fingerprint_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_fingerprint</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">input_fingerprint</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
+
+            <span class="n">input_fingerprint_key</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">input_fingerprint</span><span class="o">=</span><span class="n">input_fingerprint_key</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_visit_names</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">names</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">names</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">names</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">segment_sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">))</span>
+
+    <span class="nd">@property</span>
+
+    <span class="k">def</span> <span class="nf">includes_input_fingerprint_template</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{input_fingerprint}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_fields</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+
+    <span class="k">def</span> <span class="nf">key_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompositeKeyTypes</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_types</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;`key_types` have not been set yet.&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_key_types</span>
+
     <span class="nd">@property</span>
 
     <span class="k">def</span> <span class="nf">_format_fields</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
@@ -2330,11 +2234,17 @@
 
     <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AnyStorage&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">_check_keys</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key_types</span><span class="p">:</span> <span class="n">CompositeKeyTypes</span><span class="p">,</span> <span class="n">keys</span><span class="p">:</span> <span class="n">CompositeKey</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="kn">from</span> <span class="nn">arti.storage.literal</span> <span class="kn">import</span> <span class="n">StringLiteral</span>
+        <span class="c1"># TODO: Confirm the key names and types align</span>
 
-        <span class="k">return</span> <span class="n">StringLiteral</span><span class="p">()</span>  <span class="c1"># TODO: Support some sort of configurable defaults.</span>
+        <span class="k">if</span> <span class="n">key_types</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">keys</span><span class="p">:</span>
+
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected partition keys </span><span class="si">{</span><span class="nb">tuple</span><span class="p">(</span><span class="n">key_types</span><span class="p">)</span><span class="si">}</span><span class="s2"> but none were passed&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">keys</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">key_types</span><span class="p">:</span>
+
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Expected no partition keys but got: </span><span class="si">{</span><span class="n">keys</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="nd">@abc</span><span class="o">.</span><span class="n">abstractmethod</span>
 
@@ -2342,7 +2252,7 @@
 
         <span class="bp">self</span><span class="p">,</span> <span class="n">input_fingerprints</span><span class="p">:</span> <span class="n">InputFingerprints</span> <span class="o">=</span> <span class="n">InputFingerprints</span><span class="p">()</span>
 
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">_StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">StoragePartitionVar_co</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
 
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
 
@@ -2356,7 +2266,7 @@
 
         <span class="n">with_content_fingerprint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_StoragePartition</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StoragePartitionVar_co</span><span class="p">:</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_check_keys</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key_types</span><span class="p">,</span> <span class="n">keys</span><span class="p">)</span>
 
@@ -2406,12 +2316,6 @@
 
         <span class="k">return</span> <span class="n">partition</span>
 
-    <span class="nd">@property</span>
-
-    <span class="k">def</span> <span class="nf">includes_input_fingerprint_template</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-
-        <span class="k">return</span> <span class="nb">any</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{input_fingerprint}</span><span class="s2">&quot;</span> <span class="ow">in</span> <span class="n">val</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_fields</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-
     <span class="k">def</span> <span class="nf">_resolve_field</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">spec</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">placeholder_values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 
         <span class="k">for</span> <span class="n">placeholder</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">placeholder_values</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -2436,71 +2340,7 @@
 
         <span class="k">return</span> <span class="n">partial_format</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="o">**</span><span class="n">placeholder_values</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">resolve_templates</span><span class="p">(</span>
-
-        <span class="bp">self</span><span class="p">:</span> <span class="s2">&quot;_Storage&quot;</span><span class="p">,</span>
-
-        <span class="n">graph_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-
-        <span class="n">input_fingerprint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-
-        <span class="n">names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-
-        <span class="n">path_tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;_Storage&quot;</span><span class="p">:</span>
-
-        <span class="n">values</span> <span class="o">=</span> <span class="p">{}</span>
-
-        <span class="k">if</span> <span class="n">graph_name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">values</span><span class="p">[</span><span class="s2">&quot;graph_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_name</span>
-
-        <span class="k">if</span> <span class="n">input_fingerprint</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">input_fingerprint_key</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">input_fingerprint</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">input_fingerprint</span><span class="o">.</span><span class="n">is_empty</span><span class="p">:</span>
-
-                <span class="n">input_fingerprint_key</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
-
-            <span class="n">values</span><span class="p">[</span><span class="s2">&quot;input_fingerprint&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">input_fingerprint_key</span>
-
-        <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">values</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="k">if</span> <span class="n">names</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
-
-            <span class="n">values</span><span class="p">[</span><span class="s2">&quot;names&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">segment_sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">path_tags</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">values</span><span class="p">[</span><span class="s2">&quot;path_tags&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">segment_sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">tag</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_value_sep</span><span class="si">}{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">tag</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">path_tags</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-
-            <span class="p">)</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">values</span><span class="p">[</span><span class="s2">&quot;extension&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format</span><span class="o">.</span><span class="n">extension</span>
-
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">type</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
-            <span class="n">key_component_specs</span> <span class="o">=</span> <span class="p">{</span>
-
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">partition_name_component_sep</span><span class="si">}{</span><span class="n">component_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">{{</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.</span><span class="si">{</span><span class="n">component_spec</span><span class="si">}</span><span class="se">}}</span><span class="s2">&quot;</span>
-
-                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">pk</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">key_types</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-
-                <span class="k">for</span> <span class="n">component_name</span><span class="p">,</span> <span class="n">component_spec</span> <span class="ow">in</span> <span class="n">pk</span><span class="o">.</span><span class="n">default_key_components</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-
-            <span class="p">}</span>
-
-            <span class="n">values</span><span class="p">[</span><span class="s2">&quot;partition_key_spec&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">segment_sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
-
-                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}{</span><span class="bp">self</span><span class="o">.</span><span class="n">key_value_sep</span><span class="si">}{</span><span class="n">spec</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">spec</span> <span class="ow">in</span> <span class="n">key_component_specs</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-
-            <span class="p">)</span>
+    <span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">values</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span>
 
@@ -2519,16 +2359,6 @@
             <span class="p">}</span>
 
         <span class="p">)</span>
-
-<span class="n">AnyStorage</span> <span class="o">=</span> <span class="n">Storage</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
-
-<span class="c1"># mypy doesn&#39;t (yet?) support nested TypeVars[1], so mark internal as Any.</span>
-
-<span class="c1">#</span>
-
-<span class="c1"># 1: https://github.com/python/mypy/issues/2756</span>
-
-<span class="n">_Storage</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s2">&quot;_Storage&quot;</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="n">AnyStorage</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -2538,7 +2368,16 @@
 <li><a href="local/">arti.storage.local</a></li>
 </ul>
 <h2 id="variables">Variables</h2>
-<div class="codehilite"><pre><span></span><code><span class="n">AnyStorage</span>
+<div class="codehilite"><pre><span></span><code><span class="n">StoragePartitionVar</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">StoragePartitionVar_co</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">StoragePartitions</span>
+</code></pre></div>
+
+<div class="codehilite"><pre><span></span><code><span class="n">TYPE_CHECKING</span>
 </code></pre></div>
 
 <h2 id="classes">Classes</h2>
@@ -2551,7 +2390,7 @@
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="n">Storage</span><span class="p">(</span><span class="n">_StorageMixin</span><span class="p">,</span><span class="w"> </span><span class="n">Model</span><span class="p">,</span><span class="w"> </span><span class="n">Generic</span><span class="o">[</span><span class="n">_StoragePartition</span><span class="o">]</span><span class="p">)</span><span class="err">:</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="n">Storage</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span><span class="w"> </span><span class="n">Generic</span><span class="o">[</span><span class="n">StoragePartitionVar_co</span><span class="o">]</span><span class="p">)</span><span class="err">:</span>
 
 <span class="w">    </span><span class="ss">&quot;&quot;&quot;Storage is a data reference identifying 1 or more partitions of data.</span>
 
@@ -2564,6 +2403,8 @@
 <span class="ss">    &quot;&quot;&quot;</span>
 
 <span class="w">    </span><span class="n">_abstract_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">True</span>
+
+<span class="w">    </span><span class="nl">storage_partition_type</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">type[StoragePartitionVar_co</span><span class="o">]</span><span class="err">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="o">[</span><span class="n">misc</span><span class="o">]</span>
 
 <span class="w">    </span><span class="err">#</span><span class="w"> </span><span class="n">These</span><span class="w"> </span><span class="n">separators</span><span class="w"> </span><span class="k">are</span><span class="w"> </span><span class="n">used</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">default</span><span class="w"> </span><span class="n">resolve_</span><span class="o">*</span><span class="w"> </span><span class="n">helpers</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nf">format</span><span class="w"> </span><span class="n">metadata</span><span class="w"> </span><span class="k">into</span>
 
@@ -2579,29 +2420,7 @@
 
 <span class="w">    </span><span class="nl">segment_sep</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">str</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">os</span><span class="p">.</span><span class="n">sep</span>
 
-<span class="w">    </span><span class="nl">storage_partition_type</span><span class="p">:</span><span class="w"> </span><span class="n">ClassVar</span><span class="o">[</span><span class="n">type[_StoragePartition</span><span class="o">]</span><span class="err">]</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="k">ignore</span><span class="o">[</span><span class="n">misc</span><span class="o">]</span>
-
-<span class="w">    </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Type</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Field</span><span class="p">(</span><span class="k">None</span><span class="p">,</span><span class="w"> </span><span class="n">repr</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nf">format</span><span class="err">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Format</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Field</span><span class="p">(</span><span class="k">None</span><span class="p">,</span><span class="w"> </span><span class="n">repr</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nv">@validator</span><span class="p">(</span><span class="ss">&quot;type&quot;</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nv">@classmethod</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">validate_type</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Type</span><span class="p">:</span>
-
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Check</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">types</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">partitioning</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">specified</span><span class="w"> </span><span class="n">field</span><span class="p">(</span><span class="n">s</span><span class="p">).</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type_</span>
-
-<span class="w">    </span><span class="nv">@validator</span><span class="p">(</span><span class="ss">&quot;format&quot;</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nv">@classmethod</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">validate_format</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nf">format</span><span class="err">:</span><span class="w"> </span><span class="nf">Format</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nf">Format</span><span class="err">:</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nf">format</span>
+<span class="w">    </span><span class="nl">_key_types</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">CompositeKeyTypes</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PrivateAttr</span><span class="p">(</span><span class="k">None</span><span class="p">)</span>
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
@@ -2643,6 +2462,92 @@
 
 <span class="w">            </span><span class="p">)</span>
 
+<span class="w">    </span><span class="nv">@classmethod</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_default</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Storage</span><span class="o">[</span><span class="n">StoragePartition</span><span class="o">]</span><span class="err">:</span>
+
+<span class="w">        </span><span class="k">from</span><span class="w"> </span><span class="n">arti</span><span class="p">.</span><span class="n">storage</span><span class="p">.</span><span class="n">literal</span><span class="w"> </span><span class="n">import</span><span class="w"> </span><span class="n">StringLiteral</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">StringLiteral</span><span class="p">()</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Support</span><span class="w"> </span><span class="ow">some</span><span class="w"> </span><span class="n">sort</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">configurable</span><span class="w"> </span><span class="n">defaults</span><span class="p">.</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_visit_type</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Self</span><span class="p">:</span>
+
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Check</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">types</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">partitioning</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">specified</span><span class="w"> </span><span class="n">field</span><span class="p">(</span><span class="n">s</span><span class="p">).</span>
+
+<span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="w">        </span><span class="n">copy</span><span class="p">.</span><span class="n">_key_types</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">PartitionKey</span><span class="p">.</span><span class="n">types_from</span><span class="p">(</span><span class="n">type_</span><span class="p">)</span>
+
+<span class="w">        </span><span class="n">assert</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">key_types</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span>
+
+<span class="w">        </span><span class="n">key_component_specs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{</span>
+
+<span class="w">            </span><span class="n">f</span><span class="ss">&quot;{name}{self.partition_name_component_sep}{component_name}&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">f</span><span class="ss">&quot;{{{name}.{component_spec}}}&quot;</span>
+
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">pk</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">key_types</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
+
+<span class="w">            </span><span class="k">for</span><span class="w"> </span><span class="n">component_name</span><span class="p">,</span><span class="w"> </span><span class="n">component_spec</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">pk</span><span class="p">.</span><span class="n">default_key_components</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
+
+<span class="w">        </span><span class="err">}</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">copy</span><span class="p">.</span><span class="n">resolve</span><span class="p">(</span>
+
+<span class="w">            </span><span class="n">partition_key_spec</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span>
+
+<span class="w">                </span><span class="n">f</span><span class="ss">&quot;{name}{self.key_value_sep}{spec}&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">key_component_specs</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
+
+<span class="w">            </span><span class="p">)</span>
+
+<span class="w">        </span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_visit_format</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">format_</span><span class="p">:</span><span class="w"> </span><span class="nf">Format</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Self</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">extension</span><span class="o">=</span><span class="n">format_</span><span class="p">.</span><span class="n">extension</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_visit_graph</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph</span><span class="p">:</span><span class="w"> </span><span class="n">Graph</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Self</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">resolve</span><span class="p">(</span>
+
+<span class="w">            </span><span class="n">graph_name</span><span class="o">=</span><span class="n">graph</span><span class="p">.</span><span class="n">name</span><span class="p">,</span>
+
+<span class="w">            </span><span class="n">path_tags</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span>
+
+<span class="w">                </span><span class="n">f</span><span class="ss">&quot;{tag}{self.key_value_sep}{value}&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">graph</span><span class="p">.</span><span class="n">path_tags</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
+
+<span class="w">            </span><span class="p">),</span>
+
+<span class="w">        </span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_visit_input_fingerprint</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">input_fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Self</span><span class="p">:</span>
+
+<span class="w">        </span><span class="n">input_fingerprint_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">str</span><span class="p">(</span><span class="n">input_fingerprint</span><span class="p">.</span><span class="k">key</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">input_fingerprint</span><span class="p">.</span><span class="nl">is_empty</span><span class="p">:</span>
+
+<span class="w">            </span><span class="n">input_fingerprint_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">&quot;&quot;</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">input_fingerprint</span><span class="o">=</span><span class="n">input_fingerprint_key</span><span class="p">)</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_visit_names</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="k">names</span><span class="err">:</span><span class="w"> </span><span class="n">tuple</span><span class="o">[</span><span class="n">str, ...</span><span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Self</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">resolve</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="k">names</span><span class="o">[</span><span class="n">-1</span><span class="o">]</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">names</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="ss">&quot;&quot;</span><span class="p">,</span><span class="w"> </span><span class="k">names</span><span class="o">=</span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span><span class="k">names</span><span class="p">))</span>
+
+<span class="w">    </span><span class="nv">@property</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">includes_input_fingerprint_template</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">bool</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="ow">any</span><span class="p">(</span><span class="ss">&quot;{input_fingerprint}&quot;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">_format_fields</span><span class="p">.</span><span class="k">values</span><span class="p">())</span>
+
+<span class="w">    </span><span class="nv">@property</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">key_types</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">CompositeKeyTypes</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">_key_types</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
+
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="ss">&quot;`key_types` have not been set yet.&quot;</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">_key_types</span>
+
 <span class="w">    </span><span class="nv">@property</span>
 
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_format_fields</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">frozendict</span><span class="o">[</span><span class="n">str, str</span><span class="o">]</span><span class="err">:</span>
@@ -2663,11 +2568,17 @@
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">get_default</span><span class="p">(</span><span class="n">cls</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;AnyStorage&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_check_keys</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">key_types</span><span class="p">:</span><span class="w"> </span><span class="n">CompositeKeyTypes</span><span class="p">,</span><span class="w"> </span><span class="nl">keys</span><span class="p">:</span><span class="w"> </span><span class="n">CompositeKey</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">        </span><span class="k">from</span><span class="w"> </span><span class="n">arti</span><span class="p">.</span><span class="n">storage</span><span class="p">.</span><span class="n">literal</span><span class="w"> </span><span class="n">import</span><span class="w"> </span><span class="n">StringLiteral</span>
+<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Confirm</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">key</span><span class="w"> </span><span class="k">names</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">types</span><span class="w"> </span><span class="n">align</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">StringLiteral</span><span class="p">()</span><span class="w">  </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="n">Support</span><span class="w"> </span><span class="ow">some</span><span class="w"> </span><span class="n">sort</span><span class="w"> </span><span class="k">of</span><span class="w"> </span><span class="n">configurable</span><span class="w"> </span><span class="n">defaults</span><span class="p">.</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">key_types</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nl">keys</span><span class="p">:</span>
+
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Expected partition keys {tuple(key_types)} but none were passed&quot;</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">keys</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nl">key_types</span><span class="p">:</span>
+
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Expected no partition keys but got: {keys}&quot;</span><span class="p">)</span>
 
 <span class="w">    </span><span class="nv">@abc</span><span class="p">.</span><span class="n">abstractmethod</span>
 
@@ -2675,7 +2586,7 @@
 
 <span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">input_fingerprints</span><span class="p">:</span><span class="w"> </span><span class="n">InputFingerprints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InputFingerprints</span><span class="p">()</span>
 
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">tuple</span><span class="o">[</span><span class="n">_StoragePartition, ...</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">tuple</span><span class="o">[</span><span class="n">StoragePartitionVar_co, ...</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="p">()</span>
 
@@ -2689,7 +2600,7 @@
 
 <span class="w">        </span><span class="nl">with_content_fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">True</span><span class="p">,</span>
 
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">_StoragePartition</span><span class="p">:</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">StoragePartitionVar_co</span><span class="p">:</span>
 
 <span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">_check_keys</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">key_types</span><span class="p">,</span><span class="w"> </span><span class="n">keys</span><span class="p">)</span>
 
@@ -2739,12 +2650,6 @@
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="k">partition</span>
 
-<span class="w">    </span><span class="nv">@property</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">includes_input_fingerprint_template</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">bool</span><span class="p">:</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="ow">any</span><span class="p">(</span><span class="ss">&quot;{input_fingerprint}&quot;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">val</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">_format_fields</span><span class="p">.</span><span class="k">values</span><span class="p">())</span>
-
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_resolve_field</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">spec</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">placeholder_values</span><span class="p">:</span><span class="w"> </span><span class="n">dict</span><span class="o">[</span><span class="n">str, str</span><span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nf">str</span><span class="err">:</span>
 
 <span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">placeholder</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">placeholder_values</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="err">:</span>
@@ -2769,71 +2674,7 @@
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">partial_format</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">placeholder_values</span><span class="p">)</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">resolve_templates</span><span class="p">(</span>
-
-<span class="w">        </span><span class="nl">self</span><span class="p">:</span><span class="w"> </span><span class="ss">&quot;_Storage&quot;</span><span class="p">,</span>
-
-<span class="w">        </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">str</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="p">,</span>
-
-<span class="w">        </span><span class="nl">input_fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Fingerprint</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="p">,</span>
-
-<span class="w">        </span><span class="k">names</span><span class="err">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">tuple[str, ...</span><span class="o">]</span><span class="err">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="p">,</span>
-
-<span class="w">        </span><span class="nl">path_tags</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">frozendict[str, str</span><span class="o">]</span><span class="err">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="p">,</span>
-
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;_Storage&quot;</span><span class="err">:</span>
-
-<span class="w">        </span><span class="k">values</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{}</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">graph_name</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;graph_name&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph_name</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">input_fingerprint</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="n">input_fingerprint_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">str</span><span class="p">(</span><span class="n">input_fingerprint</span><span class="p">.</span><span class="k">key</span><span class="p">)</span>
-
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">input_fingerprint</span><span class="p">.</span><span class="nl">is_empty</span><span class="p">:</span>
-
-<span class="w">                </span><span class="n">input_fingerprint_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">&quot;&quot;</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;input_fingerprint&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input_fingerprint_key</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="k">names</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;name&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">names</span><span class="o">[</span><span class="n">-1</span><span class="o">]</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">names</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="ss">&quot;&quot;</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;names&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span><span class="k">names</span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">path_tags</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;path_tags&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span>
-
-<span class="w">                </span><span class="n">f</span><span class="ss">&quot;{tag}{self.key_value_sep}{value}&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">path_tags</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">            </span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="nf">format</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;extension&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="nf">format</span><span class="p">.</span><span class="n">extension</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">type</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="n">key_component_specs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{</span>
-
-<span class="w">                </span><span class="n">f</span><span class="ss">&quot;{name}{self.partition_name_component_sep}{component_name}&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">f</span><span class="ss">&quot;{{{name}.{component_spec}}}&quot;</span>
-
-<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">pk</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">key_types</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="n">component_name</span><span class="p">,</span><span class="w"> </span><span class="n">component_spec</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">pk</span><span class="p">.</span><span class="n">default_key_components</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">            </span><span class="err">}</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;partition_key_spec&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span>
-
-<span class="w">                </span><span class="n">f</span><span class="ss">&quot;{name}{self.key_value_sep}{spec}&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">key_component_specs</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">            </span><span class="p">)</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">resolve</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="k">values</span><span class="err">:</span><span class="w"> </span><span class="nf">str</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Self</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span>
 
@@ -2858,7 +2699,6 @@
 <hr />
 <h4 id="ancestors-in-mro">Ancestors (in MRO)</h4>
 <ul>
-<li>arti.storage._StorageMixin</li>
 <li>arti.internal.models.Model</li>
 <li>pydantic.main.BaseModel</li>
 <li>pydantic.utils.Representation</li>
@@ -2903,14 +2743,14 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="get_default">get_default</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span>
 
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;AnyStorage&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Storage[StoragePartition]&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code>    <span class="nd">@classmethod</span>
 
-    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;AnyStorage&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">get_default</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Storage</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">]:</span>
 
         <span class="kn">from</span> <span class="nn">arti.storage.literal</span> <span class="kn">import</span> <span class="n">StringLiteral</span>
 
@@ -2975,44 +2815,6 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Model&#39;</span>
 </code></pre></div>
 
-<h4 id="validate_format">validate_format</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_format</span><span class="p">(</span>
-    <span class="nb">format</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span>
-</code></pre></div>
-
-<details class="example">
-<summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@validator</span><span class="p">(</span><span class="ss">&quot;format&quot;</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nv">@classmethod</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">validate_format</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nf">format</span><span class="err">:</span><span class="w"> </span><span class="nf">Format</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nf">Format</span><span class="err">:</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="nf">format</span>
-</code></pre></div>
-
-</details>
-<h4 id="validate_type">validate_type</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_type</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
-</code></pre></div>
-
-<details class="example">
-<summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@validator</span><span class="p">(</span><span class="ss">&quot;type&quot;</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nv">@classmethod</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">validate_type</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">type_</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Type</span><span class="p">:</span>
-
-<span class="w">        </span><span class="err">#</span><span class="w"> </span><span class="nl">TODO</span><span class="p">:</span><span class="w"> </span><span class="k">Check</span><span class="w"> </span><span class="n">support</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">types</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">partitioning</span><span class="w"> </span><span class="k">on</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">specified</span><span class="w"> </span><span class="n">field</span><span class="p">(</span><span class="n">s</span><span class="p">).</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type_</span>
-</code></pre></div>
-
-</details>
 <h4 id="instance-variables">Instance variables</h4>
 <div class="codehilite"><pre><span></span><code><span class="n">fingerprint</span>
 </code></pre></div>
@@ -3026,12 +2828,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="methods">Methods</h4>
 <h4 id="copy">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -3095,7 +2897,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -3159,8 +2961,8 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="discover_partitions">discover_partitions</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">discover_partitions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">input_fingerprints</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">],</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="o">~</span><span class="n">_StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span>
+    <span class="n">input_fingerprints</span><span class="p">:</span> <span class="s1">&#39;InputFingerprints&#39;</span> <span class="o">=</span> <span class="p">{}</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;tuple[StoragePartitionVar_co, ...]&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3171,7 +2973,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">input_fingerprints</span><span class="p">:</span><span class="w"> </span><span class="n">InputFingerprints</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">InputFingerprints</span><span class="p">()</span>
 
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">tuple</span><span class="o">[</span><span class="n">_StoragePartition, ...</span><span class="o">]</span><span class="err">:</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">tuple</span><span class="o">[</span><span class="n">StoragePartitionVar_co, ...</span><span class="o">]</span><span class="err">:</span>
 
 <span class="w">        </span><span class="n">raise</span><span class="w"> </span><span class="n">NotImplementedError</span><span class="p">()</span>
 </code></pre></div>
@@ -3180,10 +2982,10 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="generate_partition">generate_partition</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">generate_partition</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">keys</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">]</span> <span class="o">=</span> <span class="p">{},</span>
-    <span class="n">input_fingerprint</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span> <span class="o">=</span> <span class="n">Fingerprint</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
-    <span class="n">with_content_fingerprint</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_StoragePartition</span>
+    <span class="n">keys</span><span class="p">:</span> <span class="s1">&#39;CompositeKey&#39;</span> <span class="o">=</span> <span class="p">{},</span>
+    <span class="n">input_fingerprint</span><span class="p">:</span> <span class="s1">&#39;Fingerprint&#39;</span> <span class="o">=</span> <span class="n">Fingerprint</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span>
+    <span class="n">with_content_fingerprint</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;StoragePartitionVar_co&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3198,7 +3000,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="x">        with_content_fingerprint: bool = True,</span>
 
-<span class="x">    ) -&gt; _StoragePartition:</span>
+<span class="x">    ) -&gt; StoragePartitionVar_co:</span>
 
 <span class="x">        self._check_keys(self.key_types, keys)</span>
 
@@ -3269,99 +3071,32 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <p>Generate a JSON representation of the model, <code>include</code> and <code>exclude</code> arguments as per <code>dict()</code>.</p>
 <p><code>encoder</code> is an optional function to supply as <code>default</code> to json.dumps(), other arguments as per <code>json.dumps()</code>.</p>
-<h4 id="resolve_templates">resolve_templates</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">resolve_templates</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="s1">&#39;_Storage&#39;</span><span class="p">,</span>
-    <span class="n">graph_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">input_fingerprint</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-    <span class="n">path_tags</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_Storage&#39;</span>
+<h4 id="resolve">resolve</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">resolve</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">values</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">resolve_templates</span><span class="p">(</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">def</span><span class="w"> </span><span class="nf">resolve</span><span class="p">(</span><span class="nv">self</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="nv">values</span><span class="o">:</span><span class="w"> </span><span class="nv">str</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nv">Self</span><span class="o">:</span>
 
-<span class="w">        </span><span class="nl">self</span><span class="p">:</span><span class="w"> </span><span class="ss">&quot;_Storage&quot;</span><span class="p">,</span>
+<span class="w">        </span><span class="nv">return</span><span class="w"> </span><span class="nv">self</span><span class="o">.</span><span class="nf">copy</span><span class="p">(</span>
 
-<span class="w">        </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">str</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="p">,</span>
+<span class="w">            </span><span class="nv">update</span><span class="o">=</span><span class="p">{</span>
 
-<span class="w">        </span><span class="nl">input_fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">Fingerprint</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="p">,</span>
+<span class="w">                </span><span class="nv">name</span><span class="o">:</span><span class="w"> </span><span class="nv">new</span>
 
-<span class="w">        </span><span class="k">names</span><span class="err">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">tuple[str, ...</span><span class="o">]</span><span class="err">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="p">,</span>
+<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="nv">name</span><span class="p">,</span><span class="w"> </span><span class="ow">or</span><span class="nv">iginal</span><span class="w"> </span><span class="nv">in</span><span class="w"> </span><span class="nv">self</span><span class="o">.</span><span class="nv">_format_fields</span><span class="o">.</span><span class="nf">items</span><span class="p">()</span>
 
-<span class="w">        </span><span class="nl">path_tags</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="o">[</span><span class="n">frozendict[str, str</span><span class="o">]</span><span class="err">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">None</span><span class="p">,</span>
+<span class="w">                </span><span class="o">#</span><span class="w"> </span><span class="nv">Avoid</span><span class="w"> </span><span class="s">&quot;setting&quot;</span><span class="w"> </span><span class="nv">the</span><span class="w"> </span><span class="nv">value</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">updated</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="nv">reduce</span><span class="w"> </span><span class="nv">pydantic</span><span class="w"> </span><span class="nv">repr</span><span class="w"> </span><span class="nf">verbosity</span><span class="w"> </span><span class="p">(</span><span class="nv">which</span>
 
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;_Storage&quot;</span><span class="err">:</span>
+<span class="w">                </span><span class="o">#</span><span class="w"> </span><span class="nv">only</span><span class="w"> </span><span class="nv">shows</span><span class="w"> </span><span class="s">&quot;set&quot;</span><span class="w"> </span><span class="nv">fields</span><span class="w"> </span><span class="nv">by</span><span class="w"> </span><span class="nv">default</span><span class="p">)</span><span class="o">.</span>
 
-<span class="w">        </span><span class="k">values</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{}</span>
+<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nv">new</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nv">self</span><span class="o">.</span><span class="nf">_resolve_field</span><span class="p">(</span><span class="nv">name</span><span class="p">,</span><span class="w"> </span><span class="ow">or</span><span class="nv">iginal</span><span class="p">,</span><span class="w"> </span><span class="nv">values</span><span class="p">))</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="ow">or</span><span class="nv">iginal</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">graph_name</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;graph_name&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph_name</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">input_fingerprint</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="n">input_fingerprint_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">str</span><span class="p">(</span><span class="n">input_fingerprint</span><span class="p">.</span><span class="k">key</span><span class="p">)</span>
-
-<span class="w">            </span><span class="k">if</span><span class="w"> </span><span class="n">input_fingerprint</span><span class="p">.</span><span class="nl">is_empty</span><span class="p">:</span>
-
-<span class="w">                </span><span class="n">input_fingerprint_key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">&quot;&quot;</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;input_fingerprint&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">input_fingerprint_key</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="k">names</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;name&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">names</span><span class="o">[</span><span class="n">-1</span><span class="o">]</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="k">names</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="ss">&quot;&quot;</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;names&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span><span class="k">names</span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">path_tags</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;path_tags&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span>
-
-<span class="w">                </span><span class="n">f</span><span class="ss">&quot;{tag}{self.key_value_sep}{value}&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">tag</span><span class="p">,</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">path_tags</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">            </span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="nf">format</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;extension&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="nf">format</span><span class="p">.</span><span class="n">extension</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">type</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">            </span><span class="n">key_component_specs</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="err">{</span>
-
-<span class="w">                </span><span class="n">f</span><span class="ss">&quot;{name}{self.partition_name_component_sep}{component_name}&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">f</span><span class="ss">&quot;{{{name}.{component_spec}}}&quot;</span>
-
-<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">pk</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">key_types</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="n">component_name</span><span class="p">,</span><span class="w"> </span><span class="n">component_spec</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">pk</span><span class="p">.</span><span class="n">default_key_components</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">            </span><span class="err">}</span>
-
-<span class="w">            </span><span class="k">values</span><span class="o">[</span><span class="n">&quot;partition_key_spec&quot;</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">segment_sep</span><span class="p">.</span><span class="k">join</span><span class="p">(</span>
-
-<span class="w">                </span><span class="n">f</span><span class="ss">&quot;{name}{self.key_value_sep}{spec}&quot;</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">spec</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">key_component_specs</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">            </span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span>
-
-<span class="w">            </span><span class="k">update</span><span class="o">=</span><span class="err">{</span>
-
-<span class="w">                </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="k">new</span>
-
-<span class="w">                </span><span class="k">for</span><span class="w"> </span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">original</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">_format_fields</span><span class="p">.</span><span class="n">items</span><span class="p">()</span>
-
-<span class="w">                </span><span class="err">#</span><span class="w"> </span><span class="n">Avoid</span><span class="w"> </span><span class="ss">&quot;setting&quot;</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="k">value</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">updated</span><span class="w"> </span><span class="k">to</span><span class="w"> </span><span class="n">reduce</span><span class="w"> </span><span class="n">pydantic</span><span class="w"> </span><span class="n">repr</span><span class="w"> </span><span class="n">verbosity</span><span class="w"> </span><span class="p">(</span><span class="n">which</span>
-
-<span class="w">                </span><span class="err">#</span><span class="w"> </span><span class="k">only</span><span class="w"> </span><span class="n">shows</span><span class="w"> </span><span class="ss">&quot;set&quot;</span><span class="w"> </span><span class="n">fields</span><span class="w"> </span><span class="k">by</span><span class="w"> </span><span class="k">default</span><span class="p">).</span>
-
-<span class="w">                </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="k">new</span><span class="w"> </span><span class="err">:</span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">_resolve_field</span><span class="p">(</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">original</span><span class="p">,</span><span class="w"> </span><span class="k">values</span><span class="p">))</span><span class="w"> </span><span class="o">!=</span><span class="w"> </span><span class="n">original</span>
-
-<span class="w">            </span><span class="err">}</span>
+<span class="w">            </span><span class="p">}</span>
 
 <span class="w">        </span><span class="p">)</span>
 </code></pre></div>
@@ -3376,11 +3111,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="n">StoragePartition</span><span class="p">(</span><span class="n">_StorageMixin</span><span class="p">,</span><span class="w"> </span><span class="n">Model</span><span class="p">)</span><span class="err">:</span>
-
-<span class="w">    </span><span class="nl">type</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Field</span><span class="p">(</span><span class="n">repr</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nf">format</span><span class="err">:</span><span class="w"> </span><span class="nf">Format</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Field</span><span class="p">(</span><span class="n">repr</span><span class="o">=</span><span class="k">False</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="k">class</span><span class="w"> </span><span class="n">StoragePartition</span><span class="p">(</span><span class="n">Model</span><span class="p">)</span><span class="err">:</span>
 
 <span class="w">    </span><span class="nl">keys</span><span class="p">:</span><span class="w"> </span><span class="n">CompositeKey</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">CompositeKey</span><span class="p">()</span>
 
@@ -3388,23 +3119,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="w">    </span><span class="nl">content_fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">.</span><span class="n">empty</span><span class="p">()</span>
 
-<span class="w">    </span><span class="nv">@validator</span><span class="p">(</span><span class="ss">&quot;keys&quot;</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nv">@classmethod</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">validate_keys</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">keys</span><span class="p">:</span><span class="w"> </span><span class="n">CompositeKey</span><span class="p">,</span><span class="w"> </span><span class="k">values</span><span class="err">:</span><span class="w"> </span><span class="n">dict</span><span class="o">[</span><span class="n">str, Any</span><span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">CompositeKey</span><span class="p">:</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ss">&quot;type&quot;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">values</span><span class="err">:</span>
-
-<span class="w">            </span><span class="n">cls</span><span class="p">.</span><span class="n">_check_keys</span><span class="p">(</span><span class="n">PartitionKey</span><span class="p">.</span><span class="n">types_from</span><span class="p">(</span><span class="k">values</span><span class="o">[</span><span class="n">&quot;type&quot;</span><span class="o">]</span><span class="p">),</span><span class="w"> </span><span class="n">keys</span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">keys</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">with_content_fingerprint</span><span class="p">(</span>
-
-<span class="w">        </span><span class="nl">self</span><span class="p">:</span><span class="w"> </span><span class="ss">&quot;_StoragePartition&quot;</span><span class="p">,</span><span class="w"> </span><span class="nl">keep_existing</span><span class="p">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">True</span>
-
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="ss">&quot;_StoragePartition&quot;</span><span class="err">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">with_content_fingerprint</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">keep_existing</span><span class="p">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">True</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Self</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">keep_existing</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">content_fingerprint</span><span class="p">.</span><span class="nl">is_empty</span><span class="p">:</span>
 
@@ -3427,7 +3142,6 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <hr />
 <h4 id="ancestors-in-mro_1">Ancestors (in MRO)</h4>
 <ul>
-<li>arti.storage._StorageMixin</li>
 <li>arti.internal.models.Model</li>
 <li>pydantic.main.BaseModel</li>
 <li>pydantic.utils.Representation</li>
@@ -3516,41 +3230,15 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Model&#39;</span>
 </code></pre></div>
 
-<h4 id="validate_keys">validate_keys</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">validate_keys</span><span class="p">(</span>
-    <span class="n">keys</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">],</span>
-    <span class="n">values</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">frozendict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">arti</span><span class="o">.</span><span class="n">partitions</span><span class="o">.</span><span class="n">PartitionKey</span><span class="p">]</span>
-</code></pre></div>
-
-<details class="example">
-<summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@validator</span><span class="p">(</span><span class="ss">&quot;keys&quot;</span><span class="p">)</span>
-
-<span class="w">    </span><span class="nv">@classmethod</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">validate_keys</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="nl">keys</span><span class="p">:</span><span class="w"> </span><span class="n">CompositeKey</span><span class="p">,</span><span class="w"> </span><span class="k">values</span><span class="err">:</span><span class="w"> </span><span class="n">dict</span><span class="o">[</span><span class="n">str, Any</span><span class="o">]</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">CompositeKey</span><span class="p">:</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="ss">&quot;type&quot;</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="k">values</span><span class="err">:</span>
-
-<span class="w">            </span><span class="n">cls</span><span class="p">.</span><span class="n">_check_keys</span><span class="p">(</span><span class="n">PartitionKey</span><span class="p">.</span><span class="n">types_from</span><span class="p">(</span><span class="k">values</span><span class="o">[</span><span class="n">&quot;type&quot;</span><span class="o">]</span><span class="p">),</span><span class="w"> </span><span class="n">keys</span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">keys</span>
-</code></pre></div>
-
-</details>
 <h4 id="instance-variables_1">Instance variables</h4>
 <div class="codehilite"><pre><span></span><code><span class="n">fingerprint</span>
-</code></pre></div>
-
-<div class="codehilite"><pre><span></span><code><span class="n">key_types</span>
 </code></pre></div>
 
 <h4 id="methods_1">Methods</h4>
 <h4 id="compute_content_fingerprint">compute_content_fingerprint</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">compute_content_fingerprint</span><span class="p">(</span>
     <span class="bp">self</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Fingerprint&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3569,12 +3257,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy_1">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -3638,7 +3326,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -3720,18 +3408,14 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <p><code>encoder</code> is an optional function to supply as <code>default</code> to json.dumps(), other arguments as per <code>json.dumps()</code>.</p>
 <h4 id="with_content_fingerprint">with_content_fingerprint</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">with_content_fingerprint</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="s1">&#39;_StoragePartition&#39;</span><span class="p">,</span>
-    <span class="n">keep_existing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;_StoragePartition&#39;</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">keep_existing</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">with_content_fingerprint</span><span class="p">(</span>
-
-<span class="w">        </span><span class="kr">self</span><span class="o">:</span><span class="w"> </span><span class="s">&quot;_StoragePartition&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">keep_existing</span><span class="o">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">True</span>
-
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s">&quot;_StoragePartition&quot;</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">with_content_fingerprint</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span><span class="w"> </span><span class="n">keep_existing</span><span class="o">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="kr">True</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="kr">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="nf">if</span><span class="w"> </span><span class="n">keep_existing</span><span class="w"> </span><span class="kr">and</span><span class="w"> </span><span class="kr">not</span><span class="w"> </span><span class="kr">self</span><span class="p">.</span><span class="n">content_fingerprint</span><span class="p">.</span><span class="n">is_empty</span><span class="o">:</span>
 
@@ -3741,40 +3425,6 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </code></pre></div>
 
 </details>
-<h3 id="storagepartitions">StoragePartitions</h3>
-<div class="codehilite"><pre><span></span><code><span class="k">class</span> <span class="nc">StoragePartitions</span><span class="p">(</span>
-    <span class="o">/</span><span class="p">,</span>
-    <span class="o">*</span><span class="n">args</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span>
-<span class="p">)</span>
-</code></pre></div>
-
-<h4 id="ancestors-in-mro_2">Ancestors (in MRO)</h4>
-<ul>
-<li>builtins.tuple</li>
-</ul>
-<h4 id="methods_2">Methods</h4>
-<h4 id="count">count</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">count</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">value</span><span class="p">,</span>
-    <span class="o">/</span>
-<span class="p">)</span>
-</code></pre></div>
-
-<p>Return number of occurrences of value.</p>
-<h4 id="index">index</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">index</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">,</span>
-    <span class="n">value</span><span class="p">,</span>
-    <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-    <span class="n">stop</span><span class="o">=</span><span class="mi">9223372036854775807</span><span class="p">,</span>
-    <span class="o">/</span>
-<span class="p">)</span>
-</code></pre></div>
-
-<p>Return first index of value.</p>
-<p>Raises ValueError if the value is not present.</p>
                 
               
               

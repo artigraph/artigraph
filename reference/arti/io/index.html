@@ -1394,7 +1394,9 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="n">__path__</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;pkgutil&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">extend_path</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="n">__path__</span> <span class="o">=</span> <span class="nb">__import__</span><span class="p">(</span><span class="s2">&quot;pkgutil&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">extend_path</span><span class="p">(</span><span class="n">__path__</span><span class="p">,</span> <span class="vm">__name__</span><span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
@@ -1408,7 +1410,7 @@
 
 <span class="kn">from</span> <span class="nn">arti.internal.utils</span> <span class="kn">import</span> <span class="n">import_submodules</span>
 
-<span class="kn">from</span> <span class="nn">arti.storage</span> <span class="kn">import</span> <span class="n">StoragePartition</span><span class="p">,</span> <span class="n">_StoragePartition</span>
+<span class="kn">from</span> <span class="nn">arti.storage</span> <span class="kn">import</span> <span class="n">StoragePartition</span><span class="p">,</span> <span class="n">StoragePartitionVar</span>
 
 <span class="kn">from</span> <span class="nn">arti.types</span> <span class="kn">import</span> <span class="n">Type</span><span class="p">,</span> <span class="n">is_partitioned</span>
 
@@ -1474,9 +1476,9 @@
 
 <span class="k">def</span> <span class="nf">_write</span><span class="p">(</span>
 
-    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Format</span><span class="p">,</span> <span class="n">storage_partition</span><span class="p">:</span> <span class="n">_StoragePartition</span><span class="p">,</span> <span class="n">view</span><span class="p">:</span> <span class="n">View</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Format</span><span class="p">,</span> <span class="n">storage_partition</span><span class="p">:</span> <span class="n">StoragePartitionVar</span><span class="p">,</span> <span class="n">view</span><span class="p">:</span> <span class="n">View</span>
 
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">_StoragePartition</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">StoragePartitionVar</span><span class="p">]:</span>
 
     <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
 
@@ -1488,9 +1490,9 @@
 
 <span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
 
-    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Format</span><span class="p">,</span> <span class="n">storage_partition</span><span class="p">:</span> <span class="n">_StoragePartition</span><span class="p">,</span> <span class="n">view</span><span class="p">:</span> <span class="n">View</span>
+    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="n">Format</span><span class="p">,</span> <span class="n">storage_partition</span><span class="p">:</span> <span class="n">StoragePartitionVar</span><span class="p">,</span> <span class="n">view</span><span class="p">:</span> <span class="n">View</span>
 
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_StoragePartition</span><span class="p">:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StoragePartitionVar</span><span class="p">:</span>
 
     <span class="k">if</span> <span class="p">(</span><span class="n">updated</span> <span class="o">:=</span> <span class="n">_write</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">type_</span><span class="p">,</span> <span class="nb">format</span><span class="p">,</span> <span class="n">storage_partition</span><span class="p">,</span> <span class="n">view</span><span class="p">))</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 
@@ -1511,11 +1513,11 @@
 <h2 id="functions">Functions</h2>
 <h3 id="read">read</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
-    <span class="nb">format</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span><span class="p">,</span>
-    <span class="n">storage_partitions</span><span class="p">:</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Sequence</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">],</span>
-    <span class="n">view</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">View</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Format&#39;</span><span class="p">,</span>
+    <span class="n">storage_partitions</span><span class="p">:</span> <span class="s1">&#39;Sequence[StoragePartition]&#39;</span><span class="p">,</span>
+    <span class="n">view</span><span class="p">:</span> <span class="s1">&#39;View&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -1554,8 +1556,8 @@
 </details>
 <h3 id="register_reader">register_reader</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">register_reader</span><span class="p">(</span>
-    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="o">~</span><span class="n">REGISTERED</span><span class="p">],</span> <span class="o">~</span><span class="n">REGISTERED</span><span class="p">]</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable[[REGISTERED], REGISTERED]&#39;</span>
 </code></pre></div>
 
 <p>Decorator for registering a function.</p>
@@ -1618,8 +1620,8 @@
 </details>
 <h3 id="register_writer">register_writer</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">register_writer</span><span class="p">(</span>
-    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Callable</span><span class="p">[[</span><span class="o">~</span><span class="n">REGISTERED</span><span class="p">],</span> <span class="o">~</span><span class="n">REGISTERED</span><span class="p">]</span>
+    <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Callable[[REGISTERED], REGISTERED]&#39;</span>
 </code></pre></div>
 
 <p>Decorator for registering a function.</p>
@@ -1682,21 +1684,21 @@
 </details>
 <h3 id="write">write</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write</span><span class="p">(</span>
-    <span class="n">data</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
-    <span class="nb">format</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">formats</span><span class="o">.</span><span class="n">Format</span><span class="p">,</span>
-    <span class="n">storage_partition</span><span class="p">:</span> <span class="o">~</span><span class="n">_StoragePartition</span><span class="p">,</span>
-    <span class="n">view</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">views</span><span class="o">.</span><span class="n">View</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_StoragePartition</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
+    <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;Format&#39;</span><span class="p">,</span>
+    <span class="n">storage_partition</span><span class="p">:</span> <span class="s1">&#39;StoragePartitionVar&#39;</span><span class="p">,</span>
+    <span class="n">view</span><span class="p">:</span> <span class="s1">&#39;View&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;StoragePartitionVar&#39;</span>
 </code></pre></div>
 
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="nv">def</span><span class="w"> </span><span class="nf">write</span><span class="p">(</span>
 
-<span class="w">    </span><span class="nv">data</span><span class="o">:</span><span class="w"> </span><span class="nv">Any</span><span class="p">,</span><span class="w"> </span><span class="nv">type_</span><span class="o">:</span><span class="w"> </span><span class="nv">Type</span><span class="p">,</span><span class="w"> </span><span class="k">for</span><span class="nv">mat</span><span class="o">:</span><span class="w"> </span><span class="nv">Format</span><span class="p">,</span><span class="w"> </span><span class="nv">storage_partition</span><span class="o">:</span><span class="w"> </span><span class="nv">_StoragePartition</span><span class="p">,</span><span class="w"> </span><span class="nv">view</span><span class="o">:</span><span class="w"> </span><span class="nv">View</span>
+<span class="w">    </span><span class="nv">data</span><span class="o">:</span><span class="w"> </span><span class="nv">Any</span><span class="p">,</span><span class="w"> </span><span class="nv">type_</span><span class="o">:</span><span class="w"> </span><span class="nv">Type</span><span class="p">,</span><span class="w"> </span><span class="k">for</span><span class="nv">mat</span><span class="o">:</span><span class="w"> </span><span class="nv">Format</span><span class="p">,</span><span class="w"> </span><span class="nv">storage_partition</span><span class="o">:</span><span class="w"> </span><span class="nv">StoragePartitionVar</span><span class="p">,</span><span class="w"> </span><span class="nv">view</span><span class="o">:</span><span class="w"> </span><span class="nv">View</span>
 
-<span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nv">_StoragePartition</span><span class="o">:</span>
+<span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nv">StoragePartitionVar</span><span class="o">:</span>
 
 <span class="w">    </span><span class="k">if</span><span class="w"> </span><span class="p">(</span><span class="nv">updated</span><span class="w"> </span><span class="o">:=</span><span class="w"> </span><span class="nf">_write</span><span class="p">(</span><span class="nv">data</span><span class="p">,</span><span class="w"> </span><span class="nv">type_</span><span class="p">,</span><span class="w"> </span><span class="k">for</span><span class="nv">mat</span><span class="p">,</span><span class="w"> </span><span class="nv">storage_partition</span><span class="p">,</span><span class="w"> </span><span class="nv">view</span><span class="p">))</span><span class="w"> </span><span class="nv">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nv">None</span><span class="o">:</span>
 

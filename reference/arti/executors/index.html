@@ -1716,9 +1716,9 @@
 
             <span class="p">{</span>
 
-                <span class="n">name</span><span class="p">:</span> <span class="n">connection</span><span class="o">.</span><span class="n">read_graph_partitions</span><span class="p">(</span>
+                <span class="n">name</span><span class="p">:</span> <span class="n">connection</span><span class="o">.</span><span class="n">read_snapshot_partitions</span><span class="p">(</span>
 
-                    <span class="n">snapshot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">artifact_to_key</span><span class="p">[</span><span class="n">artifact</span><span class="p">],</span> <span class="n">artifact</span>
+                    <span class="n">snapshot</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">artifact_to_key</span><span class="p">[</span><span class="n">artifact</span><span class="p">],</span> <span class="n">artifact</span>
 
                 <span class="p">)</span>
 
@@ -1764,17 +1764,9 @@
 
         <span class="k">for</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">partitions</span> <span class="ow">in</span> <span class="n">existing_output_partitions</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
 
-            <span class="n">connection</span><span class="o">.</span><span class="n">write_graph_partitions</span><span class="p">(</span>
+            <span class="n">connection</span><span class="o">.</span><span class="n">write_snapshot_partitions</span><span class="p">(</span>
 
-                <span class="n">snapshot</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-
-                <span class="n">snapshot</span><span class="o">.</span><span class="n">id</span><span class="p">,</span>
-
-                <span class="n">snapshot</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">artifact_to_key</span><span class="p">[</span><span class="n">artifact</span><span class="p">],</span>
-
-                <span class="n">artifact</span><span class="p">,</span>
-
-                <span class="n">partitions</span><span class="p">,</span>
+                <span class="n">snapshot</span><span class="p">,</span> <span class="n">snapshot</span><span class="o">.</span><span class="n">graph</span><span class="o">.</span><span class="n">artifact_to_key</span><span class="p">[</span><span class="n">artifact</span><span class="p">],</span> <span class="n">artifact</span><span class="p">,</span> <span class="n">partitions</span>
 
             <span class="p">)</span>
 
@@ -1906,9 +1898,9 @@
 
 <span class="w">            </span><span class="err">{</span>
 
-<span class="w">                </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="k">connection</span><span class="p">.</span><span class="n">read_graph_partitions</span><span class="p">(</span>
+<span class="w">                </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="k">connection</span><span class="p">.</span><span class="n">read_snapshot_partitions</span><span class="p">(</span>
 
-<span class="w">                    </span><span class="n">snapshot</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span>
+<span class="w">                    </span><span class="n">snapshot</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span>
 
 <span class="w">                </span><span class="p">)</span>
 
@@ -1954,17 +1946,9 @@
 
 <span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">existing_output_partitions</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="err">:</span>
 
-<span class="w">            </span><span class="k">connection</span><span class="p">.</span><span class="n">write_graph_partitions</span><span class="p">(</span>
+<span class="w">            </span><span class="k">connection</span><span class="p">.</span><span class="n">write_snapshot_partitions</span><span class="p">(</span>
 
-<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">name</span><span class="p">,</span>
-
-<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">id</span><span class="p">,</span>
-
-<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span>
-
-<span class="w">                </span><span class="n">artifact</span><span class="p">,</span>
-
-<span class="w">                </span><span class="n">partitions</span><span class="p">,</span>
+<span class="w">                </span><span class="n">snapshot</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span>
 
 <span class="w">            </span><span class="p">)</span>
 
@@ -2279,12 +2263,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -2348,7 +2332,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -2458,17 +2442,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="w">        </span><span class="k">for</span><span class="w"> </span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">existing_output_partitions</span><span class="p">.</span><span class="n">items</span><span class="p">()</span><span class="err">:</span>
 
-<span class="w">            </span><span class="k">connection</span><span class="p">.</span><span class="n">write_graph_partitions</span><span class="p">(</span>
+<span class="w">            </span><span class="k">connection</span><span class="p">.</span><span class="n">write_snapshot_partitions</span><span class="p">(</span>
 
-<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">name</span><span class="p">,</span>
-
-<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">id</span><span class="p">,</span>
-
-<span class="w">                </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span>
-
-<span class="w">                </span><span class="n">artifact</span><span class="p">,</span>
-
-<span class="w">                </span><span class="n">partitions</span><span class="p">,</span>
+<span class="w">                </span><span class="n">snapshot</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span>
 
 <span class="w">            </span><span class="p">)</span>
 
@@ -2505,9 +2481,9 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="w">            </span><span class="err">{</span>
 
-<span class="w">                </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="k">connection</span><span class="p">.</span><span class="n">read_graph_partitions</span><span class="p">(</span>
+<span class="w">                </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="k">connection</span><span class="p">.</span><span class="n">read_snapshot_partitions</span><span class="p">(</span>
 
-<span class="w">                    </span><span class="n">snapshot</span><span class="p">.</span><span class="n">name</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">id</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span>
+<span class="w">                    </span><span class="n">snapshot</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="p">.</span><span class="n">graph</span><span class="p">.</span><span class="n">artifact_to_key</span><span class="o">[</span><span class="n">artifact</span><span class="o">]</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span>
 
 <span class="w">                </span><span class="p">)</span>
 

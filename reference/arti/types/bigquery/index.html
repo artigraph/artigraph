@@ -2122,7 +2122,9 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">warnings</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
@@ -2252,15 +2254,15 @@
 
         <span class="n">system</span><span class="o">=</span><span class="n">SqlTypeNames</span><span class="o">.</span><span class="n">FLOAT64</span><span class="p">,</span>
 
+        <span class="n">priority</span><span class="o">=</span><span class="n">_precision</span><span class="p">,</span>
+
     <span class="p">)</span>
 
 <span class="k">for</span> <span class="n">_precision</span> <span class="ow">in</span> <span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">16</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="mi">64</span><span class="p">):</span>
 
     <span class="n">_gen_adapter</span><span class="p">(</span>
 
-        <span class="n">artigraph</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Int</span><span class="si">{</span><span class="n">_precision</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span>
-
-        <span class="n">system</span><span class="o">=</span><span class="n">SqlTypeNames</span><span class="o">.</span><span class="n">INT64</span><span class="p">,</span>
+        <span class="n">artigraph</span><span class="o">=</span><span class="nb">getattr</span><span class="p">(</span><span class="n">types</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;Int</span><span class="si">{</span><span class="n">_precision</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">),</span> <span class="n">system</span><span class="o">=</span><span class="n">SqlTypeNames</span><span class="o">.</span><span class="n">INT64</span><span class="p">,</span> <span class="n">priority</span><span class="o">=</span><span class="n">_precision</span>
 
     <span class="p">)</span>
 
@@ -2426,11 +2428,11 @@
 
         <span class="k">if</span> <span class="n">type_</span><span class="o">.</span><span class="n">nullable</span><span class="p">:</span>
 
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;BigQuery doesn&#39;t support nullable arrays&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;BigQuery doesn&#39;t support nullable arrays&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">type_</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">nullable</span><span class="p">:</span>
 
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;BigQuery doesn&#39;t support nullable array elements&quot;</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;BigQuery doesn&#39;t support nullable array elements&quot;</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
             <span class="n">type_</span> <span class="o">=</span> <span class="n">type_</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;element&quot;</span><span class="p">:</span> <span class="n">type_</span><span class="o">.</span><span class="n">element</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">update</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;nullable&quot;</span><span class="p">:</span> <span class="kc">False</span><span class="p">})})</span>
 
@@ -2453,6 +2455,8 @@
     <span class="n">artigraph</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">Collection</span>
 
     <span class="n">system</span> <span class="o">=</span> <span class="n">bigquery</span><span class="o">.</span><span class="n">Table</span>
+
+    <span class="n">priority</span> <span class="o">=</span> <span class="n">ListFieldTypeAdapter</span><span class="o">.</span><span class="n">priority</span> <span class="o">+</span> <span class="mi">1</span>
 
     <span class="nd">@classmethod</span>
 
@@ -2669,10 +2673,10 @@
 <h4 id="static-methods">Static methods</h4>
 <h4 id="matches_artigraph">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2687,10 +2691,10 @@
 </details>
 <h4 id="matches_system">matches_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">SchemaField</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.SchemaField&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2705,11 +2709,11 @@
 </details>
 <h4 id="to_artigraph">to_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2730,11 +2734,11 @@
 </details>
 <h4 id="to_system">to_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2821,11 +2825,11 @@
 
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">type_</span><span class="p">.</span><span class="nl">nullable</span><span class="p">:</span>
 
-<span class="w">            </span><span class="n">warnings</span><span class="p">.</span><span class="n">warn</span><span class="p">(</span><span class="ss">&quot;BigQuery doesn&#39;t support nullable arrays&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">warnings</span><span class="p">.</span><span class="n">warn</span><span class="p">(</span><span class="ss">&quot;BigQuery doesn&#39;t support nullable arrays&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">type_</span><span class="p">.</span><span class="k">element</span><span class="p">.</span><span class="nl">nullable</span><span class="p">:</span>
 
-<span class="w">            </span><span class="n">warnings</span><span class="p">.</span><span class="n">warn</span><span class="p">(</span><span class="ss">&quot;BigQuery doesn&#39;t support nullable array elements&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">warnings</span><span class="p">.</span><span class="n">warn</span><span class="p">(</span><span class="ss">&quot;BigQuery doesn&#39;t support nullable array elements&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="w">            </span><span class="n">type_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">type_</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="k">update</span><span class="o">=</span><span class="err">{</span><span class="ss">&quot;element&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">type_</span><span class="p">.</span><span class="k">element</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="k">update</span><span class="o">=</span><span class="err">{</span><span class="ss">&quot;nullable&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">False</span><span class="err">}</span><span class="p">)</span><span class="err">}</span><span class="p">)</span>
 
@@ -2864,10 +2868,10 @@
 <h4 id="static-methods_1">Static methods</h4>
 <h4 id="matches_artigraph_1">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2888,10 +2892,10 @@
 </details>
 <h4 id="matches_system_1">matches_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">SchemaField</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.SchemaField&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2906,11 +2910,11 @@
 </details>
 <h4 id="to_artigraph_1">to_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">SchemaField</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.SchemaField&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2945,11 +2949,11 @@
 </details>
 <h4 id="to_system_1">to_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2962,11 +2966,11 @@
 
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">type_</span><span class="p">.</span><span class="nl">nullable</span><span class="p">:</span>
 
-<span class="w">            </span><span class="n">warnings</span><span class="p">.</span><span class="n">warn</span><span class="p">(</span><span class="ss">&quot;BigQuery doesn&#39;t support nullable arrays&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">warnings</span><span class="p">.</span><span class="n">warn</span><span class="p">(</span><span class="ss">&quot;BigQuery doesn&#39;t support nullable arrays&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">type_</span><span class="p">.</span><span class="k">element</span><span class="p">.</span><span class="nl">nullable</span><span class="p">:</span>
 
-<span class="w">            </span><span class="n">warnings</span><span class="p">.</span><span class="n">warn</span><span class="p">(</span><span class="ss">&quot;BigQuery doesn&#39;t support nullable array elements&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">warnings</span><span class="p">.</span><span class="n">warn</span><span class="p">(</span><span class="ss">&quot;BigQuery doesn&#39;t support nullable array elements&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">stacklevel</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="w">            </span><span class="n">type_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">type_</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="k">update</span><span class="o">=</span><span class="err">{</span><span class="ss">&quot;element&quot;</span><span class="err">:</span><span class="w"> </span><span class="n">type_</span><span class="p">.</span><span class="k">element</span><span class="p">.</span><span class="n">copy</span><span class="p">(</span><span class="k">update</span><span class="o">=</span><span class="err">{</span><span class="ss">&quot;nullable&quot;</span><span class="err">:</span><span class="w"> </span><span class="k">False</span><span class="err">}</span><span class="p">)</span><span class="err">}</span><span class="p">)</span>
 
@@ -3074,10 +3078,10 @@
 <h4 id="static-methods_2">Static methods</h4>
 <h4 id="matches_artigraph_2">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3092,10 +3096,10 @@
 </details>
 <h4 id="matches_system_2">matches_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">SchemaField</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.SchemaField&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3110,11 +3114,11 @@
 </details>
 <h4 id="to_artigraph_2">to_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">SchemaField</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.SchemaField&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3145,11 +3149,11 @@
 </details>
 <h4 id="to_system_2">to_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3197,6 +3201,8 @@
 <span class="w">    </span><span class="n">artigraph</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">types</span><span class="p">.</span><span class="n">Collection</span>
 
 <span class="w">    </span><span class="k">system</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">bigquery</span><span class="p">.</span><span class="nc">Table</span>
+
+<span class="w">    </span><span class="n">priority</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">ListFieldTypeAdapter</span><span class="p">.</span><span class="n">priority</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span>
 
 <span class="w">    </span><span class="nv">@classmethod</span>
 
@@ -3349,10 +3355,10 @@
 <h4 id="static-methods_3">Static methods</h4>
 <h4 id="matches_artigraph_3">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3367,10 +3373,10 @@
 </details>
 <h4 id="matches_system_3">matches_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">SchemaField</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.SchemaField&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3385,11 +3391,11 @@
 </details>
 <h4 id="to_artigraph_3">to_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">table</span><span class="o">.</span><span class="n">Table</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.Table&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3456,11 +3462,11 @@
 </details>
 <h4 id="to_system_3">to_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3577,10 +3583,10 @@
 <h4 id="static-methods_4">Static methods</h4>
 <h4 id="matches_artigraph_4">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3595,10 +3601,10 @@
 </details>
 <h4 id="matches_system_4">matches_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">SchemaField</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.SchemaField&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3613,11 +3619,11 @@
 </details>
 <h4 id="to_artigraph_4">to_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3638,11 +3644,11 @@
 </details>
 <h4 id="to_system_4">to_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3701,10 +3707,10 @@
 <h4 id="static-methods_5">Static methods</h4>
 <h4 id="matches_artigraph_5">matches_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3719,10 +3725,10 @@
 </details>
 <h4 id="matches_system_5">matches_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">matches_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">google</span><span class="o">.</span><span class="n">cloud</span><span class="o">.</span><span class="n">bigquery</span><span class="o">.</span><span class="n">schema</span><span class="o">.</span><span class="n">SchemaField</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;bigquery.SchemaField&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">]</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;bool&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3737,11 +3743,11 @@
 </details>
 <h4 id="to_artigraph_5">to_artigraph</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_artigraph</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Type&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -3762,11 +3768,11 @@
 </details>
 <h4 id="to_system_5">to_system</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">to_system</span><span class="p">(</span>
-    <span class="n">type_</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">Type</span><span class="p">,</span>
+    <span class="n">type_</span><span class="p">:</span> <span class="s1">&#39;Type&#39;</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">hints</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">typing</span><span class="o">.</span><span class="n">Any</span><span class="p">],</span>
-    <span class="n">type_system</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">TypeSystem</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span>
+    <span class="n">hints</span><span class="p">:</span> <span class="s1">&#39;dict[str, Any]&#39;</span><span class="p">,</span>
+    <span class="n">type_system</span><span class="p">:</span> <span class="s1">&#39;TypeSystem&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Any&#39;</span>
 </code></pre></div>
 
 <details class="example">

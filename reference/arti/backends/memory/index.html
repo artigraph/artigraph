@@ -755,6 +755,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#connect_1" class="md-nav__link">
+    connect
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#read_artifact_partitions" class="md-nav__link">
     read_artifact_partitions
   </a>
@@ -762,15 +769,29 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#read_graph_partitions" class="md-nav__link">
-    read_graph_partitions
+  <a href="#read_graph" class="md-nav__link">
+    read_graph
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#read_graph_tag" class="md-nav__link">
-    read_graph_tag
+  <a href="#read_snapshot" class="md-nav__link">
+    read_snapshot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_snapshot_partitions" class="md-nav__link">
+    read_snapshot_partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_snapshot_tag" class="md-nav__link">
+    read_snapshot_tag
   </a>
   
 </li>
@@ -790,15 +811,29 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#write_graph_partitions" class="md-nav__link">
-    write_graph_partitions
+  <a href="#write_graph" class="md-nav__link">
+    write_graph
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#write_graph_tag" class="md-nav__link">
-    write_graph_tag
+  <a href="#write_snapshot" class="md-nav__link">
+    write_snapshot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write_snapshot_partitions" class="md-nav__link">
+    write_snapshot_partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write_snapshot_tag" class="md-nav__link">
+    write_snapshot_tag
   </a>
   
 </li>
@@ -1674,6 +1709,13 @@
 </li>
         
           <li class="md-nav__item">
+  <a href="#connect_1" class="md-nav__link">
+    connect
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
   <a href="#read_artifact_partitions" class="md-nav__link">
     read_artifact_partitions
   </a>
@@ -1681,15 +1723,29 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#read_graph_partitions" class="md-nav__link">
-    read_graph_partitions
+  <a href="#read_graph" class="md-nav__link">
+    read_graph
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#read_graph_tag" class="md-nav__link">
-    read_graph_tag
+  <a href="#read_snapshot" class="md-nav__link">
+    read_snapshot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_snapshot_partitions" class="md-nav__link">
+    read_snapshot_partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#read_snapshot_tag" class="md-nav__link">
+    read_snapshot_tag
   </a>
   
 </li>
@@ -1709,15 +1765,29 @@
 </li>
         
           <li class="md-nav__item">
-  <a href="#write_graph_partitions" class="md-nav__link">
-    write_graph_partitions
+  <a href="#write_graph" class="md-nav__link">
+    write_graph
   </a>
   
 </li>
         
           <li class="md-nav__item">
-  <a href="#write_graph_tag" class="md-nav__link">
-    write_graph_tag
+  <a href="#write_snapshot" class="md-nav__link">
+    write_snapshot
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write_snapshot_partitions" class="md-nav__link">
+    write_snapshot_partitions
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#write_snapshot_tag" class="md-nav__link">
+    write_snapshot_tag
   </a>
   
 </li>
@@ -1766,17 +1836,31 @@
 
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">PrivateAttr</span>
 
-<span class="kn">from</span> <span class="nn">arti.artifacts</span> <span class="kn">import</span> <span class="n">Artifact</span>
+<span class="kn">from</span> <span class="nn">arti</span> <span class="kn">import</span> <span class="p">(</span>
 
-<span class="kn">from</span> <span class="nn">arti.backends</span> <span class="kn">import</span> <span class="n">Backend</span><span class="p">,</span> <span class="n">Connection</span>
+    <span class="n">Artifact</span><span class="p">,</span>
 
-<span class="kn">from</span> <span class="nn">arti.fingerprints</span> <span class="kn">import</span> <span class="n">Fingerprint</span>
+    <span class="n">Backend</span><span class="p">,</span>
+
+    <span class="n">Connection</span><span class="p">,</span>
+
+    <span class="n">Fingerprint</span><span class="p">,</span>
+
+    <span class="n">Graph</span><span class="p">,</span>
+
+    <span class="n">GraphSnapshot</span><span class="p">,</span>
+
+    <span class="n">InputFingerprints</span><span class="p">,</span>
+
+    <span class="n">Storage</span><span class="p">,</span>
+
+    <span class="n">StoragePartition</span><span class="p">,</span>
+
+    <span class="n">StoragePartitions</span><span class="p">,</span>
+
+<span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">arti.internal.utils</span> <span class="kn">import</span> <span class="n">NoCopyMixin</span>
-
-<span class="kn">from</span> <span class="nn">arti.partitions</span> <span class="kn">import</span> <span class="n">InputFingerprints</span>
-
-<span class="kn">from</span> <span class="nn">arti.storage</span> <span class="kn">import</span> <span class="n">AnyStorage</span><span class="p">,</span> <span class="n">StoragePartition</span><span class="p">,</span> <span class="n">StoragePartitions</span>
 
 <span class="k">def</span> <span class="nf">_ensure_fingerprinted</span><span class="p">(</span><span class="n">partitions</span><span class="p">:</span> <span class="n">StoragePartitions</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">]:</span>
 
@@ -1784,9 +1868,19 @@
 
         <span class="k">yield</span> <span class="n">partition</span><span class="o">.</span><span class="n">with_content_fingerprint</span><span class="p">(</span><span class="n">keep_existing</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="n">_GraphSnapshotPartitions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Fingerprint</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">]]]]</span>
+<span class="n">_Graphs</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Fingerprint</span><span class="p">,</span> <span class="n">Graph</span><span class="p">]]</span>
 
-<span class="n">_StoragePartitions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="n">AnyStorage</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">]]</span>
+<span class="n">_GraphSnapshots</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Fingerprint</span><span class="p">,</span> <span class="n">GraphSnapshot</span><span class="p">]]</span>
+
+<span class="n">_GraphSnapshotPartitions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span>
+
+    <span class="n">GraphSnapshot</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">]]</span>
+
+<span class="p">]</span>  <span class="c1"># ...[snapshot][artifact_key]</span>
+
+<span class="n">_SnapshotTags</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">GraphSnapshot</span><span class="p">]]</span>  <span class="c1"># ...[name][tag]</span>
+
+<span class="n">_StoragePartitions</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">[</span><span class="n">Storage</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">],</span> <span class="nb">set</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">]]</span>
 
 <span class="k">class</span> <span class="nc">_NoCopyContainer</span><span class="p">(</span><span class="n">NoCopyMixin</span><span class="p">):</span>
 
@@ -1806,19 +1900,25 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="c1"># `container.graph_snapshot_partitions` tracks all the partitions for a *specific* &quot;run&quot; of a graph.</span>
+        <span class="c1"># NOTE: lambdas are not pickleable, so use partial for any nested defaultdicts.</span>
 
-        <span class="c1"># `container.storage_partitions` tracks all partitions, across all graphs. This separation is important</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">graphs</span><span class="p">:</span> <span class="n">_Graphs</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
-        <span class="c1"># to allow for Literals to be used even after a snapshot_id change.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshots</span><span class="p">:</span> <span class="n">_GraphSnapshots</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">graph_snapshot_partitions</span><span class="p">:</span> <span class="n">_GraphSnapshotPartitions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span>
+        <span class="c1"># `container.snapshot_partitions` tracks all the partitions for a *specific* GraphSnapshot.</span>
 
-            <span class="n">partial</span><span class="p">(</span><span class="n">defaultdict</span><span class="p">,</span> <span class="n">partial</span><span class="p">(</span><span class="n">defaultdict</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">]))</span>  <span class="c1"># type: ignore[arg-type]</span>
+        <span class="c1"># `container.storage_partitions` tracks all partitions, across all snapshots. This</span>
+
+        <span class="c1"># separation is important to allow for Literals to be used even after a snapshot change.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_partitions</span><span class="p">:</span> <span class="n">_GraphSnapshotPartitions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span>
+
+            <span class="n">partial</span><span class="p">(</span><span class="n">defaultdict</span><span class="p">,</span> <span class="nb">set</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">])</span>  <span class="c1"># type: ignore[arg-type]</span>
 
         <span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">graph_tags</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Fingerprint</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">snapshot_tags</span><span class="p">:</span> <span class="n">_SnapshotTags</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">dict</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">storage_partitions</span><span class="p">:</span> <span class="n">_StoragePartitions</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">set</span><span class="p">[</span><span class="n">StoragePartition</span><span class="p">])</span>
 
@@ -1870,25 +1970,65 @@
 
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="nf">read_graph_partitions</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">read_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fingerprint</span><span class="p">:</span> <span class="n">Fingerprint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Graph</span><span class="p">:</span>
 
-        <span class="bp">self</span><span class="p">,</span> <span class="n">graph_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="n">Fingerprint</span><span class="p">,</span> <span class="n">artifact_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">artifact</span><span class="p">:</span> <span class="n">Artifact</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">graphs</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">fingerprint</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">write_graph</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph</span><span class="p">:</span> <span class="n">Graph</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">graphs</span><span class="p">[</span><span class="n">graph</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">graph</span><span class="o">.</span><span class="n">fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph</span>
+
+    <span class="k">def</span> <span class="nf">read_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">fingerprint</span><span class="p">:</span> <span class="n">Fingerprint</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphSnapshot</span><span class="p">:</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">snapshots</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">fingerprint</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">write_snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">GraphSnapshot</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">snapshots</span><span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">snapshot</span><span class="o">.</span><span class="n">fingerprint</span><span class="p">]</span> <span class="o">=</span> <span class="n">snapshot</span>
+
+    <span class="k">def</span> <span class="nf">read_snapshot_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GraphSnapshot</span><span class="p">:</span>
+
+        <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">snapshot_tags</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No known `</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">` tag for GraphSnapshot `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">snapshot_tags</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="n">tag</span><span class="p">]</span>
+
+    <span class="k">def</span> <span class="nf">write_snapshot_tag</span><span class="p">(</span>
+
+        <span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">GraphSnapshot</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the known Partitions for the named Artifact in a specific GraphSnapshot.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+
+            <span class="n">existing</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">snapshot_tags</span><span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+        <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
+
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+
+                <span class="sa">f</span><span class="s2">&quot;Existing `</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">` tag for Graph `</span><span class="si">{</span><span class="n">snapshot</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` points to </span><span class="si">{</span><span class="n">existing</span><span class="si">}</span><span class="s2">&quot;</span>
+
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">snapshot_tags</span><span class="p">[</span><span class="n">snapshot</span><span class="o">.</span><span class="n">name</span><span class="p">][</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">snapshot</span>
+
+    <span class="k">def</span> <span class="nf">read_snapshot_partitions</span><span class="p">(</span>
+
+        <span class="bp">self</span><span class="p">,</span> <span class="n">snapshot</span><span class="p">:</span> <span class="n">GraphSnapshot</span><span class="p">,</span> <span class="n">artifact_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">artifact</span><span class="p">:</span> <span class="n">Artifact</span>
 
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">StoragePartitions</span><span class="p">:</span>
 
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">snapshot_partitions</span><span class="p">[</span><span class="n">snapshot</span><span class="p">][</span><span class="n">artifact_key</span><span class="p">])</span>
 
-            <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">graph_snapshot_partitions</span><span class="p">[</span><span class="n">graph_name</span><span class="p">][</span><span class="n">graph_snapshot_id</span><span class="p">][</span><span class="n">artifact_key</span><span class="p">]</span>
-
-        <span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">write_graph_partitions</span><span class="p">(</span>
+    <span class="k">def</span> <span class="nf">write_snapshot_partitions</span><span class="p">(</span>
 
         <span class="bp">self</span><span class="p">,</span>
 
-        <span class="n">graph_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-
-        <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="n">Fingerprint</span><span class="p">,</span>
+        <span class="n">snapshot</span><span class="p">:</span> <span class="n">GraphSnapshot</span><span class="p">,</span>
 
         <span class="n">artifact_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
 
@@ -1898,37 +2038,11 @@
 
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">graph_snapshot_partitions</span><span class="p">[</span><span class="n">graph_name</span><span class="p">][</span><span class="n">graph_snapshot_id</span><span class="p">][</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">snapshot_partitions</span><span class="p">[</span><span class="n">snapshot</span><span class="p">][</span><span class="n">artifact_key</span><span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span>
 
-            <span class="n">artifact_key</span>
+            <span class="n">_ensure_fingerprinted</span><span class="p">(</span><span class="n">partitions</span><span class="p">)</span>
 
-        <span class="p">]</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">_ensure_fingerprinted</span><span class="p">(</span><span class="n">partitions</span><span class="p">))</span>
-
-    <span class="k">def</span> <span class="nf">read_graph_tag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">graph_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
-
-        <span class="k">if</span> <span class="n">tag</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">graph_tags</span><span class="p">[</span><span class="n">graph_name</span><span class="p">]:</span>
-
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No known `</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">` tag for Graph `</span><span class="si">{</span><span class="n">graph_name</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">graph_tags</span><span class="p">[</span><span class="n">graph_name</span><span class="p">][</span><span class="n">tag</span><span class="p">]</span>
-
-    <span class="k">def</span> <span class="nf">write_graph_tag</span><span class="p">(</span>
-
-        <span class="bp">self</span><span class="p">,</span> <span class="n">graph_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="n">Fingerprint</span><span class="p">,</span> <span class="n">tag</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">overwrite</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Read the known Partitions for the named Artifact in a specific Graph snapshot.&quot;&quot;&quot;</span>
-
-        <span class="k">if</span> <span class="p">(</span>
-
-            <span class="n">existing</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">graph_tags</span><span class="p">[</span><span class="n">graph_name</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-
-        <span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">overwrite</span><span class="p">:</span>
-
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Existing `</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">` tag for Graph `</span><span class="si">{</span><span class="n">graph_name</span><span class="si">}</span><span class="s2">` points to </span><span class="si">{</span><span class="n">existing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">container</span><span class="o">.</span><span class="n">graph_tags</span><span class="p">[</span><span class="n">graph_name</span><span class="p">][</span><span class="n">tag</span><span class="p">]</span> <span class="o">=</span> <span class="n">graph_snapshot_id</span>
+        <span class="p">)</span>
 
 <span class="k">class</span> <span class="nc">MemoryBackend</span><span class="p">(</span><span class="n">Backend</span><span class="p">[</span><span class="n">MemoryConnection</span><span class="p">]):</span>
 
@@ -2074,12 +2188,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </details>
 <h4 id="copy">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -2143,7 +2257,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -2279,25 +2393,65 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="w">        </span><span class="p">)</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_graph_partitions</span><span class="p">(</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_graph</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Graph</span><span class="p">:</span>
 
-<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_snapshot_id</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact_key</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact</span><span class="p">:</span><span class="w"> </span><span class="n">Artifact</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graphs</span><span class="o">[</span><span class="n">name</span><span class="o">][</span><span class="n">fingerprint</span><span class="o">]</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_graph</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph</span><span class="p">:</span><span class="w"> </span><span class="n">Graph</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graphs</span><span class="o">[</span><span class="n">graph.name</span><span class="o">][</span><span class="n">graph.fingerprint</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_snapshot</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">GraphSnapshot</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshots</span><span class="o">[</span><span class="n">name</span><span class="o">][</span><span class="n">fingerprint</span><span class="o">]</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_snapshot</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshots</span><span class="o">[</span><span class="n">snapshot.name</span><span class="o">][</span><span class="n">snapshot.fingerprint</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snapshot</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_snapshot_tag</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">tag</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">GraphSnapshot</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">tag</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_tags</span><span class="o">[</span><span class="n">name</span><span class="o">]</span><span class="err">:</span>
+
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;No known `{tag}` tag for GraphSnapshot `{name}`&quot;</span><span class="p">)</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_tags</span><span class="o">[</span><span class="n">name</span><span class="o">][</span><span class="n">tag</span><span class="o">]</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_snapshot_tag</span><span class="p">(</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span><span class="w"> </span><span class="nl">tag</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">overwrite</span><span class="p">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">False</span>
+
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
+
+<span class="w">        </span><span class="ss">&quot;&quot;&quot;Read the known Partitions for the named Artifact in a specific GraphSnapshot.&quot;&quot;&quot;</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span>
+
+<span class="w">            </span><span class="n">existing</span><span class="w"> </span><span class="err">:</span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_tags</span><span class="o">[</span><span class="n">snapshot.name</span><span class="o">]</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+
+<span class="w">        </span><span class="p">)</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nl">overwrite</span><span class="p">:</span>
+
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span>
+
+<span class="w">                </span><span class="n">f</span><span class="ss">&quot;Existing `{tag}` tag for Graph `{snapshot.name}` points to {existing}&quot;</span>
+
+<span class="w">            </span><span class="p">)</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_tags</span><span class="o">[</span><span class="n">snapshot.name</span><span class="o">][</span><span class="n">tag</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snapshot</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_snapshot_partitions</span><span class="p">(</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact_key</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact</span><span class="p">:</span><span class="w"> </span><span class="n">Artifact</span>
 
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">StoragePartitions</span><span class="p">:</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_partitions</span><span class="o">[</span><span class="n">snapshot</span><span class="o">][</span><span class="n">artifact_key</span><span class="o">]</span><span class="p">)</span>
 
-<span class="w">            </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_snapshot_partitions</span><span class="o">[</span><span class="n">graph_name</span><span class="o">][</span><span class="n">graph_snapshot_id</span><span class="o">][</span><span class="n">artifact_key</span><span class="o">]</span>
-
-<span class="w">        </span><span class="p">)</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_graph_partitions</span><span class="p">(</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_snapshot_partitions</span><span class="p">(</span>
 
 <span class="w">        </span><span class="n">self</span><span class="p">,</span>
 
-<span class="w">        </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span>
-
-<span class="w">        </span><span class="nl">graph_snapshot_id</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">,</span>
+<span class="w">        </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span>
 
 <span class="w">        </span><span class="nl">artifact_key</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span>
 
@@ -2307,37 +2461,11 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_snapshot_partitions</span><span class="o">[</span><span class="n">graph_name</span><span class="o">][</span><span class="n">graph_snapshot_id</span><span class="o">][</span>
+<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_partitions</span><span class="o">[</span><span class="n">snapshot</span><span class="o">][</span><span class="n">artifact_key</span><span class="o">]</span><span class="p">.</span><span class="k">update</span><span class="p">(</span>
 
-<span class="n">            artifact_key</span>
+<span class="w">            </span><span class="n">_ensure_fingerprinted</span><span class="p">(</span><span class="n">partitions</span><span class="p">)</span>
 
-<span class="n">        </span><span class="o">]</span><span class="p">.</span><span class="k">update</span><span class="p">(</span><span class="n">_ensure_fingerprinted</span><span class="p">(</span><span class="n">partitions</span><span class="p">))</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_graph_tag</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">tag</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">tag</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_tags</span><span class="o">[</span><span class="n">graph_name</span><span class="o">]</span><span class="err">:</span>
-
-<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;No known `{tag}` tag for Graph `{graph_name}`&quot;</span><span class="p">)</span>
-
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_tags</span><span class="o">[</span><span class="n">graph_name</span><span class="o">][</span><span class="n">tag</span><span class="o">]</span>
-
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_graph_tag</span><span class="p">(</span>
-
-<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_snapshot_id</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">,</span><span class="w"> </span><span class="nl">tag</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">overwrite</span><span class="p">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">False</span>
-
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
-
-<span class="w">        </span><span class="ss">&quot;&quot;&quot;Read the known Partitions for the named Artifact in a specific Graph snapshot.&quot;&quot;&quot;</span>
-
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span>
-
-<span class="w">            </span><span class="n">existing</span><span class="w"> </span><span class="err">:</span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_tags</span><span class="o">[</span><span class="n">graph_name</span><span class="o">]</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
-
-<span class="w">        </span><span class="p">)</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nl">overwrite</span><span class="p">:</span>
-
-<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Existing `{tag}` tag for Graph `{graph_name}` points to {existing}&quot;</span><span class="p">)</span>
-
-<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_tags</span><span class="o">[</span><span class="n">graph_name</span><span class="o">][</span><span class="n">tag</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph_snapshot_id</span>
+<span class="w">        </span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -2347,6 +2475,36 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <li>arti.backends.Connection</li>
 </ul>
 <h4 id="methods_1">Methods</h4>
+<h4 id="connect_1">connect</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">connect</span><span class="p">(</span>
+    <span class="bp">self</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Iterator[Self]&#39;</span>
+</code></pre></div>
+
+<p>Return self</p>
+<p>This makes it easier to work with an Optional connection, eg:
+    with (connection or backend).connect() as conn:
+        ...</p>
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="nv">@contextmanager</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="k">connect</span><span class="p">(</span><span class="n">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Iterator</span><span class="o">[</span><span class="n">Self</span><span class="o">]</span><span class="err">:</span>
+
+<span class="w">        </span><span class="ss">&quot;&quot;&quot;Return self</span>
+
+<span class="ss">        This makes it easier to work with an Optional connection, eg:</span>
+
+<span class="ss">            with (connection or backend).connect() as conn:</span>
+
+<span class="ss">                ...</span>
+
+<span class="ss">        &quot;&quot;&quot;</span>
+
+<span class="w">        </span><span class="n">yield</span><span class="w"> </span><span class="n">self</span>
+</code></pre></div>
+
+</details>
 <h4 id="read_artifact_partitions">read_artifact_partitions</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read_artifact_partitions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
@@ -2358,7 +2516,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <p>Read all known Partitions for this Storage spec.</p>
 <p>If <code>input_fingerprints</code> is provided, the returned partitions will be filtered accordingly.</p>
 <p>NOTE: The returned partitions may not be associated with any particular Graph, unless
-<code>input_fingerprints</code> is provided matching those for a Graph snapshot.</p>
+<code>input_fingerprints</code> is provided matching those for a GraphSnapshot.</p>
 <details class="example">
 <summary>View Source</summary>
 <div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_artifact_partitions</span><span class="p">(</span>
@@ -2397,63 +2555,91 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </code></pre></div>
 
 </details>
-<h4 id="read_graph_partitions">read_graph_partitions</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read_graph_partitions</span><span class="p">(</span>
+<h4 id="read_graph">read_graph</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read_graph</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">graph_name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
-    <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="s1">&#39;Fingerprint&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
+    <span class="n">fingerprint</span><span class="p">:</span> <span class="s1">&#39;Fingerprint&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Graph&#39;</span>
+</code></pre></div>
+
+<p>Fetch an instance of the named Graph.</p>
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_graph</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Graph</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graphs</span><span class="o">[</span><span class="n">name</span><span class="o">][</span><span class="n">fingerprint</span><span class="o">]</span>
+</code></pre></div>
+
+</details>
+<h4 id="read_snapshot">read_snapshot</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read_snapshot</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
+    <span class="n">fingerprint</span><span class="p">:</span> <span class="s1">&#39;Fingerprint&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;GraphSnapshot&#39;</span>
+</code></pre></div>
+
+<p>Fetch an instance of the named GraphSnapshot.</p>
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_snapshot</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">fingerprint</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">GraphSnapshot</span><span class="p">:</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshots</span><span class="o">[</span><span class="n">name</span><span class="o">][</span><span class="n">fingerprint</span><span class="o">]</span>
+</code></pre></div>
+
+</details>
+<h4 id="read_snapshot_partitions">read_snapshot_partitions</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read_snapshot_partitions</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="s1">&#39;GraphSnapshot&#39;</span><span class="p">,</span>
     <span class="n">artifact_key</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
     <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;StoragePartitions&#39;</span>
 </code></pre></div>
 
-<p>Read the known Partitions for the named Artifact in a specific Graph snapshot.</p>
+<p>Read the known Partitions for the named Artifact in a specific GraphSnapshot.</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_graph_partitions</span><span class="p">(</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_snapshot_partitions</span><span class="p">(</span>
 
-<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_snapshot_id</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact_key</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact</span><span class="p">:</span><span class="w"> </span><span class="n">Artifact</span>
+<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact_key</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">artifact</span><span class="p">:</span><span class="w"> </span><span class="n">Artifact</span>
 
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">StoragePartitions</span><span class="p">:</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span>
-
-<span class="w">            </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_snapshot_partitions</span><span class="o">[</span><span class="n">graph_name</span><span class="o">][</span><span class="n">graph_snapshot_id</span><span class="o">][</span><span class="n">artifact_key</span><span class="o">]</span>
-
-<span class="w">        </span><span class="p">)</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_partitions</span><span class="o">[</span><span class="n">snapshot</span><span class="o">][</span><span class="n">artifact_key</span><span class="o">]</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
-<h4 id="read_graph_tag">read_graph_tag</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read_graph_tag</span><span class="p">(</span>
+<h4 id="read_snapshot_tag">read_snapshot_tag</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">read_snapshot_tag</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">graph_name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
+    <span class="n">name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
     <span class="n">tag</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Fingerprint&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;GraphSnapshot&#39;</span>
 </code></pre></div>
 
-<p>Fetch the Snapshot ID for the named tag.</p>
+<p>Fetch the GraphSnapshot for the named tag.</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_graph_tag</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">tag</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">Fingerprint</span><span class="p">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">read_snapshot_tag</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">tag</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nl">GraphSnapshot</span><span class="p">:</span>
 
-<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">tag</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_tags</span><span class="o">[</span><span class="n">graph_name</span><span class="o">]</span><span class="err">:</span>
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">tag</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_tags</span><span class="o">[</span><span class="n">name</span><span class="o">]</span><span class="err">:</span>
 
-<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;No known `{tag}` tag for Graph `{graph_name}`&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;No known `{tag}` tag for GraphSnapshot `{name}`&quot;</span><span class="p">)</span>
 
-<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_tags</span><span class="o">[</span><span class="n">graph_name</span><span class="o">][</span><span class="n">tag</span><span class="o">]</span>
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_tags</span><span class="o">[</span><span class="n">name</span><span class="o">][</span><span class="n">tag</span><span class="o">]</span>
 </code></pre></div>
 
 </details>
 <h4 id="write_artifact_and_graph_partitions">write_artifact_and_graph_partitions</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_artifact_and_graph_partitions</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">artifact</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">artifacts</span><span class="o">.</span><span class="n">Artifact</span><span class="p">,</span>
-    <span class="n">partitions</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">storage</span><span class="o">.</span><span class="n">StoragePartition</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
-    <span class="n">graph_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-    <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="o">.</span><span class="n">Fingerprint</span><span class="p">,</span>
-    <span class="n">artifact_key</span><span class="p">:</span> <span class="nb">str</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="s1">&#39;GraphSnapshot&#39;</span><span class="p">,</span>
+    <span class="n">artifact_key</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
+    <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span><span class="p">,</span>
+    <span class="n">partitions</span><span class="p">:</span> <span class="s1">&#39;StoragePartitions&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2462,25 +2648,19 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="w">        </span><span class="kr">self</span><span class="p">,</span>
 
+<span class="w">        </span><span class="n">snapshot</span><span class="o">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span>
+
+<span class="w">        </span><span class="n">artifact_key</span><span class="o">:</span><span class="w"> </span><span class="n">str</span><span class="p">,</span>
+
 <span class="w">        </span><span class="n">artifact</span><span class="o">:</span><span class="w"> </span><span class="n">Artifact</span><span class="p">,</span>
 
 <span class="w">        </span><span class="n">partitions</span><span class="o">:</span><span class="w"> </span><span class="n">StoragePartitions</span><span class="p">,</span>
-
-<span class="w">        </span><span class="n">graph_name</span><span class="o">:</span><span class="w"> </span><span class="n">str</span><span class="p">,</span>
-
-<span class="w">        </span><span class="n">graph_snapshot_id</span><span class="o">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">,</span>
-
-<span class="w">        </span><span class="n">artifact_key</span><span class="o">:</span><span class="w"> </span><span class="n">str</span><span class="p">,</span>
 
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">None</span><span class="o">:</span>
 
 <span class="w">        </span><span class="kr">self</span><span class="p">.</span><span class="n">write_artifact_partitions</span><span class="p">(</span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span><span class="p">)</span>
 
-<span class="w">        </span><span class="kr">self</span><span class="p">.</span><span class="n">write_graph_partitions</span><span class="p">(</span>
-
-<span class="w">            </span><span class="n">graph_name</span><span class="p">,</span><span class="w"> </span><span class="n">graph_snapshot_id</span><span class="p">,</span><span class="w"> </span><span class="n">artifact_key</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span>
-
-<span class="w">        </span><span class="p">)</span>
+<span class="w">        </span><span class="kr">self</span><span class="p">.</span><span class="n">write_snapshot_partitions</span><span class="p">(</span><span class="n">snapshot</span><span class="p">,</span><span class="w"> </span><span class="n">artifact_key</span><span class="p">,</span><span class="w"> </span><span class="n">artifact</span><span class="p">,</span><span class="w"> </span><span class="n">partitions</span><span class="p">)</span>
 </code></pre></div>
 
 </details>
@@ -2505,27 +2685,56 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </code></pre></div>
 
 </details>
-<h4 id="write_graph_partitions">write_graph_partitions</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_graph_partitions</span><span class="p">(</span>
+<h4 id="write_graph">write_graph</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_graph</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">graph_name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
-    <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="s1">&#39;Fingerprint&#39;</span><span class="p">,</span>
+    <span class="n">graph</span><span class="p">:</span> <span class="s1">&#39;Graph&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
+</code></pre></div>
+
+<p>Write the Graph and all linked Artifacts and Producers to the database.</p>
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_graph</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span><span class="w"> </span><span class="nf">graph</span><span class="o">:</span><span class="w"> </span><span class="nf">Graph</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">None</span><span class="o">:</span>
+
+<span class="w">        </span><span class="kr">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graphs</span><span class="p">[</span><span class="nf">graph</span><span class="p">.</span><span class="n">name</span><span class="p">][</span><span class="nf">graph</span><span class="p">.</span><span class="n">fingerprint</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">graph</span>
+</code></pre></div>
+
+</details>
+<h4 id="write_snapshot">write_snapshot</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_snapshot</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="s1">&#39;GraphSnapshot&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
+</code></pre></div>
+
+<p>Write the GraphSnapshot to the database.</p>
+<details class="example">
+<summary>View Source</summary>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_snapshot</span><span class="p">(</span><span class="kr">self</span><span class="p">,</span><span class="w"> </span><span class="n">snapshot</span><span class="o">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">None</span><span class="o">:</span>
+
+<span class="w">        </span><span class="kr">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshots</span><span class="p">[</span><span class="n">snapshot</span><span class="p">.</span><span class="n">name</span><span class="p">][</span><span class="n">snapshot</span><span class="p">.</span><span class="n">fingerprint</span><span class="p">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snapshot</span>
+</code></pre></div>
+
+</details>
+<h4 id="write_snapshot_partitions">write_snapshot_partitions</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_snapshot_partitions</span><span class="p">(</span>
+    <span class="bp">self</span><span class="p">,</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="s1">&#39;GraphSnapshot&#39;</span><span class="p">,</span>
     <span class="n">artifact_key</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
     <span class="n">artifact</span><span class="p">:</span> <span class="s1">&#39;Artifact&#39;</span><span class="p">,</span>
     <span class="n">partitions</span><span class="p">:</span> <span class="s1">&#39;StoragePartitions&#39;</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
-<p>Link the Partitions to the named Artifact in a specific Graph snapshot.</p>
+<p>Link the Partitions to the named Artifact in a specific GraphSnapshot.</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_graph_partitions</span><span class="p">(</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_snapshot_partitions</span><span class="p">(</span>
 
 <span class="w">        </span><span class="n">self</span><span class="p">,</span>
 
-<span class="w">        </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span>
-
-<span class="w">        </span><span class="nl">graph_snapshot_id</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">,</span>
+<span class="w">        </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span>
 
 <span class="w">        </span><span class="nl">artifact_key</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span>
 
@@ -2535,44 +2744,47 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_snapshot_partitions</span><span class="o">[</span><span class="n">graph_name</span><span class="o">][</span><span class="n">graph_snapshot_id</span><span class="o">][</span>
+<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_partitions</span><span class="o">[</span><span class="n">snapshot</span><span class="o">][</span><span class="n">artifact_key</span><span class="o">]</span><span class="p">.</span><span class="k">update</span><span class="p">(</span>
 
-<span class="n">            artifact_key</span>
+<span class="w">            </span><span class="n">_ensure_fingerprinted</span><span class="p">(</span><span class="n">partitions</span><span class="p">)</span>
 
-<span class="n">        </span><span class="o">]</span><span class="p">.</span><span class="k">update</span><span class="p">(</span><span class="n">_ensure_fingerprinted</span><span class="p">(</span><span class="n">partitions</span><span class="p">))</span>
+<span class="w">        </span><span class="p">)</span>
 </code></pre></div>
 
 </details>
-<h4 id="write_graph_tag">write_graph_tag</h4>
-<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_graph_tag</span><span class="p">(</span>
+<h4 id="write_snapshot_tag">write_snapshot_tag</h4>
+<div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">write_snapshot_tag</span><span class="p">(</span>
     <span class="bp">self</span><span class="p">,</span>
-    <span class="n">graph_name</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
-    <span class="n">graph_snapshot_id</span><span class="p">:</span> <span class="s1">&#39;Fingerprint&#39;</span><span class="p">,</span>
+    <span class="n">snapshot</span><span class="p">:</span> <span class="s1">&#39;GraphSnapshot&#39;</span><span class="p">,</span>
     <span class="n">tag</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span><span class="p">,</span>
     <span class="n">overwrite</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;None&#39;</span>
 </code></pre></div>
 
-<p>Read the known Partitions for the named Artifact in a specific Graph snapshot.</p>
+<p>Read the known Partitions for the named Artifact in a specific GraphSnapshot.</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_graph_tag</span><span class="p">(</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">write_snapshot_tag</span><span class="p">(</span>
 
-<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_name</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">graph_snapshot_id</span><span class="p">:</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">,</span><span class="w"> </span><span class="nl">tag</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">overwrite</span><span class="p">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">False</span>
+<span class="w">        </span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="nl">snapshot</span><span class="p">:</span><span class="w"> </span><span class="n">GraphSnapshot</span><span class="p">,</span><span class="w"> </span><span class="nl">tag</span><span class="p">:</span><span class="w"> </span><span class="nf">str</span><span class="p">,</span><span class="w"> </span><span class="nl">overwrite</span><span class="p">:</span><span class="w"> </span><span class="n">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">False</span>
 
 <span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="k">None</span><span class="err">:</span>
 
-<span class="w">        </span><span class="ss">&quot;&quot;&quot;Read the known Partitions for the named Artifact in a specific Graph snapshot.&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="ss">&quot;&quot;&quot;Read the known Partitions for the named Artifact in a specific GraphSnapshot.&quot;&quot;&quot;</span>
 
 <span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="p">(</span>
 
-<span class="w">            </span><span class="n">existing</span><span class="w"> </span><span class="err">:</span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_tags</span><span class="o">[</span><span class="n">graph_name</span><span class="o">]</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
+<span class="w">            </span><span class="n">existing</span><span class="w"> </span><span class="err">:</span><span class="o">=</span><span class="w"> </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_tags</span><span class="o">[</span><span class="n">snapshot.name</span><span class="o">]</span><span class="p">.</span><span class="k">get</span><span class="p">(</span><span class="n">tag</span><span class="p">)</span>
 
 <span class="w">        </span><span class="p">)</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="k">None</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="nl">overwrite</span><span class="p">:</span>
 
-<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span><span class="n">f</span><span class="ss">&quot;Existing `{tag}` tag for Graph `{graph_name}` points to {existing}&quot;</span><span class="p">)</span>
+<span class="w">            </span><span class="n">raise</span><span class="w"> </span><span class="n">ValueError</span><span class="p">(</span>
 
-<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">graph_tags</span><span class="o">[</span><span class="n">graph_name</span><span class="o">][</span><span class="n">tag</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">graph_snapshot_id</span>
+<span class="w">                </span><span class="n">f</span><span class="ss">&quot;Existing `{tag}` tag for Graph `{snapshot.name}` points to {existing}&quot;</span>
+
+<span class="w">            </span><span class="p">)</span>
+
+<span class="w">        </span><span class="n">self</span><span class="p">.</span><span class="n">container</span><span class="p">.</span><span class="n">snapshot_tags</span><span class="o">[</span><span class="n">snapshot.name</span><span class="o">][</span><span class="n">tag</span><span class="o">]</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">snapshot</span>
 </code></pre></div>
 
 </details>

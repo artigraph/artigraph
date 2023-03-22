@@ -1267,7 +1267,9 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="kn">import</span> <span class="nn">json</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
 
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 
@@ -1327,11 +1329,9 @@
 
         <span class="p">)</span>
 
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">storage_partitions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>  <span class="c1"># Better error handled in base read</span>
 
-        <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">storage_partitions</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>  <span class="c1"># Better error handled in base read</span>
-
-        <span class="k">return</span> <span class="n">_read_json_file</span><span class="p">(</span><span class="n">storage_partitions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">qualified_path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_read_json_file</span><span class="p">(</span><span class="n">storage_partitions</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">qualified_path</span><span class="p">)</span>
 
 <span class="nd">@register_writer</span>
 

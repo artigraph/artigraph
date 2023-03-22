@@ -1656,7 +1656,9 @@
 <p>None</p>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
+<div class="codehilite"><pre><span></span><code><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Generator</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Sequence</span>
 
 <span class="kn">from</span> <span class="nn">copy</span> <span class="kn">import</span> <span class="n">deepcopy</span>
 
@@ -1678,11 +1680,15 @@
 
     <span class="n">TypeVar</span><span class="p">,</span>
 
+    <span class="n">Union</span><span class="p">,</span>
+
     <span class="n">get_args</span><span class="p">,</span>
 
     <span class="n">get_origin</span><span class="p">,</span>
 
 <span class="p">)</span>
+
+<span class="kn">from</span> <span class="nn">box</span> <span class="kn">import</span> <span class="n">Box</span>
 
 <span class="kn">from</span> <span class="nn">pydantic</span> <span class="kn">import</span> <span class="n">BaseModel</span><span class="p">,</span> <span class="n">Extra</span><span class="p">,</span> <span class="n">root_validator</span><span class="p">,</span> <span class="n">validator</span>
 
@@ -1690,17 +1696,19 @@
 
 <span class="kn">from</span> <span class="nn">pydantic.json</span> <span class="kn">import</span> <span class="n">pydantic_encoder</span> <span class="k">as</span> <span class="n">pydantic_json_encoder</span>
 
-<span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">is_union</span><span class="p">,</span> <span class="n">lenient_issubclass</span>
+<span class="kn">from</span> <span class="nn">arti.internal.type_hints</span> <span class="kn">import</span> <span class="n">Self</span><span class="p">,</span> <span class="n">is_union</span><span class="p">,</span> <span class="n">lenient_issubclass</span>
 
 <span class="kn">from</span> <span class="nn">arti.internal.utils</span> <span class="kn">import</span> <span class="n">class_name</span><span class="p">,</span> <span class="n">frozendict</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
 
+    <span class="kn">from</span> <span class="nn">pydantic.typing</span> <span class="kn">import</span> <span class="n">AbstractSetIntStr</span><span class="p">,</span> <span class="n">MappingIntStrAny</span>
+
     <span class="kn">from</span> <span class="nn">arti.fingerprints</span> <span class="kn">import</span> <span class="n">Fingerprint</span>
 
     <span class="kn">from</span> <span class="nn">arti.types</span> <span class="kn">import</span> <span class="n">Type</span>
 
-<span class="k">def</span> <span class="nf">_check_types</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>  <span class="c1"># noqa: C901</span>
+<span class="k">def</span> <span class="nf">_check_types</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="nb">type</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
 
     <span class="n">mismatch_error</span> <span class="o">=</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;expected an instance of </span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s2">, got: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -1788,9 +1796,17 @@
 
         <span class="k">if</span> <span class="nb">set</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">==</span> <span class="p">{</span><span class="n">Any</span><span class="p">}:</span>
 
-            <span class="k">return</span> <span class="n">_check_types</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">origin</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">_check_types</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">origin</span><span class="p">)</span>  <span class="c1"># pragma: no cover</span>
 
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing handler for </span><span class="si">{</span><span class="n">type_</span><span class="si">}</span><span class="s2"> with </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">!&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">origin</span><span class="p">):</span>  <span class="c1"># Other Generic args can&#39;t really be checked generally</span>
+
+            <span class="k">return</span> <span class="n">value</span>
+
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;expected a instance of </span><span class="si">{</span><span class="n">origin</span><span class="si">}</span><span class="s2">, got: </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>  <span class="c1"># pragma: no cover</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">type_</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">):</span>
+
+        <span class="k">return</span> <span class="n">value</span>  <span class="c1"># TODO: Check __bound__, __covariant__, __contravariant__</span>
 
     <span class="c1"># Models are immutable, so we convert all Mappings to frozendicts.</span>
 
@@ -1840,7 +1856,7 @@
 
         <span class="c1"># Default _abstract_ to False if not set explicitly on the class. __dict__ is read-only.</span>
 
-        <span class="nb">setattr</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">))</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_abstract_</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
         <span class="n">field_names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
 
@@ -1918,6 +1934,26 @@
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="vm">__class__</span> <span class="ow">and</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span>
 
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+
+        <span class="c1"># Override the default __hash__ to match the fingerprint, which notably excludes</span>
+
+        <span class="c1"># `cached_property`s.</span>
+
+        <span class="c1">#</span>
+
+        <span class="c1"># If `cached_property`s are included, the hash will be different before and after caching,</span>
+
+        <span class="c1"># which wrecks havoc if a model is a key in a dict (`key in mydict` will be `False`...).</span>
+
+        <span class="c1">#</span>
+
+        <span class="c1"># This is only safe as the models are (mostly) frozen.</span>
+
+        <span class="k">assert</span> <span class="p">(</span><span class="n">key</span> <span class="o">:=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fingerprint</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+
+        <span class="k">return</span> <span class="n">key</span>
+
     <span class="c1"># Omitting unpassed args in repr by default</span>
 
     <span class="k">def</span> <span class="nf">__repr_args__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">Any</span><span class="p">]]:</span>
@@ -1942,7 +1978,7 @@
 
         <span class="n">validate_assignment</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># Unused with frozen, unless that is overridden in subclass.</span>
 
-    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="n">_Model</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">_Model</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Self</span><span class="p">:</span>
 
         <span class="n">copy</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -2000,11 +2036,15 @@
 
             <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">fingerprint</span>
 
+        <span class="k">if</span> <span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
+
+            <span class="k">return</span> <span class="n">obj</span><span class="o">.</span><span class="n">_class_key_</span>  <span class="c1"># eg: View.artifact_class</span>
+
         <span class="k">return</span> <span class="n">encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
     <span class="nd">@property</span>
 
-    <span class="k">def</span> <span class="nf">fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Fingerprint</span><span class="p">:</span>
 
         <span class="kn">from</span> <span class="nn">arti.fingerprints</span> <span class="kn">import</span> <span class="n">Fingerprint</span>
 
@@ -2038,9 +2078,69 @@
 
             <span class="n">default</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_json_encoder</span><span class="p">,</span> <span class="n">encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__json_encoder__</span><span class="p">),</span>
 
+            <span class="n">sort_keys</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+
         <span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Fingerprint</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_class_key_</span><span class="si">}</span><span class="s2">:</span><span class="si">{</span><span class="n">json_repr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+
+    <span class="k">def</span> <span class="nf">_get_value</span><span class="p">(</span>
+
+        <span class="bp">cls</span><span class="p">,</span>
+
+        <span class="n">v</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span>
+
+        <span class="n">to_dict</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+
+        <span class="n">by_alias</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+
+        <span class="n">include</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">AbstractSetIntStr</span><span class="p">,</span> <span class="n">MappingIntStrAny</span><span class="p">]],</span>
+
+        <span class="n">exclude</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">AbstractSetIntStr</span><span class="p">,</span> <span class="n">MappingIntStrAny</span><span class="p">]],</span>
+
+        <span class="n">exclude_unset</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+
+        <span class="n">exclude_defaults</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+
+        <span class="n">exclude_none</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
+
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span>
+
+            <span class="n">v</span><span class="p">,</span>
+
+            <span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span>
+
+            <span class="n">by_alias</span><span class="o">=</span><span class="n">by_alias</span><span class="p">,</span>
+
+            <span class="n">include</span><span class="o">=</span><span class="n">include</span><span class="p">,</span>
+
+            <span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>
+
+            <span class="n">exclude_unset</span><span class="o">=</span><span class="n">exclude_unset</span><span class="p">,</span>
+
+            <span class="n">exclude_defaults</span><span class="o">=</span><span class="n">exclude_defaults</span><span class="p">,</span>
+
+            <span class="n">exclude_none</span><span class="o">=</span><span class="n">exclude_none</span><span class="p">,</span>
+
+        <span class="p">)</span>
+
+        <span class="c1"># Copying dict subclasses doesn&#39;t preserve the subclass[1]. Further, we have extra Box</span>
+
+        <span class="c1"># configuration (namely frozen_box=True) we need to preserve.</span>
+
+        <span class="c1">#</span>
+
+        <span class="c1"># 1: https://github.com/pydantic/pydantic/issues/5225</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">Box</span><span class="p">):</span>
+
+            <span class="k">return</span> <span class="n">v</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">new</span><span class="p">,</span> <span class="o">**</span><span class="n">v</span><span class="o">.</span><span class="n">_Box__box_config</span><span class="p">())</span>
+
+        <span class="k">return</span> <span class="n">new</span>
 
     <span class="c1"># Filter out non-fields from ._iter (and thus .dict, .json, etc), such as `@cached_property`</span>
 
@@ -2058,9 +2158,9 @@
 
     <span class="k">def</span> <span class="nf">_pydantic_type_system_post_field_conversion_hook_</span><span class="p">(</span>
 
-        <span class="bp">cls</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">type_</span><span class="p">:</span> <span class="n">Type</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">required</span><span class="p">:</span> <span class="nb">bool</span>
 
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Type&quot;</span><span class="p">:</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Type</span><span class="p">:</span>
 
         <span class="k">return</span> <span class="n">type_</span>
 
@@ -2077,9 +2177,9 @@
 <h2 id="functions">Functions</h2>
 <h3 id="get_field_default">get_field_default</h3>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">get_field_default</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">:</span> <span class="nb">type</span><span class="p">[</span><span class="n">arti</span><span class="o">.</span><span class="n">internal</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">Model</span><span class="p">],</span>
-    <span class="n">field</span><span class="p">:</span> <span class="nb">str</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span>
+    <span class="n">model</span><span class="p">:</span> <span class="s1">&#39;type[Model]&#39;</span><span class="p">,</span>
+    <span class="n">field</span><span class="p">:</span> <span class="s1">&#39;str&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Optional[Any]&#39;</span>
 </code></pre></div>
 
 <details class="example">
@@ -2130,7 +2230,7 @@
 
 <span class="w">        </span><span class="c1"># Default _abstract_ to False if not set explicitly on the class. __dict__ is read-only.</span>
 
-<span class="w">        </span><span class="n">setattr</span><span class="p">(</span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">cls</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">False</span><span class="p">))</span>
+<span class="w">        </span><span class="n">cls</span><span class="o">.</span><span class="n">_abstract_</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">cls</span><span class="o">.</span><span class="n">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;_abstract_&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">False</span><span class="p">)</span>
 
 <span class="w">        </span><span class="n">field_names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">set</span><span class="p">(</span><span class="n">cls</span><span class="o">.</span><span class="n">__fields__</span><span class="p">)</span>
 
@@ -2208,6 +2308,26 @@
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">__class__</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">other</span><span class="o">.</span><span class="n">__class__</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="n">tuple</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_iter</span><span class="p">())</span>
 
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="nb nb-Type">int</span><span class="p">:</span>
+
+<span class="w">        </span><span class="c1"># Override the default __hash__ to match the fingerprint, which notably excludes</span>
+
+<span class="w">        </span><span class="c1"># `cached_property`s.</span>
+
+<span class="w">        </span><span class="c1">#</span>
+
+<span class="w">        </span><span class="c1"># If `cached_property`s are included, the hash will be different before and after caching,</span>
+
+<span class="w">        </span><span class="c1"># which wrecks havoc if a model is a key in a dict (`key in mydict` will be `False`...).</span>
+
+<span class="w">        </span><span class="c1">#</span>
+
+<span class="w">        </span><span class="c1"># This is only safe as the models are (mostly) frozen.</span>
+
+<span class="w">        </span><span class="nb">assert</span><span class="w"> </span><span class="p">(</span><span class="n">key</span><span class="w"> </span><span class="p">:</span><span class="o">=</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">fingerprint</span><span class="o">.</span><span class="n">key</span><span class="p">)</span><span class="w"> </span><span class="k">is</span><span class="w"> </span><span class="ow">not</span><span class="w"> </span><span class="n">None</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">key</span>
+
 <span class="w">    </span><span class="c1"># Omitting unpassed args in repr by default</span>
 
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">__repr_args__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Sequence</span><span class="p">[</span><span class="n">tuple</span><span class="p">[</span><span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span><span class="w"> </span><span class="n">Any</span><span class="p">]]:</span>
@@ -2232,7 +2352,7 @@
 
 <span class="w">        </span><span class="n">validate_assignment</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">True</span><span class="w">  </span><span class="c1"># Unused with frozen, unless that is overridden in subclass.</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="p">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="p">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
@@ -2290,11 +2410,15 @@
 
 <span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">obj</span><span class="o">.</span><span class="n">fingerprint</span>
 
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">lenient_issubclass</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span><span class="w"> </span><span class="n">Model</span><span class="p">):</span>
+
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">obj</span><span class="o">.</span><span class="n">_class_key_</span><span class="w">  </span><span class="c1"># eg: View.artifact_class</span>
+
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">encoder</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
 
 <span class="w">    </span><span class="err">@</span><span class="n">property</span>
 
-<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s2">&quot;Fingerprint&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">fingerprint</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Fingerprint</span><span class="p">:</span>
 
 <span class="w">        </span><span class="n">from</span><span class="w"> </span><span class="n">arti</span><span class="o">.</span><span class="n">fingerprints</span><span class="w"> </span><span class="n">import</span><span class="w"> </span><span class="n">Fingerprint</span>
 
@@ -2328,9 +2452,69 @@
 
 <span class="w">            </span><span class="n">default</span><span class="o">=</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_fingerprint_json_encoder</span><span class="p">,</span><span class="w"> </span><span class="n">encoder</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">__json_encoder__</span><span class="p">),</span>
 
+<span class="w">            </span><span class="n">sort_keys</span><span class="o">=</span><span class="n">True</span><span class="p">,</span>
+
 <span class="w">        </span><span class="p">)</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">Fingerprint</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">f</span><span class="s2">&quot;{self._class_key_}:{json_repr}&quot;</span><span class="p">)</span>
+
+<span class="w">    </span><span class="err">@</span><span class="n">classmethod</span>
+
+<span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_get_value</span><span class="p">(</span>
+
+<span class="w">        </span><span class="n">cls</span><span class="p">,</span>
+
+<span class="w">        </span><span class="n">v</span><span class="p">:</span><span class="w"> </span><span class="n">Any</span><span class="p">,</span>
+
+<span class="w">        </span><span class="n">to_dict</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="p">,</span>
+
+<span class="w">        </span><span class="n">by_alias</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="p">,</span>
+
+<span class="w">        </span><span class="n">include</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">AbstractSetIntStr</span><span class="p">,</span><span class="w"> </span><span class="n">MappingIntStrAny</span><span class="p">]],</span>
+
+<span class="w">        </span><span class="n">exclude</span><span class="p">:</span><span class="w"> </span><span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">AbstractSetIntStr</span><span class="p">,</span><span class="w"> </span><span class="n">MappingIntStrAny</span><span class="p">]],</span>
+
+<span class="w">        </span><span class="n">exclude_unset</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="p">,</span>
+
+<span class="w">        </span><span class="n">exclude_defaults</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="p">,</span>
+
+<span class="w">        </span><span class="n">exclude_none</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span><span class="p">,</span>
+
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Any</span><span class="p">:</span>
+
+<span class="w">        </span><span class="n">new</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">super</span><span class="p">()</span><span class="o">.</span><span class="n">_get_value</span><span class="p">(</span>
+
+<span class="w">            </span><span class="n">v</span><span class="p">,</span>
+
+<span class="w">            </span><span class="n">to_dict</span><span class="o">=</span><span class="n">to_dict</span><span class="p">,</span>
+
+<span class="w">            </span><span class="n">by_alias</span><span class="o">=</span><span class="n">by_alias</span><span class="p">,</span>
+
+<span class="w">            </span><span class="n">include</span><span class="o">=</span><span class="n">include</span><span class="p">,</span>
+
+<span class="w">            </span><span class="n">exclude</span><span class="o">=</span><span class="n">exclude</span><span class="p">,</span>
+
+<span class="w">            </span><span class="n">exclude_unset</span><span class="o">=</span><span class="n">exclude_unset</span><span class="p">,</span>
+
+<span class="w">            </span><span class="n">exclude_defaults</span><span class="o">=</span><span class="n">exclude_defaults</span><span class="p">,</span>
+
+<span class="w">            </span><span class="n">exclude_none</span><span class="o">=</span><span class="n">exclude_none</span><span class="p">,</span>
+
+<span class="w">        </span><span class="p">)</span>
+
+<span class="w">        </span><span class="c1"># Copying dict subclasses doesn&#39;t preserve the subclass[1]. Further, we have extra Box</span>
+
+<span class="w">        </span><span class="c1"># configuration (namely frozen_box=True) we need to preserve.</span>
+
+<span class="w">        </span><span class="c1">#</span>
+
+<span class="w">        </span><span class="c1"># 1: https://github.com/pydantic/pydantic/issues/5225</span>
+
+<span class="w">        </span><span class="k">if</span><span class="w"> </span><span class="n">isinstance</span><span class="p">(</span><span class="n">v</span><span class="p">,</span><span class="w"> </span><span class="n">Box</span><span class="p">):</span>
+
+<span class="w">            </span><span class="k">return</span><span class="w"> </span><span class="n">v</span><span class="o">.</span><span class="n">__class__</span><span class="p">(</span><span class="n">new</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">v</span><span class="o">.</span><span class="n">_Box__box_config</span><span class="p">())</span>
+
+<span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">new</span>
 
 <span class="w">    </span><span class="c1"># Filter out non-fields from ._iter (and thus .dict, .json, etc), such as `@cached_property`</span>
 
@@ -2348,9 +2532,9 @@
 
 <span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">_pydantic_type_system_post_field_conversion_hook_</span><span class="p">(</span>
 
-<span class="w">        </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">type_</span><span class="p">:</span><span class="w"> </span><span class="s2">&quot;Type&quot;</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">required</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span>
+<span class="w">        </span><span class="n">cls</span><span class="p">,</span><span class="w"> </span><span class="n">type_</span><span class="p">:</span><span class="w"> </span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">name</span><span class="p">:</span><span class="w"> </span><span class="nb">str</span><span class="p">,</span><span class="w"> </span><span class="n">required</span><span class="p">:</span><span class="w"> </span><span class="nb nb-Type">bool</span>
 
-<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="s2">&quot;Type&quot;</span><span class="p">:</span>
+<span class="w">    </span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Type</span><span class="p">:</span>
 
 <span class="w">        </span><span class="k">return</span><span class="w"> </span><span class="n">type_</span>
 </code></pre></div>
@@ -2374,7 +2558,6 @@
 <li>arti.statistics.Statistic</li>
 <li>arti.fingerprints.Fingerprint</li>
 <li>arti.partitions.PartitionKey</li>
-<li>arti.storage._StorageMixin</li>
 <li>arti.storage.StoragePartition</li>
 <li>arti.storage.Storage</li>
 <li>arti.artifacts.Artifact</li>
@@ -2474,12 +2657,12 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 <h4 id="methods">Methods</h4>
 <h4 id="copy">copy</h4>
 <div class="codehilite"><pre><span></span><code><span class="k">def</span> <span class="nf">copy</span><span class="p">(</span>
-    <span class="bp">self</span><span class="p">:</span> <span class="o">~</span><span class="n">_Model</span><span class="p">,</span>
+    <span class="bp">self</span><span class="p">,</span>
     <span class="o">*</span><span class="p">,</span>
-    <span class="n">deep</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-    <span class="n">validate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="o">~</span><span class="n">_Model</span>
+    <span class="n">deep</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">validate</span><span class="p">:</span> <span class="s1">&#39;bool&#39;</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">&#39;Any&#39;</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">&#39;Self&#39;</span>
 </code></pre></div>
 
 <p>Duplicate a model, optionally choose which fields to include, exclude and change.</p>
@@ -2543,7 +2726,7 @@ Behaves as if <code>Config.extra = 'allow'</code> was set since it adds all pass
 </table>
 <details class="example">
 <summary>View Source</summary>
-<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="o">:</span><span class="w"> </span><span class="n">_Model</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">_Model</span><span class="o">:</span>
+<div class="codehilite"><pre><span></span><code><span class="w">    </span><span class="n">def</span><span class="w"> </span><span class="n">copy</span><span class="p">(</span><span class="n">self</span><span class="p">,</span><span class="w"> </span><span class="o">*</span><span class="p">,</span><span class="w"> </span><span class="n">deep</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">False</span><span class="p">,</span><span class="w"> </span><span class="n">validate</span><span class="o">:</span><span class="w"> </span><span class="kt">bool</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="no">True</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="o">:</span><span class="w"> </span><span class="k">Any</span><span class="p">)</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Self</span><span class="o">:</span>
 
 <span class="w">        </span><span class="n">copy</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">super</span><span class="p">().</span><span class="n">copy</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="n">deep</span><span class="p">,</span><span class="w"> </span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
