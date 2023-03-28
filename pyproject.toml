@@ -150,7 +150,10 @@ ignore = [
 ]
 
 [tool.ruff.per-file-ignores]
-"tests/*" = ["SIM117"]                           # disable merging `with pytest.raises(...)` contexts with others in one line
+"tests/*" = [
+    "S301",    # disable pickle.load warnings
+    "SIM117",  # disable merging `with pytest.raises(...)` contexts with others in one line
+]
 "tests/arti/storage/test_storage.py" = ["S108"]  # insecure usage of /tmp
 
 [tool.ruff.isort]
