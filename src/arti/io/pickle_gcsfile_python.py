@@ -20,7 +20,7 @@ from arti.views.python import PythonBuiltin
 def _read_pickle_file(path: str) -> Any:
     # TODO: GCSFileSystem needs to be injected somehow
     with GCSFileSystem().open(path, "rb") as file:
-        return pickle.load(file)  # nosec # User opted into pickle, ignore bandit check
+        return pickle.load(file)  # noqa: S301 # User opted into pickle, ignore bandit check
 
 
 @register_reader
