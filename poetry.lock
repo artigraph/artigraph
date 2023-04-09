@@ -2319,14 +2319,14 @@ testing = ["fields", "hunter", "process-tests", "pytest-xdist", "six", "virtuale
 
 [[package]]
 name = "pytest-pretty"
-version = "1.1.1"
+version = "1.2.0"
 description = "pytest plugin for printing summary data as I want it"
 category = "dev"
 optional = false
 python-versions = ">=3.7"
 files = [
-    {file = "pytest_pretty-1.1.1-py3-none-any.whl", hash = "sha256:22d19d319f2ce07d62ea64f487616d99433cae8530cd20813487bad8a7d5f088"},
-    {file = "pytest_pretty-1.1.1.tar.gz", hash = "sha256:dfabbeee334ff5e77f3f731623cd44f147b3db7001df8d9ef8ea1f54986b41e2"},
+    {file = "pytest_pretty-1.2.0-py3-none-any.whl", hash = "sha256:6f79122bf53864ae2951b6c9e94d7a06a87ef753476acd4588aeac018f062036"},
+    {file = "pytest_pretty-1.2.0.tar.gz", hash = "sha256:105a355f128e392860ad2c478ae173ff96d2f03044692f9818ff3d49205d3a60"},
 ]
 
 [package.dependencies]
