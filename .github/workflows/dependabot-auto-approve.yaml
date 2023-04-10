@@ -3,6 +3,7 @@ name: Dependabot auto-approve
 on: pull_request
 
 permissions:
+  contents: write
   pull-requests: write
 
 jobs:
@@ -11,18 +12,8 @@ jobs:
     if: ${{ github.actor == 'dependabot[bot]' }}
     steps:
       - name: Dependabot metadata
-        id: metadata
         uses: dependabot/fetch-metadata@v1
-        with:
-          github-token: "${{ secrets.GITHUB_TOKEN }}"
-      - name: Approve a PR
+      - name: Enable auto-merge
         env:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-          PR_URL: ${{github.event.pull_request.html_url}}
-        run: |
-          gh pr checkout "$PR_URL" # sets the upstream metadata for `gh pr status`
-          if [ "$(gh pr status --json reviewDecision -q .currentBranch.reviewDecision)" != "APPROVED" ]; then
-            gh pr review --approve -b "@dependabot merge" "${{ github.event.pull_request.html_url }}"
-          else
-            echo "PR already approved, skipping additional approvals to minimize emails/notification noise.";
-          fi
+        run: gh pr merge --auto --rebase "${{ github.event.pull_request.html_url }}"
