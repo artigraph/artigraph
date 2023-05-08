@@ -25,6 +25,11 @@ NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an obje
 
 
 def _check_issubclass(klass: Any, check_type: type) -> bool:
+    # sourcery skip: remove-redundant-if
+    #
+    # Sourcery may remove some redundant if statements, but they're required for mypy type narrowing
+    # (at least, without further refactoring).
+    #
     # If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the
     # metadata.
     klass = discard_Annotated(klass)
@@ -61,16 +66,21 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
         # The builtin mutable containers (list, dict, etc) are invariant (klass_args ==
         # check_type_args), but the interfaces (Mapping, Sequence, etc) and immutable containers are
         # covariant.
-        if check_type_args and not (
-            len(klass_args) == len(check_type_args)
-            and all(
-                # check subclass OR things like "..."
-                lenient_issubclass(klass_arg, check_type_arg) or klass_arg is check_type_arg
-                for (klass_arg, check_type_arg) in zip(klass_args, check_type_args)
+        return (
+            False
+            if (
+                check_type_args
+                and (
+                    len(klass_args) != len(check_type_args)
+                    or not all(
+                        # check subclass OR things like "..."
+                        lenient_issubclass(klass_arg, check_type_arg) or klass_arg is check_type_arg
+                        for (klass_arg, check_type_arg) in zip(klass_args, check_type_args)
+                    )
+                )
             )
-        ):
-            return False
-        return lenient_issubclass(klass_origin, check_type_origin)
+            else lenient_issubclass(klass_origin, check_type_origin)
+        )
     # Shouldn't happen, but need to explicitly say "x is not None" to narrow mypy types.
     raise NotImplementedError("The origin conditions don't cover all cases!")
 

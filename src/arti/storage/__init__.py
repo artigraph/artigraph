@@ -172,10 +172,10 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         if input_fingerprint.is_empty:
             if self.includes_input_fingerprint_template:
                 raise ValueError(f"{self} requires an input_fingerprint, but none was provided")
-        else:
-            if not self.includes_input_fingerprint_template:
-                raise ValueError(f"{self} does not specify a {{input_fingerprint}} template")
+        elif self.includes_input_fingerprint_template:
             format_kwargs["input_fingerprint"] = str(input_fingerprint.key)
+        else:
+            raise ValueError(f"{self} does not specify a {{input_fingerprint}} template")
         field_values = {
             name: (
                 strip_partition_indexes(original).format(**format_kwargs)

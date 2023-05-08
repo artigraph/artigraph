@@ -153,7 +153,7 @@ class PyLiteral(TypeAdapter):
         if len(items) == 0:
             raise NotImplementedError(f"Invalid Literal with no values: {type_}")
         py_type, *other_types = (type(v) for v in items)
-        if not all(t is py_type for t in other_types):
+        if any(t is not py_type for t in other_types):
             raise ValueError("All Literals must be the same type, got: {(py_type, *other_types)}")
         return cls.artigraph(type=type_system.to_artigraph(py_type, hints=hints), items=items)
 

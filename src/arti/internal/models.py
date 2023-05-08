@@ -212,9 +212,7 @@ class Model(BaseModel):
             return obj.key
         if isinstance(obj, Model):
             return obj.fingerprint
-        if lenient_issubclass(obj, Model):
-            return obj._class_key_  # eg: View.artifact_class
-        return encoder(obj)
+        return obj._class_key_ if lenient_issubclass(obj, Model) else encoder(obj)
 
     @property
     def fingerprint(self) -> Fingerprint:
@@ -265,9 +263,7 @@ class Model(BaseModel):
         # configuration (namely frozen_box=True) we need to preserve.
         #
         # 1: https://github.com/pydantic/pydantic/issues/5225
-        if isinstance(v, Box):
-            return v.__class__(new, **v._Box__box_config())
-        return new
+        return v.__class__(new, **v._Box__box_config()) if isinstance(v, Box) else new
 
     # Filter out non-fields from ._iter (and thus .dict, .json, etc), such as `@cached_property`
     # after access (which just gets cached in .__dict__).

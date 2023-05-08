@@ -173,8 +173,8 @@ def test_Storage_vist_type_extra() -> None:
         ) -> tuple[TablePartition, ...]:
             return ()
 
-    type = Collection(element=Struct(fields={"a": Int8(), "b": Int8()}), partition_by=("a", "b"))
-    t = Table()._visit_type(type)
+    type_ = Collection(element=Struct(fields={"a": Int8(), "b": Int8()}), partition_by=("a", "b"))
+    t = Table()._visit_type(type_)
     assert t.dataset == "s_{tag}"
     assert t.name == "a_key_{a.key}__b_key_{b.key}"
 

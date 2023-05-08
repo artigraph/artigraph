@@ -108,13 +108,11 @@ def import_submodules(
     # packages... however we can leverage setuptools.find_namespace_packages, which was built for
     # exactly this.
     path_names = {p: name for p in path}
-    path_names.update(
-        {
-            str(Path(path).joinpath(*name.split("."))): f"{root_name}.{name}"
-            for path, root_name in path_names.items()
-            for name in find_namespace_packages(path)
-        }
-    )
+    path_names |= {
+        str(Path(path).joinpath(*name.split("."))): f"{root_name}.{name}"
+        for path, root_name in path_names.items()
+        for name in find_namespace_packages(path)
+    }
     with lock:
         return {
             name: importlib.import_module(name)
@@ -262,7 +260,6 @@ def one_or_none(values: Optional[list[_V]], *, item_name: str) -> Optional[_V]:
 
 def ordinal(n: int) -> str:
     """Convert an integer into its ordinal representation."""
-    n = int(n)
     suffix = ["th", "st", "nd", "rd", "th"][min(n % 10, 4)]
     if 11 <= (n % 100) <= 13:
         suffix = "th"
@@ -291,9 +288,7 @@ def register(
 
 
 def qname(val: Union[object, type]) -> str:
-    if isinstance(val, type):
-        return val.__qualname__
-    return type(val).__qualname__
+    return val.__qualname__ if isinstance(val, type) else type(val).__qualname__
 
 
 class NoCopyMixin:
@@ -326,14 +321,13 @@ class TypedBox(Box, MutableMapping[str, Union[_V, MutableMapping[str, _V]]]):
     def __class_getitem__(cls, item: type[_V]) -> GenericAlias:
         if isinstance(item, tuple):
             raise TypeError(f"{cls.__name__} expects a single value type")
-        value_type = item
         return GenericAlias(
             type(
                 cls.__name__,
                 (cls,),
                 {
                     "__module__": get_module_name(depth=2),  # Set to our caller's module
-                    "__target_type__": value_type,
+                    "__target_type__": item,
                 },
             ),
             item,

@@ -22,7 +22,7 @@ class FormatPlaceholder(Placeholder):
     def __format__(self, spec: str) -> str:
         result = self._key
         if spec:
-            result += ":" + spec
+            result += f":{spec}"
         return "{" + result + "}"
 
     def __getitem__(self, key: Any) -> FormatPlaceholder:

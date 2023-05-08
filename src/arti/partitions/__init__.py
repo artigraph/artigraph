@@ -55,10 +55,12 @@ class PartitionKey(Model):
 
     @classmethod
     def types_from(cls, type_: Type) -> CompositeKeyTypes:
-        if not isinstance(type_, Collection):
-            return frozendict()
-        return frozendict(
-            {name: cls.get_class_for(field) for name, field in type_.partition_fields.items()}
+        return (
+            frozendict(
+                {name: cls.get_class_for(field) for name, field in type_.partition_fields.items()}
+            )
+            if isinstance(type_, Collection)
+            else frozendict()
         )
 
 

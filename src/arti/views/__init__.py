@@ -96,14 +96,14 @@ class View(Model):
             # Import the View submodules to trigger registration.
             import_submodules(__path__, __name__)
             view_class = cls._by_python_type_.get(annotation)
-            # If no match and the type is a subscripted Generic (eg: `list[int]`), try to unwrap any
-            # extra type variables.
-            if view_class is None and (origin := get_origin(annotation)) is not None:
-                view_class = cls._by_python_type_.get(origin)
-            if view_class is None:
-                raise ValueError(
-                    f"{annotation} cannot be matched to a View, try setting one explicitly (eg: `Annotated[int, arti.views.python.Int]`)"
-                )
+        # If no match and the type is a subscripted Generic (eg: `list[int]`), try to unwrap any
+        # extra type variables.
+        if view_class is None and (origin := get_origin(annotation)) is not None:
+            view_class = cls._by_python_type_.get(origin)
+        if view_class is None:
+            raise ValueError(
+                f"{annotation} cannot be matched to a View, try setting one explicitly (eg: `Annotated[int, arti.views.python.Int]`)"
+            )
         return view_class
 
     @classmethod  # TODO: Use typing.Self for return, pending mypy support

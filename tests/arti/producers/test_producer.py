@@ -355,6 +355,10 @@ def test_Producer_validate_output_hint_validation() -> None:
 
 
 def test_Producer_build_outputs_check() -> None:
+    # sourcery skip: for-index-underscore
+    #
+    # Bypass https://github.com/sourcery-ai/sourcery/issues/344
+
     class A(Artifact):
         type: Type = Int64()
 
@@ -594,7 +598,7 @@ def test_Producer_bad_signature() -> None:
     ):
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
+            def build(self) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
     with pytest.raises(
@@ -607,7 +611,7 @@ def test_Producer_bad_signature() -> None:
             def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
-            def map(cls) -> PartitionDependencies:  # type: ignore[empty-body]
+            def map(self) -> PartitionDependencies:  # type: ignore[empty-body]
                 pass
 
 

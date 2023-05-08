@@ -122,14 +122,15 @@ class Enum(_NamedMixin, Type):
     def _validate_values(cls, items: frozenset[Any], values: dict[str, Any]) -> frozenset[Any]:
         from arti.types.python import python_type_system
 
-        if len(items) == 0:
+        if not items:
             raise ValueError("cannot be empty.")
         # `type` will be missing if it doesn't pass validation.
         if (arti_type := values.get("type")) is None:
             return items
         py_type = python_type_system.to_system(arti_type, hints={})
-        mismatched_items = [item for item in items if not lenient_issubclass(type(item), py_type)]
-        if mismatched_items:
+        if mismatched_items := [
+            item for item in items if not lenient_issubclass(type(item), py_type)
+        ]:
             raise ValueError(f"incompatible {arti_type} ({py_type}) item(s): {mismatched_items}")
         return items
 
@@ -225,9 +226,11 @@ class Collection(_NamedMixin, List):
 
     @property
     def partition_fields(self) -> frozendict[str, Type]:
-        if not isinstance(self.element, Struct):
-            return frozendict()
-        return frozendict({name: self.element.fields[name] for name in self.partition_by})
+        return (
+            frozendict({name: self.element.fields[name] for name in self.partition_by})
+            if isinstance(self.element, Struct)
+            else frozendict()
+        )
 
 
 class Map(Type):

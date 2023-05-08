@@ -385,9 +385,7 @@ class Producer(Model):
             )
 
         outputs = tuple(validate(artifact, ord=i) for i, artifact in enumerate(outputs))
-        if len(outputs) == 1:
-            return outputs[0]
-        return outputs
+        return outputs[0] if len(outputs) == 1 else outputs
 
 
 def producer(

@@ -197,8 +197,8 @@ def test_Collection_partition_cluster_overlapping() -> None:
 
 
 def test_Map() -> None:
-    map = Map(key=String(), value=Int32())
-    assert map.friendly_key == "StringToInt32"
+    map_ = Map(key=String(), value=Int32())
+    assert map_.friendly_key == "StringToInt32"
 
 
 def test_Set() -> None:
