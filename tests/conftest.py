@@ -15,7 +15,7 @@ def gcs_emulator() -> Generator[tuple[str, int], None, None]:
     server.start()
     try:
         host, port = server._api._httpd.socket.getsockname()
-        with mock.patch.dict(os.environ, {"STORAGE_EMULATOR_HOST": f"http://{host}:{port}"}):
+        with mock.patch.dict(os.environ, {"STORAGE_EMULATOR_HOST": f"{host}:{port}"}):
             yield host, port
     finally:
         server.stop()
