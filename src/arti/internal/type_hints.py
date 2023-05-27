@@ -246,7 +246,7 @@ if sys.version_info < (3, 10):  # pragma: no cover
         return isinstance(type_, _TypedDictMeta)
 
 else:  # pragma: no cover
-    from typing import is_typeddict as is_typeddict  # noqa: F401
+    from typing import is_typeddict as is_typeddict
 
     # mypy doesn't know of types.UnionType yet, but `type: ignore` would be "unused"
     # (and error) on other python versions.
