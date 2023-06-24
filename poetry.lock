@@ -875,13 +875,13 @@ tool = ["click (>=6.0.0)"]
 
 [[package]]
 name = "google-cloud-bigquery"
-version = "3.11.1"
+version = "3.11.2"
 description = "Google BigQuery API client library"
 optional = true
 python-versions = ">=3.7"
 files = [
-    {file = "google-cloud-bigquery-3.11.1.tar.gz", hash = "sha256:cfe1158bc5818276ba765959da8a27afdcdaa11fa3fa9eed097d5639297dfe74"},
-    {file = "google_cloud_bigquery-3.11.1-py2.py3-none-any.whl", hash = "sha256:738ae717f26bd7567f826f29f65be266f49bc3db0b069ac6030894fd8895ed6f"},
+    {file = "google-cloud-bigquery-3.11.2.tar.gz", hash = "sha256:a0f0d0492fff4c9c911cab27640e690dd14b442eda833319b11190042b2f7469"},
+    {file = "google_cloud_bigquery-3.11.2-py2.py3-none-any.whl", hash = "sha256:72f307c761312784d1a020fbf415ed81975472adde526d6b2d11468539310f7e"},
 ]
 
 [package.dependencies]
