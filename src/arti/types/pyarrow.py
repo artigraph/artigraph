@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
-from typing import Any, cast
+from typing import Any, ClassVar, cast
 
 import pyarrow as pa
 
@@ -264,7 +264,7 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
 
 
 class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
-    precision_to_unit = {
+    precision_to_unit: ClassVar[dict[str, str]] = {
         "second": "s",
         "millisecond": "ms",
         "microsecond": "us",
@@ -345,7 +345,7 @@ class _BaseSizedTimeTypeAdapter(_BaseTimeTypeAdapter):
 
 @pyarrow_type_system.register_adapter
 class Time32TypeAdapter(_BaseSizedTimeTypeAdapter):
-    precision_to_unit = {
+    precision_to_unit: ClassVar[dict[str, str]] = {
         "second": "s",
         "millisecond": "ms",
     }
@@ -354,7 +354,7 @@ class Time32TypeAdapter(_BaseSizedTimeTypeAdapter):
 
 @pyarrow_type_system.register_adapter
 class Time64TypeAdapter(_BaseSizedTimeTypeAdapter):
-    precision_to_unit = {
+    precision_to_unit: ClassVar[dict[str, str]] = {
         "microsecond": "us",
         "nanosecond": "ns",
     }
