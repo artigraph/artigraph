@@ -176,7 +176,7 @@ class Model(BaseModel):
     class Config:
         extra = Extra.forbid
         frozen = True
-        json_encoders = {frozendict: dict}
+        json_encoders: ClassVar[dict[Any, Any]] = {frozendict: dict}
         keep_untouched = (cached_property,)
         smart_union = True
         validate_assignment = True  # Unused with frozen, unless that is overridden in subclass.
