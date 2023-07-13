@@ -96,7 +96,7 @@ all = [
 
 
 [tool.portray.mkdocs]
-edit_uri = 'edit/golden/'
+edit_uri = 'edit/main/'
 
 
 [tool.pytest.ini_options]

@@ -6,7 +6,7 @@ If you just need help or have a question, refer to our [support page](SUPPORT.md
 
 ## How to Contribute a Bug Fix or Enhancement
 
-Contributions can be submitted via [Pull Requests](https://github.com/lfai/artigraph/issues) to the `golden` branch and must:
+Contributions can be submitted via [Pull Requests](https://github.com/lfai/artigraph/issues) to the `main` branch and must:
 
 - be submitted under the Apache 2.0 license.
 - include a [Developer Certificate of Origin signoff](https://wiki.linuxfoundation.org/dco) (`git commit -s`)
@@ -21,7 +21,7 @@ Code is formatted with [`black`](https://black.readthedocs.io/en/stable/) and [`
 
 ## Development Workflow
 
-The default branch is `golden` (poking fun at "golden data"). The project is managed using [`poetry`](https://python-poetry.org/). We use [`pre-commit`](https://pre-commit.com/) to automate rapid feedback via git hooks.
+The project is managed with [`poetry`](https://python-poetry.org/). We use [`pre-commit`](https://pre-commit.com/) to apply and enforce code formatting and linting with git hooks.
 
 ### Environment Setup
 

@@ -22,7 +22,7 @@ repos:
       - id: debug-statements
       - id: end-of-file-fixer
       - id: no-commit-to-branch
-        args: [--branch, golden]
+        args: [--branch, main]
       - id: pretty-format-json
         args: [--autofix]
       - id: trailing-whitespace
@@ -67,7 +67,7 @@ repos:
         entry: bash -c
         args:
           - >
-            if [[ $(git branch --show-current) == "golden" ]]; then
+            if [[ $(git branch --show-current) == "main" ]]; then
               pytest
             else
               # If tests become too slow, mark slow ones and omit. We'll add a little coverage buffer for working
