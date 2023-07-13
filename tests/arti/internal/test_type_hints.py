@@ -1,4 +1,3 @@
-import typing
 from collections.abc import Mapping, Sequence
 from typing import Annotated, Any, Generic, Literal, Optional, TypedDict, TypeVar, Union, get_origin
 
@@ -106,7 +105,6 @@ def test_get_item_from_annotated(
         (list[int], Annotated[list[int], 5]),
         (str, Any),
         (str, Union[int, str]),
-        (tuple, typing.Tuple),
         (tuple, TupleVar),
         (tuple, UnboundVar),
         (tuple, tuple),
@@ -114,7 +112,6 @@ def test_get_item_from_annotated(
         (tuple[MyTuple[int]], tuple[tuple[int]]),  # type: ignore[type-arg]
         (tuple[int], Sequence),
         (tuple[int], Sequence[int]),
-        (tuple[int], typing.Tuple),
         (tuple[int], tuple),
         (tuple[int], tuple[int]),
         (tuple[tuple[int]], tuple),
@@ -149,10 +146,9 @@ def test_lenient_issubclass_true(
         (tuple[str], Sequence[int]),
         (tuple[tuple[int]], tuple[MyTuple[int]]),  # type: ignore[type-arg]
         (tuple[tuple[str]], tuple[tuple[int]]),
-        # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for these (but
-        # oddly, `issubclass(tuple[int], tuple)` does not).
+        # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for
+        # these.
         (Optional[int], int),
-        (typing.Tuple[int], tuple),
     ],
 )
 def test_lenient_issubclass_false(
