@@ -4,9 +4,9 @@
 [![changelog](https://img.shields.io/github/v/release/artigraph/artigraph?label=changelog)](https://github.com/artigraph/artigraph/releases)
 [![downloads](https://pepy.tech/badge/arti/month)](https://pepy.tech/project/arti)
 [![versions](https://img.shields.io/pypi/pyversions/arti.svg)](https://github.com/artigraph/artigraph)
-[![license](https://img.shields.io/github/license/artigraph/artigraph.svg)](https://github.com/artigraph/artigraph/blob/golden/LICENSE)
+[![license](https://img.shields.io/github/license/artigraph/artigraph.svg)](https://github.com/artigraph/artigraph/blob/main/LICENSE)
 [![CI](https://github.com/artigraph/artigraph/actions/workflows/ci.yaml/badge.svg)](https://github.com/artigraph/artigraph/actions/workflows/ci.yaml)
-[![codecov](https://codecov.io/gh/artigraph/artigraph/branch/golden/graph/badge.svg?token=6LUCpjcGdN)](https://codecov.io/gh/artigraph/artigraph)
+[![codecov](https://codecov.io/gh/artigraph/artigraph/branch/main/graph/badge.svg?token=6LUCpjcGdN)](https://codecov.io/gh/artigraph/artigraph)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/5561/badge)](https://bestpractices.coreinfrastructure.org/projects/5561)
 
 Declarative Data Production
