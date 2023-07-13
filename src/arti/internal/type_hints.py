@@ -143,7 +143,7 @@ def get_annotation_from_value(value: Any) -> Any:
             return type(value)[first_type]  # type: ignore[index]
     if isinstance(value, dict):
         items = value.items()
-        first_key_type, first_value_type = (type(v) for v in tuple(items)[0])
+        first_key_type, first_value_type = (type(v) for v in next(iter(items)))
         if all(
             isinstance(k, first_key_type) and isinstance(v, first_value_type) for (k, v) in items
         ):

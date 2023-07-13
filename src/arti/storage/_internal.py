@@ -143,7 +143,7 @@ def extract_placeholders(
         key, component = k.split(".")
         # parsing a string like "{date.Y[1970]}" will return a dict like {'1970': '1970'}.
         if isinstance(v, dict):
-            v = tuple(v)[0]
+            v = next(iter(v))
         key_components[key][component] = v
 
     keys = {
