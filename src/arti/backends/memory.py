@@ -10,7 +10,7 @@ from pydantic import PrivateAttr
 from arti import (
     Artifact,
     Backend,
-    Connection,
+    BackendConnection,
     Fingerprint,
     Graph,
     GraphSnapshot,
@@ -61,7 +61,7 @@ class _NoCopyContainer(NoCopyMixin):
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartition])
 
 
-class MemoryConnection(Connection):
+class MemoryConnection(BackendConnection):
     def __init__(self, container: _NoCopyContainer) -> None:
         self.container = container
 

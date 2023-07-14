@@ -6,7 +6,7 @@ import abc
 import logging
 from itertools import chain
 
-from arti.backends import Connection
+from arti.backends import BackendConnection
 from arti.fingerprints import Fingerprint
 from arti.graphs import GraphSnapshot
 from arti.internal.models import Model
@@ -22,7 +22,7 @@ class Executor(Model):
         raise NotImplementedError()
 
     def get_producer_inputs(
-        self, snapshot: GraphSnapshot, connection: Connection, producer: Producer
+        self, snapshot: GraphSnapshot, connection: BackendConnection, producer: Producer
     ) -> InputPartitions:
         return InputPartitions(
             {
@@ -36,7 +36,7 @@ class Executor(Model):
     def discover_producer_partitions(
         self,
         snapshot: GraphSnapshot,
-        connection: Connection,
+        connection: BackendConnection,
         producer: Producer,
         *,
         partition_input_fingerprints: InputFingerprints,
@@ -63,7 +63,7 @@ class Executor(Model):
     def build_producer_partition(
         self,
         snapshot: GraphSnapshot,
-        connection: Connection,
+        connection: BackendConnection,
         producer: Producer,
         *,
         existing_partition_keys: set[CompositeKey],
