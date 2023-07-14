@@ -76,7 +76,9 @@ class Executor(Model):
             pk_str = f" for: {dict(partition_key)}" if partition_key else "."
             logging.info(f"Skipping existing {type(producer).__name__} output{pk_str}")
             return
-        logging.info(f"Building {producer} output for {partition_key}...")
+        logging.info(
+            f"Building {type(producer)} output for {partition_key} and inputs {input_fingerprint}..."
+        )
         # TODO: Catch DispatchError and give a nicer error... maybe add this to our
         # @dispatch wrapper (eg: msg arg, or even fn that returns the message to
         # raise).

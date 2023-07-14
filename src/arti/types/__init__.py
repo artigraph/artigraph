@@ -197,7 +197,7 @@ class Collection(_NamedMixin, List):
             raise ValueError("requires element to be a Struct")
         known, requested = set(element.fields), set(references)
         if unknown := requested - known:
-            raise ValueError(f"unknown field(s): {unknown}")
+            raise ValueError(f"field '{unknown}' does not exist on {element}")
         return references
 
     @validator("cluster_by")

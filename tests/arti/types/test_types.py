@@ -165,7 +165,7 @@ def test_Collection_partitioned() -> None:
 
 @pytest.mark.parametrize("param", ["partition_by", "cluster_by"])
 def test_Collection_field_references(param: str) -> None:
-    match = re.escape("unknown field(s): {'z'}")
+    match = re.escape("field '{'z'}' does not exist on")
 
     with pytest.raises(ValueError, match=match):
         Collection(element=Struct(fields={"x": Int32(), "y": Int32()}), **{param: ("z",)})
