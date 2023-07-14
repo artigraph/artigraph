@@ -3,6 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import operator
+import warnings
 from collections.abc import Callable
 from functools import reduce
 from typing import Optional, Union
@@ -77,6 +78,11 @@ class Fingerprint(Model):
     def identity(cls) -> Fingerprint:
         """Return a Fingerprint that, when combined, will return the other Fingerprint."""
         return cls(key=int64(0))
+
+    @property
+    def fingerprint(self) -> Fingerprint:
+        warnings.warn("`Fingerprint.fingerprint` returns itself", stacklevel=2)
+        return self
 
     @property
     def is_empty(self) -> bool:

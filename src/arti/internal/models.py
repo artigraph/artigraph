@@ -163,8 +163,12 @@ class Model(BaseModel):
         # which wrecks havoc if a model is a key in a dict (`key in mydict` will be `False`...).
         #
         # This is only safe as the models are (mostly) frozen.
-        assert (key := self.fingerprint.key) is not None
-        return key
+        from arti.fingerprints import Fingerprint
+
+        fingerprint = self if isinstance(self, Fingerprint) else self.fingerprint
+        if fingerprint.key is None:
+            return 0
+        return int(fingerprint.key)
 
     # Omitting unpassed args in repr by default
     def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:

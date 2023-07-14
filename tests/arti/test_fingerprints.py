@@ -30,6 +30,9 @@ def test_Fingerprint() -> None:
     assert not Fingerprint.empty().is_identity
     assert not Fingerprint.identity().is_empty
 
+    with pytest.warns(match="returns itself"):
+        assert f1.fingerprint is f1
+
 
 def test_Fingerprint_math() -> None:
     f1, f2, f3, f4, f5 = (Fingerprint(key=int64(i)) for i in range(5))
