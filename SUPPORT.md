@@ -2,7 +2,7 @@
 
 ## How to Ask for Help
 
-If you have trouble installing, building, or using Artigraph, but not sure you've encountered a genuine bug, start a [GitHub Discussion](https://github.com/artigraph/artigraph/discussions). This is a great place for questions such has "How do I...".
+If you have trouble installing, building, or using Artigraph, but not sure you've encountered a bug, start a [GitHub Discussion](https://github.com/artigraph/artigraph/discussions). This is a great place for questions such has "How do I...".
 
 ## How to Report a Bug or Request an Enhancement
 
