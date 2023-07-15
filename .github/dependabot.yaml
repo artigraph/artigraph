@@ -3,11 +3,19 @@ version: 2
 updates:
 - package-ecosystem: pip
   directory: /
+  groups:
+    deps:
+      patterns:
+        - "*"
   schedule:
     interval: weekly
-    day: "saturday"
+    day: "monday"
 - package-ecosystem: github-actions
   directory: /
+  groups:
+    deps:
+      patterns:
+        - "*"
   schedule:
     interval: weekly
-    day: "saturday"
+    day: "monday"
