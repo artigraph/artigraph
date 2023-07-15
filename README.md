@@ -13,7 +13,11 @@ Declarative Data Production
 
 Artigraph is a tool to improve the authorship, management, and quality of data. It emphasizes that the core deliverable of a data pipeline or workflow is the data, not the tasks.
 
-Artigraph is hosted by the [LF AI and Data Foundation](https://lfaidata.foundation) as a Sandbox project.
+Artigraph is hosted by the [LF AI and Data Foundation](https://lfaidata.foundation) as a Sandbox project. See our [deck](https://docs.google.com/presentation/d/1KLM9r0L5sTbpb_UPR5nx4fil-7fO-UnmhTeatSiaN3Y) or [presentation](https://wiki.lfaidata.foundation/download/attachments/7733341/GMT20220127-140219_Recording_3840x2160.mp4?version=1&modificationDate=1643716019000&api=v2) (@6m35s) requesting Sandbox incubation.
+
+## Community
+
+We're excited to hear from anyone interested in the project - feel free to introduce yourself over in the [Intro Discussions](https://github.com/artigraph/artigraph/discussions/categories/intros)! See our [support page](SUPPORT.md) for help or our [contributing page](CONTRIBUTING.md) for guidelines.
 
 ## Installation
 
@@ -85,11 +89,3 @@ INFO:root:Build finished.
 INFO:root:Final Spend data:
 INFO:root:      /tmp/test-graph/spend/7564053533177891797/spend.json: 42.0
 ```
-
-## Community
-
-We're excited to hear from anyone interested in the project - feel free to introduce yourself over in the [Intro Discussions](https://github.com/artigraph/artigraph/discussions/categories/intros)! See our [support page](SUPPORT.md) for help or our [contributing page](CONTRIBUTING.md) for guidelines.
-
-## Presentations
-
-- 2022-01-27: Requesting Sandbox Incubation with [LF AI & Data](https://lfaidata.foundation/) ([deck](https://docs.google.com/presentation/d/1KLM9r0L5sTbpb_UPR5nx4fil-7fO-UnmhTeatSiaN3Y), [presentation](https://wiki.lfaidata.foundation/download/attachments/7733341/GMT20220127-140219_Recording_3840x2160.mp4?version=1&modificationDate=1643716019000&api=v2) @ 6m35s)
