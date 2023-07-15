@@ -88,7 +88,7 @@ INFO:root:      /tmp/test-graph/spend/7564053533177891797/spend.json: 42.0
 
 ## Community
 
-Everyone is welcome to join the community - learn more in out [support](SUPPORT.md) and [contributing](CONTRIBUTING.md) pages!
+We're excited to hear from anyone interested in the project - feel free to introduce yourself over in the [Intro Discussions](https://github.com/artigraph/artigraph/discussions/categories/intros)! See our [support page](SUPPORT.md) for help or our [contributing page](CONTRIBUTING.md) for guidelines.
 
 ## Presentations
 

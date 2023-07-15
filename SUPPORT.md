@@ -2,11 +2,11 @@
 
 ## How to Ask for Help
 
-If you have trouble installing, building, or using Artigraph, but there's not yet reason to suspect you've encountered a genuine bug, start a [Discussions](https://github.com/artigraph/artigraph/discussions). This is a great place for questions such has "How do I...".
+If you have trouble installing, building, or using Artigraph, but not sure you've encountered a genuine bug, start a [GitHub Discussion](https://github.com/artigraph/artigraph/discussions). This is a great place for questions such has "How do I...".
 
 ## How to Report a Bug or Request an Enhancement
 
-Artigraph manages bug and enhancements via [Issues](https://github.com/lfai/artigraph/issues). The issue template will guide you on making an effective report.
+Artigraph manages bug and enhancements via [GitHub Issues](https://github.com/lfai/artigraph/issues). The issue template will guide you on making an effective report.
 
 ## How to Report a Security Vulnerability
 
