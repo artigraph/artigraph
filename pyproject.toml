@@ -149,6 +149,9 @@ ignore = [
     "S101",   # use of assert (used for mypy type narrowing)
 ]
 
+[tool.ruff.flake8-implicit-str-concat]
+allow-multiline = false
+
 [tool.ruff.isort]
 known-first-party = ["tests"]
 
