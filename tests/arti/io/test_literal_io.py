@@ -37,10 +37,10 @@ def test_stringliteral_io() -> None:
     ) == [{"a": 1}, {"a": 2}]
     # Check that read with value=None fails
     with pytest.raises(FileNotFoundError, match="Literal has not been written yet"):
-        io.read(a.type, a.format, [StringLiteralPartition(id="junk")], view=view)
+        io.read(a.type, a.format, [StringLiteralPartition(id="junk", storage=a.storage)], view=view)
 
     # Test write
-    unwritten = StringLiteralPartition(id="junk")
+    unwritten = StringLiteralPartition(id="junk", storage=a.storage)
     new = io.write(10, a.type, a.format, unwritten, view=view)
     assert isinstance(new, StringLiteralPartition)
     assert new.value == json.dumps(10)

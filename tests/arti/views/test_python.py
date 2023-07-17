@@ -4,7 +4,7 @@ from datetime import date, datetime
 from arti import Artifact, View, read, write
 from arti.formats.pickle import Pickle
 from arti.internal.utils import named_temporary_file
-from arti.storage.local import LocalFilePartition
+from arti.storage.local import LocalFile, LocalFilePartition
 from arti.views.python import Date, Datetime, Dict, Float, Int, Null, Str
 
 
@@ -24,10 +24,9 @@ def test_python_View() -> None:
         assert view.type == view.type_system.to_artigraph(python_type, hints={})
 
         test_format = Pickle()
-
         binary = pickle.dumps(val)
         with named_temporary_file("w+b") as f:
-            test_storage_partition = LocalFilePartition(path=f.name)
+            test_storage_partition = LocalFilePartition(path=f.name, storage=LocalFile())
 
             f.write(binary)
             f.seek(0)
