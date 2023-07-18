@@ -3,6 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import operator
+import warnings
 from collections.abc import Callable
 from functools import reduce
 from typing import Optional, Union
@@ -54,29 +55,42 @@ class Fingerprint(Model):
         return cls(key=None)
 
     @classmethod
-    def from_int(cls, x: int, /) -> Fingerprint:
+    def from_int(cls, x: Optional[int], /) -> Fingerprint:
+        if x is None:
+            return cls.empty()
         return cls.from_int64(int64(x))
 
     @classmethod
-    def from_int64(cls, x: int64, /) -> Fingerprint:
+    def from_int64(cls, x: Optional[int64], /) -> Fingerprint:
+        if x is None:
+            return cls.empty()
         return cls(key=x)
 
     @classmethod
-    def from_string(cls, x: str, /) -> Fingerprint:
+    def from_string(cls, x: Optional[str], /) -> Fingerprint:
         """Fingerprint an arbitrary string.
 
         Fingerprints using Farmhash Fingerprint64, converted to int64 via two's complement.
         """
+        if x is None:
+            return cls.empty()
         return cls.from_uint64(uint64(farmhash.fingerprint64(x)))
 
     @classmethod
-    def from_uint64(cls, x: uint64, /) -> Fingerprint:
+    def from_uint64(cls, x: Optional[uint64], /) -> Fingerprint:
+        if x is None:
+            return cls.empty()
         return cls.from_int64(int64(x))
 
     @classmethod
     def identity(cls) -> Fingerprint:
         """Return a Fingerprint that, when combined, will return the other Fingerprint."""
         return cls(key=int64(0))
+
+    @property
+    def fingerprint(self) -> Fingerprint:
+        warnings.warn("`Fingerprint.fingerprint` returns itself", stacklevel=2)
+        return self
 
     @property
     def is_empty(self) -> bool:
