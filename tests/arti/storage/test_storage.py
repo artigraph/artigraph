@@ -45,7 +45,7 @@ class MockStorage(Storage[MockStoragePartition]):
 
 
 def test_StoragePartition_content_fingerprint() -> None:
-    sp = MockStoragePartition(path="/tmp/test", keys={})
+    sp = MockStoragePartition(path="/tmp/test", keys={}, storage=MockStorage(path="/tmp/test"))
     assert sp.content_fingerprint == Fingerprint.empty()
     populated = sp.with_content_fingerprint()
     assert sp.content_fingerprint == Fingerprint.empty()
@@ -201,7 +201,7 @@ def test_Storage_generate_partition() -> None:
         ._visit_format(DummyFormat())
     )
     expected_partition = MockStoragePartition(
-        input_fingerprint=input_fingerprint, keys=keys, path="05/10"
+        input_fingerprint=input_fingerprint, keys=keys, path="05/10", storage=s
     )
 
     output = s.generate_partition(keys=keys, input_fingerprint=input_fingerprint)

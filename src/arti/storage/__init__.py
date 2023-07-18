@@ -6,7 +6,7 @@ import abc
 import os
 from typing import TYPE_CHECKING, Any, ClassVar, Generic, Optional, TypeVar
 
-from pydantic import PrivateAttr
+from pydantic import Field, PrivateAttr
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
@@ -22,6 +22,7 @@ if TYPE_CHECKING:
 
 
 class StoragePartition(Model):
+    storage: Storage[StoragePartition] = Field(repr=False)
     keys: CompositeKey = CompositeKey()
     input_fingerprint: Fingerprint = Fingerprint.empty()
     content_fingerprint: Fingerprint = Fingerprint.empty()
@@ -186,7 +187,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
             if name in self.storage_partition_type.__fields__
         }
         partition = self.storage_partition_type(
-            input_fingerprint=input_fingerprint, keys=keys, **field_values
+            input_fingerprint=input_fingerprint, keys=keys, storage=self, **field_values
         )
         if with_content_fingerprint:
             partition = partition.with_content_fingerprint()
@@ -215,3 +216,6 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
                 if (new := self._resolve_field(name, original, values)) != original
             }
         )
+
+
+StoragePartition.update_forward_refs()

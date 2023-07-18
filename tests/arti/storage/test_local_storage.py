@@ -129,8 +129,9 @@ def test_local_file_partition_fingerprint(tmp_path: Path) -> None:
     path = tmp_path / "test.txt"
     with path.open("w") as f:
         f.write("hello world")
-
-    partition = LocalFilePartition(keys={}, path=str(path)).with_content_fingerprint()
+    partition = LocalFilePartition(
+        keys={}, path=str(path), storage=LocalFile(path=str(path))
+    ).with_content_fingerprint()
     assert partition.content_fingerprint == Fingerprint.from_string(
         hashlib.sha256(text.encode()).hexdigest()
     )
