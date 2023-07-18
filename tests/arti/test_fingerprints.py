@@ -10,9 +10,13 @@ def test_Fingerprint() -> None:
     assert Fingerprint(key=int64(5)).key == 5
     assert Fingerprint.empty().key is None
     assert Fingerprint.from_int(-5) == -5
+    assert Fingerprint.from_int(None) == Fingerprint.empty()
+    assert Fingerprint.from_int64(None) == Fingerprint.empty()
     assert Fingerprint.from_int64(int64(-5)) == -5
     assert Fingerprint.from_string("OK") == -7962813320811223369
     assert Fingerprint.from_string("ok") == 5227454011934222951
+    assert Fingerprint.from_string(None) == Fingerprint.empty()
+    assert Fingerprint.from_uint64(None) == Fingerprint.empty()
     assert Fingerprint.from_uint64(uint64(5)) == 5
     assert Fingerprint.from_uint64(uint64(int64(-5))) == -5
     assert Fingerprint.identity() == 0
