@@ -55,23 +55,31 @@ class Fingerprint(Model):
         return cls(key=None)
 
     @classmethod
-    def from_int(cls, x: int, /) -> Fingerprint:
+    def from_int(cls, x: Optional[int], /) -> Fingerprint:
+        if x is None:
+            return cls.empty()
         return cls.from_int64(int64(x))
 
     @classmethod
-    def from_int64(cls, x: int64, /) -> Fingerprint:
+    def from_int64(cls, x: Optional[int64], /) -> Fingerprint:
+        if x is None:
+            return cls.empty()
         return cls(key=x)
 
     @classmethod
-    def from_string(cls, x: str, /) -> Fingerprint:
+    def from_string(cls, x: Optional[str], /) -> Fingerprint:
         """Fingerprint an arbitrary string.
 
         Fingerprints using Farmhash Fingerprint64, converted to int64 via two's complement.
         """
+        if x is None:
+            return cls.empty()
         return cls.from_uint64(uint64(farmhash.fingerprint64(x)))
 
     @classmethod
-    def from_uint64(cls, x: uint64, /) -> Fingerprint:
+    def from_uint64(cls, x: Optional[uint64], /) -> Fingerprint:
+        if x is None:
+            return cls.empty()
         return cls.from_int64(int64(x))
 
     @classmethod
