@@ -27,11 +27,11 @@ if TYPE_CHECKING:
 # bunch of low level calls, each own network call), Backend can override.
 
 
-class Connection:
-    """Connection is a wrapper around an active connection to a Backend resource.
+class BackendConnection:
+    """BackendConnection is a wrapper around an active connection to a Backend resource.
 
     For example, a Backend connecting to a database might wrap up a SQLAlchemy connection in a
-    Connection subclass implementing the required methods.
+    BackendConnection subclass implementing the required methods.
     """
 
     # Artifact partitions - independent of a specific GraphSnapshot
@@ -134,18 +134,18 @@ class Connection:
     def __get_validators__(cls) -> list[Callable[[Any, ModelField], Any]]:
         """Return an empty list of "validators".
 
-        Allows using a Connection (which is not a model) as a field in other models without setting
-        `arbitrary_types_allowed` (which applies broadly). [1].
+        Allows using a BackendConnection (which is not a model) as a field in other models without
+        setting `arbitrary_types_allowed` (which applies broadly). [1].
 
         1: https://docs.pydantic.dev/usage/types/#generic-classes-as-types
         """
         return []
 
 
-ConnectionVar = TypeVar("ConnectionVar", bound=Connection, covariant=True)
+BackendConnectionVar = TypeVar("BackendConnectionVar", bound=BackendConnection, covariant=True)
 
 
-class Backend(Model, Generic[ConnectionVar]):
+class Backend(Model, Generic[BackendConnectionVar]):
     """Backend represents a storage for internal Artigraph metadata.
 
     Backend storage is an addressable location (local path, database connection, etc) that
@@ -158,5 +158,5 @@ class Backend(Model, Generic[ConnectionVar]):
 
     @contextmanager
     @abstractmethod
-    def connect(self) -> Iterator[ConnectionVar]:
+    def connect(self) -> Iterator[BackendConnectionVar]:
         raise NotImplementedError()

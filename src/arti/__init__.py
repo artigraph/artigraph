@@ -10,7 +10,7 @@ from typing import Optional
 
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
-from arti.backends import Backend, Connection
+from arti.backends import Backend, BackendConnection
 from arti.executors import Executor
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
@@ -30,9 +30,9 @@ __all__ = [
     "Annotation",
     "Artifact",
     "Backend",
+    "BackendConnection",
     "CompositeKey",
     "CompositeKeyTypes",
-    "Connection",
     "Executor",
     "Fingerprint",
     "Format",

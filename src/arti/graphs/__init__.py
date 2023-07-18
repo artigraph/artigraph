@@ -14,7 +14,7 @@ from pydantic import Field, PrivateAttr, validator
 import arti
 from arti import io
 from arti.artifacts import Artifact
-from arti.backends import Backend, Connection
+from arti.backends import Backend, BackendConnection
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import TypedBox, frozendict
@@ -100,7 +100,7 @@ class Graph(Model):
     # The Backend *itself* should not affect the results of a Graph build, though the contents
     # certainly may (eg: stored annotations), so we avoid serializing it. This also prevent
     # embedding any credentials.
-    backend: Backend[Connection] = Field(default_factory=_get_memory_backend, exclude=True)
+    backend: Backend[BackendConnection] = Field(default_factory=_get_memory_backend, exclude=True)
     path_tags: frozendict[str, str] = frozendict()
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
@@ -147,7 +147,7 @@ class Graph(Model):
         return self.snapshot().build(executor)
 
     @requires_sealed
-    def snapshot(self, *, connection: Optional[Connection] = None) -> GraphSnapshot:
+    def snapshot(self, *, connection: Optional[BackendConnection] = None) -> GraphSnapshot:
         """Identify a "unique" ID for this Graph at this point in time.
 
         The ID aims to encode the structure of the Graph plus a _snapshot_ of the raw Artifact data
@@ -209,7 +209,7 @@ class Graph(Model):
         storage_partitions: Optional[Sequence[StoragePartition]] = None,
         view: Optional[View] = None,
         snapshot: Optional[GraphSnapshot] = None,
-        connection: Optional[Connection] = None,
+        connection: Optional[BackendConnection] = None,
     ) -> Any:
         key = self.artifact_to_key[artifact]
         if annotation is None and view is None:
@@ -252,7 +252,7 @@ class Graph(Model):
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
         snapshot: Optional[GraphSnapshot] = None,
-        connection: Optional[Connection] = None,
+        connection: Optional[BackendConnection] = None,
     ) -> StoragePartition:
         key = self.artifact_to_key[artifact]
         if snapshot is not None and artifact.producer_output is None:
@@ -302,7 +302,7 @@ class GraphSnapshot(Model):
         return self.graph.artifacts
 
     @property
-    def backend(self) -> Backend[Connection]:
+    def backend(self) -> Backend[BackendConnection]:
         return self.graph.backend
 
     @property
@@ -310,7 +310,9 @@ class GraphSnapshot(Model):
         return self.graph.name
 
     @classmethod  # TODO: Should this use a (TTL) cache? Raw data changes (especially in tests) still need to be detected.
-    def from_graph(cls, graph: Graph, *, connection: Optional[Connection] = None) -> GraphSnapshot:
+    def from_graph(
+        cls, graph: Graph, *, connection: Optional[BackendConnection] = None
+    ) -> GraphSnapshot:
         """Snapshot the Graph and all existing raw data.
 
         NOTE: There is currently a gap (and thus race condition) between when the Graph ID is
@@ -366,14 +368,18 @@ class GraphSnapshot(Model):
         return self
 
     def tag(
-        self, tag: str, *, overwrite: bool = False, connection: Optional[Connection] = None
+        self, tag: str, *, overwrite: bool = False, connection: Optional[BackendConnection] = None
     ) -> None:
         with (connection or self.backend).connect() as conn:
             conn.write_snapshot_tag(self, tag, overwrite)
 
     @classmethod
     def from_tag(
-        cls, name: str, tag: str, *, connectable: Union[Backend[Connection], Connection]
+        cls,
+        name: str,
+        tag: str,
+        *,
+        connectable: Union[Backend[BackendConnection], BackendConnection],
     ) -> GraphSnapshot:
         with connectable.connect() as conn:
             return conn.read_snapshot_tag(name, tag)
@@ -385,7 +391,7 @@ class GraphSnapshot(Model):
         annotation: Optional[Any] = None,
         storage_partitions: Optional[Sequence[StoragePartition]] = None,
         view: Optional[View] = None,
-        connection: Optional[Connection] = None,
+        connection: Optional[BackendConnection] = None,
     ) -> Any:
         return self.graph.read(
             artifact,
@@ -404,7 +410,7 @@ class GraphSnapshot(Model):
         input_fingerprint: Fingerprint = Fingerprint.empty(),
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
-        connection: Optional[Connection] = None,
+        connection: Optional[BackendConnection] = None,
     ) -> StoragePartition:
         return self.graph.write(
             data,
