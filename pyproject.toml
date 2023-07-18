@@ -36,7 +36,14 @@ show_error_codes = true
 strict = true
 
 [[tool.mypy.overrides]]
-module = ["gcp_storage_emulator.*", "gcsfs", "pandas", "pyarrow", "sh", ]
+module = [
+    "gcp_storage_emulator.*",
+    "gcsfs",
+    "pandas",
+    "py2neo.*",
+    "pyarrow",
+    "sh",
+]
 ignore_missing_imports = true
 
 
@@ -60,6 +67,7 @@ multimethod = ">=1.6"
 numpy = {version = ">=1.23.1", optional = true}
 pandas = {version = ">=1.4.3", optional = true}
 parse = ">=1.19.0"
+py2neo = {version = "*", optional = true}
 pyarrow = {version = ">=8", optional = true}
 pydantic = ">=1.9.0,<2"  # We use some pydantic internals, so expect 2.0 to break things.
 pyfarmhash = ">=0.2.2"
@@ -91,6 +99,7 @@ all = [
     "google-cloud-bigquery",
     "numpy",
     "pandas",
+    "py2neo",
     "pyarrow",
 ]
 
