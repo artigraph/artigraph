@@ -1,10 +1,18 @@
 import os
 from collections.abc import Generator
+from typing import cast
 from unittest import mock
 
 import gcp_storage_emulator.server
 import gcsfs
 import pytest
+
+
+@pytest.fixture()
+def clean_test_name(request: pytest.FixtureRequest) -> str:
+    # Strip malformed characters (eg: parametrized test names include brackets). Depending on
+    # parametrize inputs, we may have to replace/escape more things.
+    return cast(str, request.node.name.replace("[", "").replace("]", ""))
 
 
 # For now, run a single emulator per session. Tests should use separate buckets for isolation.
@@ -27,12 +35,8 @@ def gcs(gcs_emulator: tuple[str, int]) -> gcsfs.GCSFileSystem:
 
 
 @pytest.fixture()
-def gcs_bucket(
-    request: pytest.FixtureRequest, gcs: gcsfs.GCSFileSystem
-) -> Generator[str, None, None]:
-    # Strip malformed characters (eg: parametrized test names include brackets). Depending on
-    # parametrize inputs, we may have to replace/escape more things.
-    bucket = request.node.name.replace("[", "").replace("]", "")
+def gcs_bucket(clean_test_name: str, gcs: gcsfs.GCSFileSystem) -> Generator[str, None, None]:
+    bucket = clean_test_name
     gcs.mkdir(bucket)
     try:
         yield bucket
