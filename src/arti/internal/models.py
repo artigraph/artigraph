@@ -163,12 +163,7 @@ class Model(BaseModel):
         # which wrecks havoc if a model is a key in a dict (`key in mydict` will be `False`...).
         #
         # This is only safe as the models are (mostly) frozen.
-        from arti.fingerprints import Fingerprint
-
-        fingerprint = self if isinstance(self, Fingerprint) else self.fingerprint
-        if fingerprint.key is None:
-            return 0
-        return int(fingerprint.key)
+        return int(self.fingerprint)
 
     # Omitting unpassed args in repr by default
     def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
@@ -210,10 +205,6 @@ class Model(BaseModel):
 
     @staticmethod
     def _fingerprint_json_encoder(obj: Any, encoder: Any = pydantic_json_encoder) -> Any:
-        from arti.fingerprints import Fingerprint
-
-        if isinstance(obj, Fingerprint):
-            return obj.key
         if isinstance(obj, Model):
             return obj.fingerprint
         if lenient_issubclass(obj, Model):
@@ -241,7 +232,11 @@ class Model(BaseModel):
             default=partial(self._fingerprint_json_encoder, encoder=self.__json_encoder__),
             sort_keys=True,
         )
-        return Fingerprint.from_string(f"{self._class_key_}:{json_repr}")
+        fingerprint = Fingerprint.from_string(f"{self._class_key_}:{json_repr}")
+        # NOTE: This shouldn't happen unless we somehow stumble upon Farmhash64(...) => 0
+        if fingerprint.is_identity:  # pragma: no cover
+            raise ValueError("Fingerprint is empty!")
+        return fingerprint
 
     @classmethod
     def _get_value(

@@ -5,7 +5,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 import abc
 from datetime import date
 from inspect import getattr_static
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Optional
 
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
@@ -154,4 +154,4 @@ class NullKey(PartitionKey):
         return super().from_key_components(**key_components)
 
 
-InputFingerprints = frozendict[CompositeKey, Fingerprint]
+InputFingerprints = frozendict[CompositeKey, Optional[Fingerprint]]

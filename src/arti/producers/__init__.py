@@ -327,7 +327,7 @@ class Producer(Model):
         return Fingerprint.from_string(self._class_key_).combine(
             self.version.fingerprint,
             *(
-                partition.content_fingerprint
+                partition.get_or_compute_content_fingerprint()
                 for name, partitions in dependency_partitions.items()
                 for partition in partitions
             ),

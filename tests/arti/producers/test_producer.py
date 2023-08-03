@@ -198,7 +198,7 @@ def test_Producer_string_annotation() -> None:
 def test_Producer_fingerprint() -> None:
     p1 = P1(a1=A1())
     assert p1.fingerprint == Fingerprint.from_string(
-        f'P1:{{"a1": {p1.a1.fingerprint.key}, "version": {p1.version.fingerprint.key}}}'
+        f'P1:{{"a1": {p1.a1.fingerprint}, "version": {p1.version.fingerprint}}}'
     )
 
 
@@ -214,7 +214,7 @@ def test_Producer_compute_input_fingerprint() -> None:
     assert p1.compute_input_fingerprint(
         frozendict(a1=StoragePartitions([storage_partition]))
     ) == Fingerprint.from_string(p1._class_key_).combine(
-        p1.version.fingerprint, storage_partition.content_fingerprint
+        p1.version.fingerprint, storage_partition.get_or_compute_content_fingerprint()
     )
 
     with pytest.raises(

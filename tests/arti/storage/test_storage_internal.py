@@ -39,9 +39,9 @@ def paths() -> set[str]:
 @pytest.fixture()
 def paths_to_placeholders() -> PathPlaceholders:
     return {
-        "/p/1/0x1": (Fingerprint.empty(), frozendict({"x": Int8Key(key=1), "y": Int8Key(key=1)})),
-        "/p/2/0x2": (Fingerprint.empty(), frozendict({"x": Int8Key(key=2), "y": Int8Key(key=2)})),
-        "/p/3/0x3": (Fingerprint.empty(), frozendict({"x": Int8Key(key=3), "y": Int8Key(key=3)})),
+        "/p/1/0x1": (None, frozendict({"x": Int8Key(key=1), "y": Int8Key(key=1)})),
+        "/p/2/0x2": (None, frozendict({"x": Int8Key(key=2), "y": Int8Key(key=2)})),
+        "/p/3/0x3": (None, frozendict({"x": Int8Key(key=3), "y": Int8Key(key=3)})),
     }
 
 

@@ -46,13 +46,13 @@ class MockStorage(Storage[MockStoragePartition]):
 
 def test_StoragePartition_content_fingerprint() -> None:
     sp = MockStoragePartition(path="/tmp/test", keys={}, storage=MockStorage(path="/tmp/test"))
-    assert sp.content_fingerprint == Fingerprint.empty()
+    assert sp.content_fingerprint is None
     populated = sp.with_content_fingerprint()
-    assert sp.content_fingerprint == Fingerprint.empty()
     assert populated.content_fingerprint == Fingerprint.from_string(sp.path)
-    assert populated.with_content_fingerprint(keep_existing=True) is populated
-    assert populated.with_content_fingerprint(keep_existing=False) == populated
-    assert populated.with_content_fingerprint(keep_existing=False) is not populated
+
+    modified = populated.copy(update={"content_fingerprint": Fingerprint(-1)})
+    assert modified.with_content_fingerprint(keep_existing=False) == populated
+    assert modified.with_content_fingerprint(keep_existing=True) != populated
 
 
 def test_Storage_init_subclass() -> None:
@@ -101,7 +101,7 @@ def test_Storage_visit_graph() -> None:
 def test_Storage_visit_input_fingerprint() -> None:
     s = MockStorage(path="/{input_fingerprint}/junk")
     assert s._visit_input_fingerprint(Fingerprint.from_int(10)) == MockStorage(path="/10/junk")
-    assert s._visit_input_fingerprint(Fingerprint.empty()) == MockStorage(path="/junk")
+    assert s._visit_input_fingerprint(None) == MockStorage(path="/junk")
 
 
 def test_Storage_visit_names() -> None:
@@ -157,7 +157,7 @@ def test_Storage_vist_type_extra() -> None:
         name: str
 
         def compute_content_fingerprint(self) -> Fingerprint:
-            return Fingerprint.empty()
+            return Fingerprint.from_string("test")
 
     class Table(Storage[TablePartition]):
         # NOTE: The type hints are needed to fix https://github.com/pydantic/pydantic/issues/1777#issuecomment-1465026331
@@ -224,7 +224,7 @@ def test_Storage_generate_partition() -> None:
             keys=CompositeKey(j=Int8Key(key=5)), input_fingerprint=input_fingerprint
         )
     with pytest.raises(ValueError, match="requires an input_fingerprint, but none was provided"):
-        s.generate_partition(keys=keys, input_fingerprint=Fingerprint.empty())
+        s.generate_partition(keys=keys, input_fingerprint=None)
 
     with pytest.raises(ValueError, match="Expected no partition keys but got:"):
         MockStorage(path="hard coded")._visit_type(Int8()).generate_partition(keys=keys)

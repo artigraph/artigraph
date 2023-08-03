@@ -24,18 +24,29 @@ if TYPE_CHECKING:
 class StoragePartition(Model):
     storage: Storage[StoragePartition] = Field(repr=False)
     keys: CompositeKey = CompositeKey()
-    input_fingerprint: Fingerprint = Fingerprint.empty()
-    content_fingerprint: Fingerprint = Fingerprint.empty()
-
-    def with_content_fingerprint(self, keep_existing: bool = True) -> Self:
-        if keep_existing and not self.content_fingerprint.is_empty:
-            return self
-        return self.copy(update={"content_fingerprint": self.compute_content_fingerprint()})
+    input_fingerprint: Optional[Fingerprint] = None
+    content_fingerprint: Optional[Fingerprint] = None
 
     @abc.abstractmethod
     def compute_content_fingerprint(self) -> Fingerprint:
         raise NotImplementedError(
             "{type(self).__name__}.compute_content_fingerprint is not implemented!"
+        )
+
+    def get_or_compute_content_fingerprint(self) -> Fingerprint:
+        if self.content_fingerprint is None:
+            return self.compute_content_fingerprint()
+        return self.content_fingerprint
+
+    def with_content_fingerprint(self, keep_existing: bool = True) -> Self:
+        return self.copy(
+            update={
+                "content_fingerprint": (
+                    self.get_or_compute_content_fingerprint()
+                    if keep_existing
+                    else self.compute_content_fingerprint()
+                )
+            }
         )
 
 
@@ -119,11 +130,10 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
             ),
         )
 
-    def _visit_input_fingerprint(self, input_fingerprint: Fingerprint) -> Self:
-        input_fingerprint_key = str(input_fingerprint.key)
-        if input_fingerprint.is_empty:
-            input_fingerprint_key = ""
-        return self.resolve(input_fingerprint=input_fingerprint_key)
+    def _visit_input_fingerprint(self, input_fingerprint: Optional[Fingerprint]) -> Self:
+        return self.resolve(
+            input_fingerprint="" if input_fingerprint is None else str(input_fingerprint)
+        )
 
     def _visit_names(self, names: tuple[str, ...]) -> Self:
         return self.resolve(name=names[-1] if names else "", names=self.segment_sep.join(names))
@@ -165,18 +175,18 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
     def generate_partition(
         self,
         keys: CompositeKey = CompositeKey(),
-        input_fingerprint: Fingerprint = Fingerprint.empty(),
+        input_fingerprint: Optional[Fingerprint] = None,
         with_content_fingerprint: bool = True,
     ) -> StoragePartitionVar_co:
         self._check_keys(self.key_types, keys)
         format_kwargs = dict[Any, Any](keys)
-        if input_fingerprint.is_empty:
+        if input_fingerprint is None:
             if self.includes_input_fingerprint_template:
                 raise ValueError(f"{self} requires an input_fingerprint, but none was provided")
         else:
             if not self.includes_input_fingerprint_template:
                 raise ValueError(f"{self} does not specify a {{input_fingerprint}} template")
-            format_kwargs["input_fingerprint"] = str(input_fingerprint.key)
+            format_kwargs["input_fingerprint"] = str(input_fingerprint)
         field_values = {
             name: (
                 strip_partition_indexes(original).format(**format_kwargs)

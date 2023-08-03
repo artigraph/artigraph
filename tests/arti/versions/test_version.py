@@ -55,7 +55,7 @@ def test_Timestamp() -> None:
     d = datetime.now(tz=timezone.utc)
     assert Timestamp(dt=d).fingerprint == round(d.timestamp())
     # Check the default is ~now.
-    key, now = Timestamp().fingerprint.key, round(datetime.now(tz=timezone.utc).timestamp())
+    key, now = Timestamp().fingerprint, round(datetime.now(tz=timezone.utc).timestamp())
     assert key is not None
     assert now - 1 <= key <= now + 1
     # Confirm naive datetime are not supported

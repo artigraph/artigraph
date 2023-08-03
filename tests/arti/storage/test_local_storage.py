@@ -42,9 +42,7 @@ def test_local_partitioning(tmp_path: Path, date_keys: list[CompositeKey]) -> No
         ._visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
         ._visit_format(DummyFormat())
     )
-    generate_partition_files(
-        storage, InputFingerprints(zip(date_keys, repeat(Fingerprint.empty())))
-    )
+    generate_partition_files(storage, InputFingerprints(zip(date_keys, repeat(None))))
     partitions = storage.discover_partitions()
     assert len(partitions) > 0
     for partition in partitions:
@@ -73,9 +71,7 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[CompositeKe
             ._visit_format(DummyFormat())
         )
         # Generate files for *all* years - we want discover_partitions to do the filtering.
-        generate_partition_files(
-            storage, InputFingerprints(zip(date_keys, repeat(Fingerprint.empty())))
-        )
+        generate_partition_files(storage, InputFingerprints(zip(date_keys, repeat(None))))
         partitions = storage.discover_partitions()
         assert len(partitions) > 0
         for partition in partitions:

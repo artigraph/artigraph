@@ -41,7 +41,5 @@ class StringLiteral(Storage[StringLiteralPartition]):
             return ()
         return tuple(
             self.generate_partition(input_fingerprint=input_fingerprint, keys=keys)
-            for keys, input_fingerprint in (
-                input_fingerprints or {CompositeKey(): Fingerprint.empty()}
-            ).items()
+            for keys, input_fingerprint in (input_fingerprints or {CompositeKey(): None}).items()
         )
