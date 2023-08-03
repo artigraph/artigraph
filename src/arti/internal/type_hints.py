@@ -24,6 +24,11 @@ _T = TypeVar("_T")
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
 
+def assert_not_none(v: Optional[_T]) -> _T:
+    assert v is not None
+    return v
+
+
 def _check_issubclass(klass: Any, check_type: type) -> bool:
     # If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the
     # metadata.
