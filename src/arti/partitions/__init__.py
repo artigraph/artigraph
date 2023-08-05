@@ -9,19 +9,19 @@ from typing import Any, ClassVar, Optional
 
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
-from arti.internal.utils import classproperty, frozendict, register
+from arti.internal.utils import _K, _V, classproperty, frozendict, register
 from arti.types import Collection, Date, Int8, Int16, Int32, Int64, Null, Type
 
 
-class key_component(property):
+class field_component(property):
     pass
 
 
-class PartitionKey(Model):
+class PartitionField(Model):
     _abstract_ = True
-    _by_type_: ClassVar[dict[type[Type], type[PartitionKey]]] = {}
+    _by_type_: ClassVar[dict[type[Type], type[PartitionField]]] = {}
 
-    default_key_components: ClassVar[frozendict[str, str]]
+    default_components: ClassVar[frozendict[str, str]]
     matching_type: ClassVar[type[Type]]
 
     @classmethod
@@ -29,129 +29,137 @@ class PartitionKey(Model):
         super().__init_subclass__(**kwargs)
         if cls._abstract_:
             return
-        for attr in ("default_key_components", "matching_type"):
+        for attr in ("default_components", "matching_type"):
             if not hasattr(cls, attr):
                 raise TypeError(f"{cls.__name__} must set `{attr}`")
-        if unknown := set(cls.default_key_components) - cls.key_components:
-            raise TypeError(
-                f"Unknown key_components in {cls.__name__}.default_key_components: {unknown}"
-            )
+        if unknown := set(cls.default_components) - cls.components:
+            raise TypeError(f"Unknown components in {cls.__name__}.default_components: {unknown}")
         register(cls._by_type_, cls.matching_type, cls)
 
     @classproperty
-    def key_components(cls) -> frozenset[str]:
+    def components(cls) -> frozenset[str]:
         return frozenset(cls.__fields__) | frozenset(
-            name for name in dir(cls) if isinstance(getattr_static(cls, name), key_component)
+            name for name in dir(cls) if isinstance(getattr_static(cls, name), field_component)
         )
 
     @classmethod
     @abc.abstractmethod
-    def from_key_components(cls, **key_components: str) -> PartitionKey:
-        raise NotImplementedError(f"Unable to parse '{cls.__name__}' from: {key_components}")
+    def from_components(cls, **components: str) -> PartitionField:
+        raise NotImplementedError(f"Unable to parse '{cls.__name__}' from: {components}")
 
     @classmethod
-    def get_class_for(cls, type_: Type) -> type[PartitionKey]:
+    def get_class_for(cls, type_: Type) -> type[PartitionField]:
         return cls._by_type_[type(type_)]
 
+
+PartitionKeyTypes = frozendict[str, type[PartitionField]]
+
+
+# See the note above frozendict for info on why we subclass this way and add an alias later.
+class _PartitionKey(frozendict[_K, _V]):
+    """The set of named PartitionFields that uniquely identify a single partition."""
+
     @classmethod
-    def types_from(cls, type_: Type) -> CompositeKeyTypes:
+    def types_from(cls, type_: Type) -> PartitionKeyTypes:
         if not isinstance(type_, Collection):
             return frozendict()
         return frozendict(
-            {name: cls.get_class_for(field) for name, field in type_.partition_fields.items()}
+            {
+                name: PartitionField.get_class_for(field)
+                for name, field in type_.partition_fields.items()
+            }
         )
 
 
-# CompositeKey is the set of named PartitionKeys that uniquely identify a single partition.
-CompositeKey = frozendict[str, PartitionKey]
-CompositeKeyTypes = frozendict[str, type[PartitionKey]]
-
-NotPartitioned = CompositeKey()
+PartitionKey = _PartitionKey[str, PartitionField]
 
 
-class DateKey(PartitionKey):
-    default_key_components: ClassVar[frozendict[str, str]] = frozendict(Y="Y", m="m:02", d="d:02")
+NotPartitioned = PartitionKey()
+
+
+class DateField(PartitionField):
+    default_components: ClassVar[frozendict[str, str]] = frozendict(Y="Y", m="m:02", d="d:02")
     matching_type = Date
 
     key: date
 
-    @key_component
+    @field_component
     def Y(self) -> int:
         return self.key.year
 
-    @key_component
+    @field_component
     def m(self) -> int:
         return self.key.month
 
-    @key_component
+    @field_component
     def d(self) -> int:
         return self.key.day
 
-    @key_component
+    @field_component
     def iso(self) -> str:
         return self.key.isoformat()
 
     @classmethod
-    def from_key_components(cls, **key_components: str) -> PartitionKey:
-        names = set(key_components)
+    def from_components(cls, **components: str) -> PartitionField:
+        names = set(components)
         if names == {"key"}:
-            return cls(key=date.fromisoformat(key_components["key"]))
+            return cls(key=date.fromisoformat(components["key"]))
         if names == {"iso"}:
-            return cls(key=date.fromisoformat(key_components["iso"]))
+            return cls(key=date.fromisoformat(components["iso"]))
         if names == {"Y", "m", "d"}:
-            return cls(key=date(*[int(key_components[k]) for k in ("Y", "m", "d")]))
-        return super().from_key_components(**key_components)
+            return cls(key=date(*[int(components[k]) for k in ("Y", "m", "d")]))
+        return super().from_components(**components)
 
 
-class _IntKey(PartitionKey):
+class _IntField(PartitionField):
     _abstract_ = True
-    default_key_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
+    default_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
 
     key: int
 
-    @key_component
+    @field_component
     def hex(self) -> str:
         return hex(self.key)
 
     @classmethod
-    def from_key_components(cls, **key_components: str) -> PartitionKey:
-        names = set(key_components)
+    def from_components(cls, **components: str) -> PartitionField:
+        names = set(components)
         if names == {"key"}:
-            return cls(key=int(key_components["key"]))
+            return cls(key=int(components["key"]))
         if names == {"hex"}:
-            return cls(key=int(key_components["hex"], base=16))
-        return super().from_key_components(**key_components)
+            return cls(key=int(components["hex"], base=16))
+        return super().from_components(**components)
 
 
-class Int8Key(_IntKey):
+class Int8Field(_IntField):
     matching_type = Int8
 
 
-class Int16Key(_IntKey):
+class Int16Field(_IntField):
     matching_type = Int16
 
 
-class Int32Key(_IntKey):
+class Int32Field(_IntField):
     matching_type = Int32
 
 
-class Int64Key(_IntKey):
+class Int64Field(_IntField):
     matching_type = Int64
 
 
-class NullKey(PartitionKey):
-    default_key_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
+class NullField(PartitionField):
+    default_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
     matching_type = Null
 
     key: None = None
 
     @classmethod
-    def from_key_components(cls, **key_components: str) -> PartitionKey:
-        if set(key_components) == {"key"}:
-            if key_components["key"] != "None":
+    def from_components(cls, **components: str) -> PartitionField:
+        if set(components) == {"key"}:
+            if components["key"] != "None":
                 raise ValueError(f"'{cls.__name__}' can only be used with 'None'!")
             return cls()
-        return super().from_key_components(**key_components)
+        return super().from_components(**components)
 
 
-InputFingerprints = frozendict[CompositeKey, Optional[Fingerprint]]
+InputFingerprints = frozendict[PartitionKey, Optional[Fingerprint]]

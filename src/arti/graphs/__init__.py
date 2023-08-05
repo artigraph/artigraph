@@ -18,7 +18,7 @@ from arti.backends import Backend, BackendConnection
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.utils import TypedBox, frozendict
-from arti.partitions import CompositeKey
+from arti.partitions import PartitionKey
 from arti.producers import Producer
 from arti.storage import StoragePartition, StoragePartitions
 from arti.types import is_partitioned
@@ -249,7 +249,7 @@ class Graph(Model):
         *,
         artifact: Artifact,
         input_fingerprint: Optional[Fingerprint] = None,
-        keys: CompositeKey = CompositeKey(),
+        keys: PartitionKey = PartitionKey(),
         view: Optional[View] = None,
         snapshot: Optional[GraphSnapshot] = None,
         connection: Optional[BackendConnection] = None,
@@ -405,7 +405,7 @@ class GraphSnapshot(Model):
         *,
         artifact: Artifact,
         input_fingerprint: Optional[Fingerprint] = None,
-        keys: CompositeKey = CompositeKey(),
+        keys: PartitionKey = PartitionKey(),
         view: Optional[View] = None,
         connection: Optional[BackendConnection] = None,
     ) -> StoragePartition:

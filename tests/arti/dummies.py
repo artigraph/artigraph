@@ -6,10 +6,10 @@ from typing import Annotated, Any
 from arti import (
     Annotation,
     Artifact,
-    CompositeKeyTypes,
     Fingerprint,
     Format,
     InputFingerprints,
+    PartitionKeyTypes,
     Producer,
     Statistic,
     Storage,
@@ -60,7 +60,7 @@ class DummyStorage(Storage[DummyPartition]):
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> tuple[DummyPartition, ...]:
-        if self.key_types != CompositeKeyTypes():
+        if self.key_types != PartitionKeyTypes():
             raise NotImplementedError()
         if input_fingerprints is not None and input_fingerprints != InputFingerprints():
             raise NotImplementedError()

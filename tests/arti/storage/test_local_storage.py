@@ -6,22 +6,22 @@ from pathlib import Path
 
 import pytest
 
-from arti import CompositeKey, Fingerprint, InputFingerprints
-from arti.partitions import DateKey
+from arti import Fingerprint, InputFingerprints, PartitionKey
+from arti.partitions import DateField
 from arti.storage.local import LocalFile, LocalFilePartition
 from arti.types import Collection, Date, Struct
 from tests.arti.dummies import DummyFormat
 
 
 @pytest.fixture()
-def date_keys() -> list[CompositeKey]:
+def date_keys() -> list[PartitionKey]:
     return [
-        CompositeKey(date=date_key)
+        PartitionKey(date=date_key)
         for date_key in (
-            DateKey(key=date(1970, 1, 1)),
-            DateKey(key=date(1970, 1, 2)),
-            DateKey(key=date(1970, 1, 3)),
-            DateKey(key=date(2021, 1, 1)),
+            DateField(key=date(1970, 1, 1)),
+            DateField(key=date(1970, 1, 2)),
+            DateField(key=date(1970, 1, 3)),
+            DateField(key=date(2021, 1, 1)),
         )
     ]
 
@@ -36,7 +36,7 @@ def generate_partition_files(storage: LocalFile, input_fingerprints: InputFinger
         partition_path.touch()
 
 
-def test_local_partitioning(tmp_path: Path, date_keys: list[CompositeKey]) -> None:
+def test_local_partitioning(tmp_path: Path, date_keys: list[PartitionKey]) -> None:
     storage = (
         LocalFile(path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"))
         ._visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
@@ -49,10 +49,10 @@ def test_local_partitioning(tmp_path: Path, date_keys: list[CompositeKey]) -> No
         assert isinstance(partition, LocalFilePartition)
         assert set(partition.keys) == {"date"}
         assert partition.keys in date_keys
-        assert isinstance(partition.keys["date"], DateKey)
+        assert isinstance(partition.keys["date"], DateField)
 
 
-def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[CompositeKey]) -> None:
+def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[PartitionKey]) -> None:
     for year in {k["date"].Y for k in date_keys}:  # type: ignore[attr-defined]
         storage = (
             LocalFile(
@@ -78,12 +78,12 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[CompositeKe
             assert isinstance(partition, LocalFilePartition)
             assert set(partition.keys) == {"date"}
             assert partition.keys in date_keys
-            assert isinstance(partition.keys["date"], DateKey)
+            assert isinstance(partition.keys["date"], DateField)
             assert year == partition.keys["date"].Y
 
 
 def test_local_partitioning_with_input_fingerprints(
-    tmp_path: Path, date_keys: list[CompositeKey]
+    tmp_path: Path, date_keys: list[PartitionKey]
 ) -> None:
     storage = (
         LocalFile(
@@ -103,7 +103,7 @@ def test_local_partitioning_with_input_fingerprints(
         assert isinstance(partition, LocalFilePartition)
         assert set(partition.keys) == {"date"}
         assert partition.keys in date_keys
-        assert isinstance(partition.keys["date"], DateKey)
+        assert isinstance(partition.keys["date"], DateField)
         assert partition.input_fingerprint == input_fingerprint
 
 

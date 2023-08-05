@@ -6,18 +6,18 @@ from typing import ClassVar
 import pytest
 
 from arti import (
-    CompositeKey,
-    CompositeKeyTypes,
     Fingerprint,
     Graph,
     InputFingerprints,
+    PartitionKey,
+    PartitionKeyTypes,
     Storage,
     StoragePartition,
     Type,
 )
 from arti.formats.json import JSON
 from arti.internal.utils import frozendict
-from arti.partitions import Int8Key
+from arti.partitions import Int8Field
 from arti.types import Collection, Date, Int8, Struct
 from tests.arti.dummies import DummyFormat
 
@@ -35,11 +35,11 @@ class MockStorage(Storage[MockStoragePartition]):
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> tuple[MockStoragePartition, ...]:
-        assert all(v is Int8Key for v in self.key_types.values())  # Simplifies logic here...
+        assert all(v is Int8Field for v in self.key_types.values())  # Simplifies logic here...
         return tuple(
             self.generate_partition(keys=keys)
             for keys in (
-                CompositeKey({k: Int8Key(key=i) for k in self.key_types}) for i in range(3)
+                PartitionKey({k: Int8Field(key=i) for k in self.key_types}) for i in range(3)
             )
         )
 
@@ -145,8 +145,8 @@ def test_Storage_visit_type(spec: str, expected: str, type: Type) -> None:
 def test_Storage_key_types() -> None:
     assert MockStorage(path="test")._visit_type(
         Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",))
-    ).key_types == CompositeKeyTypes(a=Int8Key)
-    assert MockStorage(path="test")._visit_type(Int8()).key_types == CompositeKeyTypes()
+    ).key_types == PartitionKeyTypes(a=Int8Field)
+    assert MockStorage(path="test")._visit_type(Int8()).key_types == PartitionKeyTypes()
     with pytest.raises(ValueError, match="`key_types` have not been set yet."):
         assert MockStorage(path="test").key_types
 
@@ -188,12 +188,12 @@ def test_Storage_discover_partitions() -> None:
     partitions = s.discover_partitions()
     for i, sp in enumerate(sorted(partitions, key=lambda x: x.path)):
         assert sp.path == f"/test/{i}/file"
-        assert isinstance(sp.keys["i"], Int8Key)
+        assert isinstance(sp.keys["i"], Int8Field)
         assert sp.keys["i"].key == i
 
 
 def test_Storage_generate_partition() -> None:
-    keys = CompositeKey(i=Int8Key(key=5))
+    keys = PartitionKey(i=Int8Field(key=5))
     input_fingerprint = Fingerprint.from_int(10)
     s = (
         MockStorage(path="{i.key:02}/{input_fingerprint}")
@@ -221,7 +221,7 @@ def test_Storage_generate_partition() -> None:
     # probably want nicer error messages for these eventually.
     with pytest.raises(KeyError, match="i"):
         s.generate_partition(
-            keys=CompositeKey(j=Int8Key(key=5)), input_fingerprint=input_fingerprint
+            keys=PartitionKey(j=Int8Field(key=5)), input_fingerprint=input_fingerprint
         )
     with pytest.raises(ValueError, match="requires an input_fingerprint, but none was provided"):
         s.generate_partition(keys=keys, input_fingerprint=None)

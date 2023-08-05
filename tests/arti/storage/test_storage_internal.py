@@ -4,9 +4,8 @@ from typing import Optional
 import parse
 import pytest
 
-from arti import CompositeKey, CompositeKeyTypes, Fingerprint, PartitionKey
-from arti.internal.utils import frozendict
-from arti.partitions import Int8Key
+from arti import Fingerprint, PartitionField, PartitionKey, PartitionKeyTypes
+from arti.partitions import Int8Field
 from arti.storage._internal import (
     FormatDict,
     FormatPlaceholder,
@@ -18,12 +17,12 @@ from arti.storage._internal import (
     strip_partition_indexes,
 )
 
-PathPlaceholders = dict[str, tuple[Optional[Fingerprint], CompositeKey]]
+PathPlaceholders = dict[str, tuple[Optional[Fingerprint], PartitionKey]]
 
 
 @pytest.fixture()
-def PKs() -> dict[str, type[PartitionKey]]:
-    return {"x": Int8Key, "y": Int8Key}
+def PKs() -> dict[str, type[PartitionField]]:
+    return {"x": Int8Field, "y": Int8Field}
 
 
 @pytest.fixture()
@@ -39,9 +38,9 @@ def paths() -> set[str]:
 @pytest.fixture()
 def paths_to_placeholders() -> PathPlaceholders:
     return {
-        "/p/1/0x1": (None, frozendict({"x": Int8Key(key=1), "y": Int8Key(key=1)})),
-        "/p/2/0x2": (None, frozendict({"x": Int8Key(key=2), "y": Int8Key(key=2)})),
-        "/p/3/0x3": (None, frozendict({"x": Int8Key(key=3), "y": Int8Key(key=3)})),
+        "/p/1/0x1": (None, PartitionKey({"x": Int8Field(key=1), "y": Int8Field(key=1)})),
+        "/p/2/0x2": (None, PartitionKey({"x": Int8Field(key=2), "y": Int8Field(key=2)})),
+        "/p/3/0x3": (None, PartitionKey({"x": Int8Field(key=3), "y": Int8Field(key=3)})),
     }
 
 
@@ -71,12 +70,12 @@ def test_FormatPlaceholder(spec: str, key: str) -> None:
 @pytest.mark.parametrize(
     ("key", "partition_key_types", "attribute"),
     [
-        ("test", CompositeKeyTypes(test=Int8Key), "key"),
-        ("test", CompositeKeyTypes(test=Int8Key), "hex"),
+        ("test", PartitionKeyTypes(test=Int8Field), "key"),
+        ("test", PartitionKeyTypes(test=Int8Field), "hex"),
     ],
 )
 def test_WildcardPlaceholder(
-    key: str, partition_key_types: CompositeKeyTypes, attribute: str
+    key: str, partition_key_types: PartitionKeyTypes, attribute: str
 ) -> None:
     partition_key_type = partition_key_types[key]
 
@@ -124,11 +123,11 @@ def test_WildcardPlaceholder(
 
 
 def test_FormatDict() -> None:
-    d = FormatDict(WildcardPlaceholder.with_key_types({"test": Int8Key}), tag="x")
+    d = FormatDict(WildcardPlaceholder.with_key_types({"test": Int8Field}), tag="x")
     test_placeholder = d["test"]
     assert isinstance(test_placeholder, WildcardPlaceholder)
     assert test_placeholder._key == "test"
-    assert test_placeholder._key_type == Int8Key
+    assert test_placeholder._key_type == Int8Field
     assert d["tag"] == "x"
 
     with pytest.raises(
@@ -170,14 +169,14 @@ def test_strip_partition_indexes(spec: str, expected: str) -> None:
     assert strip_partition_indexes(spec) == expected
 
 
-def test_spec_to_wildcard(PKs: dict[str, type[PartitionKey]]) -> None:
+def test_spec_to_wildcard(PKs: dict[str, type[PartitionField]]) -> None:
     assert spec_to_wildcard("/p/{x.key}/", PKs) == "/p/*/"
     assert spec_to_wildcard("/p/{x.key[5]}/", PKs) == "/p/5/"
     assert spec_to_wildcard("/p/{x.key[5]}/{y.hex}/", PKs) == "/p/5/*/"
 
 
 def test_extract_placeholders(
-    PKs: dict[str, type[PartitionKey]],
+    PKs: dict[str, type[PartitionField]],
     spec: str,
     paths: set[str],
     paths_to_placeholders: PathPlaceholders,
@@ -215,7 +214,7 @@ def test_extract_placeholders(
 
 
 def test_parse_spec(
-    PKs: dict[str, type[PartitionKey]],
+    PKs: dict[str, type[PartitionField]],
     spec: str,
     paths: set[str],
     paths_to_placeholders: PathPlaceholders,

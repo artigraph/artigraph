@@ -9,8 +9,7 @@ from typing import Any, Optional
 import parse
 
 from arti.fingerprints import Fingerprint
-from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, CompositeKeyTypes, InputFingerprints, PartitionKey
+from arti.partitions import InputFingerprints, PartitionField, PartitionKey, PartitionKeyTypes
 
 
 class Placeholder:
@@ -42,22 +41,22 @@ class StripIndexPlaceholder(FormatPlaceholder):
 
 
 class WildcardPlaceholder(Placeholder):
-    def __init__(self, key: str, key_types: CompositeKeyTypes):
+    def __init__(self, key: str, key_types: PartitionKeyTypes):
         super().__init__(key)
         if key not in key_types:
             raise ValueError(f"No '{key}' partition key found, expected one of {tuple(key_types)}")
         self._key_type = key_types[key]
-        self._attribute: Optional[str] = None  # What field/key_component is being accessed
+        self._attribute: Optional[str] = None  # What field/field_component is being accessed
 
     @classmethod
     def with_key_types(
-        cls, key_types: Mapping[str, type[PartitionKey]]
+        cls, key_types: Mapping[str, type[PartitionField]]
     ) -> Callable[[str], WildcardPlaceholder]:
         return partial(cls, key_types=key_types)
 
     def _err_if_no_attribute(self) -> None:
         if self._attribute is None:
-            example = sorted(self._key_type.key_components)[0]
+            example = sorted(self._key_type.components)[0]
             raise ValueError(
                 f"'{self._key}' cannot be used directly in a partition path; access one of the key components (eg: '{self._key}.{example}')."
             )
@@ -67,7 +66,7 @@ class WildcardPlaceholder(Placeholder):
             raise ValueError(
                 f"'{self._key}.{self._attribute}.{name}' cannot be used in a partition path; only immediate '{self._key}' attributes (such as '{self._attribute}') can be used."
             )
-        if name not in self._key_type.key_components:
+        if name not in self._key_type.components:
             raise AttributeError(
                 f"'{self._key_type.__name__}' has no field or key component '{name}'"
             )
@@ -112,7 +111,7 @@ def strip_partition_indexes(spec: str) -> str:
     return string.Formatter().vformat(spec, (), FormatDict(StripIndexPlaceholder))
 
 
-def spec_to_wildcard(spec: str, key_types: Mapping[str, type[PartitionKey]]) -> str:
+def spec_to_wildcard(spec: str, key_types: Mapping[str, type[PartitionField]]) -> str:
     return string.Formatter().vformat(
         spec.replace("{input_fingerprint}", "*"),
         (),
@@ -123,18 +122,18 @@ def spec_to_wildcard(spec: str, key_types: Mapping[str, type[PartitionKey]]) -> 
 def extract_placeholders(
     *,
     error_on_no_match: bool = True,
-    key_types: Mapping[str, type[PartitionKey]],
+    key_types: Mapping[str, type[PartitionField]],
     parser: parse.Parser,
     path: str,
     spec: str,
-) -> Optional[tuple[Optional[Fingerprint], CompositeKey]]:
+) -> Optional[tuple[Optional[Fingerprint], PartitionKey]]:
     parsed_value = parser.parse(path)
     if parsed_value is None:
         if error_on_no_match:
             raise ValueError(f"Unable to parse '{path}' with '{spec}'.")
         return None
     input_fingerprint: Optional[Fingerprint] = None
-    key_components = defaultdict[str, dict[str, str]](dict)
+    field_components = defaultdict[str, dict[str, str]](dict)
     for k, v in parsed_value.named.items():
         if k == "input_fingerprint":
             assert isinstance(v, str)
@@ -144,26 +143,26 @@ def extract_placeholders(
         # parsing a string like "{date.Y[1970]}" will return a dict like {'1970': '1970'}.
         if isinstance(v, dict):
             v = next(iter(v))
-        key_components[key][component] = v
+        field_components[key][component] = v
 
     keys = {
-        key: key_types[key].from_key_components(**components)
-        for key, components in key_components.items()
+        key: key_types[key].from_components(**components)
+        for key, components in field_components.items()
     }
     if set(keys) != set(key_types):
         raise ValueError(
             f"Expected to find partition keys for {sorted(key_types)}, only found {sorted(keys)}. Is the partitioning spec ('{spec}') complete?"
         )
-    return input_fingerprint, frozendict(keys)
+    return input_fingerprint, PartitionKey(keys)
 
 
 def parse_spec(
     paths: set[str],
     *,
     input_fingerprints: InputFingerprints = InputFingerprints(),
-    key_types: Mapping[str, type[PartitionKey]],
+    key_types: Mapping[str, type[PartitionField]],
     spec: str,
-) -> Mapping[str, tuple[Optional[Fingerprint], CompositeKey]]:
+) -> Mapping[str, tuple[Optional[Fingerprint], PartitionKey]]:
     parser = parse.compile(spec, case_sensitive=True)
     path_placeholders = (
         (path, placeholders)

@@ -37,6 +37,32 @@ def classproperty(meth: Callable[..., PropReturn]) -> PropReturn:
     return classmethod(property(meth))  # type: ignore[arg-type,return-value]
 
 
+# NOTE: When subclassing `frozendict`, use a private name with unbound TypeVars (ie: `class
+# _X(frozendict[_K, _V])`) and then bind the desired types with an alias (eg: `X = _X[str, int]`).
+# See arti.partitions.PartitionKey for an example.
+#
+# This is required for Pydantic v1 to identify it as Mapping (and thus validate key/value types)
+# rather than a custom type. The reason is that binding type vars returns a `types.GenericAlias`
+# instance (with the class reference and bound args), but subclassing that directly obscures this
+# from pydantic. A custom type requires `arbitrary_types_allowed` or a validator. However, adding a
+# mapping-like validator requires reimplementing a lot of the key/value validation until v2[1].
+# Hence, we'll work around this by keeping the original class generic (with type vars) and using the
+# subscripted alias within models.
+#
+# When upgrading to pydantic v2, we can replace these patterns with a `__get_pydantic_core_schema__`
+# method on `frozendict` that will cover all subclasses. The method can do something similar to [1],
+# but instead use our `get_class_type_vars` helper to identify the bound type vars from a base
+# class.
+#
+#     @classmethod
+#     def __get_pydantic_core_schema__(
+#         cls, source_type: Any, handler: GetCoreSchemaHandler
+#     ) -> CoreSchema:
+#         return core_schema.no_info_after_validator_function(
+#             cls, handler(Mapping[get_class_type_vars(source_type)])  # type: ignore[misc]
+#         )
+#
+# 1: https://github.com/pydantic/pydantic/issues/1457#issuecomment-1566287896
 class frozendict(Mapping[_K, _V]):
     def __init__(
         self, arg: Union[Mapping[_K, _V], Iterable[tuple[_K, _V]]] = (), **kwargs: _V

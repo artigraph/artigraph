@@ -2,10 +2,10 @@ from typing import Annotated
 
 import pytest
 
-from arti import CompositeKey, Format, StoragePartition, StoragePartitions, View, io
+from arti import Format, PartitionKey, StoragePartition, StoragePartitions, View, io
 from arti.formats.json import JSON
 from arti.formats.pickle import Pickle
-from arti.partitions import Int64Key
+from arti.partitions import Int64Field
 from arti.storage.google.cloud.storage import GCSFile
 from arti.types import Collection, Int64, Struct
 from tests.arti.dummies import Num
@@ -39,7 +39,7 @@ def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
     a = PartitionedNum(format=format, storage=GCSFile(bucket=gcs_bucket, path="{i.key}"))
     data: dict[StoragePartition, dict[str, int]] = {
         a.storage.generate_partition(
-            keys=CompositeKey(i=Int64Key(key=i)),
+            keys=PartitionKey(i=Int64Field(key=i)),
             input_fingerprint=None,
             with_content_fingerprint=False,
         ): {"i": i}
