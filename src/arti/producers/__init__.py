@@ -232,7 +232,7 @@ class Producer(Model):
 
         if (  # Allow `*args: Any` or `*args: T` for `build(...) -> tuple[T, ...]`
             len(validate_parameters) == 1
-            and (param := tuple(validate_parameters.values())[0]).kind == param.VAR_POSITIONAL
+            and (param := next(iter(validate_parameters.values()))).kind == param.VAR_POSITIONAL
         ):
             if not all(param_matches(param, output_hint) for output_hint in build_output_hints):
                 with wrap_exc(ValueError, prefix=f" {param.name} param"):
