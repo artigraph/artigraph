@@ -145,7 +145,7 @@ def test_python_optional(arti: Type, py: Any) -> None:
 
 def test_python_optional_priority() -> None:
     # Confirm PyOptional is first since we need to wrap all other types if applicable.
-    assert tuple(python_type_system._priority_sorted_adapters)[0] is PyOptional
+    assert next(iter(python_type_system._priority_sorted_adapters)) is PyOptional
 
 
 def test_python_set() -> None:
