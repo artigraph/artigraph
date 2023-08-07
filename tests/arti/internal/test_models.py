@@ -102,7 +102,7 @@ def test_Model_fingerprint() -> None:
         b: set[str]
 
     assert B(a=a, b={"b"}).fingerprint == Fingerprint.from_string(
-        f'B:{{"a": {a.fingerprint.key}, "b": ["b"]}}'
+        f'B:{{"a": {a.fingerprint}, "b": ["b"]}}'
     )
 
     class Excludes(A):

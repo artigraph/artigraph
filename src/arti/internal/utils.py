@@ -123,9 +123,6 @@ def import_submodules(
         }
 
 
-_int_sub = TypeVar("_int_sub", bound="_int")
-
-
 class _int(int):
     def __repr__(self) -> str:
         return f"{qname(self)}({int(self)})"

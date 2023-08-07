@@ -80,7 +80,7 @@ class ArtifactBox(TypedBox[Artifact]):
         # copying the instance and setting the `producer_output` attribute). We won't know the
         # "final" instance until assignment here to the Graph.
         if artifact.producer_output is None:
-            storage = storage._visit_input_fingerprint(Fingerprint.empty())
+            storage = storage._visit_input_fingerprint(None)
         elif not artifact.storage.includes_input_fingerprint_template:
             raise ValueError(
                 "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
@@ -248,7 +248,7 @@ class Graph(Model):
         data: Any,
         *,
         artifact: Artifact,
-        input_fingerprint: Fingerprint = Fingerprint.empty(),
+        input_fingerprint: Optional[Fingerprint] = None,
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
         snapshot: Optional[GraphSnapshot] = None,
@@ -345,9 +345,6 @@ class GraphSnapshot(Model):
                     snapshot_id = snapshot_id.combine(
                         *[partition.fingerprint for partition in known_artifact_partitions[key]]
                     )
-        if snapshot_id.is_empty or snapshot_id.is_identity:  # pragma: no cover
-            # NOTE: This shouldn't happen unless the logic above is faulty.
-            raise ValueError("Fingerprint is empty!")
         snapshot = cls(graph=graph, id=snapshot_id)
         # Write the discovered partitions (if not already known) and link to this new snapshot.
         with (connection or snapshot.backend).connect() as conn:
@@ -407,7 +404,7 @@ class GraphSnapshot(Model):
         data: Any,
         *,
         artifact: Artifact,
-        input_fingerprint: Fingerprint = Fingerprint.empty(),
+        input_fingerprint: Optional[Fingerprint] = None,
         keys: CompositeKey = CompositeKey(),
         view: Optional[View] = None,
         connection: Optional[BackendConnection] = None,

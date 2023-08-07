@@ -65,7 +65,7 @@ def test_Graph_copy(graph: Graph) -> None:
         assert graph.artifacts == copy.artifacts
         assert graph.fingerprint == copy.fingerprint
         assert hash(graph) == hash(copy)
-        assert hash(copy) == copy.fingerprint.key
+        assert hash(copy) == copy.fingerprint
 
 
 def test_Graph_literals(tmp_path: Path) -> None:
@@ -387,8 +387,8 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     # Test write
     storage_partition = g.write(5, artifact=i)
     assert isinstance(storage_partition, LocalFilePartition)
-    assert storage_partition.content_fingerprint != Fingerprint.empty()
-    assert storage_partition.input_fingerprint == Fingerprint.empty()
+    assert storage_partition.content_fingerprint is not None
+    assert storage_partition.input_fingerprint is None
     assert storage_partition.keys == CompositeKey()
     assert storage_partition.path.endswith(i.format.extension)
 

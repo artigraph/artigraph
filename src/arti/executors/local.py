@@ -6,6 +6,7 @@ from graphlib import TopologicalSorter
 from arti.artifacts import Artifact
 from arti.executors import Executor
 from arti.graphs import GraphSnapshot
+from arti.internal.type_hints import assert_not_none
 from arti.producers import Producer
 
 
@@ -45,7 +46,9 @@ class LocalExecutor(Executor):
                             backend,
                             node,
                             existing_partition_keys=existing_keys,
-                            input_fingerprint=partition_input_fingerprints[partition_key],
+                            input_fingerprint=assert_not_none(
+                                partition_input_fingerprints[partition_key]
+                            ),
                             partition_dependencies=dependencies,
                             partition_key=partition_key,
                         )
