@@ -4,7 +4,7 @@ from typing import ClassVar
 
 import pytest
 
-from arti import PartitionField, Type
+from arti import PartitionField, PartitionKey, Type
 from arti.internal.utils import frozendict
 from arti.partitions import (
     DateField,
@@ -13,7 +13,6 @@ from arti.partitions import (
     Int32Field,
     Int64Field,
     NullField,
-    PartitionKey,
     _IntField,
     field_component,
 )
