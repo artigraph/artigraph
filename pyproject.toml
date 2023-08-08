@@ -142,7 +142,7 @@ extend-select = [
     # "PTH",  # TODO: prefer pathlib.Path over os.path ops
 ]
 ignore = [
-    "B008",   # don't call function in arg defaults (eg: InputFingerprint or CompositeKey)
+    "B008",   # don't call function in arg defaults (eg: InputFingerprint or PartitionKey)
     "E501",   # line too long (covered by black)
     "PT012",  # `pytest.raises()` block should contain a single simple statement
     "RET505", # Unnecessary `else` after `return` statement

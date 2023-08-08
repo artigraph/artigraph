@@ -2,7 +2,7 @@ import re
 
 import pytest
 
-from arti import CompositeKey, Fingerprint, InputFingerprints
+from arti import Fingerprint, InputFingerprints, PartitionKey
 from arti.storage.literal import StringLiteral, StringLiteralPartition
 from arti.types import Collection, Int64, Struct
 from tests.arti.dummies import DummyFormat
@@ -40,7 +40,7 @@ def test_StringLiteral_errors() -> None:
         ),
     ):
         StringLiteral(value="test")._visit_type(Int64()).discover_partitions(
-            input_fingerprints=InputFingerprints({CompositeKey(): Fingerprint.from_int(5)}),
+            input_fingerprints=InputFingerprints({PartitionKey(): Fingerprint.from_int(5)}),
         )
     with pytest.raises(
         ValueError,

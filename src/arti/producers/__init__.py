@@ -32,7 +32,7 @@ from arti.internal.type_hints import (
     signature,
 )
 from arti.internal.utils import frozendict, get_module_name, ordinal
-from arti.partitions import CompositeKey, InputFingerprints, NotPartitioned, PartitionKey
+from arti.partitions import InputFingerprints, NotPartitioned, PartitionKey
 from arti.storage import StoragePartitions
 from arti.types import is_partitioned
 from arti.versions import SemVer, Version
@@ -46,7 +46,7 @@ BuildInputs = frozendict[str, View]
 Outputs = tuple[View, ...]
 
 InputPartitions = frozendict[str, StoragePartitions]
-PartitionDependencies = frozendict[CompositeKey, InputPartitions]
+PartitionDependencies = frozendict[PartitionKey, InputPartitions]
 MapSig = Callable[..., PartitionDependencies]
 BuildSig = Callable[..., Any]
 ValidateSig = Callable[..., tuple[bool, str]]
@@ -348,8 +348,8 @@ class Producer(Model):
         )
         partition_input_fingerprints = InputFingerprints(
             {
-                composite_key: self.compute_input_fingerprint(dependency_partitions)
-                for composite_key, dependency_partitions in partition_dependencies.items()
+                partition_key: self.compute_input_fingerprint(dependency_partitions)
+                for partition_key, dependency_partitions in partition_dependencies.items()
             }
         )
         return partition_dependencies, partition_input_fingerprints

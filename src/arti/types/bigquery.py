@@ -256,7 +256,7 @@ class TableTypeAdapter(TypeAdapter):
         if partition:
             # BigQuery only supports a single partitioning field. We'll move the rest to the
             # beginning of the cluster_by. This shouldn't matter much anyway since, depending on the
-            # Storage, we'll have separate tables for each unique composite key.
+            # Storage, we'll have separate tables for each unique partition field.
             head, *tail = partition
             if tail:
                 cluster = (*tail, *cluster)

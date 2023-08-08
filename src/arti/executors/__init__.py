@@ -11,7 +11,7 @@ from arti.fingerprints import Fingerprint
 from arti.graphs import GraphSnapshot
 from arti.internal.models import Model
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, InputFingerprints
+from arti.partitions import InputFingerprints, PartitionKey
 from arti.producers import InputPartitions, Producer
 from arti.storage import StoragePartitions
 
@@ -40,7 +40,7 @@ class Executor(Model):
         producer: Producer,
         *,
         partition_input_fingerprints: InputFingerprints,
-    ) -> set[CompositeKey]:
+    ) -> set[PartitionKey]:
         # NOTE: The output partitions may be built, but not yet associated with this GraphSnapshot
         # (eg: raw input data changed, but no changes trickled into this specific Producer). Hence
         # we'll fetch all StoragePartitions for each Storage, filtered to the PKs and
@@ -66,10 +66,10 @@ class Executor(Model):
         connection: BackendConnection,
         producer: Producer,
         *,
-        existing_partition_keys: set[CompositeKey],
+        existing_partition_keys: set[PartitionKey],
         input_fingerprint: Fingerprint,
         partition_dependencies: frozendict[str, StoragePartitions],
-        partition_key: CompositeKey,
+        partition_key: PartitionKey,
     ) -> None:
         # TODO: Should this "skip if exists" live here or higher up?
         if partition_key in existing_partition_keys:

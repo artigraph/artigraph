@@ -13,7 +13,7 @@ from arti.formats import Format
 from arti.internal.models import Model
 from arti.internal.type_hints import Self, get_class_type_vars, lenient_issubclass
 from arti.internal.utils import frozendict
-from arti.partitions import CompositeKey, CompositeKeyTypes, InputFingerprints, PartitionKey
+from arti.partitions import InputFingerprints, PartitionKey, PartitionKeyTypes
 from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
 
@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 class StoragePartition(Model):
     storage: Storage[StoragePartition] = Field(repr=False)
-    keys: CompositeKey = CompositeKey()
+    keys: PartitionKey = PartitionKey()
     input_fingerprint: Optional[Fingerprint] = None
     content_fingerprint: Optional[Fingerprint] = None
 
@@ -74,7 +74,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
     partition_name_component_sep: ClassVar[str] = "_"
     segment_sep: ClassVar[str] = os.sep
 
-    _key_types: Optional[CompositeKeyTypes] = PrivateAttr(None)
+    _key_types: Optional[PartitionKeyTypes] = PrivateAttr(None)
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -108,14 +108,14 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         copy = self.copy()
         copy._key_types = PartitionKey.types_from(type_)
         assert copy.key_types is not None
-        key_component_specs = {
+        field_component_specs = {
             f"{name}{self.partition_name_component_sep}{component_name}": f"{{{name}.{component_spec}}}"
-            for name, pk in copy.key_types.items()
-            for component_name, component_spec in pk.default_key_components.items()
+            for name, field in copy.key_types.items()
+            for component_name, component_spec in field.default_components.items()
         }
         return copy.resolve(
             partition_key_spec=self.segment_sep.join(
-                f"{name}{self.key_value_sep}{spec}" for name, spec in key_component_specs.items()
+                f"{name}{self.key_value_sep}{spec}" for name, spec in field_component_specs.items()
             )
         )
 
@@ -143,7 +143,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         return any("{input_fingerprint}" in val for val in self._format_fields.values())
 
     @property
-    def key_types(self) -> CompositeKeyTypes:
+    def key_types(self) -> PartitionKeyTypes:
         if self._key_types is None:
             raise ValueError("`key_types` have not been set yet.")
         return self._key_types
@@ -159,7 +159,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         )
 
     @classmethod
-    def _check_keys(cls, key_types: CompositeKeyTypes, keys: CompositeKey) -> None:
+    def _check_keys(cls, key_types: PartitionKeyTypes, keys: PartitionKey) -> None:
         # TODO: Confirm the key names and types align
         if key_types and not keys:
             raise ValueError(f"Expected partition keys {tuple(key_types)} but none were passed")
@@ -174,7 +174,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
 
     def generate_partition(
         self,
-        keys: CompositeKey = CompositeKey(),
+        keys: PartitionKey = PartitionKey(),
         input_fingerprint: Optional[Fingerprint] = None,
         with_content_fingerprint: bool = True,
     ) -> StoragePartitionVar_co:

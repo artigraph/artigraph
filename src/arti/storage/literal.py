@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Optional
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import CompositeKey, InputFingerprints
+from arti.partitions import InputFingerprints, PartitionKey
 from arti.storage import Storage, StoragePartition
 
 _not_written_err = FileNotFoundError("Literal has not been written yet")
@@ -41,5 +41,5 @@ class StringLiteral(Storage[StringLiteralPartition]):
             return ()
         return tuple(
             self.generate_partition(input_fingerprint=input_fingerprint, keys=keys)
-            for keys, input_fingerprint in (input_fingerprints or {CompositeKey(): None}).items()
+            for keys, input_fingerprint in (input_fingerprints or {PartitionKey(): None}).items()
         )

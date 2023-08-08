@@ -7,7 +7,7 @@ from unittest.mock import PropertyMock, patch
 import pytest
 from box import BoxError
 
-from arti import Artifact, CompositeKey, Fingerprint, Graph, GraphSnapshot, View, producer
+from arti import Artifact, Fingerprint, Graph, GraphSnapshot, PartitionKey, View, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
 from arti.graphs import ArtifactBox
@@ -389,7 +389,7 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     assert isinstance(storage_partition, LocalFilePartition)
     assert storage_partition.content_fingerprint is not None
     assert storage_partition.input_fingerprint is None
-    assert storage_partition.keys == CompositeKey()
+    assert storage_partition.keys == PartitionKey()
     assert storage_partition.path.endswith(i.format.extension)
 
     # Once snapshotted, writing to the raw Artifacts would result in a different snapshot.
