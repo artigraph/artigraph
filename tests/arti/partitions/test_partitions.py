@@ -26,7 +26,7 @@ def test_PartitionField_components() -> None:
 
     components = Int8Field.components
     assert isinstance(components, frozenset)
-    assert components == {"key", "hex"}
+    assert components == {"value", "hex"}
 
     assert isinstance(Int8Field.hex, field_component)
     assert isinstance(Int8Field.hex, property)
@@ -73,7 +73,7 @@ def test_PartitionField_subclass() -> None:
 
 
 def test_DateField() -> None:
-    k = DateField(key=date(1970, 1, 1))
+    k = DateField(value=date(1970, 1, 1))
     assert k.Y == 1970
     assert k.m == 1
     assert k.d == 1
@@ -82,7 +82,7 @@ def test_DateField() -> None:
     assert k == DateField.from_components(Y="1970", m="1", d="1")
     assert k == DateField.from_components(Y="1970", m="01", d="01")
     assert k == DateField.from_components(iso="1970-01-01")
-    assert k == DateField.from_components(key="1970-01-01")
+    assert k == DateField.from_components(value="1970-01-01")
     with pytest.raises(
         NotImplementedError,
         match=re.escape("Unable to parse 'DateField' from: {'junk': 'abc'}"),
@@ -102,10 +102,10 @@ def test_DateField() -> None:
 def test_IntFields(IntKey: type[_IntField], matching_type: type[Type]) -> None:
     assert IntKey.matching_type is matching_type
 
-    k = IntKey(key=1)
+    k = IntKey(value=1)
     assert k.hex == "0x1"
 
-    assert k == IntKey.from_components(key="1")
+    assert k == IntKey.from_components(value="1")
     assert k == IntKey.from_components(hex="0x1")
 
     with pytest.raises(
@@ -117,16 +117,16 @@ def test_IntFields(IntKey: type[_IntField], matching_type: type[Type]) -> None:
 
 def test_NullField() -> None:
     k = NullField()
-    assert k.key is None
+    assert k.value is None
 
-    assert k == NullField.from_components(key="None")
+    assert k == NullField.from_components(value="None")
 
     with pytest.raises(
         NotImplementedError, match=re.escape("Unable to parse 'NullField' from: {'junk': 'abc'}")
     ):
         NullField.from_components(junk="abc")
     with pytest.raises(ValueError, match="'NullField' can only be used with 'None'!"):
-        NullField.from_components(key="abc")
+        NullField.from_components(value="abc")
 
 
 def test_PartitionKey_types_frome() -> None:
