@@ -145,15 +145,17 @@ def extract_placeholders(
             v = next(iter(v))
         field_components[key][component] = v
 
-    keys = {
-        key: key_types[key].from_components(**components)
-        for key, components in field_components.items()
-    }
-    if set(keys) != set(key_types):
+    partition_key = PartitionKey(
+        {
+            field_name: key_types[key].from_components(**components)
+            for field_name, components in field_components.items()
+        }
+    )
+    if set(partition_key) != set(key_types):
         raise ValueError(
-            f"Expected to find partition keys for {sorted(key_types)}, only found {sorted(keys)}. Is the partitioning spec ('{spec}') complete?"
+            f"Expected to find partition fields for {sorted(key_types)}, only found {sorted(partition_key)}. Is the partitioning spec ('{spec}') complete?"
         )
-    return input_fingerprint, PartitionKey(keys)
+    return input_fingerprint, partition_key
 
 
 def parse_spec(
@@ -175,7 +177,7 @@ def parse_spec(
         is not None
     )
     return {
-        path: (input_fingerprint, keys)
-        for (path, (input_fingerprint, keys)) in path_placeholders
-        if input_fingerprints.get(keys, None) == input_fingerprint
+        path: (input_fingerprint, partition_key)
+        for (path, (input_fingerprint, partition_key)) in path_placeholders
+        if input_fingerprints.get(partition_key, None) == input_fingerprint
     }

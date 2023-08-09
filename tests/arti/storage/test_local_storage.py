@@ -29,7 +29,7 @@ def date_keys() -> list[PartitionKey]:
 def generate_partition_files(storage: LocalFile, input_fingerprints: InputFingerprints) -> None:
     for pk, input_fingerprint in input_fingerprints.items():
         partition = storage.generate_partition(
-            pk, input_fingerprint, with_content_fingerprint=False
+            input_fingerprint=input_fingerprint, partition_key=pk, with_content_fingerprint=False
         )
         partition_path = Path(partition.path)
         partition_path.parent.mkdir(parents=True)
@@ -47,9 +47,9 @@ def test_local_partitioning(tmp_path: Path, date_keys: list[PartitionKey]) -> No
     assert len(partitions) > 0
     for partition in partitions:
         assert isinstance(partition, LocalFilePartition)
-        assert set(partition.keys) == {"date"}
-        assert partition.keys in date_keys
-        assert isinstance(partition.keys["date"], DateField)
+        assert set(partition.partition_key) == {"date"}
+        assert partition.partition_key in date_keys
+        assert isinstance(partition.partition_key["date"], DateField)
 
 
 def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[PartitionKey]) -> None:
@@ -76,10 +76,10 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[PartitionKe
         assert len(partitions) > 0
         for partition in partitions:
             assert isinstance(partition, LocalFilePartition)
-            assert set(partition.keys) == {"date"}
-            assert partition.keys in date_keys
-            assert isinstance(partition.keys["date"], DateField)
-            assert year == partition.keys["date"].Y
+            assert set(partition.partition_key) == {"date"}
+            assert partition.partition_key in date_keys
+            assert isinstance(partition.partition_key["date"], DateField)
+            assert year == partition.partition_key["date"].Y
 
 
 def test_local_partitioning_with_input_fingerprints(
@@ -101,9 +101,9 @@ def test_local_partitioning_with_input_fingerprints(
     assert len(partitions) > 0
     for partition in partitions:
         assert isinstance(partition, LocalFilePartition)
-        assert set(partition.keys) == {"date"}
-        assert partition.keys in date_keys
-        assert isinstance(partition.keys["date"], DateField)
+        assert set(partition.partition_key) == {"date"}
+        assert partition.partition_key in date_keys
+        assert isinstance(partition.partition_key["date"], DateField)
         assert partition.input_fingerprint == input_fingerprint
 
 
@@ -126,7 +126,7 @@ def test_local_file_partition_fingerprint(tmp_path: Path) -> None:
     with path.open("w") as f:
         f.write("hello world")
     partition = LocalFilePartition(
-        keys={}, path=str(path), storage=LocalFile(path=str(path))
+        partition_key={}, path=str(path), storage=LocalFile(path=str(path))
     ).with_content_fingerprint()
     assert partition.content_fingerprint == Fingerprint.from_string(
         hashlib.sha256(text.encode()).hexdigest()

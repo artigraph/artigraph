@@ -37,15 +37,17 @@ class MockStorage(Storage[MockStoragePartition]):
     ) -> tuple[MockStoragePartition, ...]:
         assert all(v is Int8Field for v in self.key_types.values())  # Simplifies logic here...
         return tuple(
-            self.generate_partition(keys=keys)
-            for keys in (
+            self.generate_partition(partition_key=partition_key)
+            for partition_key in (
                 PartitionKey({k: Int8Field(key=i) for k in self.key_types}) for i in range(3)
             )
         )
 
 
 def test_StoragePartition_content_fingerprint() -> None:
-    sp = MockStoragePartition(path="/tmp/test", keys={}, storage=MockStorage(path="/tmp/test"))
+    sp = MockStoragePartition(
+        path="/tmp/test", partition_key={}, storage=MockStorage(path="/tmp/test")
+    )
     assert sp.content_fingerprint is None
     populated = sp.with_content_fingerprint()
     assert populated.content_fingerprint == Fingerprint.from_string(sp.path)
@@ -188,12 +190,12 @@ def test_Storage_discover_partitions() -> None:
     partitions = s.discover_partitions()
     for i, sp in enumerate(sorted(partitions, key=lambda x: x.path)):
         assert sp.path == f"/test/{i}/file"
-        assert isinstance(sp.keys["i"], Int8Field)
-        assert sp.keys["i"].key == i
+        assert isinstance(sp.partition_key["i"], Int8Field)
+        assert sp.partition_key["i"].key == i
 
 
 def test_Storage_generate_partition() -> None:
-    keys = PartitionKey(i=Int8Field(key=5))
+    partition_key = PartitionKey(i=Int8Field(key=5))
     input_fingerprint = Fingerprint.from_int(10)
     s = (
         MockStorage(path="{i.key:02}/{input_fingerprint}")
@@ -201,35 +203,41 @@ def test_Storage_generate_partition() -> None:
         ._visit_format(DummyFormat())
     )
     expected_partition = MockStoragePartition(
-        input_fingerprint=input_fingerprint, keys=keys, path="05/10", storage=s
+        input_fingerprint=input_fingerprint, partition_key=partition_key, path="05/10", storage=s
     )
 
-    output = s.generate_partition(keys=keys, input_fingerprint=input_fingerprint)
+    output = s.generate_partition(partition_key=partition_key, input_fingerprint=input_fingerprint)
     assert output == expected_partition.with_content_fingerprint()
 
     output = s.generate_partition(
-        keys=keys, input_fingerprint=input_fingerprint, with_content_fingerprint=True
+        partition_key=partition_key,
+        input_fingerprint=input_fingerprint,
+        with_content_fingerprint=True,
     )
     assert output == expected_partition.with_content_fingerprint()
 
     output = s.generate_partition(
-        keys=keys, input_fingerprint=input_fingerprint, with_content_fingerprint=False
+        partition_key=partition_key,
+        input_fingerprint=input_fingerprint,
+        with_content_fingerprint=False,
     )
     assert output == expected_partition
 
-    # Check behavior when the Storage spec doesn't align with the passed in keys/fingerprint. We'll
+    # Check behavior when the Storage spec doesn't align with the passed in key/fingerprint. We'll
     # probably want nicer error messages for these eventually.
     with pytest.raises(KeyError, match="i"):
         s.generate_partition(
-            keys=PartitionKey(j=Int8Field(key=5)), input_fingerprint=input_fingerprint
+            partition_key=PartitionKey(j=Int8Field(key=5)), input_fingerprint=input_fingerprint
         )
     with pytest.raises(ValueError, match="requires an input_fingerprint, but none was provided"):
-        s.generate_partition(keys=keys, input_fingerprint=None)
+        s.generate_partition(partition_key=partition_key, input_fingerprint=None)
 
-    with pytest.raises(ValueError, match="Expected no partition keys but got:"):
-        MockStorage(path="hard coded")._visit_type(Int8()).generate_partition(keys=keys)
+    with pytest.raises(ValueError, match="Expected no partition key but got:"):
+        MockStorage(path="hard coded")._visit_type(Int8()).generate_partition(
+            partition_key=partition_key
+        )
     with pytest.raises(
-        ValueError, match=re.escape("Expected partition keys ('i',) but none were passed")
+        ValueError, match=re.escape("Expected partition key with ('i',) but none were passed")
     ):
         MockStorage(path="hard coded")._visit_type(
             Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",))

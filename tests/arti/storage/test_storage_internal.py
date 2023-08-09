@@ -227,6 +227,6 @@ def test_parse_spec(
         parse_spec({"/p/1/"}, spec="/p/{x.key}/{y.hex}", key_types=PKs)
     with pytest.raises(
         ValueError,
-        match=re.escape("Expected to find partition keys for ['x', 'y'], only found ['x']."),
+        match=re.escape("Expected to find partition fields for ['x', 'y'], only found ['x']."),
     ):
         parse_spec({"/p/1/"}, spec="/p/{x.key}/", key_types=PKs)

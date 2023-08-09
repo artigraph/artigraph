@@ -25,10 +25,10 @@ def test_GCSFile_discover_partitions(gcs: GCSFileSystem, gcs_bucket: str) -> Non
         ._visit_format(DummyFormat())
     )
     expected_keys = {PartitionKey(i=Int32Field(key=i)) for i in [0, 1]}
-    gcs.pipe({storage.qualified_path.format(**keys): b"data" for keys in expected_keys})
+    gcs.pipe({storage.qualified_path.format(**key): b"data" for key in expected_keys})
     for partition in storage.discover_partitions():
-        assert partition.keys in expected_keys
-        assert partition.qualified_path == storage.qualified_path.format(**partition.keys)
+        assert partition.partition_key in expected_keys
+        assert partition.qualified_path == storage.qualified_path.format(**partition.partition_key)
         assert partition.content_fingerprint == Fingerprint.from_string(
             base64.b64encode(
                 hashlib.md5(b"data").digest()  # noqa: S324 (GCS only provides md5)

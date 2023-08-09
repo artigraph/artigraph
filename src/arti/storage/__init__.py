@@ -23,7 +23,7 @@ if TYPE_CHECKING:
 
 class StoragePartition(Model):
     storage: Storage[StoragePartition] = Field(repr=False)
-    keys: PartitionKey = PartitionKey()
+    partition_key: PartitionKey = PartitionKey()
     input_fingerprint: Fingerprint | None = None
     content_fingerprint: Fingerprint | None = None
 
@@ -159,12 +159,12 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         )
 
     @classmethod
-    def _check_keys(cls, key_types: PartitionKeyTypes, keys: PartitionKey) -> None:
+    def _check_key(cls, key_types: PartitionKeyTypes, key: PartitionKey) -> None:
         # TODO: Confirm the key names and types align
-        if key_types and not keys:
-            raise ValueError(f"Expected partition keys {tuple(key_types)} but none were passed")
-        if keys and not key_types:
-            raise ValueError(f"Expected no partition keys but got: {keys}")
+        if key_types and not key:
+            raise ValueError(f"Expected partition key with {tuple(key_types)} but none were passed")
+        if key and not key_types:
+            raise ValueError(f"Expected no partition key but got: {key}")
 
     @abc.abstractmethod
     def discover_partitions(
@@ -174,12 +174,13 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
 
     def generate_partition(
         self,
-        keys: PartitionKey = PartitionKey(),
+        *,
         input_fingerprint: Fingerprint | None = None,
+        partition_key: PartitionKey = PartitionKey(),
         with_content_fingerprint: bool = True,
     ) -> StoragePartitionVar_co:
-        self._check_keys(self.key_types, keys)
-        format_kwargs = dict[Any, Any](keys)
+        self._check_key(self.key_types, partition_key)
+        format_kwargs = dict[Any, Any](partition_key)
         if input_fingerprint is None:
             if self.includes_input_fingerprint_template:
                 raise ValueError(f"{self} requires an input_fingerprint, but none was provided")
@@ -197,7 +198,10 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
             if name in self.storage_partition_type.__fields__
         }
         partition = self.storage_partition_type(
-            input_fingerprint=input_fingerprint, keys=keys, storage=self, **field_values
+            input_fingerprint=input_fingerprint,
+            partition_key=partition_key,
+            storage=self,
+            **field_values,
         )
         if with_content_fingerprint:
             partition = partition.with_content_fingerprint()

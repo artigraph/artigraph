@@ -20,7 +20,7 @@ def test_StringLiteral() -> None:
     assert partition.compute_content_fingerprint() == Fingerprint.from_string(partition.value)
     # Confirm value=None returns no partitions
     assert not StringLiteral(id="test")._visit_type(t)._visit_format(f).discover_partitions()
-    # Confirm keys/input_fingerprint validators don't error for empty values
+    # Confirm input_fingerprint and partition_key validators don't error for empty values
     assert (
         partition
         == StringLiteralPartition(

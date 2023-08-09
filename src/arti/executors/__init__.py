@@ -57,7 +57,8 @@ class Executor(Model):
         # TODO: Guarantee all outputs have the same set of identified partitions. Currently, this
         # pretends a partition is built for all outputs if _any_ are built for that partition.
         return {
-            partition.keys for partition in chain.from_iterable(existing_output_partitions.values())
+            partition.partition_key
+            for partition in chain.from_iterable(existing_output_partitions.values())
         }
 
     def build_producer_partition(
@@ -101,6 +102,6 @@ class Executor(Model):
                 output,
                 artifact=snapshot.graph.producer_outputs[producer][i],
                 input_fingerprint=input_fingerprint,
-                keys=partition_key,
+                partition_key=partition_key,
                 view=producer._outputs_[i],
             )

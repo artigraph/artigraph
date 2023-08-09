@@ -79,7 +79,7 @@ class MemoryConnection(BackendConnection):
             partitions = {
                 partition
                 for partition in partitions
-                if input_fingerprints.get(partition.keys) == partition.input_fingerprint
+                if input_fingerprints.get(partition.partition_key) == partition.input_fingerprint
             }
         return tuple(partitions)
 

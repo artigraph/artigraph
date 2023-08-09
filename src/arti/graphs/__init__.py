@@ -249,7 +249,7 @@ class Graph(Model):
         *,
         artifact: Artifact,
         input_fingerprint: Fingerprint | None = None,
-        keys: PartitionKey = PartitionKey(),
+        partition_key: PartitionKey = PartitionKey(),
         view: View | None = None,
         snapshot: GraphSnapshot | None = None,
         connection: BackendConnection | None = None,
@@ -266,7 +266,9 @@ class Graph(Model):
         view.check_annotation_compatibility(type(data))
         view.check_artifact_compatibility(artifact)
         storage_partition = artifact.storage.generate_partition(
-            input_fingerprint=input_fingerprint, keys=keys, with_content_fingerprint=False
+            input_fingerprint=input_fingerprint,
+            partition_key=partition_key,
+            with_content_fingerprint=False,
         )
         storage_partition = io.write(
             data,
@@ -405,7 +407,7 @@ class GraphSnapshot(Model):
         *,
         artifact: Artifact,
         input_fingerprint: Fingerprint | None = None,
-        keys: PartitionKey = PartitionKey(),
+        partition_key: PartitionKey = PartitionKey(),
         view: View | None = None,
         connection: BackendConnection | None = None,
     ) -> StoragePartition:
@@ -413,7 +415,7 @@ class GraphSnapshot(Model):
             data,
             artifact=artifact,
             input_fingerprint=input_fingerprint,
-            keys=keys,
+            partition_key=partition_key,
             view=view,
             snapshot=self,
             connection=connection,
