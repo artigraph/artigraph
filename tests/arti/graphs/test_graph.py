@@ -389,7 +389,7 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     assert isinstance(storage_partition, LocalFilePartition)
     assert storage_partition.content_fingerprint is not None
     assert storage_partition.input_fingerprint is None
-    assert storage_partition.keys == PartitionKey()
+    assert storage_partition.partition_key == PartitionKey()
     assert storage_partition.path.endswith(i.format.extension)
 
     # Once snapshotted, writing to the raw Artifacts would result in a different snapshot.

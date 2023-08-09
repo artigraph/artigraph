@@ -38,6 +38,10 @@ class StringLiteral(Storage[StringLiteralPartition]):
         if self.value is None:
             return ()
         return tuple(
-            self.generate_partition(input_fingerprint=input_fingerprint, keys=keys)
-            for keys, input_fingerprint in (input_fingerprints or {PartitionKey(): None}).items()
+            self.generate_partition(
+                input_fingerprint=input_fingerprint, partition_key=partition_key
+            )
+            for partition_key, input_fingerprint in (
+                input_fingerprints or {PartitionKey(): None}
+            ).items()
         )

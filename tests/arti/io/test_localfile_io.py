@@ -40,8 +40,8 @@ def test_localfile_io_partitioned(tmp_path: Path, format: Format) -> None:
     a = PartitionedNum(format=format, storage=LocalFile(path=str(tmp_path / "{i.key}")))
     data: dict[StoragePartition, dict[str, int]] = {
         a.storage.generate_partition(
-            keys=PartitionKey(i=Int64Field(key=i)),
             input_fingerprint=None,
+            partition_key=PartitionKey(i=Int64Field(key=i)),
             with_content_fingerprint=False,
         ): {"i": i}
         for i in [1, 2]

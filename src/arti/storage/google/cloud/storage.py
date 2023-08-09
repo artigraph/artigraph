@@ -49,8 +49,10 @@ class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
             paths, spec=spec, key_types=self.key_types, input_fingerprints=input_fingerprints
         )
         return tuple(
-            self.generate_partition(input_fingerprint=input_fingerprint, keys=keys)
-            for (bucket, path), (input_fingerprint, keys) in {
+            self.generate_partition(
+                input_fingerprint=input_fingerprint, partition_key=partition_key
+            )
+            for (bucket, path), (input_fingerprint, partition_key) in {
                 tuple(path.split("/", 1)): metadata for path, metadata in path_metadata.items()
             }.items()
         )
