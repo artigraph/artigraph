@@ -81,53 +81,53 @@ class DateField(PartitionField):
     default_components: ClassVar[frozendict[str, str]] = frozendict(Y="Y", m="m:02", d="d:02")
     matching_type = Date
 
-    key: date
+    value: date
 
     @field_component
     def Y(self) -> int:
-        return self.key.year
+        return self.value.year
 
     @field_component
     def m(self) -> int:
-        return self.key.month
+        return self.value.month
 
     @field_component
     def d(self) -> int:
-        return self.key.day
+        return self.value.day
 
     @field_component
     def iso(self) -> str:
-        return self.key.isoformat()
+        return self.value.isoformat()
 
     @classmethod
     def from_components(cls, **components: str) -> PartitionField:
         names = set(components)
-        if names == {"key"}:
-            return cls(key=date.fromisoformat(components["key"]))
+        if names == {"value"}:
+            return cls(value=date.fromisoformat(components["value"]))
         if names == {"iso"}:
-            return cls(key=date.fromisoformat(components["iso"]))
+            return cls(value=date.fromisoformat(components["iso"]))
         if names == {"Y", "m", "d"}:
-            return cls(key=date(*[int(components[k]) for k in ("Y", "m", "d")]))
+            return cls(value=date(*[int(components[k]) for k in ("Y", "m", "d")]))
         return super().from_components(**components)
 
 
 class _IntField(PartitionField):
     _abstract_ = True
-    default_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
+    default_components: ClassVar[frozendict[str, str]] = frozendict(value="value")
 
-    key: int
+    value: int
 
     @field_component
     def hex(self) -> str:
-        return hex(self.key)
+        return hex(self.value)
 
     @classmethod
     def from_components(cls, **components: str) -> PartitionField:
         names = set(components)
-        if names == {"key"}:
-            return cls(key=int(components["key"]))
+        if names == {"value"}:
+            return cls(value=int(components["value"]))
         if names == {"hex"}:
-            return cls(key=int(components["hex"], base=16))
+            return cls(value=int(components["hex"], base=16))
         return super().from_components(**components)
 
 
@@ -148,15 +148,15 @@ class Int64Field(_IntField):
 
 
 class NullField(PartitionField):
-    default_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
+    default_components: ClassVar[frozendict[str, str]] = frozendict(value="value")
     matching_type = Null
 
-    key: None = None
+    value: None = None
 
     @classmethod
     def from_components(cls, **components: str) -> PartitionField:
-        if set(components) == {"key"}:
-            if components["key"] != "None":
+        if set(components) == {"value"}:
+            if components["value"] != "None":
                 raise ValueError(f"'{cls.__name__}' can only be used with 'None'!")
             return cls()
         return super().from_components(**components)

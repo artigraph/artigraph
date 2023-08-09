@@ -149,7 +149,7 @@ def test_Artifact_storage_path_resolution() -> None:
         format: Format = DummyFormat()
         storage: S
 
-    assert A(storage=S()).storage.key == "test-a_key={a.key}"
+    assert A(storage=S()).storage.key == "test-a_value={a.value}"
 
 
 def test_Artifact_pickle() -> None:

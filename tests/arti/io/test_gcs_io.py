@@ -36,11 +36,11 @@ def test_gcsfile_io(gcs_bucket: str, format: Format) -> None:
 
 @pytest.mark.parametrize("format", [JSON(), Pickle()])
 def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
-    a = PartitionedNum(format=format, storage=GCSFile(bucket=gcs_bucket, path="{i.key}"))
+    a = PartitionedNum(format=format, storage=GCSFile(bucket=gcs_bucket, path="{i.value}"))
     data: dict[StoragePartition, dict[str, int]] = {
         a.storage.generate_partition(
             input_fingerprint=None,
-            partition_key=PartitionKey(i=Int64Field(key=i)),
+            partition_key=PartitionKey(i=Int64Field(value=i)),
             with_content_fingerprint=False,
         ): {"i": i}
         for i in [1, 2]

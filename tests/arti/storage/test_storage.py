@@ -39,7 +39,7 @@ class MockStorage(Storage[MockStoragePartition]):
         return tuple(
             self.generate_partition(partition_key=partition_key)
             for partition_key in (
-                PartitionKey({k: Int8Field(key=i) for k in self.key_types}) for i in range(3)
+                PartitionKey({k: Int8Field(value=i) for k in self.key_types}) for i in range(3)
             )
         )
 
@@ -130,12 +130,12 @@ def test_Storage_visit_names() -> None:
         ),
         (
             "/tmp/test/{partition_key_spec}",
-            "/tmp/test/a_key={a.key}/b_key={b.key}",
+            "/tmp/test/a_value={a.value}/b_value={b.value}",
             Collection(element=Struct(fields={"a": Int8(), "b": Int8()}), partition_by=("a", "b")),
         ),
         (
             "/tmp/test/{tag}/{partition_key_spec}",
-            "/tmp/test/{tag}/a_key={a.key}",
+            "/tmp/test/{tag}/a_value={a.value}",
             Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",)),
         ),
     ],
@@ -178,12 +178,12 @@ def test_Storage_vist_type_extra() -> None:
     type = Collection(element=Struct(fields={"a": Int8(), "b": Int8()}), partition_by=("a", "b"))
     t = Table()._visit_type(type)
     assert t.dataset == "s_{tag}"
-    assert t.name == "a_key_{a.key}__b_key_{b.key}"
+    assert t.name == "a_value_{a.value}__b_value_{b.value}"
 
 
 def test_Storage_discover_partitions() -> None:
     s = (
-        MockStorage(path="/test/{i.key}/file")
+        MockStorage(path="/test/{i.value}/file")
         ._visit_type(Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)))
         ._visit_format(DummyFormat())
     )
@@ -191,14 +191,14 @@ def test_Storage_discover_partitions() -> None:
     for i, sp in enumerate(sorted(partitions, key=lambda x: x.path)):
         assert sp.path == f"/test/{i}/file"
         assert isinstance(sp.partition_key["i"], Int8Field)
-        assert sp.partition_key["i"].key == i
+        assert sp.partition_key["i"].value == i
 
 
 def test_Storage_generate_partition() -> None:
-    partition_key = PartitionKey(i=Int8Field(key=5))
+    partition_key = PartitionKey(i=Int8Field(value=5))
     input_fingerprint = Fingerprint.from_int(10)
     s = (
-        MockStorage(path="{i.key:02}/{input_fingerprint}")
+        MockStorage(path="{i.value:02}/{input_fingerprint}")
         ._visit_type(Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)))
         ._visit_format(DummyFormat())
     )
@@ -227,7 +227,7 @@ def test_Storage_generate_partition() -> None:
     # probably want nicer error messages for these eventually.
     with pytest.raises(KeyError, match="i"):
         s.generate_partition(
-            partition_key=PartitionKey(j=Int8Field(key=5)), input_fingerprint=input_fingerprint
+            partition_key=PartitionKey(j=Int8Field(value=5)), input_fingerprint=input_fingerprint
         )
     with pytest.raises(ValueError, match="requires an input_fingerprint, but none was provided"):
         s.generate_partition(partition_key=partition_key, input_fingerprint=None)

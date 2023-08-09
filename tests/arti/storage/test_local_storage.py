@@ -18,10 +18,10 @@ def date_keys() -> list[PartitionKey]:
     return [
         PartitionKey(date=date_key)
         for date_key in (
-            DateField(key=date(1970, 1, 1)),
-            DateField(key=date(1970, 1, 2)),
-            DateField(key=date(1970, 1, 3)),
-            DateField(key=date(2021, 1, 1)),
+            DateField(value=date(1970, 1, 1)),
+            DateField(value=date(1970, 1, 2)),
+            DateField(value=date(1970, 1, 3)),
+            DateField(value=date(2021, 1, 1)),
         )
     ]
 

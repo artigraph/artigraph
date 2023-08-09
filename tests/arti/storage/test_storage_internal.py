@@ -26,7 +26,7 @@ def PKs() -> dict[str, type[PartitionField]]:
 
 @pytest.fixture()
 def spec() -> str:
-    return "/p/{x.key}/{y.hex}"
+    return "/p/{x.value}/{y.hex}"
 
 
 @pytest.fixture()
@@ -37,9 +37,9 @@ def paths() -> set[str]:
 @pytest.fixture()
 def paths_to_placeholders() -> PathPlaceholders:
     return {
-        "/p/1/0x1": (None, PartitionKey({"x": Int8Field(key=1), "y": Int8Field(key=1)})),
-        "/p/2/0x2": (None, PartitionKey({"x": Int8Field(key=2), "y": Int8Field(key=2)})),
-        "/p/3/0x3": (None, PartitionKey({"x": Int8Field(key=3), "y": Int8Field(key=3)})),
+        "/p/1/0x1": (None, PartitionKey({"x": Int8Field(value=1), "y": Int8Field(value=1)})),
+        "/p/2/0x2": (None, PartitionKey({"x": Int8Field(value=2), "y": Int8Field(value=2)})),
+        "/p/3/0x3": (None, PartitionKey({"x": Int8Field(value=3), "y": Int8Field(value=3)})),
     }
 
 
@@ -69,8 +69,8 @@ def test_FormatPlaceholder(spec: str, key: str) -> None:
 @pytest.mark.parametrize(
     ("key", "partition_key_types", "attribute"),
     [
-        ("test", PartitionKeyTypes(test=Int8Field), "key"),
         ("test", PartitionKeyTypes(test=Int8Field), "hex"),
+        ("test", PartitionKeyTypes(test=Int8Field), "value"),
     ],
 )
 def test_WildcardPlaceholder(
@@ -169,9 +169,9 @@ def test_strip_partition_indexes(spec: str, expected: str) -> None:
 
 
 def test_spec_to_wildcard(PKs: dict[str, type[PartitionField]]) -> None:
-    assert spec_to_wildcard("/p/{x.key}/", PKs) == "/p/*/"
-    assert spec_to_wildcard("/p/{x.key[5]}/", PKs) == "/p/5/"
-    assert spec_to_wildcard("/p/{x.key[5]}/{y.hex}/", PKs) == "/p/5/*/"
+    assert spec_to_wildcard("/p/{x.value}/", PKs) == "/p/*/"
+    assert spec_to_wildcard("/p/{x.value[5]}/", PKs) == "/p/5/"
+    assert spec_to_wildcard("/p/{x.value[5]}/{y.hex}/", PKs) == "/p/5/*/"
 
 
 def test_extract_placeholders(
@@ -192,7 +192,7 @@ def test_extract_placeholders(
         for path in paths
     } == paths_to_placeholders
     with pytest.raises(
-        ValueError, match=re.escape("Unable to parse 'fake' with '/p/{x.key}/{y.hex}'.")
+        ValueError, match=re.escape("Unable to parse 'fake' with '/p/{x.value}/{y.hex}'.")
     ):
         extract_placeholders(
             key_types=PKs,
@@ -222,11 +222,11 @@ def test_parse_spec(
     assert pks == paths_to_placeholders
 
     with pytest.raises(
-        ValueError, match=re.escape("Unable to parse '/p/1/' with '/p/{x.key}/{y.hex}'")
+        ValueError, match=re.escape("Unable to parse '/p/1/' with '/p/{x.value}/{y.hex}'")
     ):
-        parse_spec({"/p/1/"}, spec="/p/{x.key}/{y.hex}", key_types=PKs)
+        parse_spec({"/p/1/"}, spec="/p/{x.value}/{y.hex}", key_types=PKs)
     with pytest.raises(
         ValueError,
         match=re.escape("Expected to find partition fields for ['x', 'y'], only found ['x']."),
     ):
-        parse_spec({"/p/1/"}, spec="/p/{x.key}/", key_types=PKs)
+        parse_spec({"/p/1/"}, spec="/p/{x.value}/", key_types=PKs)
