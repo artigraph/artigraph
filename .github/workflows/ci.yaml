@@ -23,7 +23,7 @@ jobs:
       PRE_COMMIT_HOME: /tmp/pre-commit-cache
       PYTHON_VERSION: ${{ matrix.python-version }}
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install poetry
       run: pipx install 'poetry==1.5.1'
     - name: Set up Python ${{ matrix.python-version }}
@@ -63,7 +63,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
     - name: Install poetry
       run: pipx install 'poetry==1.5.1'
     - name: Set up Python
