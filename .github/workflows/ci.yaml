@@ -27,7 +27,7 @@ jobs:
     - name: Install poetry
       run: pipx install 'poetry==1.5.1'
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         cache: 'poetry'
         python-version: ${{ matrix.python-version }}
@@ -36,7 +36,7 @@ jobs:
         poetry install --all-extras --no-interaction
         poetry env info
     - name: Cache mypy and pre-commit hooks
-      uses: actions/cache@v3
+      uses: actions/cache@v4
       with:
         path: |
           ${{ env.MYPY_CACHE_DIR }}
@@ -67,7 +67,7 @@ jobs:
     - name: Install poetry
       run: pipx install 'poetry==1.5.1'
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         cache: 'poetry'
         python-version: '3.11'
