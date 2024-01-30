@@ -1,21 +1,13 @@
 version: 2
 
 updates:
-- package-ecosystem: pip
-  directory: /
-  groups:
-    deps:
-      patterns:
-        - "*"
-  schedule:
-    interval: weekly
-    day: "monday"
-- package-ecosystem: github-actions
-  directory: /
-  groups:
-    deps:
-      patterns:
-        - "*"
-  schedule:
-    interval: weekly
-    day: "monday"
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: "monday"
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: "monday"
