@@ -61,7 +61,7 @@ numpy = {version = ">=1.23.1", optional = true}
 pandas = {version = ">=1.4.3", optional = true}
 parse = ">=1.19.0"
 pyarrow = {version = ">=8", optional = true}
-pydantic = ">=1.9.0,<2"  # We use some pydantic internals, so expect 2.0 to break things.
+pydantic = ">=1.9.0,<3"  # We use some pydantic internals, so expect 2.0 to break things.
 pyfarmhash = ">=0.2.2"
 python-box = ">=7.0.0" # Tracking box_namespace requires 7+
 
