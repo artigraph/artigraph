@@ -3,7 +3,7 @@ on:
   pull_request:
   push:
     branches:
-    - main
+      - main
   release:
     types: [published]
   workflow_dispatch:
@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python-version: ['3.9', '3.10', '3.11'] # NOTE: Quote to ensure trailing 0s aren't dropped
+        python-version: ["3.9", "3.10", "3.11"] # NOTE: Quote to ensure trailing 0s aren't dropped
     runs-on: ${{ matrix.os }}
     env:
       MYPY_CACHE_DIR: /tmp/mypy-cache
@@ -23,90 +23,90 @@ jobs:
       PRE_COMMIT_HOME: /tmp/pre-commit-cache
       PYTHON_VERSION: ${{ matrix.python-version }}
     steps:
-    - uses: actions/checkout@v4
-    - name: Install poetry
-      run: pipx install 'poetry==1.5.1'
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v5
-      with:
-        cache: 'poetry'
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        poetry install --all-extras --no-interaction
-        poetry env info
-    - name: Cache mypy and pre-commit hooks
-      uses: actions/cache@v4
-      with:
-        path: |
-          ${{ env.MYPY_CACHE_DIR }}
-          ${{ env.PRE_COMMIT_HOME }}
-        key: checkers-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml', 'poetry.lock') }}-v0 # NOTE: Bump to manually cache bust
-    - name: code-checkers
-      run: |
-        # Configure ruff to annotate commits and skip:
-        # - no-commit-to-branch since this will run on merged commits too
-        # - pytest so that we can run below with specific flags
-        RUFF_FORMAT=github SKIP=no-commit-to-branch,pytest poetry run pre-commit run -a
-    - name: pytest
-      run: |
-        poetry run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
-    - uses: codecov/codecov-action@v3
-      with:
-        env_vars: OS,PYTHON_VERSION
-        fail_ci_if_error: true
-        files: coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
-        token: ${{ vars.CODECOV_TOKEN }}
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install 'poetry==1.5.1'
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          cache: "poetry"
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          poetry install --all-extras --no-interaction
+          poetry env info
+      - name: Cache mypy and pre-commit hooks
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.MYPY_CACHE_DIR }}
+            ${{ env.PRE_COMMIT_HOME }}
+          key: checkers-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml', 'poetry.lock') }}-v0 # NOTE: Bump to manually cache bust
+      - name: code-checkers
+        run: |
+          # Configure ruff to annotate commits and skip:
+          # - no-commit-to-branch since this will run on merged commits too
+          # - pytest so that we can run below with specific flags
+          RUFF_FORMAT=github SKIP=no-commit-to-branch,pytest poetry run pre-commit run -a
+      - name: pytest
+        run: |
+          poetry run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
+      - uses: codecov/codecov-action@v3
+        with:
+          env_vars: OS,PYTHON_VERSION
+          fail_ci_if_error: true
+          files: coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
+          token: ${{ vars.CODECOV_TOKEN }}
 
   publish:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v'))
     needs: test
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
-    - name: Install poetry
-      run: pipx install 'poetry==1.5.1'
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        cache: 'poetry'
-        python-version: '3.11'
-    - name: Install dependencies
-      run: |
-        poetry install --all-extras --no-interaction
-        poetry env info
-    - name: Publish to TestPyPI
-      if: github.event_name == 'push' && github.ref == 'refs/heads/main'
-      run: |
-        poetry version "$(echo "$(poetry version -s).dev$(date '+%s')")"
-        poetry build
-        poetry config repositories.test-pypi https://test.pypi.org/legacy/
-        poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
-    - name: Publish to PyPI and bump version
-      if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
-      env:
-        GH_TOKEN: ${{ github.token }}
-      run: |
-        echo 'Setting the version to the GitHub release tag and publishing...'
-        version="$(echo '${{ github.event.release.tag_name }}' | tr -d 'v')"
-        poetry version "$version"
-        poetry build
-        poetry config repositories.test-pypi https://test.pypi.org/legacy/
-        poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
-        poetry publish -u '__token__' -p '${{ secrets.PYPI_TOKEN }}'
+      - uses: actions/checkout@v4
+      - name: Install poetry
+        run: pipx install 'poetry==1.5.1'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          cache: "poetry"
+          python-version: "3.11"
+      - name: Install dependencies
+        run: |
+          poetry install --all-extras --no-interaction
+          poetry env info
+      - name: Publish to TestPyPI
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          poetry version "$(echo "$(poetry version -s).dev$(date '+%s')")"
+          poetry build
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
+      - name: Publish to PyPI and bump version
+        if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo 'Setting the version to the GitHub release tag and publishing...'
+          version="$(echo '${{ github.event.release.tag_name }}' | tr -d 'v')"
+          poetry version "$version"
+          poetry build
+          poetry config repositories.test-pypi https://test.pypi.org/legacy/
+          poetry publish -r 'test-pypi' -u '__token__' -p '${{ secrets.TEST_PYPI_TOKEN }}'
+          poetry publish -u '__token__' -p '${{ secrets.PYPI_TOKEN }}'
 
-        echo "Updating docs in GitHub Pages..."
-        git fetch origin gh-pages # Fetch the gh-pages branch so portray commits on top of existing commits.
-        git branch gh-pages origin/gh-pages
-        poetry run portray on_github_pages
+          echo "Updating docs in GitHub Pages..."
+          git fetch origin gh-pages # Fetch the gh-pages branch so portray commits on top of existing commits.
+          git branch gh-pages origin/gh-pages
+          poetry run portray on_github_pages
 
-        echo 'Bumping the patch version, marking as a prerelease, and creating a bump PR...'
-        new_version="$(poetry version -s prepatch)"
-        branch="bump-to-$new_version"
-        git switch -c "$branch"
-        git add pyproject.toml
-        git config --global user.name 'Artibot'
-        git config --global user.email 'artibot@artigraph.dev'
-        git commit -s -m "Bump to v$new_version"
-        git push -u origin "$branch"
-        gh pr create -B main -b "Automatic version bump after a release." -t "Bump to v$new_version"
+          echo 'Bumping the patch version, marking as a prerelease, and creating a bump PR...'
+          new_version="$(poetry version -s prepatch)"
+          branch="bump-to-$new_version"
+          git switch -c "$branch"
+          git add pyproject.toml
+          git config --global user.name 'Artibot'
+          git config --global user.email 'artibot@artigraph.dev'
+          git commit -s -m "Bump to v$new_version"
+          git push -u origin "$branch"
+          gh pr create -B main -b "Automatic version bump after a release." -t "Bump to v$new_version"

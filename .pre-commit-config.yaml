@@ -29,9 +29,9 @@ repos:
   - repo: https://github.com/pre-commit/pygrep-hooks
     rev: v1.9.0
     hooks:
-    - id: python-check-blanket-noqa
-    - id: python-check-blanket-type-ignore
-  - repo: local  # Prefer local tools to streamline version management with poetry
+      - id: python-check-blanket-noqa
+      - id: python-check-blanket-type-ignore
+  - repo: local # Prefer local tools to streamline version management with poetry
     hooks:
       - id: poetry-check
         name: poetry-check
@@ -60,7 +60,7 @@ repos:
         name: mypy
         entry: mypy
         language: system
-        pass_filenames: false  # Running on a subset of files may mask interface breaks
+        pass_filenames: false # Running on a subset of files may mask interface breaks
         types: [python]
       - id: pytest
         name: pytest
