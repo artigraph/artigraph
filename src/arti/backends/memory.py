@@ -17,23 +17,18 @@ from arti import (
     InputFingerprints,
     Storage,
     StoragePartition,
-    StoragePartitions,
+    StoragePartitionSnapshot,
+    StoragePartitionSnapshots,
 )
 from arti.internal.utils import NoCopyMixin
-
-
-def _ensure_fingerprinted(partitions: StoragePartitions) -> Iterator[StoragePartition]:
-    for partition in partitions:
-        yield partition.with_content_fingerprint(keep_existing=True)
-
 
 _Graphs = dict[str, dict[Fingerprint, Graph]]
 _GraphSnapshots = dict[str, dict[Fingerprint, GraphSnapshot]]
 _GraphSnapshotPartitions = dict[
-    GraphSnapshot, dict[str, set[StoragePartition]]
+    GraphSnapshot, dict[str, set[StoragePartitionSnapshot]]
 ]  # ...[snapshot][artifact_key]
 _SnapshotTags = dict[str, dict[str, GraphSnapshot]]  # ...[name][tag]
-_StoragePartitions = dict[Storage[StoragePartition], set[StoragePartition]]
+_StoragePartitions = dict[Storage[StoragePartition], set[StoragePartitionSnapshot]]
 
 
 class _NoCopyContainer(NoCopyMixin):
@@ -55,10 +50,10 @@ class _NoCopyContainer(NoCopyMixin):
         # `container.storage_partitions` tracks all partitions, across all snapshots. This
         # separation is important to allow for Literals to be used even after a snapshot change.
         self.snapshot_partitions: _GraphSnapshotPartitions = defaultdict(
-            partial(defaultdict, set[StoragePartition])
+            partial(defaultdict, set[StoragePartitionSnapshot])
         )
         self.snapshot_tags: _SnapshotTags = defaultdict(dict)
-        self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartition])
+        self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartitionSnapshot])
 
 
 class MemoryConnection(BackendConnection):
@@ -67,26 +62,26 @@ class MemoryConnection(BackendConnection):
 
     def read_artifact_partitions(
         self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> StoragePartitions:
+    ) -> StoragePartitionSnapshots:
         # The MemoryBackend is (obviously) not persistent, so there may be external data we don't
         # know about. If we haven't seen this storage before, we'll attempt to "warm" the cache.
         if artifact.storage not in self.container.storage_partitions:
             self.write_artifact_partitions(
                 artifact, artifact.storage.discover_partitions(input_fingerprints)
             )
-        partitions = self.container.storage_partitions[artifact.storage]
+        partition_snapshots = self.container.storage_partitions[artifact.storage]
         if input_fingerprints:
-            partitions = {
-                partition
-                for partition in partitions
-                if input_fingerprints.get(partition.partition_key) == partition.input_fingerprint
+            partition_snapshots = {
+                snapshot
+                for snapshot in partition_snapshots
+                if input_fingerprints.get(snapshot.partition_key) == snapshot.input_fingerprint
             }
-        return tuple(partitions)
+        return tuple(partition_snapshots)
 
-    def write_artifact_partitions(self, artifact: Artifact, partitions: StoragePartitions) -> None:
-        self.container.storage_partitions[artifact.storage].update(
-            _ensure_fingerprinted(partitions)
-        )
+    def write_artifact_partitions(
+        self, artifact: Artifact, partitions: StoragePartitionSnapshots
+    ) -> None:
+        self.container.storage_partitions[artifact.storage].update(partitions)
 
     def read_graph(self, name: str, fingerprint: Fingerprint) -> Graph:
         return self.container.graphs[name][fingerprint]
@@ -119,7 +114,7 @@ class MemoryConnection(BackendConnection):
 
     def read_snapshot_partitions(
         self, snapshot: GraphSnapshot, artifact_key: str, artifact: Artifact
-    ) -> StoragePartitions:
+    ) -> StoragePartitionSnapshots:
         return tuple(self.container.snapshot_partitions[snapshot][artifact_key])
 
     def write_snapshot_partitions(
@@ -127,11 +122,9 @@ class MemoryConnection(BackendConnection):
         snapshot: GraphSnapshot,
         artifact_key: str,
         artifact: Artifact,
-        partitions: StoragePartitions,
+        partitions: StoragePartitionSnapshots,
     ) -> None:
-        self.container.snapshot_partitions[snapshot][artifact_key].update(
-            _ensure_fingerprinted(partitions)
-        )
+        self.container.snapshot_partitions[snapshot][artifact_key].update(partitions)
 
 
 class MemoryBackend(Backend[MemoryConnection]):

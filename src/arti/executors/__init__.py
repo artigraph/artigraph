@@ -10,10 +10,8 @@ from arti.backends import BackendConnection
 from arti.fingerprints import Fingerprint
 from arti.graphs import GraphSnapshot
 from arti.internal.models import Model
-from arti.internal.utils import frozendict
 from arti.partitions import InputFingerprints, PartitionKey
 from arti.producers import InputPartitions, Producer
-from arti.storage import StoragePartitions
 
 
 class Executor(Model):
@@ -46,19 +44,19 @@ class Executor(Model):
         # we'll fetch all StoragePartitions for each Storage, filtered to the PKs and
         # input_fingerprints we've computed *are* for this snapshot - and then link them to the
         # snapshot.
-        existing_output_partitions = {
+        output_partition_snapshots = {
             output: connection.read_artifact_partitions(output, partition_input_fingerprints)
             for output in snapshot.graph.producer_outputs[producer]
         }
-        for artifact, partitions in existing_output_partitions.items():
+        for artifact, partition_snapshots in output_partition_snapshots.items():
             connection.write_snapshot_partitions(
-                snapshot, snapshot.graph.artifact_to_key[artifact], artifact, partitions
+                snapshot, snapshot.graph.artifact_to_key[artifact], artifact, partition_snapshots
             )
         # TODO: Guarantee all outputs have the same set of identified partitions. Currently, this
         # pretends a partition is built for all outputs if _any_ are built for that partition.
         return {
-            partition.partition_key
-            for partition in chain.from_iterable(existing_output_partitions.values())
+            snapshot.partition_key
+            for snapshot in chain.from_iterable(output_partition_snapshots.values())
         }
 
     def build_producer_partition(
@@ -69,7 +67,7 @@ class Executor(Model):
         *,
         existing_partition_keys: set[PartitionKey],
         input_fingerprint: Fingerprint,
-        partition_dependencies: frozendict[str, StoragePartitions],
+        input_partitions: InputPartitions,
         partition_key: PartitionKey,
     ) -> None:
         # TODO: Should this "skip if exists" live here or higher up?
@@ -86,7 +84,7 @@ class Executor(Model):
         arguments = {
             name: snapshot.read(
                 artifact=producer.inputs[name],
-                storage_partitions=partition_dependencies[name],
+                storage_partition_snapshots=input_partitions[name],
                 view=view,
             )
             for name, view in producer._build_inputs_.items()

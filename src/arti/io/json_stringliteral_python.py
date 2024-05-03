@@ -7,14 +7,16 @@ from typing import Any
 
 from arti.formats.json import JSON
 from arti.io import register_reader, register_writer
-from arti.storage.literal import StringLiteralPartition, _not_written_err
+from arti.storage.literal import StringLiteralPartition
 from arti.types import Type, is_partitioned
 from arti.views.python import PythonBuiltin
 
 
 def _read_json_literal(partition: StringLiteralPartition) -> Any:
-    if partition.value is None:
-        raise _not_written_err
+    # Though we take in a Partition (which has `value` as optional), we should be operating within a
+    # Snapshot, which will ensure the `value` is set as part of
+    # StringLiteralPartition.compute_content_fingerprint.
+    assert partition.value is not None
     return json.loads(partition.value)
 
 

@@ -14,7 +14,7 @@ from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.internal.type_hints import Self
 from arti.partitions import InputFingerprints
-from arti.storage import StoragePartitions
+from arti.storage import StoragePartitionSnapshots
 
 if TYPE_CHECKING:
     from arti.graphs import Graph, GraphSnapshot
@@ -39,7 +39,7 @@ class BackendConnection:
     @abstractmethod
     def read_artifact_partitions(
         self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> StoragePartitions:
+    ) -> StoragePartitionSnapshots:
         """Read all known Partitions for this Storage spec.
 
         If `input_fingerprints` is provided, the returned partitions will be filtered accordingly.
@@ -50,7 +50,9 @@ class BackendConnection:
         raise NotImplementedError()
 
     @abstractmethod
-    def write_artifact_partitions(self, artifact: Artifact, partitions: StoragePartitions) -> None:
+    def write_artifact_partitions(
+        self, artifact: Artifact, partitions: StoragePartitionSnapshots
+    ) -> None:
         """Add more partitions for a Storage spec."""
         raise NotImplementedError()
 
@@ -93,7 +95,7 @@ class BackendConnection:
     @abstractmethod
     def read_snapshot_partitions(
         self, snapshot: GraphSnapshot, artifact_key: str, artifact: Artifact
-    ) -> StoragePartitions:
+    ) -> StoragePartitionSnapshots:
         """Read the known Partitions for the named Artifact in a specific GraphSnapshot."""
         raise NotImplementedError()
 
@@ -103,7 +105,7 @@ class BackendConnection:
         snapshot: GraphSnapshot,
         artifact_key: str,
         artifact: Artifact,
-        partitions: StoragePartitions,
+        partitions: StoragePartitionSnapshots,
     ) -> None:
         """Link the Partitions to the named Artifact in a specific GraphSnapshot."""
         raise NotImplementedError()
@@ -115,7 +117,7 @@ class BackendConnection:
         snapshot: GraphSnapshot,
         artifact_key: str,
         artifact: Artifact,
-        partitions: StoragePartitions,
+        partitions: StoragePartitionSnapshots,
     ) -> None:
         self.write_artifact_partitions(artifact, partitions)
         self.write_snapshot_partitions(snapshot, artifact_key, artifact, partitions)

@@ -35,7 +35,7 @@ def test_python_View() -> None:
             data = read(
                 type_=view.type,
                 format=test_format,
-                storage_partitions=(test_storage_partition,),
+                storage_partition_snapshots=(test_storage_partition.snapshot(),),
                 view=view,
             )
             assert data == val

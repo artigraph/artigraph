@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import re
-from typing import ClassVar
+from typing import ClassVar, cast
 
 import pytest
 
@@ -13,6 +13,7 @@ from arti import (
     PartitionKeyTypes,
     Storage,
     StoragePartition,
+    StoragePartitionSnapshots,
     Type,
 )
 from arti.formats.json import JSON
@@ -34,27 +35,23 @@ class MockStorage(Storage[MockStoragePartition]):
 
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> tuple[MockStoragePartition, ...]:
+    ) -> StoragePartitionSnapshots:
         assert all(v is Int8Field for v in self.key_types.values())  # Simplifies logic here...
         return tuple(
-            self.generate_partition(partition_key=partition_key)
+            self.generate_partition(partition_key=partition_key).snapshot()
             for partition_key in (
                 PartitionKey({k: Int8Field(value=i) for k in self.key_types}) for i in range(3)
             )
         )
 
 
-def test_StoragePartition_content_fingerprint() -> None:
-    sp = MockStoragePartition(
-        path="/tmp/test", partition_key={}, storage=MockStorage(path="/tmp/test")
-    )
-    assert sp.content_fingerprint is None
-    populated = sp.with_content_fingerprint()
-    assert populated.content_fingerprint == Fingerprint.from_string(sp.path)
-
-    modified = populated.copy(update={"content_fingerprint": Fingerprint(-1)})
-    assert modified.with_content_fingerprint(keep_existing=False) == populated
-    assert modified.with_content_fingerprint(keep_existing=True) != populated
+def test_StoragePartition_snapshot() -> None:
+    storage = MockStorage(path="/tmp/test")
+    partition = MockStoragePartition(path="/tmp/test", partition_key={}, storage=storage)
+    snapshot = partition.snapshot()
+    assert snapshot.content_fingerprint == partition.compute_content_fingerprint()
+    assert snapshot.storage == storage
+    assert snapshot.storage_partition == partition
 
 
 def test_Storage_init_subclass() -> None:
@@ -172,7 +169,7 @@ def test_Storage_vist_type_extra() -> None:
 
         def discover_partitions(
             self, input_fingerprints: InputFingerprints = InputFingerprints()
-        ) -> tuple[TablePartition, ...]:
+        ) -> StoragePartitionSnapshots:
             return ()
 
     type = Collection(element=Struct(fields={"a": Int8(), "b": Int8()}), partition_by=("a", "b"))
@@ -188,7 +185,11 @@ def test_Storage_discover_partitions() -> None:
         ._visit_format(DummyFormat())
     )
     partitions = s.discover_partitions()
-    for i, sp in enumerate(sorted(partitions, key=lambda x: x.path)):
+    for i, sps in enumerate(
+        sorted(partitions, key=lambda x: cast(MockStoragePartition, x.storage_partition).path)
+    ):
+        sp = sps.storage_partition
+        assert isinstance(sp, MockStoragePartition)
         assert sp.path == f"/test/{i}/file"
         assert isinstance(sp.partition_key["i"], Int8Field)
         assert sp.partition_key["i"].value == i
@@ -207,20 +208,14 @@ def test_Storage_generate_partition() -> None:
     )
 
     output = s.generate_partition(partition_key=partition_key, input_fingerprint=input_fingerprint)
-    assert output == expected_partition.with_content_fingerprint()
+    assert output == expected_partition
 
-    output = s.generate_partition(
-        partition_key=partition_key,
-        input_fingerprint=input_fingerprint,
-        with_content_fingerprint=True,
-    )
-    assert output == expected_partition.with_content_fingerprint()
+    output_snapshot = s.generate_partition(
+        input_fingerprint=input_fingerprint, partition_key=partition_key
+    ).snapshot()
+    assert output_snapshot == expected_partition.snapshot()
 
-    output = s.generate_partition(
-        partition_key=partition_key,
-        input_fingerprint=input_fingerprint,
-        with_content_fingerprint=False,
-    )
+    output = s.generate_partition(input_fingerprint=input_fingerprint, partition_key=partition_key)
     assert output == expected_partition
 
     # Check behavior when the Storage spec doesn't align with the passed in key/fingerprint. We'll
