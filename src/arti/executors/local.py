@@ -49,7 +49,7 @@ class LocalExecutor(Executor):
                             input_fingerprint=assert_not_none(
                                 partition_input_fingerprints[partition_key]
                             ),
-                            partition_dependencies=dependencies,
+                            input_partitions=dependencies,
                             partition_key=partition_key,
                         )
                 else:

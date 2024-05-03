@@ -3,7 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from collections import defaultdict
-from collections.abc import Callable, Sequence
+from collections.abc import Callable
 from functools import cached_property, wraps
 from graphlib import TopologicalSorter
 from types import TracebackType
@@ -20,7 +20,7 @@ from arti.internal.models import Model
 from arti.internal.utils import TypedBox, frozendict
 from arti.partitions import PartitionKey
 from arti.producers import Producer
-from arti.storage import StoragePartition, StoragePartitions
+from arti.storage import StoragePartitionSnapshot, StoragePartitionSnapshots
 from arti.types import is_partitioned
 from arti.views import View
 
@@ -206,10 +206,10 @@ class Graph(Model):
         artifact: Artifact,
         *,
         annotation: Any | None = None,
-        storage_partitions: Sequence[StoragePartition] | None = None,
-        view: View | None = None,
-        snapshot: GraphSnapshot | None = None,
         connection: BackendConnection | None = None,
+        snapshot: GraphSnapshot | None = None,
+        storage_partition_snapshots: StoragePartitionSnapshots | None = None,
+        view: View | None = None,
     ) -> Any:
         key = self.artifact_to_key[artifact]
         if annotation is None and view is None:
@@ -223,22 +223,24 @@ class Graph(Model):
             view.check_annotation_compatibility(annotation)
             view.check_artifact_compatibility(artifact)
         assert view is not None  # mypy gets mixed up with ^
-        if storage_partitions is None:
+        if storage_partition_snapshots is None:
             # We want to allow reading raw Artifacts even if other raw Artifacts are missing (which
             # prevents snapshotting).
             if snapshot is None and artifact.producer_output is None:
                 # NOTE: We're not using read_artifact_partitions as the underlying data may have
                 # changed. The backend may have pointers to old versions (which is expected), but we
                 # only want to return the current values.
-                storage_partitions = artifact.storage.discover_partitions()
+                storage_partition_snapshots = artifact.storage.discover_partitions()
             else:
                 snapshot = snapshot or self.snapshot()
                 with (connection or self.backend).connect() as conn:
-                    storage_partitions = conn.read_snapshot_partitions(snapshot, key, artifact)
+                    storage_partition_snapshots = conn.read_snapshot_partitions(
+                        snapshot, key, artifact
+                    )
         return io.read(
             type_=artifact.type,
             format=artifact.format,
-            storage_partitions=storage_partitions,
+            storage_partition_snapshots=storage_partition_snapshots,
             view=view,
         )
 
@@ -253,7 +255,7 @@ class Graph(Model):
         view: View | None = None,
         snapshot: GraphSnapshot | None = None,
         connection: BackendConnection | None = None,
-    ) -> StoragePartition:
+    ) -> StoragePartitionSnapshot:
         key = self.artifact_to_key[artifact]
         if snapshot is not None and artifact.producer_output is None:
             raise ValueError(
@@ -265,27 +267,26 @@ class Graph(Model):
             )
         view.check_annotation_compatibility(type(data))
         view.check_artifact_compatibility(artifact)
-        storage_partition = artifact.storage.generate_partition(
-            input_fingerprint=input_fingerprint,
-            partition_key=partition_key,
-            with_content_fingerprint=False,
-        )
-        storage_partition = io.write(
+        storage_partition_snapshot = io.write(
             data,
             type_=artifact.type,
             format=artifact.format,
-            storage_partition=storage_partition,
+            storage_partition=artifact.storage.generate_partition(
+                input_fingerprint=input_fingerprint, partition_key=partition_key
+            ),
             view=view,
-        ).with_content_fingerprint()
+        )
         # TODO: Should we only do this in bulk? We might want the backends to transparently batch
         # requests, but that's not so friendly with the transient ".connect".
         with (connection or self.backend).connect() as conn:
-            conn.write_artifact_partitions(artifact, (storage_partition,))
+            conn.write_artifact_partitions(artifact, (storage_partition_snapshot,))
             # Skip linking this partition to the snapshot if it affects raw Artifacts (which would
             # trigger an id change).
             if snapshot is not None and artifact.producer_output is not None:
-                conn.write_snapshot_partitions(snapshot, key, artifact, (storage_partition,))
-        return storage_partition
+                conn.write_snapshot_partitions(
+                    snapshot, key, artifact, (storage_partition_snapshot,)
+                )
+        return storage_partition_snapshot
 
 
 class GraphSnapshot(Model):
@@ -323,7 +324,8 @@ class GraphSnapshot(Model):
         # TODO: Resolve and statically set all available fingerprints. Specifically, we should pin
         # the Producer.fingerprint, which may by dynamic (eg: version is a Timestamp). Unbuilt
         # Artifact (partitions) won't be fully resolved yet.
-        snapshot_id, known_artifact_partitions = graph.fingerprint, dict[str, StoragePartitions]()
+        snapshot_id = graph.fingerprint
+        known_artifact_partitions = dict[str, StoragePartitionSnapshots]()
         for node, _ in graph.dependencies.items():
             snapshot_id = snapshot_id.combine(node.fingerprint)
             if isinstance(node, Artifact):
@@ -337,10 +339,7 @@ class GraphSnapshot(Model):
                 # differently depending on if the external Artifacts are Produced (in an upstream
                 # Graph) or not.
                 if node.producer_output is None:
-                    known_artifact_partitions[key] = StoragePartitions(
-                        partition.with_content_fingerprint()
-                        for partition in node.storage.discover_partitions()
-                    )
+                    known_artifact_partitions[key] = node.storage.discover_partitions()
                     if not known_artifact_partitions[key]:
                         content_str = "partitions" if is_partitioned(node.type) else "data"
                         raise ValueError(f"No {content_str} found for `{key}`: {node}")
@@ -388,14 +387,14 @@ class GraphSnapshot(Model):
         artifact: Artifact,
         *,
         annotation: Any | None = None,
-        storage_partitions: Sequence[StoragePartition] | None = None,
-        view: View | None = None,
         connection: BackendConnection | None = None,
+        storage_partition_snapshots: StoragePartitionSnapshots | None = None,
+        view: View | None = None,
     ) -> Any:
         return self.graph.read(
             artifact,
             annotation=annotation,
-            storage_partitions=storage_partitions,
+            storage_partition_snapshots=storage_partition_snapshots,
             view=view,
             snapshot=self,
             connection=connection,
@@ -406,11 +405,11 @@ class GraphSnapshot(Model):
         data: Any,
         *,
         artifact: Artifact,
+        connection: BackendConnection | None = None,
         input_fingerprint: Fingerprint | None = None,
         partition_key: PartitionKey = PartitionKey(),
         view: View | None = None,
-        connection: BackendConnection | None = None,
-    ) -> StoragePartition:
+    ) -> StoragePartitionSnapshot:
         return self.graph.write(
             data,
             artifact=artifact,

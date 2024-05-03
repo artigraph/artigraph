@@ -155,8 +155,8 @@ def test_Graph_snapshot() -> None:
         g.artifacts.b.fingerprint,
         p1.fingerprint,
         *(
-            storage_partition.with_content_fingerprint().fingerprint
-            for storage_partition in g.artifacts.a.storage.discover_partitions()  # type: ignore[operator] # Some pydantic.mypy bug
+            storage_partition_snapshot.fingerprint
+            for storage_partition_snapshot in g.artifacts.a.storage.discover_partitions()  # type: ignore[operator] # Some pydantic.mypy bug
         ),
     ]
 
@@ -385,12 +385,13 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     i, j = g.artifacts.i, g.artifacts.j
     assert isinstance(j, Artifact)
     # Test write
-    storage_partition = g.write(5, artifact=i)
-    assert isinstance(storage_partition, LocalFilePartition)
-    assert storage_partition.content_fingerprint is not None
-    assert storage_partition.input_fingerprint is None
-    assert storage_partition.partition_key == PartitionKey()
-    assert storage_partition.path.endswith(i.format.extension)
+    snapshot = g.write(5, artifact=i)
+    assert snapshot.content_fingerprint is not None
+    partition = snapshot.storage_partition
+    assert isinstance(partition, LocalFilePartition)
+    assert partition.input_fingerprint is None
+    assert partition.partition_key == PartitionKey()
+    assert partition.path.endswith(i.format.extension)
 
     # Once snapshotted, writing to the raw Artifacts would result in a different snapshot.
     with pytest.raises(
@@ -403,7 +404,7 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     # Test read
     assert g.read(i, annotation=int) == 5
     assert g.read(i, view=View.from_annotation(int, mode="READ")) == 5
-    assert g.read(i, annotation=int, storage_partitions=[storage_partition]) == 5
+    assert g.read(i, annotation=int, storage_partition_snapshots=(snapshot,)) == 5
     with pytest.raises(ValueError, match="Either `annotation` or `view` must be passed"):
         g.read(i)
     with pytest.raises(ValueError, match="Only one of `annotation` or `view` may be passed"):

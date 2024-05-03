@@ -31,7 +31,7 @@ from arti.internal.type_hints import (
 )
 from arti.internal.utils import frozendict, get_module_name, ordinal
 from arti.partitions import InputFingerprints, NotPartitioned, PartitionKey
-from arti.storage import StoragePartitions
+from arti.storage import StoragePartitions, StoragePartitionSnapshots
 from arti.types import is_partitioned
 from arti.versions import SemVer, Version
 from arti.views import View
@@ -43,7 +43,7 @@ MapInputs = set[str]
 BuildInputs = frozendict[str, View]
 Outputs = tuple[View, ...]
 
-InputPartitions = frozendict[str, StoragePartitions]
+InputPartitions = frozendict[str, StoragePartitionSnapshots]
 PartitionDependencies = frozendict[PartitionKey, InputPartitions]
 MapSig = Callable[..., PartitionDependencies]
 BuildSig = Callable[..., Any]
@@ -266,7 +266,7 @@ class Producer(Model):
             if any(is_partitioned(view.type) for view in cls._outputs_):
                 raise ValueError("must be implemented when the `build` outputs are partitioned")
 
-            def map(**kwargs: StoragePartitions) -> PartitionDependencies:
+            def map(**kwargs: StoragePartitionSnapshots) -> PartitionDependencies:
                 return PartitionDependencies({NotPartitioned: frozendict(kwargs)})
 
             # Narrow the map signature, which is validated below and used at graph build time (via
@@ -312,7 +312,7 @@ class Producer(Model):
         return iter(ret)
 
     def compute_input_fingerprint(
-        self, dependency_partitions: frozendict[str, StoragePartitions]
+        self, dependency_partitions: frozendict[str, StoragePartitionSnapshots]
     ) -> Fingerprint:
         input_names = set(dependency_partitions)
         expected_names = set(self._build_inputs_)
@@ -325,9 +325,9 @@ class Producer(Model):
         return Fingerprint.from_string(self._class_key_).combine(
             self.version.fingerprint,
             *(
-                partition.get_or_compute_content_fingerprint()
-                for name, partitions in dependency_partitions.items()
-                for partition in partitions
+                snapshot.content_fingerprint
+                for name, partition_snapshots in dependency_partitions.items()
+                for snapshot in partition_snapshots
             ),
         )
 

@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 import sys
-from collections.abc import Callable
+from collections.abc import Callable, Iterable
 from datetime import date, datetime
 from types import GenericAlias, UnionType
 from typing import (
@@ -26,6 +26,12 @@ NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an obje
 def assert_not_none(v: _T | None) -> _T:
     assert v is not None
     return v
+
+
+def assert_all_instances(values: Iterable[Any], *, type: type[_T]) -> Iterable[_T]:
+    if not all(isinstance(v, type) for v in values):
+        raise TypeError(f"Expected {type.__name__} instances")
+    return values
 
 
 def _check_issubclass(klass: Any, check_type: type) -> bool:

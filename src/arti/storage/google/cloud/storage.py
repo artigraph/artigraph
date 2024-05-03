@@ -4,7 +4,13 @@ from pathlib import Path
 
 from gcsfs import GCSFileSystem
 
-from arti import Fingerprint, InputFingerprints, Storage, StoragePartition
+from arti import (
+    Fingerprint,
+    InputFingerprints,
+    Storage,
+    StoragePartition,
+    StoragePartitionSnapshots,
+)
 from arti.internal.models import Model
 from arti.storage._internal import parse_spec, spec_to_wildcard
 
@@ -38,7 +44,7 @@ class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
 
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> tuple[GCSFilePartition, ...]:
+    ) -> StoragePartitionSnapshots:
         # NOTE: The bucket/path must *already* have any graph tags resolved, otherwise they will be try to be parsed as
         # partition keys.
         spec = f"{self.bucket}/{self.path}"  # type: ignore[operator] # likely some pydantic.mypy bug
@@ -51,7 +57,7 @@ class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
         return tuple(
             self.generate_partition(
                 input_fingerprint=input_fingerprint, partition_key=partition_key
-            )
+            ).snapshot()
             for (bucket, path), (input_fingerprint, partition_key) in {
                 tuple(path.split("/", 1)): metadata for path, metadata in path_metadata.items()
             }.items()

@@ -14,6 +14,7 @@ from arti import (
     Statistic,
     Storage,
     StoragePartition,
+    StoragePartitionSnapshots,
     Type,
     TypeSystem,
     View,
@@ -59,12 +60,12 @@ class DummyStorage(Storage[DummyPartition]):
 
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> tuple[DummyPartition, ...]:
+    ) -> StoragePartitionSnapshots:
         if self.key_types != PartitionKeyTypes():
             raise NotImplementedError()
         if input_fingerprints is not None and input_fingerprints != InputFingerprints():
             raise NotImplementedError()
-        return (self.generate_partition(),)
+        return (self.generate_partition().snapshot(),)
 
 
 @io.register_reader

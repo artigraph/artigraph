@@ -29,7 +29,7 @@ def date_keys() -> list[PartitionKey]:
 def generate_partition_files(storage: LocalFile, input_fingerprints: InputFingerprints) -> None:
     for pk, input_fingerprint in input_fingerprints.items():
         partition = storage.generate_partition(
-            input_fingerprint=input_fingerprint, partition_key=pk, with_content_fingerprint=False
+            input_fingerprint=input_fingerprint, partition_key=pk
         )
         partition_path = Path(partition.path)
         partition_path.parent.mkdir(parents=True)
@@ -43,9 +43,10 @@ def test_local_partitioning(tmp_path: Path, date_keys: list[PartitionKey]) -> No
         ._visit_format(DummyFormat())
     )
     generate_partition_files(storage, InputFingerprints(zip(date_keys, repeat(None))))
-    partitions = storage.discover_partitions()
-    assert len(partitions) > 0
-    for partition in partitions:
+    snapshots = storage.discover_partitions()
+    assert len(snapshots) > 0
+    for snapshot in snapshots:
+        partition = snapshot.storage_partition
         assert isinstance(partition, LocalFilePartition)
         assert set(partition.partition_key) == {"date"}
         assert partition.partition_key in date_keys
@@ -72,9 +73,10 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[PartitionKe
         )
         # Generate files for *all* years - we want discover_partitions to do the filtering.
         generate_partition_files(storage, InputFingerprints(zip(date_keys, repeat(None))))
-        partitions = storage.discover_partitions()
-        assert len(partitions) > 0
-        for partition in partitions:
+        snapshots = storage.discover_partitions()
+        assert len(snapshots) > 0
+        for snapshot in snapshots:
+            partition = snapshot.storage_partition
             assert isinstance(partition, LocalFilePartition)
             assert set(partition.partition_key) == {"date"}
             assert partition.partition_key in date_keys
@@ -97,9 +99,10 @@ def test_local_partitioning_with_input_fingerprints(
     input_fingerprint = Fingerprint.from_int(42)
     input_fingerprints = InputFingerprints(zip(date_keys, repeat(input_fingerprint)))
     generate_partition_files(storage, input_fingerprints)
-    partitions = storage.discover_partitions(input_fingerprints)
-    assert len(partitions) > 0
-    for partition in partitions:
+    snapshots = storage.discover_partitions(input_fingerprints)
+    assert len(snapshots) > 0
+    for snapshot in snapshots:
+        partition = snapshot.storage_partition
         assert isinstance(partition, LocalFilePartition)
         assert set(partition.partition_key) == {"date"}
         assert partition.partition_key in date_keys
@@ -127,7 +130,7 @@ def test_local_file_partition_fingerprint(tmp_path: Path) -> None:
         f.write("hello world")
     partition = LocalFilePartition(
         partition_key={}, path=str(path), storage=LocalFile(path=str(path))
-    ).with_content_fingerprint()
+    ).snapshot()
     assert partition.content_fingerprint == Fingerprint.from_string(
         hashlib.sha256(text.encode()).hexdigest()
     )

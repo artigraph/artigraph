@@ -5,6 +5,7 @@ import pytest
 
 from arti.internal.type_hints import (
     NoneType,
+    assert_all_instances,
     get_class_type_vars,
     get_item_from_annotated,
     is_optional_hint,
@@ -25,6 +26,12 @@ class MyTypedDict(TypedDict):
 MyTupleVar = TypeVar("MyTupleVar", bound=MyTuple)
 TupleVar = TypeVar("TupleVar", bound=tuple)  # type: ignore[type-arg]
 UnboundVar = TypeVar("UnboundVar")
+
+
+def test_assert_all_instances() -> None:
+    assert_all_instances([1, 2, 3], type=int)
+    with pytest.raises(TypeError, match="Expected int instances"):
+        assert_all_instances([1, 2, 3, "4"], type=int)
 
 
 def test_get_class_type_vars() -> None:

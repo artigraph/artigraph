@@ -13,6 +13,7 @@ from arti import (
     Producer,
     StoragePartition,
     StoragePartitions,
+    StoragePartitionSnapshots,
     Type,
     TypeSystem,
     View,
@@ -208,22 +209,20 @@ def test_Producer_fingerprint() -> None:
 def test_Producer_compute_input_fingerprint() -> None:
     p1 = P1(a1=A1(storage=DummyStorage(key="test")))
     assert p1.compute_input_fingerprint(
-        frozendict(a1=StoragePartitions())
+        frozendict(a1=StoragePartitionSnapshots())
     ) == Fingerprint.from_string(p1._class_key_).combine(p1.version.fingerprint)
 
-    storage_partition = p1.a1.storage.generate_partition().copy(  # type: ignore[operator] # likely some pydantic.mypy bug
-        update={"content_fingerprint": Fingerprint.from_int(10)}
-    )
+    storage_partition_snapshot = p1.a1.storage.generate_partition().snapshot()  # type: ignore[operator] # likely some pydantic.mypy bug
     assert p1.compute_input_fingerprint(
-        frozendict(a1=StoragePartitions([storage_partition]))
+        frozendict(a1=StoragePartitionSnapshots([storage_partition_snapshot]))
     ) == Fingerprint.from_string(p1._class_key_).combine(
-        p1.version.fingerprint, storage_partition.get_or_compute_content_fingerprint()
+        p1.version.fingerprint, storage_partition_snapshot.content_fingerprint
     )
 
     with pytest.raises(
         ValueError, match=re.escape("Mismatched dependency inputs; expected {'a1'}, got {'junk'}")
     ):
-        p1.compute_input_fingerprint(frozendict(junk=StoragePartitions()))
+        p1.compute_input_fingerprint(frozendict(junk=StoragePartitionSnapshots()))
 
 
 def test_Producer_out() -> None:

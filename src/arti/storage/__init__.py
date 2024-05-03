@@ -4,7 +4,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
-from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar, cast
 
 from pydantic import Field, PrivateAttr
 
@@ -22,10 +22,9 @@ if TYPE_CHECKING:
 
 
 class StoragePartition(Model):
-    storage: Storage[StoragePartition] = Field(repr=False)
-    partition_key: PartitionKey = PartitionKey()
     input_fingerprint: Fingerprint | None = None
-    content_fingerprint: Fingerprint | None = None
+    partition_key: PartitionKey = PartitionKey()
+    storage: Storage[StoragePartition] = Field(repr=False)
 
     @abc.abstractmethod
     def compute_content_fingerprint(self) -> Fingerprint:
@@ -33,26 +32,35 @@ class StoragePartition(Model):
             "{type(self).__name__}.compute_content_fingerprint is not implemented!"
         )
 
-    def get_or_compute_content_fingerprint(self) -> Fingerprint:
-        if self.content_fingerprint is None:
-            return self.compute_content_fingerprint()
-        return self.content_fingerprint
-
-    def with_content_fingerprint(self, keep_existing: bool = True) -> Self:
-        return self.copy(
-            update={
-                "content_fingerprint": (
-                    self.get_or_compute_content_fingerprint()
-                    if keep_existing
-                    else self.compute_content_fingerprint()
-                )
-            }
+    def snapshot(self) -> StoragePartitionSnapshot:
+        return StoragePartitionSnapshot(
+            content_fingerprint=self.compute_content_fingerprint(), storage_partition=self
         )
 
 
+StoragePartitions = tuple[StoragePartition, ...]
 StoragePartitionVar = TypeVar("StoragePartitionVar", bound=StoragePartition)
 StoragePartitionVar_co = TypeVar("StoragePartitionVar_co", bound=StoragePartition, covariant=True)
-StoragePartitions = tuple[StoragePartition, ...]
+
+
+class StoragePartitionSnapshot(Model):
+    content_fingerprint: Fingerprint
+    storage_partition: StoragePartition
+
+    @property
+    def input_fingerprint(self) -> Fingerprint | None:
+        return self.storage_partition.input_fingerprint
+
+    @property
+    def partition_key(self) -> PartitionKey:
+        return self.storage_partition.partition_key
+
+    @property
+    def storage(self) -> Storage[StoragePartition]:
+        return self.storage_partition.storage
+
+
+StoragePartitionSnapshots = tuple[StoragePartitionSnapshot, ...]
 
 
 class Storage(Model, Generic[StoragePartitionVar_co]):
@@ -101,7 +109,8 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
     def get_default(cls) -> Storage[StoragePartition]:
         from arti.storage.literal import StringLiteral
 
-        return StringLiteral()  # TODO: Support some sort of configurable defaults.
+        # TODO: Support some sort of configurable defaults.
+        return cast(Storage[StoragePartition], StringLiteral())
 
     def _visit_type(self, type_: Type) -> Self:
         # TODO: Check support for the types and partitioning on the specified field(s).
@@ -169,7 +178,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
     @abc.abstractmethod
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> tuple[StoragePartitionVar_co, ...]:
+    ) -> StoragePartitionSnapshots:
         raise NotImplementedError()
 
     def generate_partition(
@@ -177,7 +186,6 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         *,
         input_fingerprint: Fingerprint | None = None,
         partition_key: PartitionKey = PartitionKey(),
-        with_content_fingerprint: bool = True,
     ) -> StoragePartitionVar_co:
         self._check_key(self.key_types, partition_key)
         format_kwargs = dict[Any, Any](partition_key)
@@ -197,15 +205,12 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
             for name in self.__fields__
             if name in self.storage_partition_type.__fields__
         }
-        partition = self.storage_partition_type(
+        return self.storage_partition_type(
             input_fingerprint=input_fingerprint,
             partition_key=partition_key,
             storage=self,
             **field_values,
         )
-        if with_content_fingerprint:
-            partition = partition.with_content_fingerprint()
-        return partition
 
     def _resolve_field(self, name: str, spec: str, placeholder_values: dict[str, str]) -> str:
         for placeholder, value in placeholder_values.items():

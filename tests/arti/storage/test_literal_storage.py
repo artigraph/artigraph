@@ -11,9 +11,10 @@ from tests.arti.dummies import DummyFormat
 def test_StringLiteral() -> None:
     t, f = Int64(), DummyFormat()
     literal = StringLiteral(id="test", value="test")._visit_type(t)._visit_format(f)
-    partitions = literal.discover_partitions()
-    assert len(partitions) == 1
-    partition = partitions[0]
+    snapshots = literal.discover_partitions()
+    assert len(snapshots) == 1
+    snapshot = snapshots[0]
+    partition = snapshot.storage_partition
     assert isinstance(partition, StringLiteralPartition)
     assert partition.value is not None
     assert partition.value == literal.value
@@ -21,12 +22,7 @@ def test_StringLiteral() -> None:
     # Confirm value=None returns no partitions
     assert not StringLiteral(id="test")._visit_type(t)._visit_format(f).discover_partitions()
     # Confirm input_fingerprint and partition_key validators don't error for empty values
-    assert (
-        partition
-        == StringLiteralPartition(
-            id="test", value="test", storage=literal
-        ).with_content_fingerprint()
-    )
+    assert snapshot == StringLiteralPartition(id="test", value="test", storage=literal).snapshot()
     # Confirm empty value raises
     with pytest.raises(FileNotFoundError, match="Literal has not been written yet"):
         StringLiteralPartition(id="test", storage=literal).compute_content_fingerprint()

@@ -5,9 +5,13 @@ import tempfile
 from glob import glob
 from pathlib import Path
 
-from arti.fingerprints import Fingerprint
-from arti.partitions import InputFingerprints
-from arti.storage import Storage, StoragePartition
+from arti import (
+    Fingerprint,
+    InputFingerprints,
+    Storage,
+    StoragePartition,
+    StoragePartitionSnapshots,
+)
 from arti.storage._internal import parse_spec, spec_to_wildcard
 
 
@@ -39,7 +43,7 @@ class LocalFile(Storage[LocalFilePartition]):
 
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> tuple[LocalFilePartition, ...]:
+    ) -> StoragePartitionSnapshots:
         wildcard = spec_to_wildcard(self.path, self.key_types)
         paths = set(glob(wildcard))
         path_metadata = parse_spec(
@@ -48,7 +52,7 @@ class LocalFile(Storage[LocalFilePartition]):
         return tuple(
             self.generate_partition(
                 input_fingerprint=input_fingerprint, partition_key=partition_key
-            )
+            ).snapshot()
             for path, (input_fingerprint, partition_key) in path_metadata.items()
         )
 

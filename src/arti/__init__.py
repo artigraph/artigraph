@@ -18,7 +18,13 @@ from arti.io import read, register_reader, register_writer, write
 from arti.partitions import InputFingerprints, PartitionField, PartitionKey, PartitionKeyTypes
 from arti.producers import PartitionDependencies, Producer, producer
 from arti.statistics import Statistic
-from arti.storage import Storage, StoragePartition, StoragePartitions
+from arti.storage import (
+    Storage,
+    StoragePartition,
+    StoragePartitions,
+    StoragePartitionSnapshot,
+    StoragePartitionSnapshots,
+)
 from arti.thresholds import Threshold
 from arti.types import Type, TypeAdapter, TypeSystem
 from arti.versions import Version
@@ -44,6 +50,8 @@ __all__ = [
     "Statistic",
     "Storage",
     "StoragePartition",
+    "StoragePartitionSnapshot",
+    "StoragePartitionSnapshots",
     "StoragePartitions",
     "Threshold",
     "Type",

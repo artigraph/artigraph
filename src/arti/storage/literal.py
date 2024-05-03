@@ -1,8 +1,13 @@
 from __future__ import annotations
 
-from arti.fingerprints import Fingerprint
-from arti.partitions import InputFingerprints, PartitionKey
-from arti.storage import Storage, StoragePartition
+from arti import (
+    Fingerprint,
+    InputFingerprints,
+    PartitionKey,
+    Storage,
+    StoragePartition,
+    StoragePartitionSnapshots,
+)
 
 _not_written_err = FileNotFoundError("Literal has not been written yet")
 
@@ -25,7 +30,7 @@ class StringLiteral(Storage[StringLiteralPartition]):
 
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()
-    ) -> tuple[StringLiteralPartition, ...]:
+    ) -> StoragePartitionSnapshots:
         if input_fingerprints and self.value is not None:
             raise ValueError(
                 f"Literal storage cannot have a `value` preset ({self.value}) for a Producer output"
@@ -40,7 +45,7 @@ class StringLiteral(Storage[StringLiteralPartition]):
         return tuple(
             self.generate_partition(
                 input_fingerprint=input_fingerprint, partition_key=partition_key
-            )
+            ).snapshot()
             for partition_key, input_fingerprint in (
                 input_fingerprints or {PartitionKey(): None}
             ).items()
