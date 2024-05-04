@@ -247,11 +247,17 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
 
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
-        assert isinstance(type_, cls.artigraph)
+        assert isinstance(type_, types.Collection)
         assert isinstance(type_.element, types.Struct)
-        return cls.system(
-            StructTypeAdapter.to_system(type_.element, hints=hints, type_system=type_system),
-            metadata={
+        schema = cls.system(
+            StructTypeAdapter.to_system(type_.element, hints=hints, type_system=type_system)
+        )
+        # NOTE: PyArrow has a regression[1] where `metadata` passed to `pa.schema` may be dropped, so
+        # add it explicitly.
+        #
+        # 1: https://github.com/apache/arrow/issues/38575
+        return schema.with_metadata(
+            {
                 "artigraph": json.dumps(
                     {
                         "name": type_.name,
@@ -259,7 +265,7 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
                         "cluster_by": type_.cluster_by,
                     }
                 )
-            },
+            }
         )
 
 
