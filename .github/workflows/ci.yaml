@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python-version: ["3.9", "3.10", "3.11"] # NOTE: Quote to ensure trailing 0s aren't dropped
+        python-version: ["3.10", "3.11", "3.12"] # NOTE: Quote to ensure trailing 0s aren't dropped
     runs-on: ${{ matrix.os }}
     env:
       MYPY_CACHE_DIR: /tmp/mypy-cache
