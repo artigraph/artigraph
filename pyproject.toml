@@ -5,7 +5,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.black]
 line-length = 100
-target-version = ['py39']
+target-version = ['py310']
 
 
 [tool.coverage.report]
@@ -52,11 +52,11 @@ repository = "https://github.com/artigraph/artigraph"
 include = ["src/arti/py.typed"]
 
 [tool.poetry.dependencies]
-python = "^3.9"
+python = "^3.10"
 
 gcsfs = { version = ">=2022.2.0", optional = true }
 google-cloud-bigquery = { version = "^3.5.0", optional = true }
-multimethod = ">=1.6"
+multimethod = ">=1.6,<1.11"
 numpy = { version = ">=1.23.1", optional = true }
 pandas = { version = ">=1.4.3", optional = true }
 parse = ">=1.19.0"
@@ -102,6 +102,8 @@ filterwarnings = [
     # Ignore a couple external tools that use old form namespace packages
     "ignore:Deprecated call to `pkg_resources.declare_namespace.*:DeprecationWarning",
     "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
+    # Ignore other upstream DeprecationWarnings
+    "ignore:Type google._upb._message..* uses PyType_Spec with a metaclass.*:DeprecationWarning",
 ]
 testpaths = ["src/", "tests/"]
 xfail_strict = true
@@ -111,7 +113,7 @@ xfail_strict = true
 fix = true
 line-length = 100
 src = ["src"]
-target-version = "py39"
+target-version = "py310"
 
 extend-select = [
     "B",   # bugbear
