@@ -62,18 +62,3 @@ repos:
         language: system
         pass_filenames: false # Running on a subset of files may mask interface breaks
         types: [python]
-      - id: pytest
-        name: pytest
-        entry: bash -c
-        args:
-          - >
-            if [[ $(git branch --show-current) == "main" ]]; then
-              pytest
-            else
-              # If tests become too slow, mark slow ones and omit. We'll add a little coverage buffer for working
-              # commits, though CI/PRs will still enforce 100%.
-              pytest --cov-fail-under=90
-            fi
-        language: system
-        pass_filenames: false
-        types: [python]
