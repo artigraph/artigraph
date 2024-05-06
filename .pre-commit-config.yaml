@@ -26,12 +26,15 @@ repos:
       - id: pretty-format-json
         args: [--autofix]
       - id: trailing-whitespace
-  - repo: https://github.com/pre-commit/pygrep-hooks
-    rev: v1.9.0
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.4.2
     hooks:
-      - id: python-check-blanket-noqa
-      - id: python-check-blanket-type-ignore
-  - repo: local # Prefer local tools to streamline version management with poetry
+      - id: ruff
+        args: [--fix]
+        types_or: [python, pyi, jupyter]
+      - id: ruff-format
+        types_or: [python, pyi, jupyter]
+  - repo: local
     hooks:
       - id: poetry-check
         name: poetry-check
@@ -39,23 +42,6 @@ repos:
         files: ^pyproject.toml$
         language: system
         pass_filenames: false
-      # Rewriters
-      - id: ruff
-        name: ruff
-        entry: ruff
-        language: system
-        types: [python]
-      - id: black
-        name: black
-        entry: black
-        language: system
-        types: [python]
-      - id: blacken-docs
-        name: blacken-docs
-        entry: blacken-docs
-        language: system
-        types_or: [markdown, python]
-      # Checkers
       - id: mypy
         name: mypy
         entry: mypy
