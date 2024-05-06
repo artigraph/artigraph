@@ -3,11 +3,6 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 
-[tool.black]
-line-length = 100
-target-version = ['py310']
-
-
 [tool.coverage.report]
 exclude_lines = [
     "@overload",
@@ -66,8 +61,6 @@ pyfarmhash = ">=0.2.2"
 python-box = ">=7.0.0"                                          # Tracking box_namespace requires 7+
 
 [tool.poetry.group.dev.dependencies]
-black = ">=22.6.0"
-blacken-docs = ">=1.12.1"
 coverage = { version = ">=6.4", extras = ["toml"] }                         # pyproject.toml support
 gcp-storage-emulator = ">=2022.6.11"
 ipdb = ">=0.13.9"
@@ -115,24 +108,33 @@ line-length = 100
 src = ["src"]
 target-version = "py310"
 
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.ruff.lint]
 extend-select = [
-    "B",   # bugbear
-    "C4",  # standardize comprehensions
-    "E",   # pycodestyle
-    "EXE", # check executables/shebangs
-    "F",   # pyflakes
-    "I",   # isort
-    "ISC", # disable implicit str concat
-    "PIE", # misc tidy checks
-    "PT",  # standardize pytest usage
-    "RET", # standardize return (or not)
-    "RUF", # misc ruff checks
-    "S",   # bandit
-    "SIM", # simplify code when possible
-    "UP",  # pyupgrade
-    "W",   # pycodestyle
-    # "D",  # TODO: pydocstyle
-    # "PTH",  # TODO: prefer pathlib.Path over os.path ops
+    "ASYNC", # check for blocking calls in async funcs
+    "B",     # bugbear
+    "BLE",   # prevent bare `except:`
+    "C4",    # standardize comprehensions
+    "E",     # pycodestyle errors
+    "EXE",   # check executables/shebangs
+    "F",     # pyflakes
+    "I",     # isort
+    "ISC",   # disable implicit str concat
+    "PGH",   # pygrep-hooks
+    "PIE",   # misc tidy checks
+    "PT",    # standardize pytest usage
+    "RET",   # standardize return (or not)
+    "RUF",   # misc ruff checks
+    "S",     # bandit
+    "SIM",   # simplify code when possible
+    "UP",    # pyupgrade
+    "W",     # pycodestyle
+    # "D",     # pydocstyle
+    # "ERA",   # prevent commented out code
+    # "N",     # naming conventions
+    # "PTH",   # prefer pathlib.Path over os.path ops
 ]
 ignore = [
     "B008",   # don't call function in arg defaults (eg: InputFingerprint or PartitionKey)
@@ -141,20 +143,15 @@ ignore = [
     "RET505", # Unnecessary `else` after `return` statement
     "S101",   # use of assert (used for mypy type narrowing)
 ]
+flake8-implicit-str-concat = { allow-multiline = false }
+isort = { known-first-party = ["tests"] }
+pyupgrade = { keep-runtime-typing = true } # Preserve types, even if a file imports `from __future__ import annotations`.
 
-[tool.ruff.flake8-implicit-str-concat]
-allow-multiline = false
-
-[tool.ruff.isort]
-known-first-party = ["tests"]
-
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "tests/*" = [
     "B018",   # disable "Found useless expression"
+    "N802",   # disable "Function name `...` should be lowercase" when testing classes or writing fixtures
     "S301",   # disable pickle.load warnings
     "SIM117", # disable merging `with pytest.raises(...)` contexts with others in one line
 ]
 "tests/arti/storage/test_storage.py" = ["S108"] # insecure usage of /tmp
-
-[tool.ruff.pyupgrade]
-keep-runtime-typing = true # Preserve types, even if a file imports `from __future__ import annotations`.
