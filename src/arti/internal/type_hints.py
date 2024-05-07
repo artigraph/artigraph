@@ -104,22 +104,19 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
 @overload
 def get_item_from_annotated(
     annotation: Any, klass: type[_T], *, is_subclass: Literal[True]
-) -> Optional[type[_T]]:
-    ...
+) -> Optional[type[_T]]: ...
 
 
 @overload
 def get_item_from_annotated(
     annotation: Any, klass: type[_T], *, is_subclass: Literal[False]
-) -> Optional[_T]:
-    ...
+) -> Optional[_T]: ...
 
 
 @overload
 def get_item_from_annotated(
     annotation: Any, klass: type[_T], *, is_subclass: bool
-) -> Optional[Union[_T, type[_T]]]:
-    ...
+) -> Optional[Union[_T, type[_T]]]: ...
 
 
 def get_item_from_annotated(
@@ -257,7 +254,7 @@ else:  # pragma: no cover
     # (and error) on other python versions.
     def is_union(type_: Any) -> bool:
         # `Union[int, str]` or `int | str`
-        return type_ is Union or type_ is types.UnionType  # noqa: E721
+        return type_ is Union or type_ is types.UnionType
 
 
 def is_Annotated(type_: Any) -> bool:

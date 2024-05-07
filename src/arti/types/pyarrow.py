@@ -224,7 +224,8 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
         # Collection can hold arbitrary types, but `pa.schema` is only a struct (but with arbitrary
         # metadata)
         return super().matches_artigraph(type_=type_, hints=hints) and isinstance(
-            type_.element, types.Struct  # type: ignore[attr-defined]
+            type_.element,  # type: ignore[attr-defined]
+            types.Struct,
         )
 
     @classmethod

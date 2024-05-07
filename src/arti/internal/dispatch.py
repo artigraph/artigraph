@@ -54,12 +54,10 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
         return handler
 
     @overload
-    def register(self, __func: REGISTERED) -> REGISTERED:
-        ...
+    def register(self, __func: REGISTERED) -> REGISTERED: ...
 
     @overload
-    def register(self, *args: type) -> Callable[[REGISTERED], REGISTERED]:
-        ...
+    def register(self, *args: type) -> Callable[[REGISTERED], REGISTERED]: ...
 
     def register(self, *args: Any) -> Callable[[REGISTERED], REGISTERED]:
         if len(args) == 1 and hasattr(args[0], "__annotations__"):
