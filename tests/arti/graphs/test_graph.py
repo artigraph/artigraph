@@ -411,9 +411,10 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     assert g.read(j, annotation=int) == 5
 
     # Test that we can use an existing connection
-    with g.backend.connect() as conn, patch.object(
-        type(g.backend), "connect", new_callable=PropertyMock
-    ) as connect_mock:
+    with (
+        g.backend.connect() as conn,
+        patch.object(type(g.backend), "connect", new_callable=PropertyMock) as connect_mock,
+    ):
         g.write(10, artifact=i, connection=conn)
         assert g.read(i, annotation=int, connection=conn) == 10
 
@@ -437,7 +438,8 @@ def test_Graph_storage_resolution() -> None:
         g.artifacts.root.a = Num(storage=LocalFile())
         g.artifacts.root.b = Num(storage=LocalFile())
         g.artifacts.c = cast(
-            Num, div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(Num(storage=LocalFile()))  # type: ignore[call-arg]
+            Num,
+            div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(Num(storage=LocalFile())),  # type: ignore[call-arg]
         )
         with pytest.raises(
             ValueError,

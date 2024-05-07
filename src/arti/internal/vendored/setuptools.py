@@ -1,4 +1,4 @@
-""" Vendored copy of find_namespace_packages from setuptools[1].
+"""Vendored copy of find_namespace_packages from setuptools[1].
 
 Adding setuptools as a package dependency can be a bit messy, sometimes triggering an
 uninstall/reinstall on the _user_ side or other issues.
@@ -7,6 +7,7 @@ Type hints have been added to pass `mypy` strict mode.
 
 1: https://github.com/pypa/setuptools/tree/c65e3380b0a18c92a0fc2d2b770b17cfaaec054b
 """
+
 from __future__ import annotations
 
 import os
@@ -29,9 +30,9 @@ def convert_path(pathname: str) -> str:  # pragma: no cover
     if not pathname:
         return pathname
     if pathname[0] == "/":
-        raise ValueError("path '%s' cannot be absolute" % pathname)
+        raise ValueError(f"path '{pathname}' cannot be absolute")
     if pathname[-1] == "/":
-        raise ValueError("path '%s' cannot end with '/'" % pathname)
+        raise ValueError(f"path '{pathname}' cannot end with '/'")
 
     paths = pathname.split("/")
     while "." in paths:

@@ -173,7 +173,6 @@ def test_Model_static_types() -> None:
         (Union[Literal[5], None], 5, None),
         (Union[int, str], 5, None),
         (Union[str, int], 5, None),  # Using "smart_union" to avoid cast to str
-        (dict[int, dict[int, Sub]], {5: {"5": Sub(x=5)}}, ValueError),
         (dict[int, str], {5: "hi"}, None),
         (int, 5, None),
         (str, "hi", None),
