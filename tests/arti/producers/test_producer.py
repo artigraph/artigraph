@@ -94,7 +94,7 @@ def test_Producer_input_artifact_classes() -> None:
     ) -> Annotated[dict, A2]:  # type: ignore[type-arg]
         return {}
 
-    assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1, a=Artifact, b=Artifact)  # type: ignore[arg-type]
+    assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1, a=Artifact, b=Artifact)  # type: ignore[arg-type,unused-ignore] # errors with arg-type when uncached...
 
 
 def test_Producer_partitioned_input_validation() -> None:
@@ -211,7 +211,7 @@ def test_Producer_compute_input_fingerprint() -> None:
         frozendict(a1=StoragePartitions())
     ) == Fingerprint.from_string(p1._class_key_).combine(p1.version.fingerprint)
 
-    storage_partition = p1.a1.storage.generate_partition().copy(
+    storage_partition = p1.a1.storage.generate_partition().copy(  # type: ignore[operator] # likely some pydantic.mypy bug
         update={"content_fingerprint": Fingerprint.from_int(10)}
     )
     assert p1.compute_input_fingerprint(
