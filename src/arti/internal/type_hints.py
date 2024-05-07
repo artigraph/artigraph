@@ -2,9 +2,9 @@ from __future__ import annotations
 
 import inspect
 import sys
-import types
 from collections.abc import Callable
 from datetime import date, datetime
+from types import GenericAlias, UnionType
 from typing import (
     Annotated,
     Any,
@@ -17,6 +17,7 @@ from typing import (
     get_type_hints,
     overload,
 )
+from typing import is_typeddict as is_typeddict  # Expose along with the other `is_*` helpers below.
 
 _T = TypeVar("_T")
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
@@ -79,7 +80,7 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
 
 
 def discard_Annotated(type_: Any) -> Any:
-    return get_args(type_)[0] if is_Annotated(type_) else type_
+    return get_args(type_)[0] if is_annotated_hint(type_) else type_
 
 
 def get_class_type_vars(klass: type) -> tuple[type, ...]:
@@ -122,7 +123,7 @@ def get_item_from_annotated(
 ) -> _T | type[_T] | None:
     from arti.internal.utils import one_or_none
 
-    if not is_Annotated(annotation):
+    if not is_annotated_hint(annotation):
         return None
     _, *hints = get_args(annotation)
     checker = lenient_issubclass if is_subclass else isinstance
@@ -154,9 +155,7 @@ def get_annotation_from_value(value: Any) -> Any:
 
 def lenient_issubclass(klass: Any, class_or_tuple: type | tuple[type, ...]) -> bool:
     if not (
-        isinstance(klass, type | types.GenericAlias | TypeVar)
-        or is_Annotated(klass)
-        or klass is Any
+        isinstance(klass, type | GenericAlias | TypeVar) or is_annotated_hint(klass) or klass is Any
     ):
         return False
     if isinstance(class_or_tuple, tuple):
@@ -230,24 +229,24 @@ if sys.version_info < (3, 11):  # pragma: no cover
 else:  # pragma: no cover
     from typing import Self as Self
 
-from typing import is_typeddict as is_typeddict
+
+# TODO: Update the `is_*_hint` ones to use TypeForm[1] when available.
+#
+# 1: https://github.com/python/mypy/issues/9773
 
 
-# mypy doesn't know of types.UnionType yet, but `type: ignore` would be "unused"
-# (and error) on other python versions.
-def is_union(type_: Any) -> bool:
-    # `Union[int, str]` or `int | str`
-    return type_ is Union or type_ is types.UnionType
+def is_annotated(type_: Any) -> bool:
+    return type_ is Annotated
 
 
-def is_Annotated(type_: Any) -> bool:
-    return get_origin(type_) is Annotated
+def is_annotated_hint(type_: Any) -> bool:
+    return is_annotated(get_origin(type_))
 
 
 def is_generic_alias(type_: Any) -> bool:
     from typing import _GenericAlias  # type: ignore[attr-defined]
 
-    return isinstance(type_, _GenericAlias | types.GenericAlias)
+    return isinstance(type_, _GenericAlias | GenericAlias)
 
 
 def is_optional_hint(type_: Any) -> bool:
@@ -255,5 +254,10 @@ def is_optional_hint(type_: Any) -> bool:
     return is_union(get_origin(type_)) and NoneType in get_args(type_)
 
 
+def is_union(type_: Any) -> bool:
+    # `Union[int, str]` or `int | str`
+    return type_ is Union or type_ is UnionType
+
+
 def is_union_hint(type_: Any) -> bool:
-    return get_origin(type_) is Union
+    return is_union(get_origin(type_))
