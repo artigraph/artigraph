@@ -167,7 +167,7 @@ def test_Model_static_types() -> None:
     ("hint", "value", "error_type"),
     [
         (Annotated[int, "blah"], 5, None),
-        (Literal[5] | None, 5, None),
+        (Literal[5] | None, 5, None),  # type: ignore[operator] # python/mypy#16778
         (Literal[5], 5, None),
         (Sub, Sub(x=5), None),
         (Union[Literal[5], None], 5, None),  # noqa: UP007

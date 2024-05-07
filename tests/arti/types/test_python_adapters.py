@@ -87,10 +87,10 @@ def test_python_literal() -> None:
         type=Float64(), items=(1.0, 2.0)
     )
     # Check for Union+Literal combos
-    assert python_type_system.to_artigraph(Literal[1] | Literal[2, 3], hints={}) == a
+    assert python_type_system.to_artigraph(Literal[1] | Literal[2, 3], hints={}) == a  # type: ignore[operator] # python/mypy#16778
     # Optional uses a Union as well, so check that too.
     nullable_a = a.copy(update={"nullable": True})
-    assert python_type_system.to_artigraph(Literal[1, 2, 3] | None, hints={}) == nullable_a
+    assert python_type_system.to_artigraph(Literal[1, 2, 3] | None, hints={}) == nullable_a  # type: ignore[operator] # python/mypy#16778
 
 
 def test_python_literal_errors() -> None:
@@ -129,7 +129,7 @@ def test_python_null() -> None:
     [
         (Int64(nullable=True), int | None),
         (Float64(nullable=True), float | None),
-        (Enum(type=Int64(), items=(1, 2, 3), nullable=True), Literal[1, 2, 3] | None),
+        (Enum(type=Int64(), items=(1, 2, 3), nullable=True), Literal[1, 2, 3] | None),  # type: ignore[operator] # python/mypy#16778
     ],
 )
 def test_python_optional(arti: Type, py: Any) -> None:

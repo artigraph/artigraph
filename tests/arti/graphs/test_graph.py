@@ -38,10 +38,10 @@ def test_Graph(graph: Graph) -> None:
     assert isinstance(graph.artifacts.b, A2)
     assert isinstance(graph.artifacts.c.a, A3)
     assert isinstance(graph.artifacts.c.b, A4)
-    assert not graph.artifacts.a.storage.includes_input_fingerprint_template
-    assert graph.artifacts.b.storage.includes_input_fingerprint_template
-    assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
-    assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
+    assert not graph.artifacts.a.storage.includes_input_fingerprint_template  # type: ignore[operator] # likely some pydantic.mypy bug
+    assert graph.artifacts.b.storage.includes_input_fingerprint_template  # type: ignore[operator] # likely some pydantic.mypy bug
+    assert graph.artifacts.c.a.storage.includes_input_fingerprint_template  # type: ignore[operator] # likely some pydantic.mypy bug
+    assert graph.artifacts.c.b.storage.includes_input_fingerprint_template  # type: ignore[operator] # likely some pydantic.mypy bug
     # NOTE: We may need to occasionally update this, but ensure graph.backend is not included.
     assert graph.fingerprint == Fingerprint.from_int(-2341774225960394121)
 
@@ -156,7 +156,7 @@ def test_Graph_snapshot() -> None:
         p1.fingerprint,
         *(
             storage_partition.with_content_fingerprint().fingerprint
-            for storage_partition in g.artifacts.a.storage.discover_partitions()
+            for storage_partition in g.artifacts.a.storage.discover_partitions()  # type: ignore[operator] # Some pydantic.mypy bug
         ),
     ]
 
