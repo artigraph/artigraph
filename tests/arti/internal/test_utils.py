@@ -74,8 +74,8 @@ def test_frozendict_hash() -> None:
 
 
 def test_frozendict_union() -> None:
-    assert {"a": 5} | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
-    assert frozendict(a=5) | {"b": 10} == frozendict(a=5, b=10)  # type: ignore[comparison-overlap]
+    assert {"a": 5} | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore[operator]
+    assert frozendict(a=5) | {"b": 10} == frozendict(a=5, b=10)  # type: ignore[operator]
     assert frozendict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)
 
 
