@@ -4,7 +4,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
-from typing import TYPE_CHECKING, Any, ClassVar, Generic, Optional, TypeVar
+from typing import TYPE_CHECKING, Any, ClassVar, Generic, TypeVar
 
 from pydantic import Field, PrivateAttr
 
@@ -24,8 +24,8 @@ if TYPE_CHECKING:
 class StoragePartition(Model):
     storage: Storage[StoragePartition] = Field(repr=False)
     keys: PartitionKey = PartitionKey()
-    input_fingerprint: Optional[Fingerprint] = None
-    content_fingerprint: Optional[Fingerprint] = None
+    input_fingerprint: Fingerprint | None = None
+    content_fingerprint: Fingerprint | None = None
 
     @abc.abstractmethod
     def compute_content_fingerprint(self) -> Fingerprint:
@@ -74,7 +74,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
     partition_name_component_sep: ClassVar[str] = "_"
     segment_sep: ClassVar[str] = os.sep
 
-    _key_types: Optional[PartitionKeyTypes] = PrivateAttr(None)
+    _key_types: PartitionKeyTypes | None = PrivateAttr(None)
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -130,7 +130,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
             ),
         )
 
-    def _visit_input_fingerprint(self, input_fingerprint: Optional[Fingerprint]) -> Self:
+    def _visit_input_fingerprint(self, input_fingerprint: Fingerprint | None) -> Self:
         return self.resolve(
             input_fingerprint="" if input_fingerprint is None else str(input_fingerprint)
         )
@@ -175,7 +175,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
     def generate_partition(
         self,
         keys: PartitionKey = PartitionKey(),
-        input_fingerprint: Optional[Fingerprint] = None,
+        input_fingerprint: Fingerprint | None = None,
         with_content_fingerprint: bool = True,
     ) -> StoragePartitionVar_co:
         self._check_keys(self.key_types, keys)

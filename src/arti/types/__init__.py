@@ -5,7 +5,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from abc import abstractmethod
 from collections.abc import Iterable, Mapping
 from operator import attrgetter
-from typing import Any, ClassVar, Literal, Optional
+from typing import Any, ClassVar, Literal
 
 from pydantic import PrivateAttr, validator
 from pydantic import __version__ as pydantic_version
@@ -24,7 +24,7 @@ class Type(Model):
     # NOTE: Exclude the description to minimize fingerprint changes (and thus rebuilds).
     _fingerprint_excludes_ = frozenset(["description"])
 
-    description: Optional[str]
+    description: str | None
     nullable: bool = False
 
     @property
@@ -91,7 +91,7 @@ class _Int(_Numeric):
 
 
 class Binary(Type):
-    byte_size: Optional[int]
+    byte_size: int | None
 
 
 class Boolean(Type):
@@ -151,8 +151,8 @@ class Float64(_Float):
 
 
 class Geography(Type):
-    format: Optional[str]  # "WKB", "WKT", etc
-    srid: Optional[str]
+    format: str | None  # "WKB", "WKT", etc
+    srid: str | None
 
 
 class Int8(_Int):
@@ -344,7 +344,7 @@ class _ScalarClassTypeAdapter(TypeAdapter):
         system: Any,
         priority: int = 0,
         type_system: TypeSystem,
-        name: Optional[str] = None,
+        name: str | None = None,
     ) -> type[TypeAdapter]:
         """Generate a _ScalarClassTypeAdapter subclass for the scalar system type."""
         name = name or f"{type_system.key}{artigraph.__name__}"
@@ -374,7 +374,7 @@ class TypeSystem(Model):
         return sorted(self._adapter_by_key.values(), key=attrgetter("priority"), reverse=True)
 
     def to_artigraph(
-        self, type_: Any, *, hints: dict[str, Any], root_type_system: Optional[TypeSystem] = None
+        self, type_: Any, *, hints: dict[str, Any], root_type_system: TypeSystem | None = None
     ) -> Type:
         root_type_system = root_type_system or self
         for adapter in self._priority_sorted_adapters:
@@ -390,7 +390,7 @@ class TypeSystem(Model):
         raise NotImplementedError(f"No {root_type_system} adapter for system type: {type_}.")
 
     def to_system(
-        self, type_: Type, *, hints: dict[str, Any], root_type_system: Optional[TypeSystem] = None
+        self, type_: Type, *, hints: dict[str, Any], root_type_system: TypeSystem | None = None
     ) -> Any:
         root_type_system = root_type_system or self
         for adapter in self._priority_sorted_adapters:

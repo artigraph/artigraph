@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import inspect
 from collections.abc import Callable
-from typing import Any, Optional, TypeVar, cast, overload
+from typing import Any, TypeVar, cast, overload
 
 import multimethod as _multimethod  # Minimize name confusion
 
@@ -26,8 +26,8 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
     # can just set attrs in a helper func below.
     def __init__(self, func: Callable[..., RETURN]) -> None:
         super().__init__(func)
-        self.canonical_name: Optional[str] = None
-        self.discovery_func: Optional[Callable[[], None]] = None
+        self.canonical_name: str | None = None
+        self.discovery_func: Callable[[], None] | None = None
         assert self.signature is not None
         self.clean_signature = tidy_signature(func, self.signature)
 
@@ -36,7 +36,7 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
             self.discovery_func()
         return super().__missing__(types)
 
-    def lookup(self, *args: Optional[type[Any]]) -> Callable[..., Any]:
+    def lookup(self, *args: type[Any] | None) -> Callable[..., Any]:
         # multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same
         # before looking up. Non-Generics pass through as is.
         args = tuple(_multimethod.subtype(arg) for arg in args)  # type: ignore[no-untyped-call]
@@ -88,7 +88,7 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
 
 
 def multipledispatch(
-    canonical_name: str, *, discovery_func: Optional[Callable[[], None]] = None
+    canonical_name: str, *, discovery_func: Callable[[], None] | None = None
 ) -> Callable[[Callable[..., RETURN]], _multipledispatch[RETURN]]:
     def wrap(func: Callable[..., RETURN]) -> _multipledispatch[RETURN]:
         # The base handler is expected to `raise NotImplementedError`

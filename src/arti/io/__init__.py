@@ -4,7 +4,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from collections.abc import Sequence
 from types import ModuleType
-from typing import Any, Optional
+from typing import Any
 
 from arti.formats import Format
 from arti.internal.dispatch import multipledispatch
@@ -13,7 +13,7 @@ from arti.storage import StoragePartition, StoragePartitionVar
 from arti.types import Type, is_partitioned
 from arti.views import View
 
-_submodules: Optional[dict[str, ModuleType]] = None
+_submodules: dict[str, ModuleType] | None = None
 
 
 def _discover() -> None:
@@ -54,7 +54,7 @@ def read(
 @multipledispatch("io.write", discovery_func=_discover)  # type: ignore[arg-type]
 def _write(
     data: Any, type_: Type, format: Format, storage_partition: StoragePartitionVar, view: View
-) -> Optional[StoragePartitionVar]:
+) -> StoragePartitionVar | None:
     raise NotImplementedError(
         f"Writing {type(view)} view into {type(format)} format in {type(storage_partition)} storage is not implemented."
     )

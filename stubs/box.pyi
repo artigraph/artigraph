@@ -1,11 +1,11 @@
 # Pending https://github.com/python/typeshed/pull/5140
 
 from collections.abc import Iterator, MutableMapping
-from typing import Any, Union
+from typing import Any
 
 class BoxError(Exception): ...
 
-class Box(MutableMapping[str, Union[Any, MutableMapping[str, Any]]]):
+class Box(MutableMapping[str, Any | MutableMapping[str, Any]]):
     def __delitem__(self, a: str) -> None: ...
     def __getattr__(self, a: str) -> Any: ...
     def __getitem__(self, a: str) -> Any: ...

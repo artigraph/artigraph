@@ -90,7 +90,8 @@ def test_get_item_from_annotated(
         (MyTupleVar, TupleVar),
         (MyTypedDict, dict),
         (NoneType, (int, NoneType)),
-        (NoneType, Optional[int]),
+        (NoneType, Optional[int]),  # noqa: UP007
+        (NoneType, int | None),
         (bool, Any),
         (dict[str, int], Any),
         (dict[str, int], Mapping),
@@ -99,12 +100,15 @@ def test_get_item_from_annotated(
         (dict[str, int], dict[str, int]),
         (int, (int, str)),
         (int, Annotated[int, 5]),
-        (int, Optional[int]),
-        (int, Union[int, str]),
+        (int, Optional[int]),  # noqa: UP007
+        (int, Union[int, str]),  # noqa: UP007
+        (int, int | None),
+        (int, int | str),
         (list[int], Annotated[list, 5]),
         (list[int], Annotated[list[int], 5]),
         (str, Any),
-        (str, Union[int, str]),
+        (str, Union[int, str]),  # noqa: UP007
+        (str, int | str),
         (tuple, TupleVar),
         (tuple, UnboundVar),
         (tuple, tuple),
@@ -118,9 +122,7 @@ def test_get_item_from_annotated(
         (tuple[tuple[int]], tuple[tuple[int]]),
     ],
 )
-def test_lenient_issubclass_true(
-    klass: type, class_or_tuple: Union[type, tuple[type, ...]]
-) -> None:
+def test_lenient_issubclass_true(klass: type, class_or_tuple: type | tuple[type, ...]) -> None:
     assert lenient_issubclass(klass, class_or_tuple)
 
 
@@ -137,8 +139,9 @@ def test_lenient_issubclass_true(
         (dict[str, str], Mapping[str, int]),
         (list, tuple),
         (str, (int, float)),
-        (str, Optional[int]),
-        (str, Union[int, float]),
+        (str, Union[int, float]),  # noqa: UP007
+        (str, int | None),
+        (str, int | float),
         (tuple, MyTupleVar),
         (tuple, Sequence[int]),
         (tuple, tuple[MyTuple[int]]),  # type: ignore[type-arg]
@@ -148,12 +151,10 @@ def test_lenient_issubclass_true(
         (tuple[tuple[str]], tuple[tuple[int]]),
         # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for
         # these.
-        (Optional[int], int),
+        (int | None, int),
     ],
 )
-def test_lenient_issubclass_false(
-    klass: type, class_or_tuple: Union[type, tuple[type, ...]]
-) -> None:
+def test_lenient_issubclass_false(klass: type, class_or_tuple: type | tuple[type, ...]) -> None:
     assert not lenient_issubclass(klass, class_or_tuple)
 
 
@@ -167,11 +168,12 @@ def test_lenient_issubclass_error_cases() -> None:
 
 
 def test_is_optional_hint() -> None:
-    assert is_optional_hint(Optional[int])
-    assert is_optional_hint(Union[int, None])
-    assert is_optional_hint(Union[int, str, NoneType])
-    assert is_optional_hint(Union[int, NoneType])
-    assert not is_optional_hint(Union[int, str])
+    assert is_optional_hint(Optional[int])  # noqa: UP007
+    assert is_optional_hint(Union[int, None])  # noqa: UP007
+    assert is_optional_hint(int | None)
+    assert is_optional_hint(int | str | None)
+    assert not is_optional_hint(Union[int, str])  # noqa: UP007
+    assert not is_optional_hint(int | str)
     assert not is_optional_hint(int)
 
 
@@ -179,8 +181,8 @@ def test_is_optional_hint() -> None:
     ("hint", "should_match"),
     [
         (Literal[5], False),
-        (Optional[int], True),
-        (Union[int, str], True),
+        (Union[int, str], True),  # noqa: UP007
+        (int | None, True),
     ],
 )
 def test_is_union(hint: Any, should_match: bool) -> None:

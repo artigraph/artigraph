@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
-from typing import IO, Any, ClassVar, Optional, SupportsIndex, TypeVar, Union, cast
+from typing import IO, Any, ClassVar, SupportsIndex, TypeVar, cast
 
 from box import Box
 
@@ -64,9 +64,7 @@ def classproperty(meth: Callable[..., PropReturn]) -> PropReturn:
 #
 # 1: https://github.com/pydantic/pydantic/issues/1457#issuecomment-1566287896
 class frozendict(Mapping[_K, _V]):
-    def __init__(
-        self, arg: Union[Mapping[_K, _V], Iterable[tuple[_K, _V]]] = (), **kwargs: _V
-    ) -> None:
+    def __init__(self, arg: Mapping[_K, _V] | Iterable[tuple[_K, _V]] = (), **kwargs: _V) -> None:
         self._data = dict[_K, _V](arg, **kwargs)
         # Eagerly evaluate the hash to confirm elements are also frozen (via frozenset) at
         # creation time, not just when hashed.
@@ -93,7 +91,7 @@ class frozendict(Mapping[_K, _V]):
         return repr(self._data)
 
 
-def get_module_name(depth: int = 1) -> Optional[str]:
+def get_module_name(depth: int = 1) -> str | None:
     """Return the module name of a specific level in the stack.
 
     Depth describes how many levels to traverse, for example:
@@ -243,7 +241,7 @@ class _int(int):
 class int64(_int):
     _min, _max = -(2**63), (2**63) - 1
 
-    def __new__(cls, i: Union[int, int64, uint64]) -> int64:
+    def __new__(cls, i: int | int64 | uint64) -> int64:
         if i > cls._max:
             if isinstance(i, uint64):
                 i = int(i) - uint64._max - 1
@@ -257,7 +255,7 @@ class int64(_int):
 class uint64(_int):
     _min, _max = 0, (2**64) - 1
 
-    def __new__(cls, i: Union[int, int64, uint64]) -> uint64:
+    def __new__(cls, i: int | int64 | uint64) -> uint64:
         if i > cls._max:
             raise ValueError(f"{i} is too large for uint64.")
         if i < cls._min:
@@ -275,7 +273,7 @@ def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any], None, None]:
         yield f
 
 
-def one_or_none(values: Optional[list[_V]], *, item_name: str) -> Optional[_V]:
+def one_or_none(values: list[_V] | None, *, item_name: str) -> _V | None:
     if values is None or len(values) == 0:
         return None
     if len(values) > 1:
@@ -296,7 +294,7 @@ def register(
     registry: dict[_K, _V],
     key: _K,
     value: _V,
-    get_priority: Optional[Callable[[_V], int]] = None,
+    get_priority: Callable[[_V], int] | None = None,
 ) -> _V:
     if key in registry:
         existing = registry[key]
@@ -313,7 +311,7 @@ def register(
     return value
 
 
-def qname(val: Union[object, type]) -> str:
+def qname(val: object | type) -> str:
     if isinstance(val, type):
         return val.__qualname__
     return type(val).__qualname__
@@ -337,7 +335,7 @@ class NoCopyDict(dict[_K, _V], NoCopyMixin):
     pass
 
 
-class TypedBox(Box, MutableMapping[str, Union[_V, MutableMapping[str, _V]]]):
+class TypedBox(Box, MutableMapping[str, _V | MutableMapping[str, _V]]):
     """TypedBox holds a collection of typed values.
 
     Subclasses must set the __target_type__ to a base class for the contained values.

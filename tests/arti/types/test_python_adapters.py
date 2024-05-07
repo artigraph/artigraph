@@ -1,6 +1,6 @@
 import re
 from datetime import date, datetime
-from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_type_hints
+from typing import Any, Literal, TypedDict, get_args, get_type_hints
 
 import pytest
 
@@ -87,11 +87,10 @@ def test_python_literal() -> None:
         type=Float64(), items=(1.0, 2.0)
     )
     # Check for Union+Literal combos
-    assert python_type_system.to_artigraph(Union[Literal[1], Literal[2, 3]], hints={}) == a
-    # Optional uses a Union as well, so add a few extra checks
+    assert python_type_system.to_artigraph(Literal[1] | Literal[2, 3], hints={}) == a
+    # Optional uses a Union as well, so check that too.
     nullable_a = a.copy(update={"nullable": True})
-    assert python_type_system.to_artigraph(Optional[Literal[1, 2, 3]], hints={}) == nullable_a
-    assert python_type_system.to_artigraph(Union[Literal[1, 2, 3], None], hints={}) == nullable_a
+    assert python_type_system.to_artigraph(Literal[1, 2, 3] | None, hints={}) == nullable_a
 
 
 def test_python_literal_errors() -> None:
@@ -100,16 +99,16 @@ def test_python_literal_errors() -> None:
     with pytest.raises(NotImplementedError, match="Invalid Literal with no values"):
         PyLiteral.to_artigraph(Literal[()], hints={}, type_system=python_type_system)
     # Confirm other Unions aren't handled
-    for invalid_hint in (Union[int, str], Union[int, Literal[1]]):
+    for invalid_hint in (int | str, int | Literal[1]):
         with pytest.raises(NotImplementedError, match="No TypeSystem.* adapter for system type"):
             assert python_type_system.to_artigraph(invalid_hint, hints={})
     # This path shouldn't normally be accessible (ie: `match_system` should guard against it, as
     # above), but are there for extra safety.
     with pytest.raises(
         NotImplementedError,
-        match=re.escape("Only Union[Literal[...], ...] (enums) are currently supported"),
+        match=re.escape("Only unions of Literals (enums) are currently supported"),
     ):
-        PyLiteral.to_artigraph(Union[int, str], hints={}, type_system=python_type_system)
+        PyLiteral.to_artigraph(int | str, hints={}, type_system=python_type_system)
 
 
 def test_python_map() -> None:
@@ -128,9 +127,9 @@ def test_python_null() -> None:
 @pytest.mark.parametrize(
     ("arti", "py"),
     [
-        (Int64(nullable=True), Optional[int]),
-        (Float64(nullable=True), Optional[float]),
-        (Enum(type=Int64(), items=(1, 2, 3), nullable=True), Optional[Literal[1, 2, 3]]),
+        (Int64(nullable=True), int | None),
+        (Float64(nullable=True), float | None),
+        (Enum(type=Int64(), items=(1, 2, 3), nullable=True), Literal[1, 2, 3] | None),
     ],
 )
 def test_python_optional(arti: Type, py: Any) -> None:

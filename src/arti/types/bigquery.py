@@ -261,7 +261,7 @@ class TableTypeAdapter(TypeAdapter):
             if tail:
                 cluster = (*tail, *cluster)
             if isinstance(
-                type_.element.fields[head], (types.Date, types.DateTime, types.Timestamp)
+                type_.element.fields[head], types.Date | types.DateTime | types.Timestamp
             ):
                 # TODO: Support other granularities than DAY
                 table.time_partitioning = bigquery.TimePartitioning(

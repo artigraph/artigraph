@@ -7,7 +7,7 @@ from collections.abc import Callable, Sequence
 from functools import cached_property, wraps
 from graphlib import TopologicalSorter
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Literal, Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Any, Literal, TypeVar
 
 from pydantic import Field, PrivateAttr, validator
 
@@ -88,7 +88,7 @@ class ArtifactBox(TypedBox[Artifact]):
         return artifact.copy(update={"storage": storage})
 
 
-Node = Union[Artifact, Producer]
+Node = Artifact | Producer
 NodeDependencies = frozendict[Node, frozenset[Node]]
 
 
@@ -104,7 +104,7 @@ class Graph(Model):
     path_tags: frozendict[str, str] = frozendict()
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
-    _status: Optional[bool] = PrivateAttr(None)
+    _status: bool | None = PrivateAttr(None)
     _artifact_to_key: frozendict[Artifact, str] = PrivateAttr(frozendict())
 
     @validator("artifacts")
@@ -121,9 +121,9 @@ class Graph(Model):
 
     def __exit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
-        exc_traceback: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc_value: BaseException | None,
+        exc_traceback: TracebackType | None,
     ) -> None:
         arti.context.graph = None
         self._toggle(SEALED)
@@ -143,11 +143,11 @@ class Graph(Model):
         return self._artifact_to_key
 
     @requires_sealed
-    def build(self, executor: Optional[Executor] = None) -> GraphSnapshot:
+    def build(self, executor: Executor | None = None) -> GraphSnapshot:
         return self.snapshot().build(executor)
 
     @requires_sealed
-    def snapshot(self, *, connection: Optional[BackendConnection] = None) -> GraphSnapshot:
+    def snapshot(self, *, connection: BackendConnection | None = None) -> GraphSnapshot:
         """Identify a "unique" ID for this Graph at this point in time.
 
         The ID aims to encode the structure of the Graph plus a _snapshot_ of the raw Artifact data
@@ -205,11 +205,11 @@ class Graph(Model):
         self,
         artifact: Artifact,
         *,
-        annotation: Optional[Any] = None,
-        storage_partitions: Optional[Sequence[StoragePartition]] = None,
-        view: Optional[View] = None,
-        snapshot: Optional[GraphSnapshot] = None,
-        connection: Optional[BackendConnection] = None,
+        annotation: Any | None = None,
+        storage_partitions: Sequence[StoragePartition] | None = None,
+        view: View | None = None,
+        snapshot: GraphSnapshot | None = None,
+        connection: BackendConnection | None = None,
     ) -> Any:
         key = self.artifact_to_key[artifact]
         if annotation is None and view is None:
@@ -248,11 +248,11 @@ class Graph(Model):
         data: Any,
         *,
         artifact: Artifact,
-        input_fingerprint: Optional[Fingerprint] = None,
+        input_fingerprint: Fingerprint | None = None,
         keys: PartitionKey = PartitionKey(),
-        view: Optional[View] = None,
-        snapshot: Optional[GraphSnapshot] = None,
-        connection: Optional[BackendConnection] = None,
+        view: View | None = None,
+        snapshot: GraphSnapshot | None = None,
+        connection: BackendConnection | None = None,
     ) -> StoragePartition:
         key = self.artifact_to_key[artifact]
         if snapshot is not None and artifact.producer_output is None:
@@ -311,7 +311,7 @@ class GraphSnapshot(Model):
 
     @classmethod  # TODO: Should this use a (TTL) cache? Raw data changes (especially in tests) still need to be detected.
     def from_graph(
-        cls, graph: Graph, *, connection: Optional[BackendConnection] = None
+        cls, graph: Graph, *, connection: BackendConnection | None = None
     ) -> GraphSnapshot:
         """Snapshot the Graph and all existing raw data.
 
@@ -356,7 +356,7 @@ class GraphSnapshot(Model):
                 )
         return snapshot
 
-    def build(self, executor: Optional[Executor] = None) -> GraphSnapshot:
+    def build(self, executor: Executor | None = None) -> GraphSnapshot:
         if executor is None:
             from arti.executors.local import LocalExecutor
 
@@ -365,7 +365,7 @@ class GraphSnapshot(Model):
         return self
 
     def tag(
-        self, tag: str, *, overwrite: bool = False, connection: Optional[BackendConnection] = None
+        self, tag: str, *, overwrite: bool = False, connection: BackendConnection | None = None
     ) -> None:
         with (connection or self.backend).connect() as conn:
             conn.write_snapshot_tag(self, tag, overwrite)
@@ -376,7 +376,7 @@ class GraphSnapshot(Model):
         name: str,
         tag: str,
         *,
-        connectable: Union[Backend[BackendConnection], BackendConnection],
+        connectable: Backend[BackendConnection] | BackendConnection,
     ) -> GraphSnapshot:
         with connectable.connect() as conn:
             return conn.read_snapshot_tag(name, tag)
@@ -385,10 +385,10 @@ class GraphSnapshot(Model):
         self,
         artifact: Artifact,
         *,
-        annotation: Optional[Any] = None,
-        storage_partitions: Optional[Sequence[StoragePartition]] = None,
-        view: Optional[View] = None,
-        connection: Optional[BackendConnection] = None,
+        annotation: Any | None = None,
+        storage_partitions: Sequence[StoragePartition] | None = None,
+        view: View | None = None,
+        connection: BackendConnection | None = None,
     ) -> Any:
         return self.graph.read(
             artifact,
@@ -404,10 +404,10 @@ class GraphSnapshot(Model):
         data: Any,
         *,
         artifact: Artifact,
-        input_fingerprint: Optional[Fingerprint] = None,
+        input_fingerprint: Fingerprint | None = None,
         keys: PartitionKey = PartitionKey(),
-        view: Optional[View] = None,
-        connection: Optional[BackendConnection] = None,
+        view: View | None = None,
+        connection: BackendConnection | None = None,
     ) -> StoragePartition:
         return self.graph.write(
             data,
