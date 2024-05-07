@@ -9,9 +9,7 @@ from typing import (
     Annotated,
     Any,
     ClassVar,
-    Optional,
     TypeVar,
-    Union,
     cast,
     get_args,
     get_origin,
@@ -74,7 +72,7 @@ class Producer(Model):
     else:
 
         @staticmethod
-        def validate_outputs(*outputs: Any) -> Union[bool, tuple[bool, str]]:
+        def validate_outputs(*outputs: Any) -> bool | tuple[bool, str]:
             """Validate the `Producer.build` outputs, returning the status and a message.
 
             The validation status is applied to all outputs. If validation does not pass, the
@@ -182,7 +180,7 @@ class Producer(Model):
         """Validate the .build method"""
         if not hasattr(cls, "build"):
             raise ValueError("must be implemented")
-        if not isinstance(getattr_static(cls, "build"), (classmethod, staticmethod)):
+        if not isinstance(getattr_static(cls, "build"), classmethod | staticmethod):
             raise ValueError("must be a @classmethod or @staticmethod")
         build_sig = signature(cls.build, force_tuple_return=True, remove_owner=True)
         # Validate the parameters
@@ -282,7 +280,7 @@ class Producer(Model):
                 return_annotation=PartitionDependencies,
             )
             cls.map = cast(MapSig, staticmethod(map))
-        if not isinstance(getattr_static(cls, "map"), (classmethod, staticmethod)):
+        if not isinstance(getattr_static(cls, "map"), classmethod | staticmethod):
             raise ValueError("must be a @classmethod or @staticmethod")
         map_sig = signature(cls.map)
         map_inputs = MapInputs(cls._validate_parameters(map_sig, validator=cls._validate_map_param))
@@ -358,7 +356,7 @@ class Producer(Model):
     def inputs(self) -> dict[str, Artifact]:
         return {k: getattr(self, k) for k in self._input_artifact_classes_}
 
-    def out(self, *outputs: Artifact) -> Union[Artifact, tuple[Artifact, ...]]:
+    def out(self, *outputs: Artifact) -> Artifact | tuple[Artifact, ...]:
         """Configure the output Artifacts this Producer will build.
 
         The arguments are matched to the `Producer.build` return signature in order.
@@ -392,11 +390,11 @@ class Producer(Model):
 
 def producer(
     *,
-    annotations: Optional[tuple[Annotation, ...]] = None,
-    map: Optional[MapSig] = None,
-    name: Optional[str] = None,
-    validate_outputs: Optional[ValidateSig] = None,
-    version: Optional[Version] = None,
+    annotations: tuple[Annotation, ...] | None = None,
+    map: MapSig | None = None,
+    name: str | None = None,
+    validate_outputs: ValidateSig | None = None,
+    version: Version | None = None,
 ) -> Callable[[BuildSig], type[Producer]]:
     def decorate(build: BuildSig) -> type[Producer]:
         nonlocal name

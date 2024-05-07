@@ -3,9 +3,9 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from abc import abstractmethod
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Callable, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, TypeVar
 
 from pydantic.fields import ModelField
 
@@ -124,7 +124,7 @@ class BackendConnection:
     def connect(self) -> Iterator[Self]:
         """Return self
 
-        This makes it easier to work with an Optional connection, eg:
+        This makes it easier to work with an optional connection, eg:
             with (connection or backend).connect() as conn:
                 ...
         """

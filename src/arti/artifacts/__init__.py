@@ -4,7 +4,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import json
 from itertools import chain
-from typing import TYPE_CHECKING, Any, Optional
+from typing import TYPE_CHECKING, Any
 
 from pydantic import Field, validator
 from pydantic.fields import ModelField
@@ -44,8 +44,8 @@ class Artifact(Model):
     # Hide `producer_output` in repr to prevent showing the entire upstream graph.
     #
     # ProducerOutput is a ForwardRef/cyclic import. Quote the entire hint to force full resolution
-    # during `.update_forward_refs`, rather than `Optional[ForwardRef("ProducerOutput")]`.
-    producer_output: Optional[ProducerOutput] = Field(None, repr=False)
+    # during `.update_forward_refs`, rather than `ForwardRef("ProducerOutput") | None`.
+    producer_output: ProducerOutput | None = Field(None, repr=False)
 
     # NOTE: Narrow the fields that affect the fingerprint to minimize changes (which trigger
     # recompute). Importantly, avoid fingerprinting the `.producer_output` (ie: the *upstream*

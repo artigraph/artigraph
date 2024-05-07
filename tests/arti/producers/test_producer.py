@@ -1,6 +1,6 @@
 import re
 from collections.abc import Sequence
-from typing import Annotated, Any, ClassVar, Optional
+from typing import Annotated, Any, ClassVar
 
 import pytest
 
@@ -542,7 +542,7 @@ def test_Producer_bad_signature() -> None:
     ):
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
-            a1: Optional[A1]
+            a1: A1 | None
 
             @classmethod
             def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]

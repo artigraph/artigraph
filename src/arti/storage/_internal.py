@@ -4,7 +4,7 @@ import string
 from collections import defaultdict
 from collections.abc import Callable, Iterable, Mapping
 from functools import partial
-from typing import Any, Optional
+from typing import Any
 
 import parse
 
@@ -46,7 +46,7 @@ class WildcardPlaceholder(Placeholder):
         if key not in key_types:
             raise ValueError(f"No '{key}' partition key found, expected one of {tuple(key_types)}")
         self._key_type = key_types[key]
-        self._attribute: Optional[str] = None  # What field/field_component is being accessed
+        self._attribute: str | None = None  # What field/field_component is being accessed
 
     @classmethod
     def with_key_types(
@@ -126,13 +126,13 @@ def extract_placeholders(
     parser: parse.Parser,
     path: str,
     spec: str,
-) -> Optional[tuple[Optional[Fingerprint], PartitionKey]]:
+) -> tuple[Fingerprint | None, PartitionKey] | None:
     parsed_value = parser.parse(path)
     if parsed_value is None:
         if error_on_no_match:
             raise ValueError(f"Unable to parse '{path}' with '{spec}'.")
         return None
-    input_fingerprint: Optional[Fingerprint] = None
+    input_fingerprint: Fingerprint | None = None
     field_components = defaultdict[str, dict[str, str]](dict)
     for k, v in parsed_value.named.items():
         if k == "input_fingerprint":
@@ -162,7 +162,7 @@ def parse_spec(
     input_fingerprints: InputFingerprints = InputFingerprints(),
     key_types: Mapping[str, type[PartitionField]],
     spec: str,
-) -> Mapping[str, tuple[Optional[Fingerprint], PartitionKey]]:
+) -> Mapping[str, tuple[Fingerprint | None, PartitionKey]]:
     parser = parse.compile(spec, case_sensitive=True)
     path_placeholders = (
         (path, placeholders)

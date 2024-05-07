@@ -4,7 +4,6 @@ import hashlib
 import tempfile
 from glob import glob
 from pathlib import Path
-from typing import Optional, Union
 
 from arti.fingerprints import Fingerprint
 from arti.partitions import InputFingerprints
@@ -52,6 +51,6 @@ class LocalFile(Storage[LocalFilePartition]):
         )
 
     @classmethod
-    def rooted_at(cls, root: Union[str, Path], path: Optional[str] = None) -> LocalFile:
+    def rooted_at(cls, root: str | Path, path: str | None = None) -> LocalFile:
         path = path if path is not None else cls._DEFAULT_PATH_TEMPLATE
         return cls(path=str(Path(root) / path))

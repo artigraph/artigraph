@@ -1,5 +1,3 @@
-from typing import Union
-
 import pandas as pd
 import pytest
 
@@ -30,7 +28,7 @@ from arti.types.pandas import pandas_type_system
         pytest.param(List(element=String()), pd.Series([""]), id="series[string]"),
     ],
 )
-def test_pandas_type_system(arti_type: Type, pd_type: Union[pd.DataFrame, pd.Series]) -> None:
+def test_pandas_type_system(arti_type: Type, pd_type: pd.DataFrame | pd.Series) -> None:
     output_pd_type = pandas_type_system.to_system(arti_type, hints={})
     if isinstance(pd_type, pd.DataFrame):
         pd.testing.assert_frame_equal(output_pd_type, pd_type)

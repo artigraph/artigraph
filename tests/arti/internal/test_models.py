@@ -1,7 +1,7 @@
 import re
 from collections import defaultdict
 from contextlib import nullcontext
-from typing import Annotated, Any, ClassVar, Generic, Literal, Optional, TypeVar, Union
+from typing import Annotated, Any, ClassVar, Generic, Literal, TypeVar, Union
 
 import pytest
 from pydantic import Field, PrivateAttr, ValidationError
@@ -167,33 +167,37 @@ def test_Model_static_types() -> None:
     ("hint", "value", "error_type"),
     [
         (Annotated[int, "blah"], 5, None),
+        (Literal[5] | None, 5, None),
         (Literal[5], 5, None),
-        (Optional[int], None, None),
         (Sub, Sub(x=5), None),
-        (Union[Literal[5], None], 5, None),
-        (Union[int, str], 5, None),
-        (Union[str, int], 5, None),  # Using "smart_union" to avoid cast to str
+        (Union[Literal[5], None], 5, None),  # noqa: UP007
+        (Union[int, str], 5, None),  # noqa: UP007
+        (Union[str, int], 5, None),  # noqa: UP007 # Using "smart_union" to avoid cast to str
         (dict[int, str], {5: "hi"}, None),
+        (int | None, None, None),
         (int, 5, None),
+        (int | str, 5, None),
         (str, "hi", None),
+        (str | int, 5, None),  # Using "smart_union" to avoid cast to str
         (tuple, ("hi", "bye"), None),
-        (tuple[Optional[int], ...], (5, None), None),
+        (tuple[int | None, ...], (5, None), None),
         (tuple[int, ...], (1, 2), None),
         (tuple[int], (5,), None),
         (tuple[str, int], ("test", 5), None),
         # Detected bad input:
         (Literal[5], 6, ValueError),
-        (Optional[int], "hi", ValueError),
-        (Union[int, str], 5.0, ValueError),
+        (Union[int, str], 5.0, ValueError),  # noqa: UP007
         (dict[int, dict[int, Sub]], {5: {"5": Sub(x=5)}}, ValueError),
         (dict[int, str], {"5": "hi"}, ValueError),
         (dict[str, int], {"hi": "5"}, ValueError),
+        (int | None, "hi", ValueError),
         (int, None, ValueError),
+        (int | str, 5.0, ValueError),
         (tuple[str, int], ("test",), ValueError),
     ],
 )
 def test_Model_static_types_complex(
-    hint: Any, value: Any, error_type: Optional[type[Exception]]
+    hint: Any, value: Any, error_type: type[Exception] | None
 ) -> None:
     M = type(str(hint), (Model,), {"__annotations__": {"x": hint}})
     ctx = nullcontext() if error_type is None else pytest.raises(error_type)

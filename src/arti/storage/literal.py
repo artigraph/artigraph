@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from typing import Optional
-
 from arti.fingerprints import Fingerprint
 from arti.partitions import InputFingerprints, PartitionKey
 from arti.storage import Storage, StoragePartition
@@ -11,7 +9,7 @@ _not_written_err = FileNotFoundError("Literal has not been written yet")
 
 class StringLiteralPartition(StoragePartition):
     id: str
-    value: Optional[str]
+    value: str | None
 
     def compute_content_fingerprint(self) -> Fingerprint:
         if self.value is None:
@@ -23,7 +21,7 @@ class StringLiteral(Storage[StringLiteralPartition]):
     """StringLiteral stores a literal String value directly in the Backend."""
 
     id: str = "{graph_name}/{path_tags}/{names}/{partition_key_spec}/{input_fingerprint}/{name}{extension}"
-    value: Optional[str]
+    value: str | None
 
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()

@@ -9,9 +9,7 @@ from typing import (
     Any,
     ClassVar,
     Literal,
-    Optional,
     TypeVar,
-    Union,
     get_args,
     get_origin,
 )
@@ -43,7 +41,7 @@ def _check_types(value: Any, type_: type) -> Any:
             return _check_types(value, args[0])
         if origin is Literal:
             return _check_types(value, type(args[0]))
-        # NOTE: Optional[t] -> Union[t, NoneType]
+        # NOTE: Optional[t] == Union[t, NoneType] == t | None
         if is_union(origin):
             for subtype in args:
                 try:
@@ -51,7 +49,7 @@ def _check_types(value: Any, type_: type) -> Any:
                 except ValueError:
                     pass
             raise mismatch_error
-        if issubclass(origin, (dict, Mapping)):
+        if issubclass(origin, dict | Mapping):
             value = _check_types(value, origin)
             for k, v in value.items():
                 _check_types(k, args[0])
@@ -104,8 +102,8 @@ class Model(BaseModel):
     # 1: https://github.com/artigraph/artigraph/pull/60#discussion_r669089086
     _abstract_: ClassVar[bool] = True
     _class_key_: ClassVar[str] = class_name()
-    _fingerprint_excludes_: ClassVar[Optional[frozenset[str]]] = None
-    _fingerprint_includes_: ClassVar[Optional[frozenset[str]]] = None
+    _fingerprint_excludes_: ClassVar[frozenset[str] | None] = None
+    _fingerprint_includes_: ClassVar[frozenset[str] | None] = None
 
     @classmethod
     def __init_subclass__(cls, **kwargs: Any) -> None:
@@ -144,7 +142,7 @@ class Model(BaseModel):
         # `field.outer_type_`, but add back the `Optional` wrapping if necessary.
         type_ = field.outer_type_
         if field.allow_none:
-            type_ = Optional[type_]
+            type_ = type_ | None
         return _check_types(value, type_)
 
     # By default, pydantic just compares models by their dict representation, causing models of
@@ -166,7 +164,7 @@ class Model(BaseModel):
         return int(self.fingerprint)
 
     # Omitting unpassed args in repr by default
-    def __repr_args__(self) -> Sequence[tuple[Optional[str], Any]]:
+    def __repr_args__(self) -> Sequence[tuple[str | None, Any]]:
         return [(k, v) for k, v in super().__repr_args__() if k in self.__fields_set__]
 
     def __str__(self) -> str:
@@ -244,8 +242,8 @@ class Model(BaseModel):
         v: Any,
         to_dict: bool,
         by_alias: bool,
-        include: Optional[Union[AbstractSetIntStr, MappingIntStrAny]],
-        exclude: Optional[Union[AbstractSetIntStr, MappingIntStrAny]],
+        include: AbstractSetIntStr | MappingIntStrAny | None,
+        exclude: AbstractSetIntStr | MappingIntStrAny | None,
         exclude_unset: bool,
         exclude_defaults: bool,
         exclude_none: bool,
@@ -282,5 +280,5 @@ class Model(BaseModel):
         return type_
 
 
-def get_field_default(model: type[Model], field: str) -> Optional[Any]:
+def get_field_default(model: type[Model], field: str) -> Any | None:
     return model.__fields__[field].default

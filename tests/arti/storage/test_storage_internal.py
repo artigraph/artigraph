@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 import parse
 import pytest
@@ -17,7 +16,7 @@ from arti.storage._internal import (
     strip_partition_indexes,
 )
 
-PathPlaceholders = dict[str, tuple[Optional[Fingerprint], PartitionKey]]
+PathPlaceholders = dict[str, tuple[Fingerprint | None, PartitionKey]]
 
 
 @pytest.fixture()

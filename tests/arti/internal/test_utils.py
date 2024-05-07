@@ -6,7 +6,7 @@ from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Union, cast, get_args, get_origin
+from typing import Any, cast, get_args, get_origin
 
 import pytest
 
@@ -170,7 +170,7 @@ def test__int_repr() -> None:
 
 
 @pytest.mark.parametrize("type_", [int64, uint64])
-def test_sizedint(type_: type[Union[int64, uint64]]) -> None:
+def test_sizedint(type_: type[int64 | uint64]) -> None:
     low, high = type_(type_._min), type_(type_._max)
 
     assert low == type_._min

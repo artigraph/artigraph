@@ -6,11 +6,9 @@ import types
 from collections.abc import Callable
 from datetime import date, datetime
 from typing import (
-    TYPE_CHECKING,
     Annotated,
     Any,
     Literal,
-    Optional,
     TypeVar,
     Union,
     cast,
@@ -24,7 +22,7 @@ _T = TypeVar("_T")
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
 
-def assert_not_none(v: Optional[_T]) -> _T:
+def assert_not_none(v: _T | None) -> _T:
     assert v is not None
     return v
 
@@ -71,7 +69,7 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
             and all(
                 # check subclass OR things like "..."
                 lenient_issubclass(klass_arg, check_type_arg) or klass_arg is check_type_arg
-                for (klass_arg, check_type_arg) in zip(klass_args, check_type_args)
+                for (klass_arg, check_type_arg) in zip(klass_args, check_type_args, strict=False)
             )
         ):
             return False
@@ -104,24 +102,24 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
 @overload
 def get_item_from_annotated(
     annotation: Any, klass: type[_T], *, is_subclass: Literal[True]
-) -> Optional[type[_T]]: ...
+) -> type[_T] | None: ...
 
 
 @overload
 def get_item_from_annotated(
     annotation: Any, klass: type[_T], *, is_subclass: Literal[False]
-) -> Optional[_T]: ...
+) -> _T | None: ...
 
 
 @overload
 def get_item_from_annotated(
     annotation: Any, klass: type[_T], *, is_subclass: bool
-) -> Optional[Union[_T, type[_T]]]: ...
+) -> _T | type[_T] | None: ...
 
 
 def get_item_from_annotated(
     annotation: Any, klass: type[_T], *, is_subclass: bool
-) -> Optional[Union[_T, type[_T]]]:
+) -> _T | type[_T] | None:
     from arti.internal.utils import one_or_none
 
     if not is_Annotated(annotation):
@@ -134,9 +132,9 @@ def get_item_from_annotated(
 def get_annotation_from_value(value: Any) -> Any:
     if value is None:
         return None
-    if isinstance(value, (bool, bytes, date, datetime, float, int, str)):
+    if isinstance(value, bool | bytes | date | datetime | float | int | str):
         return type(value)
-    if isinstance(value, (tuple, list, set, frozenset)):
+    if isinstance(value, tuple | list | set | frozenset):
         first, *tail = tuple(value)
         first_type = type(first)
         if all(isinstance(v, first_type) for v in tail):
@@ -154,9 +152,9 @@ def get_annotation_from_value(value: Any) -> Any:
     raise NotImplementedError(f"Unable to determine type of {value}")
 
 
-def lenient_issubclass(klass: Any, class_or_tuple: Union[type, tuple[type, ...]]) -> bool:
+def lenient_issubclass(klass: Any, class_or_tuple: type | tuple[type, ...]) -> bool:
     if not (
-        isinstance(klass, (type, types.GenericAlias, TypeVar))
+        isinstance(klass, type | types.GenericAlias | TypeVar)
         or is_Annotated(klass)
         or klass is Any
     ):
@@ -225,36 +223,21 @@ def signature(
 # Helpers for typing across python versions #
 #############################################
 #
-# Focusing on  3.9+ (for now)
+# Focusing on  3.10+ (for now)
 
 if sys.version_info < (3, 11):  # pragma: no cover
     from typing_extensions import Self as Self
 else:  # pragma: no cover
     from typing import Self as Self
 
-if sys.version_info < (3, 10):  # pragma: no cover
+from typing import is_typeddict as is_typeddict
 
-    def is_union(type_: Any) -> bool:
-        return type_ is Union
 
-    def is_typeddict(type_: Any) -> bool:
-        # mypy doesn't know of typing._TypedDictMeta, but `type: ignore` would be "unused" (and error)
-        # on other python versions.
-        if TYPE_CHECKING:
-            from typing import _TypedDict as _TypedDictMeta
-        else:
-            from typing import _TypedDictMeta
-
-        return isinstance(type_, _TypedDictMeta)
-
-else:  # pragma: no cover
-    from typing import is_typeddict as is_typeddict
-
-    # mypy doesn't know of types.UnionType yet, but `type: ignore` would be "unused"
-    # (and error) on other python versions.
-    def is_union(type_: Any) -> bool:
-        # `Union[int, str]` or `int | str`
-        return type_ is Union or type_ is types.UnionType
+# mypy doesn't know of types.UnionType yet, but `type: ignore` would be "unused"
+# (and error) on other python versions.
+def is_union(type_: Any) -> bool:
+    # `Union[int, str]` or `int | str`
+    return type_ is Union or type_ is types.UnionType
 
 
 def is_Annotated(type_: Any) -> bool:
@@ -264,7 +247,7 @@ def is_Annotated(type_: Any) -> bool:
 def is_generic_alias(type_: Any) -> bool:
     from typing import _GenericAlias  # type: ignore[attr-defined]
 
-    return isinstance(type_, (_GenericAlias, types.GenericAlias))
+    return isinstance(type_, _GenericAlias | types.GenericAlias)
 
 
 def is_optional_hint(type_: Any) -> bool:

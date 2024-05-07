@@ -144,7 +144,7 @@ class PyLiteral(TypeAdapter):
             # We only support Enums currently, so all subtypes must be Literal
             if non_literals := [sub for sub in items if get_origin(sub) is not Literal]:
                 raise NotImplementedError(
-                    f"Only Union[Literal[...], ...] (enums) are currently supported, got invalid subtypes: {non_literals}"
+                    f"Only unions of Literals (enums) are currently supported, got invalid subtypes: {non_literals}"
                 )
             # Flatten Union[Literal[1], Literal[1,2,3]]
             origin, items = Literal, tuple(chain.from_iterable(get_args(sub) for sub in items))
@@ -213,7 +213,7 @@ class PyOptional(TypeAdapter):
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         # Optional is represented as a Union; strip out NoneType before dispatching
-        type_ = Union[tuple(subtype for subtype in get_args(type_) if subtype is not NoneType)]
+        type_ = Union[tuple(subtype for subtype in get_args(type_) if subtype is not NoneType)]  # noqa: UP007
         return type_system.to_artigraph(type_, hints=hints).copy(update={"nullable": True})
 
     @classmethod

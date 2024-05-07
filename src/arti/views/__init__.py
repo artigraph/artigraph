@@ -3,7 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import builtins
-from typing import Any, ClassVar, Literal, Optional, get_origin
+from typing import Any, ClassVar, Literal, get_origin
 
 from pydantic import validator
 
@@ -24,10 +24,10 @@ class View(Model):
     """
 
     _abstract_ = True
-    _by_python_type_: ClassVar[dict[Optional[type], type[View]]] = {}
+    _by_python_type_: ClassVar[dict[type | None, type[View]]] = {}
 
     priority: ClassVar[int] = 0  # Set priority of this view for its python_type. Higher is better.
-    python_type: ClassVar[Optional[type]]
+    python_type: ClassVar[type | None]
     type_system: ClassVar[TypeSystem]
 
     mode: MODE
@@ -56,10 +56,10 @@ class View(Model):
     @validator("type")
     @classmethod
     def _validate_type(cls, type_: Type, values: dict[str, Any]) -> Type:
-        artifact_class: Optional[type[Artifact]] = values.get("artifact_class")
+        artifact_class: type[Artifact] | None = values.get("artifact_class")
         if artifact_class is None:
             return type_  # pragma: no cover
-        artifact_type: Optional[Type] = get_field_default(artifact_class, "type")
+        artifact_type: Type | None = get_field_default(artifact_class, "type")
         if artifact_type is not None:
             cls._check_type_compatibility(view_type=type_, artifact_type=artifact_type)
         return type_
@@ -75,7 +75,7 @@ class View(Model):
         # by an Artifact's default type, falling back to inferring a Type from the type hint.
         type_ = get_item_from_annotated(annotation, Type, is_subclass=False)
         if type_ is None:
-            artifact_type: Optional[Type] = get_field_default(artifact_class, "type")
+            artifact_type: Type | None = get_field_default(artifact_class, "type")
             if artifact_type is None:
                 from arti.types.python import python_type_system
 

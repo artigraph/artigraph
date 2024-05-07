@@ -6,7 +6,6 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 __version__ = importlib.metadata.version("arti")
 
 import threading
-from typing import Optional
 
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
@@ -63,7 +62,7 @@ __all__ = [
 class _Context(threading.local):
     def __init__(self) -> None:
         super().__init__()
-        self.graph: Optional[Graph] = None
+        self.graph: Graph | None = None
 
 
 context = _Context()
