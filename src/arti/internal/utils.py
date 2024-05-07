@@ -107,7 +107,7 @@ def get_module_name(depth: int = 1) -> str | None:
         frame = frame.f_back
         if frame is None:
             return None
-    return frame.f_globals.get("__name__", "__main__")
+    return cast(str, frame.f_globals.get("__name__"))
 
 
 def import_submodules(

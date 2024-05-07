@@ -55,7 +55,7 @@ class _NoCopyContainer(NoCopyMixin):
         # `container.storage_partitions` tracks all partitions, across all snapshots. This
         # separation is important to allow for Literals to be used even after a snapshot change.
         self.snapshot_partitions: _GraphSnapshotPartitions = defaultdict(
-            partial(defaultdict, set[StoragePartition])  # type: ignore[arg-type]
+            partial(defaultdict, set[StoragePartition])
         )
         self.snapshot_tags: _SnapshotTags = defaultdict(dict)
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartition])

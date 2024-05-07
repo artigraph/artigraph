@@ -87,14 +87,14 @@ def test_producer_decorator() -> None:
 def test_Producer_input_artifact_classes() -> None:
     @producer_decorator()
     def dummy_producer(
-        a1: Annotated[dict, A1],
+        a1: Annotated[dict, A1],  # type: ignore[type-arg]
         *,
         a: int,
         b: Annotated[int, "non-Artifact"],
-    ) -> Annotated[dict, A2]:
+    ) -> Annotated[dict, A2]:  # type: ignore[type-arg]
         return {}
 
-    assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1, a=Artifact, b=Artifact)
+    assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1, a=Artifact, b=Artifact)  # type: ignore[arg-type]
 
 
 def test_Producer_partitioned_input_validation() -> None:

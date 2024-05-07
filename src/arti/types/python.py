@@ -193,7 +193,7 @@ class PyMap(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return cls.system[  # type: ignore[index]
+        return cls.system[  # type: ignore[misc]
             type_system.to_system(type_.key, hints=hints),
             type_system.to_system(type_.value, hints=hints),
         ]

@@ -176,7 +176,7 @@ class Graph(Model):
             for artifact in artifact_deps
             if (producer_output := artifact.producer_output) is not None
         }
-        return NodeDependencies(artifact_deps | producer_deps)
+        return NodeDependencies(artifact_deps | producer_deps)  # type: ignore[operator]
 
     @cached_property
     @requires_sealed

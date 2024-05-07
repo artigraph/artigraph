@@ -4,7 +4,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from collections.abc import Sequence
 from types import ModuleType
-from typing import Any
+from typing import Any, cast
 
 from arti.formats import Format
 from arti.internal.dispatch import multipledispatch
@@ -51,7 +51,7 @@ def read(
     return _read(type_, format, storage_partitions, view)
 
 
-@multipledispatch("io.write", discovery_func=_discover)  # type: ignore[arg-type]
+@multipledispatch("io.write", discovery_func=_discover)
 def _write(
     data: Any, type_: Type, format: Format, storage_partition: StoragePartitionVar, view: View
 ) -> StoragePartitionVar | None:
@@ -67,5 +67,5 @@ def write(
     data: Any, type_: Type, format: Format, storage_partition: StoragePartitionVar, view: View
 ) -> StoragePartitionVar:
     if (updated := _write(data, type_, format, storage_partition, view)) is not None:
-        return updated
+        return cast(StoragePartitionVar, updated)
     return storage_partition
