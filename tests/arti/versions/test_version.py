@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 import pytest
 
@@ -52,10 +52,10 @@ def test_String() -> None:
 
 
 def test_Timestamp() -> None:
-    d = datetime.now(tz=timezone.utc)
+    d = datetime.now(tz=UTC)
     assert Timestamp(dt=d).fingerprint == round(d.timestamp())
     # Check the default is ~now.
-    key, now = Timestamp().fingerprint, round(datetime.now(tz=timezone.utc).timestamp())
+    key, now = Timestamp().fingerprint, round(datetime.now(tz=UTC).timestamp())
     assert key is not None
     assert now - 1 <= key <= now + 1
     # Confirm naive datetime are not supported

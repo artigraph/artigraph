@@ -9,11 +9,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import GenericAlias, ModuleType
-from typing import IO, Any, ClassVar, SupportsIndex, TypeVar, cast
+from typing import IO, Any, ClassVar, Self, SupportsIndex, TypeVar, cast
 
 from box import Box
 
-from arti.internal.type_hints import Self
 from arti.internal.vendored.setuptools import find_namespace_packages
 
 _K = TypeVar("_K")

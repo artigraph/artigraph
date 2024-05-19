@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import inspect
-import sys
 from collections.abc import Callable, Iterable
 from datetime import date, datetime
 from types import GenericAlias, UnionType
@@ -228,17 +227,12 @@ def signature(
 # Helpers for typing across python versions #
 #############################################
 #
-# Focusing on  3.10+ (for now)
-
-if sys.version_info < (3, 11):  # pragma: no cover
-    from typing_extensions import Self as Self
-else:  # pragma: no cover
-    from typing import Self as Self
+# Focusing on  3.12+ (for now)
 
 
 # TODO: Update the `is_*_hint` ones to use TypeForm[1] when available.
 #
-# 1: https://github.com/python/mypy/issues/9773
+# 1: https://discuss.python.org/t/typeform-spelling-for-a-type-annotation-object-at-runtime/51435
 
 
 def is_annotated(type_: Any) -> bool:

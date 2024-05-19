@@ -9,6 +9,7 @@ from typing import (
     Any,
     ClassVar,
     Literal,
+    Self,
     TypeVar,
     get_args,
     get_origin,
@@ -19,7 +20,7 @@ from pydantic import BaseModel, Extra, root_validator, validator
 from pydantic.fields import ModelField, Undefined
 from pydantic.json import pydantic_encoder as pydantic_json_encoder
 
-from arti.internal.type_hints import Self, is_union, lenient_issubclass
+from arti.internal.type_hints import is_union, lenient_issubclass
 from arti.internal.utils import class_name, frozendict
 
 if TYPE_CHECKING:

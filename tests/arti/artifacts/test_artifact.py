@@ -2,13 +2,12 @@ import json
 import pickle
 import re
 from datetime import date, datetime
-from typing import Any
+from typing import Any, Self
 
 import pytest
 
 from arti import Annotation, Artifact, Format, Statistic, Storage, StoragePartition, Type
 from arti.formats.json import JSON
-from arti.internal.type_hints import Self
 from arti.storage.literal import StringLiteral
 from arti.types import (
     Binary,

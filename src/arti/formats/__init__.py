@@ -2,10 +2,9 @@ from __future__ import annotations
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
-from typing import ClassVar
+from typing import ClassVar, Self
 
 from arti.internal.models import Model
-from arti.internal.type_hints import Self
 from arti.types import Type, TypeSystem
 
 
