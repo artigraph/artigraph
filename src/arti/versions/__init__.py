@@ -5,7 +5,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 import inspect
 import subprocess
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any, cast
 
 from pydantic import Field, validator
@@ -62,7 +62,7 @@ _Source = cast(Callable[[], String], _SourceDescriptor)
 
 
 class Timestamp(Version):
-    dt: datetime = Field(default_factory=lambda: datetime.now(tz=timezone.utc))
+    dt: datetime = Field(default_factory=lambda: datetime.now(tz=UTC))
 
     @validator("dt", always=True)
     @classmethod

@@ -5,14 +5,13 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from abc import abstractmethod
 from collections.abc import Callable, Iterator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Generic, TypeVar
+from typing import TYPE_CHECKING, Any, Generic, Self, TypeVar
 
 from pydantic.fields import ModelField
 
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
-from arti.internal.type_hints import Self
 from arti.partitions import InputFingerprints
 from arti.storage import StoragePartitionSnapshots
 
