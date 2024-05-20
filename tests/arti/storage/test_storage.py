@@ -17,7 +17,6 @@ from arti import (
     Type,
 )
 from arti.formats.json import JSON
-from arti.internal.utils import frozendict
 from arti.partitions import Int8Field
 from arti.types import Collection, Date, Int8, Struct
 from tests.arti.dummies import DummyFormat
@@ -60,11 +59,6 @@ def test_Storage_init_subclass() -> None:
 
     assert not hasattr(Abstract, "storage_partition_type")
 
-    with pytest.raises(TypeError, match="NoSubscript must subclass a subscripted Generic"):
-
-        class NoSubscript(Storage):  # type: ignore[type-arg]
-            pass
-
     with pytest.raises(TypeError, match="Bad fields must match MockStoragePartition"):
 
         class Bad(Storage[MockStoragePartition]):
@@ -92,7 +86,7 @@ def test_Storage_visit_format() -> None:
 def test_Storage_visit_graph() -> None:
     s = MockStorage(path="/{graph_name}/{path_tags}/junk")
     assert s._visit_graph(Graph(name="test")) == MockStorage(path="/test/junk")
-    assert s._visit_graph(Graph(name="test", path_tags=frozendict(a="b"))) == MockStorage(
+    assert s._visit_graph(Graph(name="test", path_tags={"a": "b"})) == MockStorage(
         path="/test/a=b/junk"
     )
 

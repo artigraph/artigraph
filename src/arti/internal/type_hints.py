@@ -8,6 +8,7 @@ from typing import (
     Annotated,
     Any,
     Literal,
+    TypeGuard,
     TypeVar,
     Union,
     cast,
@@ -33,6 +34,7 @@ def assert_all_instances(values: Iterable[Any], *, type: type[_T]) -> Iterable[_
     return values
 
 
+# TODO: Determine if we can replace this logic with `beartype` or related packages.
 def _check_issubclass(klass: Any, check_type: type) -> bool:
     # If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the
     # metadata.
@@ -93,11 +95,18 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
 
     NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.
     """
+    # get_origin and get_args don't work with Pydantic Generics[1], but the metadata is exposed in
+    # `__pydantic_generic_metadata__`. This only works for the direct instance (eg: `MyModel[X]`),
+    # but not for further subclasses (eg: `class Sub(MyModel[X])`).
+    #
+    # 1: https://github.com/pydantic/pydantic/issues/3559
+    if args := getattr(klass, "__pydantic_generic_metadata__", {}).get("args"):
+        return args  # coverage: ignore
     bases = (klass,) if is_generic_alias(klass) else klass.__orig_bases__  # type: ignore[attr-defined]
     for base in bases:
         base_origin = get_origin(base)
         if base_origin is None:
-            continue
+            continue  # coverage: ignore
         args = get_args(base)
         if any(isinstance(arg, TypeVar) for arg in args):
             continue
@@ -106,33 +115,29 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
 
 
 @overload
-def get_item_from_annotated(
-    annotation: Any, klass: type[_T], *, is_subclass: Literal[True]
-) -> type[_T] | None: ...
+def get_item_from_annotated[T, D](
+    annotation: Any, klass: type[T], *, kind: Literal["class"], default: D = None
+) -> type[T] | D: ...
 
 
 @overload
-def get_item_from_annotated(
-    annotation: Any, klass: type[_T], *, is_subclass: Literal[False]
-) -> _T | None: ...
+def get_item_from_annotated[T, D](
+    annotation: Any, klass: type[T], *, kind: Literal["object"], default: D = None
+) -> T | D: ...
 
 
-@overload
-def get_item_from_annotated(
-    annotation: Any, klass: type[_T], *, is_subclass: bool
-) -> _T | type[_T] | None: ...
-
-
-def get_item_from_annotated(
-    annotation: Any, klass: type[_T], *, is_subclass: bool
-) -> _T | type[_T] | None:
+def get_item_from_annotated[T, D](
+    annotation: Any, klass: type[T], *, kind: Literal["class", "object"], default: D = None
+) -> T | type[T] | D:
     from arti.internal.utils import one_or_none
 
     if not is_annotated_hint(annotation):
-        return None
+        return default
     _, *hints = get_args(annotation)
-    checker = lenient_issubclass if is_subclass else isinstance
-    return one_or_none([hint for hint in hints if checker(hint, klass)], item_name=klass.__name__)
+    checker = {"class": lenient_issubclass, "object": isinstance}[kind]
+    return one_or_none(
+        [hint for hint in hints if checker(hint, klass)], default=default, item_name=klass.__name__
+    )
 
 
 def get_annotation_from_value(value: Any) -> Any:
@@ -158,7 +163,7 @@ def get_annotation_from_value(value: Any) -> Any:
     raise NotImplementedError(f"Unable to determine type of {value}")
 
 
-def lenient_issubclass(klass: Any, class_or_tuple: type | tuple[type, ...]) -> bool:
+def lenient_issubclass[T: type | tuple[type, ...]](klass: Any, class_or_tuple: T) -> TypeGuard[T]:
     if not (
         isinstance(klass, type | GenericAlias | TypeVar) or is_annotated_hint(klass) or klass is Any
     ):

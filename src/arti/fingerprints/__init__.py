@@ -3,13 +3,19 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import operator
+from dataclasses import dataclass
 from functools import reduce
+from typing import Any, final
 
+import annotated_types
 import farmhash
+from pydantic import GetCoreSchemaHandler
+from pydantic_core import CoreSchema, core_schema
 
 from arti.internal.utils import int64, uint64
 
 
+@final
 class Fingerprint(int64):
     """Fingerprint represents a unique identity as an int64 value.
 
@@ -51,3 +57,26 @@ class Fingerprint(int64):
     @property
     def is_identity(self) -> bool:
         return self == 0
+
+    @classmethod
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: GetCoreSchemaHandler
+    ) -> CoreSchema:
+        # TODO: Add LT/GT to limit to 64-bit values.
+        return core_schema.no_info_after_validator_function(cls, handler.generate_schema(int))
+
+
+@dataclass(frozen=True, **annotated_types.SLOTS)
+class SkipFingerprint(annotated_types.BaseMetadata):
+    """Determine whether the field contributes a model's fingerprint.
+
+    Set with `Annotated`, eg: `x: Annotated[int, SkipFingerprint()]`.
+    """
+
+    value: bool = True
+
+    def __bool__(self) -> bool:
+        return self.value
+
+    def __eq__(self, other: Any) -> bool:
+        return self.value == other

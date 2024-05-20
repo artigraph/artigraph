@@ -6,11 +6,11 @@ import inspect
 import subprocess
 from collections.abc import Callable
 from datetime import UTC, datetime
-from typing import Any, cast
+from typing import Annotated, Any, cast
 
-from pydantic import Field, validator
+from annotated_types import Timezone
+from pydantic import Field, field_validator
 
-from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 
 
@@ -39,12 +39,23 @@ class SemVer(Version):
     minor: int
     patch: int
 
-    @property
-    def fingerprint(self) -> Fingerprint:
-        s = str(self.major)
-        if self.major == 0:
-            s = f"{self.major}.{self.minor}.{self.patch}"
-        return Fingerprint.from_string(s)
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        fields = self._arti_fingerprint_fields_
+        desired = {"_arti_type_", "major", "minor", "patch"}
+        if unexpected := set(fields) - desired:
+            raise NotImplementedError(
+                f"Unexpected {self._arti_type_key_} fingerprint fields ({unexpected}) - did we forget to handle them?"
+            )
+        if self.major > 0:
+            desired = desired - {"minor", "patch"}
+        # Pydantic no-ops regular (private?) attribute assignment here for some reason, so escalate
+        # to object.
+        #
+        # We want to preserve the (sorted) order in _arti_fingerprint_fields_.
+        object.__setattr__(
+            self, "_arti_fingerprint_fields_", tuple(f for f in fields if f in desired)
+        )
 
 
 class String(Version):
@@ -62,18 +73,18 @@ _Source = cast(Callable[[], String], _SourceDescriptor)
 
 
 class Timestamp(Version):
-    dt: datetime = Field(default_factory=lambda: datetime.now(tz=UTC))
+    # The Timezone(...) annotation should tell pydantic a timezone is required, but it may not be
+    # supported yet so we also validate it manually in `_requires_timezone`.
+    dt: Annotated[datetime, Timezone(...)] = Field(
+        default_factory=lambda: datetime.now(tz=UTC), validate_default=True
+    )
 
-    @validator("dt", always=True)
+    @field_validator("dt")
     @classmethod
     def _requires_timezone(cls, dt: datetime) -> datetime:
-        if dt is not None and dt.tzinfo is None:
+        if dt.tzinfo is None:
             raise ValueError("Timestamp requires a timezone-aware datetime!")
         return dt
-
-    @property
-    def fingerprint(self) -> Fingerprint:
-        return Fingerprint.from_int(round(self.dt.timestamp()))
 
 
 # TODO: Consider a Timestamp like version with a "frequency" arg (day, hour, etc) that we floor/ceil

@@ -33,7 +33,7 @@ class GCSFilePartition(_GCSMixin, StoragePartition):
 
 
 class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
-    path = str(
+    path: str = str(
         Path("{graph_name}")
         / "{path_tags}"
         / "{names}"
@@ -47,7 +47,7 @@ class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
     ) -> StoragePartitionSnapshots:
         # NOTE: The bucket/path must *already* have any graph tags resolved, otherwise they will be try to be parsed as
         # partition keys.
-        spec = f"{self.bucket}/{self.path}"  # type: ignore[operator] # likely some pydantic.mypy bug
+        spec = f"{self.bucket}/{self.path}"
         wildcard = spec_to_wildcard(spec, self.key_types)
         # TODO: GCSFileSystem needs to be injected somehow
         paths = GCSFileSystem().glob(wildcard)

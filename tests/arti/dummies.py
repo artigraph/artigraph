@@ -90,33 +90,33 @@ def dummy_writer(
 
 
 class DummyStatistic(Statistic):
-    type = Int32()
-    format = DummyFormat()
-    storage = DummyStorage()
+    type: Type = Int32()
+    format: Format = DummyFormat()
+    storage: Storage = DummyStorage()
 
 
 class A1(Artifact):
-    type = Struct(fields={"a": Int32()})
-    format = DummyFormat()
-    storage = DummyStorage()
+    type: Type = Struct(fields={"a": Int32()})
+    format: Format = DummyFormat()
+    storage: Storage = DummyStorage()
 
 
 class A2(Artifact):
-    type = Struct(fields={"b": Int32()})
-    format = DummyFormat()
-    storage = DummyStorage()
+    type: Type = Struct(fields={"b": Int32()})
+    format: Format = DummyFormat()
+    storage: Storage = DummyStorage()
 
 
 class A3(Artifact):
-    type = Struct(fields={"c": Int32()})
-    format = DummyFormat()
-    storage = DummyStorage()
+    type: Type = Struct(fields={"c": Int32()})
+    format: Format = DummyFormat()
+    storage: Storage = DummyStorage()
 
 
 class A4(Artifact):
-    type = Struct(fields={"d": Int32()})
-    format = DummyFormat()
-    storage = DummyStorage()
+    type: Type = Struct(fields={"d": Int32()})
+    format: Format = DummyFormat()
+    storage: Storage = DummyStorage()
 
 
 class P1(Producer):

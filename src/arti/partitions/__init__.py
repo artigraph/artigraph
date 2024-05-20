@@ -8,8 +8,9 @@ from inspect import getattr_static
 from typing import Any, ClassVar
 
 from arti.fingerprints import Fingerprint
+from arti.internal.mappings import frozendict
 from arti.internal.models import Model
-from arti.internal.utils import _K, _V, classproperty, frozendict, register
+from arti.internal.utils import classproperty, register
 from arti.types import Collection, Date, Int8, Int16, Int32, Int64, Null, Type
 
 
@@ -25,8 +26,8 @@ class PartitionField(Model):
     matching_type: ClassVar[type[Type]]
 
     @classmethod
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)
+    def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
+        super().__pydantic_init_subclass__(**kwargs)
         if cls._abstract_:
             return
         for attr in ("default_components", "matching_type"):
@@ -38,7 +39,7 @@ class PartitionField(Model):
 
     @classproperty
     def components(cls) -> frozenset[str]:
-        return frozenset(cls.__fields__) | frozenset(
+        return frozenset(cls.model_fields) | frozenset(
             name for name in dir(cls) if isinstance(getattr_static(cls, name), field_component)
         )
 
@@ -55,8 +56,7 @@ class PartitionField(Model):
 PartitionKeyTypes = frozendict[str, type[PartitionField]]
 
 
-# See the note above frozendict for info on why we subclass this way and add an alias later.
-class _PartitionKey(frozendict[_K, _V]):
+class PartitionKey(frozendict[str, PartitionField]):
     """The set of named PartitionFields that uniquely identify a single partition."""
 
     @classmethod
@@ -69,9 +69,6 @@ class _PartitionKey(frozendict[_K, _V]):
                 for name, field in type_.partition_fields.items()
             }
         )
-
-
-PartitionKey = _PartitionKey[str, PartitionField]
 
 
 NotPartitioned = PartitionKey()

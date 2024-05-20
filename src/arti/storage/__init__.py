@@ -4,15 +4,15 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
-from typing import TYPE_CHECKING, Any, ClassVar, Generic, Self, TypeVar, cast
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Self, TypeVar, cast
 
 from pydantic import Field, PrivateAttr
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
+from arti.internal.mappings import frozendict
 from arti.internal.models import Model
-from arti.internal.type_hints import get_class_type_vars, lenient_issubclass
-from arti.internal.utils import frozendict
+from arti.internal.type_hints import lenient_issubclass
 from arti.partitions import InputFingerprints, PartitionKey, PartitionKeyTypes
 from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class StoragePartition(Model):
     input_fingerprint: Fingerprint | None = None
     partition_key: PartitionKey = PartitionKey()
-    storage: Storage[StoragePartition] = Field(repr=False)
+    storage: Annotated[Storage, Field(repr=False)]
 
     @abc.abstractmethod
     def compute_content_fingerprint(self) -> Fingerprint:
@@ -40,7 +40,6 @@ class StoragePartition(Model):
 
 StoragePartitions = tuple[StoragePartition, ...]
 StoragePartitionVar = TypeVar("StoragePartitionVar", bound=StoragePartition)
-StoragePartitionVar_co = TypeVar("StoragePartitionVar_co", bound=StoragePartition, covariant=True)
 
 
 class StoragePartitionSnapshot(Model):
@@ -56,14 +55,14 @@ class StoragePartitionSnapshot(Model):
         return self.storage_partition.partition_key
 
     @property
-    def storage(self) -> Storage[StoragePartition]:
+    def storage(self) -> Storage:
         return self.storage_partition.storage
 
 
 StoragePartitionSnapshots = tuple[StoragePartitionSnapshot, ...]
 
 
-class Storage(Model, Generic[StoragePartitionVar_co]):
+class Storage[SP: StoragePartition](Model):
     """Storage is a data reference identifying 1 or more partitions of data.
 
     Storage fields should have defaults set with placeholders for tags and partition
@@ -72,7 +71,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
     """
 
     _abstract_ = True
-    storage_partition_type: ClassVar[type[StoragePartitionVar_co]]  # type: ignore[misc]
+    storage_partition_type: ClassVar[type[SP]]  # type: ignore[misc]
 
     # These separators are used in the default resolve_* helpers to format metadata into
     # the storage fields.
@@ -82,23 +81,34 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
     partition_name_component_sep: ClassVar[str] = "_"
     segment_sep: ClassVar[str] = os.sep
 
-    _key_types: PartitionKeyTypes | None = PrivateAttr(None)
+    _key_types: PartitionKeyTypes | None = PrivateAttr(default=None)
 
     @classmethod
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)
-        if cls._abstract_:
+    def __class_getitem__(cls, item: type[SP]) -> type[Self]:  # type: ignore[override]
+        subclass = cast(type[Self], super().__class_getitem__(item))
+        subclass._abstract_ = True
+        subclass.storage_partition_type = item
+        return subclass
+
+    @classmethod
+    def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
+        super().__pydantic_init_subclass__(**kwargs)
+        # NOTE: When subscripting a generic, Pydantic generates a new model subclass, triggering
+        # this code. This runs *before* our `__class_getitem__` can mark it as `_abstract_` or set
+        # `storage_partition_type`. While we could detect the `storage_partition_type` here from the
+        # subscripted model, it's not actually the final class that has all of the fields defined -
+        # so we cannot validate it yet.
+        if cls._abstract_ or not hasattr(cls, "storage_partition_type"):
             return
-        cls.storage_partition_type = get_class_type_vars(cls)[0]
         expected_field_types = {
-            name: info.outer_type_
-            for name, info in cls.storage_partition_type.__fields__.items()
-            if name not in StoragePartition.__fields__
+            name: info.annotation
+            for name, info in cls.storage_partition_type.model_fields.items()
+            if name not in StoragePartition.model_fields
         }
         fields = {
-            name: info.outer_type_
-            for name, info in cls.__fields__.items()
-            if name not in Storage.__fields__
+            name: info.annotation
+            for name, info in cls.model_fields.items()
+            if name not in Storage.model_fields
         }
         if fields != expected_field_types:
             raise TypeError(
@@ -106,15 +116,14 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
             )
 
     @classmethod
-    def get_default(cls) -> Storage[StoragePartition]:
+    def get_default(cls) -> Storage:
         from arti.storage.literal import StringLiteral
 
-        # TODO: Support some sort of configurable defaults.
-        return cast(Storage[StoragePartition], StringLiteral())
+        return StringLiteral()  # TODO: Support some sort of configurable defaults.
 
     def _visit_type(self, type_: Type) -> Self:
         # TODO: Check support for the types and partitioning on the specified field(s).
-        copy = self.copy()
+        copy = self.model_copy()
         copy._key_types = PartitionKey.types_from(type_)
         assert copy.key_types is not None
         field_component_specs = {
@@ -162,7 +171,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         return frozendict(
             {
                 name: value
-                for name in self.__fields__
+                for name in self.model_fields
                 if lenient_issubclass(type(value := getattr(self, name)), str)
             }
         )
@@ -186,7 +195,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         *,
         input_fingerprint: Fingerprint | None = None,
         partition_key: PartitionKey = PartitionKey(),
-    ) -> StoragePartitionVar_co:
+    ) -> SP:
         self._check_key(self.key_types, partition_key)
         format_kwargs = dict[Any, Any](partition_key)
         if input_fingerprint is None:
@@ -202,8 +211,8 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
                 if lenient_issubclass(type(original := getattr(self, name)), str)
                 else original
             )
-            for name in self.__fields__
-            if name in self.storage_partition_type.__fields__
+            for name in self.model_fields
+            if name in self.storage_partition_type.model_fields
         }
         return self.storage_partition_type(
             input_fingerprint=input_fingerprint,
@@ -226,7 +235,7 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         return partial_format(spec, **placeholder_values)
 
     def resolve(self, **values: str) -> Self:
-        return self.copy(
+        return self.model_copy(
             update={
                 name: new
                 for name, original in self._format_fields.items()
@@ -237,4 +246,4 @@ class Storage(Model, Generic[StoragePartitionVar_co]):
         )
 
 
-StoragePartition.update_forward_refs()
+StoragePartition.model_rebuild()

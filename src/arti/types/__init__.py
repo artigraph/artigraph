@@ -5,26 +5,31 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from abc import abstractmethod
 from collections.abc import Iterable, Mapping
 from operator import attrgetter
-from typing import Any, ClassVar, Literal
+from typing import Annotated, Any, ClassVar, Literal
 
-from pydantic import PrivateAttr, validator
-from pydantic import __version__ as pydantic_version
+from pydantic import PrivateAttr, ValidationInfo, field_validator
 
+from arti.fingerprints import SkipFingerprint
+from arti.internal.mappings import FrozenMapping, frozendict
 from arti.internal.models import Model
 from arti.internal.type_hints import lenient_issubclass
-from arti.internal.utils import NoCopyDict, class_name, frozendict, register
+from arti.internal.utils import NoCopyDict, class_name, register
 
 DEFAULT_ANONYMOUS_NAME = "anon"
+
+
+def is_partitioned(type_: Type) -> bool:
+    """Helper function to determine whether the type is partitioned."""
+    return isinstance(type_, Collection) and bool(type_.partition_fields)
 
 
 class Type(Model):
     """Type represents a data type."""
 
     _abstract_ = True
-    # NOTE: Exclude the description to minimize fingerprint changes (and thus rebuilds).
-    _fingerprint_excludes_ = frozenset(["description"])
 
-    description: str | None
+    # NOTE: Skip fingerprinting the description to minimize changes (and thus rebuilds).
+    description: Annotated[str | None, SkipFingerprint()] = None
     nullable: bool = False
 
     @property
@@ -33,12 +38,7 @@ class Type(Model):
 
         The key doesn't have to be unique, just a best effort, meaningful string.
         """
-        return self._class_key_
-
-
-def is_partitioned(type_: Type) -> bool:
-    """Helper function to determine whether the type is partitioned."""
-    return isinstance(type_, Collection) and bool(type_.partition_fields)
+        return self._arti_type_key_
 
 
 class _ContainerMixin(Model):
@@ -47,17 +47,6 @@ class _ContainerMixin(Model):
 
 class _NamedMixin(Model):
     name: str = DEFAULT_ANONYMOUS_NAME
-
-    @classmethod
-    def _pydantic_type_system_post_field_conversion_hook_(
-        cls, type_: Type, *, name: str, required: bool
-    ) -> Type:
-        type_ = super()._pydantic_type_system_post_field_conversion_hook_(
-            type_, name=name, required=required
-        )
-        if "name" not in type_.__fields_set__:
-            type_ = type_.copy(update={"name": name})
-        return type_
 
     @property
     @abstractmethod
@@ -91,7 +80,7 @@ class _Int(_Numeric):
 
 
 class Binary(Type):
-    byte_size: int | None
+    byte_size: int | None = None
 
 
 class Boolean(Type):
@@ -110,23 +99,23 @@ class Enum(_NamedMixin, Type):
     type: Type
     items: frozenset[Any]
 
-    @validator("items", pre=True)
+    @field_validator("items", mode="before")
     @classmethod
     def _cast_values(cls, items: Any) -> Any:
         if isinstance(items, Iterable) and not isinstance(items, Mapping):
             return frozenset(items)
-        return items
+        return items  # coverage: ignore
 
-    @validator("items")
+    @field_validator("items")
     @classmethod
-    def _validate_values(cls, items: frozenset[Any], values: dict[str, Any]) -> frozenset[Any]:
+    def _validate_values(cls, items: frozenset[Any], info: ValidationInfo) -> frozenset[Any]:
         from arti.types.python import python_type_system
 
         if len(items) == 0:
             raise ValueError("cannot be empty.")
         # `type` will be missing if it doesn't pass validation.
-        if (arti_type := values.get("type")) is None:
-            return items
+        if (arti_type := info.data.get("type")) is None:
+            return items  # coverage: ignore
         py_type = python_type_system.to_system(arti_type, hints={})
         mismatched_items = [item for item in items if not lenient_issubclass(type(item), py_type)]
         if mismatched_items:
@@ -135,7 +124,7 @@ class Enum(_NamedMixin, Type):
 
     @property
     def _default_friendly_key(self) -> str:
-        return f"{self.type.friendly_key}{self._class_key_}"
+        return f"{self.type.friendly_key}{self._arti_type_key_}"
 
 
 class Float16(_Float):
@@ -151,8 +140,8 @@ class Float64(_Float):
 
 
 class Geography(Type):
-    format: str | None  # "WKB", "WKT", etc
-    srid: str | None
+    format: str | None = None  # "WKB", "WKT", etc
+    srid: str | None = None
 
 
 class Int8(_Int):
@@ -174,60 +163,58 @@ class Int64(_Int):
 class List(_ContainerMixin, Type):
     @property
     def friendly_key(self) -> str:
-        return f"{self.element.friendly_key}{self._class_key_}"
+        return f"{self.element.friendly_key}{self._arti_type_key_}"
 
 
 class Collection(_NamedMixin, List):
-    """A collection of elements with partition and cluster metadata.
+    """A collection of Structs with partition and cluster metadata.
 
     Collections should not be nested in other types.
     """
 
+    element: Struct  # Partitioning requires fields, so constrain the element further than List.
     partition_by: tuple[str, ...] = ()
     cluster_by: tuple[str, ...] = ()
 
-    @validator("partition_by", "cluster_by")
+    @field_validator("partition_by", "cluster_by")
     @classmethod
     def _validate_field_ref(
-        cls, references: tuple[str, ...], values: dict[str, Any]
+        cls, references: tuple[str, ...], info: ValidationInfo
     ) -> tuple[str, ...]:
-        if (element := values.get("element")) is None:
-            return references
-        if references and not isinstance(element, Struct):
-            raise ValueError("requires element to be a Struct")
+        if (element := info.data.get("element")) is None:
+            return references  # coverage: ignore
+        assert isinstance(element, Struct)
         known, requested = set(element.fields), set(references)
         if unknown := requested - known:
             raise ValueError(f"field '{unknown}' does not exist on {element}")
         return references
 
-    @validator("cluster_by")
+    @field_validator("cluster_by")
     @classmethod
     def _validate_cluster_by(
-        cls, cluster_by: tuple[str, ...], values: dict[str, Any]
+        cls, cluster_by: tuple[str, ...], info: ValidationInfo
     ) -> tuple[str, ...]:
-        if (partition_by := values.get("partition_by")) is None:
-            return cluster_by
+        if (partition_by := info.data.get("partition_by")) is None:
+            return cluster_by  # coverage: ignore
         if overlapping := set(cluster_by) & set(partition_by):
-            raise ValueError(f"clustering fields overlap with partition fields: {overlapping}")
+            raise ValueError(f"cluster_by overlaps with partition_by: {overlapping}")
         return cluster_by
 
     @property
     def _default_friendly_key(self) -> str:
-        return f"{self.element.friendly_key}{self._class_key_}"
+        return f"{self.element.friendly_key}{self._arti_type_key_}"
 
     @property
     def fields(self) -> frozendict[str, Type]:
-        """Shorthand accessor to access Struct element fields.
-
-        If the element is not a Struct, an AttributeError will be raised.
-        """
-        return self.element.fields  # type: ignore[attr-defined,no-any-return] # We want the standard AttributeError
+        return self.element.fields
 
     @property
     def partition_fields(self) -> frozendict[str, Type]:
-        if not isinstance(self.element, Struct):
-            return frozendict()
-        return frozendict({name: self.element.fields[name] for name in self.partition_by})
+        return frozendict({name: self.fields[name] for name in self.partition_by})
+
+    @property
+    def cluster_fields(self) -> frozendict[str, Type]:
+        return frozendict({name: self.fields[name] for name in self.cluster_by})
 
 
 class Map(Type):
@@ -246,7 +233,7 @@ class Null(Type):
 class Set(_ContainerMixin, Type):
     @property
     def friendly_key(self) -> str:
-        return f"{self.element.friendly_key}{self._class_key_}"
+        return f"{self.element.friendly_key}{self._arti_type_key_}"
 
 
 class String(Type):
@@ -254,11 +241,11 @@ class String(Type):
 
 
 class Struct(_NamedMixin, Type):
-    fields: frozendict[str, Type]
+    fields: FrozenMapping[str, Type]
 
     @property
     def _default_friendly_key(self) -> str:
-        return f"Custom{self._class_key_}"  # :shrug:
+        return f"Custom{self._arti_type_key_}"  # :shrug:
 
 
 class Time(_TimeMixin, Type):
@@ -270,7 +257,7 @@ class Timestamp(_TimeMixin, Type):
 
     @property
     def friendly_key(self) -> str:
-        return f"{self.precision.title()}{self._class_key_}"
+        return f"{self.precision.title()}{self._arti_type_key_}"
 
 
 class UInt8(_Int):
@@ -402,8 +389,3 @@ class TypeSystem(Model):
             except NotImplementedError:
                 pass
         raise NotImplementedError(f"No {root_type_system} adapter for Artigraph type: {type_}.")
-
-
-if tuple(int(i) for i in pydantic_version.split(".")) < (1, 10):  # pragma: no cover
-    # Fix ForwardRefs in outer_type_ before https://github.com/samuelcolvin/pydantic/pull/4249
-    TypeSystem.__fields__["extends"].outer_type_ = tuple[TypeSystem, ...]

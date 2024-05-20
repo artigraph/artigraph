@@ -2,12 +2,9 @@ import re
 from typing import Any
 
 import pytest
-from pydantic import ValidationError
 
 from arti import Type, TypeAdapter, TypeSystem
-from arti.internal.utils import frozendict
 from arti.types import (
-    DEFAULT_ANONYMOUS_NAME,
     Collection,
     Enum,
     Float16,
@@ -36,7 +33,7 @@ def _gen_numeric_adapter(
     artigraph_type: type[Type], system_type: Any, precision: int
 ) -> type[TypeAdapter]:
     class Adapter(TypeAdapter):
-        key = f"{artigraph_type._class_key_}Adapter"
+        key = f"{artigraph_type._arti_type_key_}Adapter"
         artigraph = artigraph_type
         system = system_type
 
@@ -80,7 +77,7 @@ def Int32Adapter() -> type[TypeAdapter]:
 
 
 def test_Type() -> None:
-    with pytest.raises(ValidationError, match="cannot be instantiated directly"):
+    with pytest.raises(TypeError, match="cannot be instantiated directly"):
         Type()
 
     class MyType(Type):
@@ -91,7 +88,7 @@ def test_Type() -> None:
 
 
 def test_Enum() -> None:
-    float32, items = Float32(), frozenset((1.0, 2.0, 3.0))
+    float32, items = Float32(), frozenset({1.0, 2.0, 3.0})
     enum = Enum(name="Rating", type=float32, items=items)
     assert enum.items == items
     assert enum.name == "Rating"
@@ -100,29 +97,22 @@ def test_Enum() -> None:
     assert Enum(type=float32, items=items).friendly_key == "Float32Enum"
 
     for other_items in (items, list(items), tuple(items)):
-        other = Enum(name="Rating", type=float32, items=other_items)
+        other = Enum(name="Rating", type=float32, items=other_items)  # pyright: ignore[reportArgumentType]
         assert enum == other
         assert isinstance(enum.items, frozenset)
 
 
 def test_Enum_errors() -> None:
-    float32, items = Float32(), frozenset((1.0, 2.0, 3.0))
+    float32 = Float32()
 
     with pytest.raises(ValueError, match="cannot be empty"):
-        Enum(type=float32, items=[])
+        Enum(type=float32, items=frozenset())
 
-    with pytest.raises(ValueError, match="expected an instance of"):
-        Enum(type=float32, items={v: v for v in items})
-
-    mismatch_prefix = "incompatible Float32() (<class 'float'>) item(s)"
-    with pytest.raises(ValueError, match=re.escape(f"{mismatch_prefix}: [1, 2, 3]")):
-        Enum(type=float32, items=(1, 2, 3))
-    with pytest.raises(ValueError, match=re.escape(f"{mismatch_prefix}: [3]")):
-        Enum(type=float32, items=(1.0, 2.0, 3))
-
-    with pytest.raises(ValueError, match="expected an instance of <class 'arti.types.Type'>"):
-        # NOTE: using a python type instead of an Artigraph type
-        Enum(type=float, items=items)
+    mismatch_prefix = r"incompatible Float32\(.*\) \(<class 'float'>\) item\(s\)"
+    with pytest.raises(ValueError, match=rf"{mismatch_prefix}: \[1, 2, 3\]"):
+        Enum(type=float32, items=frozenset({1, 2, 3}))
+    with pytest.raises(ValueError, match=rf"{mismatch_prefix}: \[3\]"):
+        Enum(type=float32, items=frozenset({1.0, 2.0, 3}))
 
 
 def test_List() -> None:
@@ -132,35 +122,20 @@ def test_List() -> None:
 
 
 def test_Collection() -> None:
-    collection = Collection(element=Int32())
-    assert isinstance(collection, List)  # Confirm subclass
-    assert collection.cluster_by == ()
-    assert collection.element == Int32()
-    assert collection.friendly_key == "Int32Collection"
-    assert collection.name == DEFAULT_ANONYMOUS_NAME
-    assert collection.partition_by == ()
-    assert collection.partition_fields == frozendict()
+    assert issubclass(Collection, List)
+
+    struct = Struct(fields={"a": Int32(), "b": Int32()}, name="MyStruct")
+
+    collection = Collection(element=struct)
+    assert collection.fields == struct.fields
+    assert collection.friendly_key == "MyStructCollection"
+    assert collection.partition_fields == {}
     assert is_partitioned(collection) is False
-    # Test fields accessor - it raises a standard AttributeError if the element doesn't contain a
-    # fields member.
-    with pytest.raises(AttributeError):
-        collection.fields
-    assert Collection(element=Struct(fields={"a": Int32()})).fields == frozendict(a=Int32())
 
-
-def test_Collection_partitioned() -> None:
-    fields = {"x": Int32(), "y": Int32()}
-
-    collection = Collection(element=Struct(fields=fields), partition_by=("x",), cluster_by=("y",))
-    assert collection.cluster_by == ("y",)
-    assert collection.partition_by == ("x",)
-    assert collection.partition_fields == frozendict({"x": fields["x"]})
+    collection = Collection(element=struct, partition_by=("a",), cluster_by=("b",))
+    assert collection.cluster_fields == {"b": Int32()}
+    assert collection.partition_fields == {"a": Int32()}
     assert is_partitioned(collection) is True
-
-    with pytest.raises(ValueError, match="requires element to be a Struct"):
-        Collection(element=Int32(), partition_by=("x",))
-    with pytest.raises(ValueError, match="requires element to be a Struct"):
-        Collection(element=Int32(), cluster_by=("x",))
 
 
 @pytest.mark.parametrize("param", ["partition_by", "cluster_by"])
@@ -168,30 +143,25 @@ def test_Collection_field_references(param: str) -> None:
     match = re.escape("field '{'z'}' does not exist on")
 
     with pytest.raises(ValueError, match=match):
-        Collection(element=Struct(fields={"x": Int32(), "y": Int32()}), **{param: ("z",)})
+        Collection(element=Struct(fields={"x": Int32(), "y": Int32()}), **{param: ("z",)})  # pyright: ignore[reportArgumentType]
 
     # Test with a bad `fields` and confirm the error *does not* contain the "unknown field" error.
-    with pytest.raises(ValueError, match="expected an instance of") as exc:
-        Collection(element="junk", **{param: ("z",)})
+    with pytest.raises(ValueError, match="Input should be a valid") as exc:
+        Collection(element="junk", **{param: ("z",)})  # pyright: ignore[reportArgumentType]
     with pytest.raises(AssertionError):
         exc.match(match)
 
 
 def test_Collection_partition_cluster_overlapping() -> None:
-    match = re.escape("clustering fields overlap with partition fields: {'x'}")
+    match = re.escape("cluster_by overlaps with partition_by: {'x'}")
+    struct = Struct(fields={"x": Int32(), "y": Int32()})
 
     with pytest.raises(ValueError, match=match):
-        Collection(
-            element=Struct(fields={"x": Int32(), "y": Int32()}),
-            partition_by=("x",),
-            cluster_by=("x",),
-        )
+        Collection(element=struct, partition_by=("x",), cluster_by=("x",))
 
     # Test with a bad `partition_by` and confirm the error *does not* contain the "unknown field" error.
-    with pytest.raises(ValueError, match="expected an instance of") as exc:
-        Collection(
-            element=Struct(fields={"x": Int32(), "y": Int32()}), partition_by="x", cluster_by=("y",)
-        )
+    with pytest.raises(ValueError, match="Input should be a valid") as exc:
+        Collection(element=struct, partition_by="x", cluster_by=("y",))  # pyright: ignore[reportArgumentType]
     with pytest.raises(AssertionError):
         exc.match(match)
 
@@ -208,8 +178,7 @@ def test_Set() -> None:
 def test_Struct() -> None:
     fields = {"x": Int32(), "y": Int32()}
     s = Struct(fields=fields)
-    assert isinstance(s.fields, frozendict)
-    assert s.fields == frozendict(fields)
+    assert s.fields == fields
 
     assert s.friendly_key == "CustomStruct"  # Struct name doesn't vary
     assert Struct(name="test", fields=fields).friendly_key == "test"

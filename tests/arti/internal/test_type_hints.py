@@ -65,20 +65,20 @@ def test_get_class_type_vars() -> None:
 
 
 @pytest.mark.parametrize(
-    ("annotation", "klass", "is_subclass", "expected"),
+    ("annotation", "klass", "kind", "expected"),
     [
-        (int, int, True, None),
-        (int, int, False, None),
-        (Annotated[int, 5], int, False, 5),
-        (Annotated[int, 5], int, True, None),
-        (Annotated[int, int], int, False, None),
-        (Annotated[int, int], int, True, int),
+        (int, int, "class", None),
+        (int, int, "object", None),
+        (Annotated[int, 5], int, "object", 5),
+        (Annotated[int, 5], int, "class", None),
+        (Annotated[int, int], int, "object", None),
+        (Annotated[int, int], int, "class", int),
     ],
 )
 def test_get_item_from_annotated(
-    annotation: Any, klass: type, is_subclass: bool, expected: Any
+    annotation: Any, klass: type, kind: Literal["class", "object"], expected: Any
 ) -> None:
-    assert get_item_from_annotated(annotation, klass, is_subclass=is_subclass) == expected
+    assert get_item_from_annotated(annotation, klass, kind=kind) == expected
 
 
 @pytest.mark.parametrize(
@@ -163,15 +163,6 @@ def test_lenient_issubclass_true(klass: type, class_or_tuple: type | tuple[type,
 )
 def test_lenient_issubclass_false(klass: type, class_or_tuple: type | tuple[type, ...]) -> None:
     assert not lenient_issubclass(klass, class_or_tuple)
-
-
-def test_lenient_issubclass_error_cases() -> None:
-    assert not lenient_issubclass(5, 5)  # type: ignore[arg-type]
-    with pytest.raises(TypeError, match="arg 2 must be a class"):
-        lenient_issubclass(tuple, 5)  # type: ignore[arg-type]
-    # Might support this in the future
-    with pytest.raises(TypeError, match="TypedDict does not support instance and class checks"):
-        lenient_issubclass(dict, MyTypedDict)
 
 
 def test_is_optional_hint() -> None:

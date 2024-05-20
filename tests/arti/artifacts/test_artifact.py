@@ -6,7 +6,7 @@ from typing import Any, Self
 
 import pytest
 
-from arti import Annotation, Artifact, Format, Statistic, Storage, StoragePartition, Type
+from arti import Annotation, Artifact, Format, Statistic, Storage, Type
 from arti.formats.json import JSON
 from arti.storage.literal import StringLiteral
 from arti.types import (
@@ -88,7 +88,7 @@ def test_Artifact_validation() -> None:
         def _visit_format(self, format: Format) -> Self:
             raise ValueError("Storage - Boo!")
 
-    with pytest.raises(ValueError, match="type\n  field required"):
+    with pytest.raises(ValueError, match="type\n  Field required"):
         Artifact()  # type: ignore[call-arg]
 
     with pytest.raises(ValueError, match="Format - Boo!"):
@@ -96,7 +96,7 @@ def test_Artifact_validation() -> None:
         class BadFormatArtifact(Artifact):
             type: Type = Int64()
             format: Format = BadFormat()
-            storage: Storage[StoragePartition] = DummyStorage()
+            storage: Storage = DummyStorage()
 
         BadFormatArtifact()
 
@@ -105,14 +105,14 @@ def test_Artifact_validation() -> None:
         class BadStorageArtifact(Artifact):
             type: Type = Int64()
             format: Format = DummyFormat()
-            storage: Storage[StoragePartition] = BadStorage()
+            storage: Storage = BadStorage()
 
         BadStorageArtifact()
 
     class GoodArtifact(Artifact):
         type: Type = Int64()
         format: Format = DummyFormat()
-        storage: Storage[StoragePartition] = DummyStorage()
+        storage: Storage = DummyStorage()
 
     GoodArtifact()
 

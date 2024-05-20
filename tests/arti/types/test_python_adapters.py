@@ -1,10 +1,11 @@
 import re
 from datetime import date, datetime
-from typing import Any, Literal, TypedDict, get_args, get_type_hints
+from typing import Any, Literal, TypedDict, get_args, get_origin, get_type_hints
 
 import pytest
 
 from arti import Type
+from arti.internal.type_hints import is_typeddict
 from arti.types import (
     Boolean,
     Collection,
@@ -72,8 +73,12 @@ def test_python_list() -> None:
 
     assert python_type_system.to_system(a, hints={}) == p
     assert python_type_system.to_artigraph(p, hints={}) == a
+
     # Confirm we can convert Collections to a list (NOTE: round trip still goes to List)
-    assert python_type_system.to_system(Collection(element=Int64()), hints={}) == p
+    collection = Collection(element=Struct(fields={"x": Int64()}))
+    complex = python_type_system.to_system(collection, hints={})
+    assert get_origin(complex) == list
+    assert is_typeddict(get_args(complex)[0])
 
 
 def test_python_literal() -> None:
@@ -89,7 +94,7 @@ def test_python_literal() -> None:
     # Check for Union+Literal combos
     assert python_type_system.to_artigraph(Literal[1] | Literal[2, 3], hints={}) == a  # type: ignore[operator] # python/mypy#16778
     # Optional uses a Union as well, so check that too.
-    nullable_a = a.copy(update={"nullable": True})
+    nullable_a = a.model_copy(update={"nullable": True})
     assert python_type_system.to_artigraph(Literal[1, 2, 3] | None, hints={}) == nullable_a  # type: ignore[operator] # python/mypy#16778
 
 
@@ -136,7 +141,7 @@ def test_python_optional(arti: Type, py: Any) -> None:
     for a, p in [
         (arti, py),
         # Confirm non-null too
-        (arti.copy(update={"nullable": False}), get_args(py)[0]),
+        (arti.model_copy(update={"nullable": False}), get_args(py)[0]),
     ]:
         assert python_type_system.to_system(a, hints={}) == p
         assert python_type_system.to_artigraph(p, hints={}) == a
@@ -173,13 +178,13 @@ def test_python_tuple() -> None:
     p = tuple[int, ...]
 
     assert python_type_system.to_system(a, hints={}) == list[int]  # list has higher priority
-    assert PyTuple.to_system(List(element=Int64()), hints={}, type_system=python_type_system) == p
+    assert PyTuple.to_system(a, hints={}, type_system=python_type_system) == p
     assert python_type_system.to_artigraph(p, hints={}) == a
 
-    assert (
-        PyTuple.to_system(Collection(element=Int64()), hints={}, type_system=python_type_system)
-        == p
-    )
+    collection = Collection(element=Struct(fields={"x": Int64()}))
+    complex = PyTuple.to_system(collection, hints={}, type_system=python_type_system)
+    assert get_origin(complex) == tuple
+    assert is_typeddict(get_args(complex)[0])
 
     # We don't (currently) support structure based tuples
     with pytest.raises(NotImplementedError):

@@ -1,28 +1,25 @@
+from __future__ import annotations
+
 import math
-import operator as op
+import operator
 import os
 from collections.abc import Callable
-from copy import deepcopy
 from functools import partial
 from pathlib import Path
 from types import ModuleType
-from typing import Any, cast, get_args, get_origin
+from typing import Any
 
 import pytest
 
 from arti.internal.utils import (
-    TypedBox,
-    _int,
     class_name,
     classproperty,
-    frozendict,
     get_module_name,
     import_submodules,
     int64,
     named_temporary_file,
     one_or_none,
     ordinal,
-    qname,
     register,
     uint64,
 )
@@ -44,48 +41,6 @@ def test_classproperty() -> None:
 
     assert Test.a == "Test"
     assert Test().a == "Test"
-
-
-def test_frozendict() -> None:
-    # Test input variations
-    assert frozendict([("a", 5)])
-    assert frozendict([("a", 5)], b=10)
-    assert frozendict(a=5)
-    assert frozendict(a=5, b=10)
-    assert frozendict(a=5, b=frozendict(b=10))
-    assert frozendict({"a": 5})
-    assert frozendict({"a": 5}, b=10)
-    with pytest.raises(TypeError, match="unhashable type: 'dict'"):
-        frozendict(a=5, b={"b": 10})
-
-
-def test_frozendict_immutability() -> None:
-    val = frozendict({"x": 5})
-    with pytest.raises(TypeError, match="does not support item assignment"):
-        val["x"] = 10  # type: ignore[index]
-    with pytest.raises(TypeError, match="does not support item assignment"):
-        val["y"] = 10  # type: ignore[index]
-    with pytest.raises(TypeError, match="does not support item deletion"):
-        del val["x"]  # type: ignore[attr-defined]
-
-
-def test_frozendict_hash() -> None:
-    assert hash(frozendict(a=5)) == hash(frozenset((("a", 5),)))
-
-
-def test_frozendict_union() -> None:
-    assert {"a": 5} | frozendict(b=10) == frozendict(a=5, b=10)  # type: ignore[operator]
-    assert frozendict(a=5) | {"b": 10} == frozendict(a=5, b=10)  # type: ignore[operator]
-    assert frozendict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)
-
-
-def test_frozendict_typing() -> None:
-    assert get_origin(frozendict[str, int]) is frozendict
-    assert get_args(frozendict[str, int]) == (str, int)
-    for klass in (frozendict, frozendict[str, int]):
-        # Confirm deepcopying the class works:
-        #     https://bugs.python.org/issue45167
-        assert deepcopy(klass) == klass
 
 
 def test_get_module_name() -> None:
@@ -119,32 +74,27 @@ def test_import_submodules() -> None:
     } == {name.replace(".", os.sep) for name in modules}
 
 
-class _I(_int):
-    pass
+@pytest.mark.parametrize("type_", [int64, uint64])
+def test_sizedint(type_: type[int64 | uint64]) -> None:
+    assert repr(type_(5)) == f"{type_.__name__}(5)"
+
+    low, high = type_(type_._min), type_(type_._max)
+
+    assert low == type_._min
+    assert high == type_._max
+
+    with pytest.raises(ValueError):  # noqa: PT011
+        assert low - 1
+
+    with pytest.raises(ValueError):  # noqa: PT011
+        assert high + 1
 
 
-@pytest.mark.parametrize(
-    "op",
-    [
-        op.add,
-        op.and_,
-        op.floordiv,
-        op.lshift,
-        op.mod,
-        op.mul,
-        op.or_,
-        op.rshift,
-        op.sub,
-        op.xor,
-    ],
-)
-def test__int_binary(op: Callable[..., Any]) -> None:
-    i, _i = 123, _I(123)
-    left = op(_i, i)
-    right = op(i, _i)
-    assert left == right
-    assert isinstance(left, _I)
-    assert isinstance(right, _I)
+def test_sizedint_cast() -> None:
+    assert int64(uint64(18446744073709551611)) == int64(-5)
+    assert int64(uint64(5)) == int64(5)
+    assert uint64(int64(-5)) == uint64(18446744073709551611)
+    assert uint64(int64(5)) == uint64(5)
 
 
 @pytest.mark.parametrize(
@@ -153,41 +103,45 @@ def test__int_binary(op: Callable[..., Any]) -> None:
         math.ceil,
         math.floor,
         math.trunc,
-        op.invert,
-        op.neg,
-        op.pos,
+        operator.invert,
+        operator.neg,
+        operator.pos,
         partial(round, ndigits=-1),
     ],
 )
-def test__int_unary(op: Callable[..., Any]) -> None:
-    output, expected = op(_I(123)), op(123)
-    assert output == expected
-    assert isinstance(output, _I)
-
-
-def test__int_repr() -> None:
-    assert repr(_I(5)) == "_I(5)"
-
-
 @pytest.mark.parametrize("type_", [int64, uint64])
-def test_sizedint(type_: type[int64 | uint64]) -> None:
-    low, high = type_(type_._min), type_(type_._max)
+def test_sizedint_unary(type_: type[int], op: Callable[..., Any]) -> None:
+    if type_ is uint64 and op in (operator.invert, operator.neg):
+        pytest.skip("invalid for unsigned ints")
 
-    assert low == type_._min
-    assert high == type_._max
-
-    with pytest.raises(ValueError):  # noqa: PT011
-        low - 1
-
-    with pytest.raises(ValueError):  # noqa: PT011
-        high + 1
+    output, expected = op(type_(123)), op(123)
+    assert output == expected
+    assert isinstance(output, type_)
 
 
-def test_sizedint_cast() -> None:
-    assert int64(uint64(18446744073709551611)) == int64(-5)
-    assert int64(uint64(5)) == int64(5)
-    assert uint64(int64(-5)) == uint64(18446744073709551611)
-    assert uint64(int64(5)) == uint64(5)
+@pytest.mark.parametrize(
+    "op",
+    [
+        operator.add,
+        operator.and_,
+        operator.floordiv,
+        operator.lshift,
+        operator.mod,
+        operator.mul,
+        operator.or_,
+        operator.rshift,
+        operator.sub,
+        operator.xor,
+    ],
+)
+@pytest.mark.parametrize("type_", [int64, uint64])
+def test_sizedint_binary(type_: type[int], op: Callable[..., Any]) -> None:
+    i, _i = 10, type_(10)
+    left = op(_i, i)
+    right = op(i, _i)
+    assert left == right
+    assert isinstance(left, type_)
+    assert isinstance(right, type_)
 
 
 @pytest.mark.parametrize("mode", ["w+", "wb"])
@@ -227,7 +181,7 @@ def test_register_priority() -> None:
         def __init__(self, priority: int):
             self.priority = priority
 
-    get_priority = op.attrgetter("priority")
+    get_priority = operator.attrgetter("priority")
 
     reg: dict[str, Val] = {}
     x, y = Val(1), Val(1)
@@ -239,78 +193,3 @@ def test_register_priority() -> None:
     with pytest.raises(ValueError, match="is already registered"):
         register(reg, "y", Val(y2.priority), get_priority)
     assert reg == {"x": x, "y": y2}
-
-
-def test_qname() -> None:
-    assert qname(TypedBox) == "TypedBox"
-    assert qname(TypedBox()) == "TypedBox"
-
-
-class BaseCoord:
-    def __init__(self, x: int, y: int):
-        self.x, self.y = (x, y)
-
-
-def test_TypedBox() -> None:
-    class Coord(BaseCoord):
-        pass
-
-    CoordBox = TypedBox[Coord]
-
-    box = CoordBox({"home": Coord(1, 1)})
-    assert (box.home.x, box.home.y) == (1, 1)
-    with pytest.raises(ValueError, match="home is already set!"):
-        box.home = Coord(0, 0)
-    box.work = Coord(2, 2)
-    with pytest.raises(TypeError, match="Expected an instance of Coord"):
-        box.school = (3, 3)
-
-
-def test_TypedBox_introspection() -> None:
-    # We subclass the original TypedBox to set .__target_type__
-    hint = TypedBox[str]
-    origin, args = get_origin(hint), get_args(hint)
-    assert origin is not None
-    assert issubclass(origin, TypedBox)
-    assert args == (str,)
-
-
-def test_TypedBox_bad_hint() -> None:
-    with pytest.raises(TypeError, match="TypedBox expects a single value type"):
-        TypedBox[str, str]  # type: ignore[misc]
-
-
-def test_TypedBox_cast() -> None:
-    class Coord(BaseCoord):
-        @classmethod
-        def cast(cls, value: tuple[int, int]) -> "Coord":
-            return cls(*value)
-
-    CoordBox = TypedBox[Coord]
-
-    home = Coord(1, 1)
-    box = CoordBox(
-        {
-            "home": home,  # Existing values will be used directly
-            "work": (2, 2),  # (2, 2) -> Coord.cast((2, 2))
-        }
-    )
-    box.school = cast(Coord, (3, 3))
-    assert box.home is home
-    assert (box.home.x, box.home.y) == (1, 1)
-    assert (box.work.x, box.work.y) == (2, 2)
-    assert (box.school.x, box.school.y) == (3, 3)
-
-
-def test_TypedBox_bad_cast() -> None:
-    class Coord(BaseCoord):
-        @classmethod
-        def cast(cls, value: tuple[int, int]) -> tuple[int, int]:  # Should return a Coord
-            return value
-
-    CoordBox = TypedBox[Coord]
-
-    box = CoordBox()
-    box.home = Coord(1, 1)
-    with pytest.raises(TypeError, match=r"Expected .*\.cast.* to return"):
-        box.work = (2, 2)

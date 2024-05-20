@@ -5,7 +5,7 @@ from typing import ClassVar
 import pytest
 
 from arti import PartitionField, PartitionKey, Type
-from arti.internal.utils import frozendict
+from arti.internal.mappings import frozendict
 from arti.partitions import (
     DateField,
     Int8Field,
@@ -130,8 +130,8 @@ def test_NullField() -> None:
 
 
 def test_PartitionKey_types_frome() -> None:
-    assert PartitionKey.types_from(Int8()) == frozendict()
-    assert PartitionKey.types_from(Struct(fields={"date": Date(), "i": Int8()})) == frozendict()
+    assert PartitionKey.types_from(Int8()) == {}
+    assert PartitionKey.types_from(Struct(fields={"date": Date(), "i": Int8()})) == {}
     assert PartitionKey.types_from(
         Collection(element=Struct(fields={"date": Date(), "i": Int8()}), partition_by=("date", "i"))
-    ) == frozendict({"date": DateField, "i": Int8Field})
+    ) == {"date": DateField, "i": Int8Field}

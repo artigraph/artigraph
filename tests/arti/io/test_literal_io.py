@@ -32,8 +32,8 @@ def test_stringliteral_io() -> None:
         tuple(
             p.snapshot()
             for p in [
-                partition.copy(update={"value": '[{"a": 1}]'}),
-                partition.copy(update={"value": '[{"a": 2}]'}),
+                partition.model_copy(update={"value": '[{"a": 1}]'}),
+                partition.model_copy(update={"value": '[{"a": 2}]'}),
             ]
         ),
         view=view,
