@@ -21,7 +21,7 @@ We're excited to hear from anyone interested in the project - feel free to intro
 
 ## Installation
 
-Artigraph can be installed from PyPI on python 3.9+ with `pip install arti`.
+Artigraph can be installed from PyPI with `pip install arti`.
 
 ## Example
 
