@@ -42,9 +42,12 @@ repos:
         files: ^pyproject.toml$
         language: system
         pass_filenames: false
-      - id: mypy
-        name: mypy
-        entry: mypy
-        language: system
-        pass_filenames: false # Running on a subset of files may mask interface breaks
-        types: [python]
+      # TODO: Replace mypy with pyright - pyright has much better support for the complex types
+      # (recursive types, type parameter syntax, etc).
+      #
+      # - id: mypy
+      #   name: mypy
+      #   entry: mypy
+      #   language: system
+      #   pass_filenames: false # Running on a subset of files may mask interface breaks
+      #   types: [python]
