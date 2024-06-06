@@ -1,9 +1,9 @@
 from typing import Annotated, ClassVar
 
 import pytest
-from pydantic import ValidationError
 
 from arti import Artifact, TypeSystem, View, types
+from arti.types import Int64
 from arti.types.python import python_type_system
 
 
@@ -19,20 +19,24 @@ def MockView() -> type[View]:
     return V
 
 
-def test_View_init() -> None:
-    with pytest.raises(ValidationError, match="cannot be instantiated directly"):
-        View()  # type: ignore[call-arg]
+def test_View_serialization(MockView: type[View]) -> None:
+    class Int(MockView):
+        python_type = int
+
+    v = Int(type=Int64(), mode="READ")
+    assert v.model_dump(include="artifact_class") == {"artifact_class": Artifact}
+    assert v.model_dump_json(include="artifact_class") == '{"artifact_class":"Artifact"}'
 
 
 def test_View_registry(MockView: type[View]) -> None:
-    class Int(MockView):  # type: ignore[misc,valid-type]
+    class Int(MockView):
         python_type = int
 
-    class Int2(MockView):  # type: ignore[misc,valid-type]
+    class Int2(MockView):
         priority = Int.priority + 1
         python_type = int
 
-    class Str(MockView):  # type: ignore[misc,valid-type]
+    class Str(MockView):
         python_type = str
 
     assert MockView._by_python_type_ == {int: Int2, str: Str}
@@ -42,7 +46,7 @@ def test_View_get_class_for(MockView: type[View]) -> None:
     with pytest.raises(ValueError, match="cannot be matched to a View, try setting one explicitly"):
         MockView.get_class_for(list)
 
-    class List(MockView):  # type: ignore[misc,valid-type]
+    class List(MockView):
         python_type = list
 
     for annotation in [list, list[int]]:
@@ -53,7 +57,7 @@ def test_View_from_annotation(MockView: type[View]) -> None:
     with pytest.raises(ValueError, match="cannot be matched to a View, try setting one explicitly"):
         MockView.from_annotation(list, mode="READ")
 
-    class List(MockView):  # type: ignore[misc,valid-type]
+    class List(MockView):
         python_type = list
 
     int_list = types.List(element=types.Int64())

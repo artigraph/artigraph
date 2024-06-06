@@ -20,8 +20,7 @@ from arti import (
     io,
 )
 from arti import producer as producer_decorator  # Avoid shadowing
-from arti.internal.models import Model, get_field_default
-from arti.internal.utils import frozendict
+from arti.internal.models import get_field_default
 from arti.producers import ValidateSig
 from arti.types import Collection, Int64, List, Struct
 from arti.versions import String as StringVersion
@@ -41,10 +40,6 @@ class DummyProducer(Producer):
         pass
 
 
-def check_model_matches(a: Model, b: Model, *, exclude: set[str]) -> None:
-    assert a.dict(exclude=exclude) == b.dict(exclude=exclude)
-
-
 def test_Producer() -> None:
     a1 = A1()
     producer = DummyProducer(a1=a1)
@@ -61,11 +56,11 @@ def test_producer_decorator() -> None:
         return {}
 
     assert dummy_producer.__name__ == "dummy_producer"
-    assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1)
+    assert dummy_producer._input_artifact_classes_ == {"a1": A1}
     assert len(dummy_producer._outputs_) == 1
     assert dummy_producer._outputs_[0].artifact_class == A2
-    assert dummy_producer(a1=A1()).annotations == Producer.__fields__["annotations"].default  # type: ignore[call-arg]
-    assert dummy_producer(a1=A1()).version == Producer.__fields__["version"].default  # type: ignore[call-arg]
+    assert dummy_producer(a1=A1()).annotations == Producer.model_fields["annotations"].default  # type: ignore[call-arg]
+    assert dummy_producer(a1=A1()).version == Producer.model_fields["version"].default  # type: ignore[call-arg]
 
     class MyAnnotation(Annotation):
         pass
@@ -95,7 +90,7 @@ def test_Producer_input_artifact_classes() -> None:
     ) -> Annotated[dict, A2]:  # type: ignore[type-arg]
         return {}
 
-    assert dummy_producer._input_artifact_classes_ == frozendict(a1=A1, a=Artifact, b=Artifact)  # type: ignore[arg-type,unused-ignore] # errors with arg-type when uncached...
+    assert dummy_producer._input_artifact_classes_ == {"a1": A1, "a": Artifact, "b": Artifact}  # type: ignore[arg-type,unused-ignore] # errors with arg-type when uncached...
 
 
 def test_Producer_partitioned_input_validation() -> None:
@@ -109,10 +104,10 @@ def test_Producer_partitioned_input_validation() -> None:
         def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
             pass
 
-    assert P._input_artifact_classes_ == frozendict(a=A)
-    assert P._build_inputs_ == frozendict(
-        a=python_views.List(artifact_class=A, type=get_field_default(A, "type"), mode="READ")
-    )
+    assert P._input_artifact_classes_ == {"a": A}
+    assert P._build_inputs_ == {
+        "a": python_views.List(artifact_class=A, type=get_field_default(A, "type"), mode="READ")
+    }
 
     with pytest.raises(ValueError, match="dict.* cannot be used to represent Collection"):
 
@@ -199,30 +194,28 @@ def test_Producer_string_annotation() -> None:
     assert isinstance(StrAnnotation(a1=A1()).out(), A2)
 
 
-def test_Producer_fingerprint() -> None:
+def test_Producer_fingerprint_fields() -> None:
     p1 = P1(a1=A1())
-    assert p1.fingerprint == Fingerprint.from_string(
-        f'P1:{{"a1": {p1.a1.fingerprint}, "version": {p1.version.fingerprint}}}'
-    )
+    assert set(p1._arti_fingerprint_fields_) == {"_arti_type_", "a1", "version"}
 
 
 def test_Producer_compute_input_fingerprint() -> None:
     p1 = P1(a1=A1(storage=DummyStorage(key="test")))
     assert p1.compute_input_fingerprint(
-        frozendict(a1=StoragePartitionSnapshots())
-    ) == Fingerprint.from_string(p1._class_key_).combine(p1.version.fingerprint)
+        {"a1": StoragePartitionSnapshots()}
+    ) == Fingerprint.from_string(p1._arti_type_key_).combine(p1.version.fingerprint)
 
-    storage_partition_snapshot = p1.a1.storage.generate_partition().snapshot()  # type: ignore[operator] # likely some pydantic.mypy bug
+    storage_partition_snapshot = p1.a1.storage.generate_partition().snapshot()
     assert p1.compute_input_fingerprint(
-        frozendict(a1=StoragePartitionSnapshots([storage_partition_snapshot]))
-    ) == Fingerprint.from_string(p1._class_key_).combine(
+        {"a1": StoragePartitionSnapshots([storage_partition_snapshot])}
+    ) == Fingerprint.from_string(p1._arti_type_key_).combine(
         p1.version.fingerprint, storage_partition_snapshot.content_fingerprint
     )
 
     with pytest.raises(
         ValueError, match=re.escape("Mismatched dependency inputs; expected {'a1'}, got {'junk'}")
     ):
-        p1.compute_input_fingerprint(frozendict(junk=StoragePartitionSnapshots()))
+        p1.compute_input_fingerprint({"junk": StoragePartitionSnapshots()})
 
 
 def test_Producer_out() -> None:
@@ -243,7 +236,9 @@ def test_Producer_out() -> None:
         assert out.producer_output is not None
         assert out.producer_output.producer == producer
         assert out.producer_output.position == position
-        check_model_matches(inp, out, exclude={"producer_output"})
+        assert inp.model_dump(exclude={"producer_output"}) == out.model_dump(
+            exclude={"producer_output"}
+        )
     assert list(p1) == [a2_]
     assert list(p2) == [a3_, a4_]
 
@@ -525,9 +520,7 @@ def test_Producer_bad_signature() -> None:
             def build(cls, a1: dict) -> None:  # type: ignore[type-arg]
                 pass
 
-    with pytest.raises(
-        ValueError, match="BadProducer.a1 - field must not have a default nor be Optional."
-    ):
+    with pytest.raises(ValueError, match="BadProducer.a1 - field must not have a default."):
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1 = None  # type: ignore[assignment]
@@ -536,9 +529,7 @@ def test_Producer_bad_signature() -> None:
             def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]
                 pass
 
-    with pytest.raises(
-        ValueError, match="BadProducer.a1 - field must not have a default nor be Optional."
-    ):
+    with pytest.raises(ValueError, match="BadProducer.a1 - field must not be optional."):
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
             a1: A1 | None
@@ -549,7 +540,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(
         ValueError,
-        match=r"BadProducer.a1 - field must not have a default nor be Optional.",
+        match=r"BadProducer.a1 - field must not have a default.",
     ):
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
@@ -580,9 +571,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(
         ValueError,
-        match=re.escape(
-            r"the specified Type (`Int64()`) is not compatible with the Artifact's Type"
-        ),
+        match=r"the specified Type \(`Int64\(.*\)`\) is not compatible with the Artifact's Type",
     ):
 
         class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
@@ -614,16 +603,16 @@ def test_Producer_bad_signature() -> None:
 
 
 def test_Producer_bad_init() -> None:
-    with pytest.raises(ValueError, match="cannot be instantiated directly"):
+    with pytest.raises(TypeError, match="cannot be instantiated directly"):
         Producer()
-    with pytest.raises(ValueError, match="extra fields not permitted"):
+    with pytest.raises(ValueError, match="Extra inputs are not permitted"):
         DummyProducer(junk=5)  # type: ignore[call-arg]
-    with pytest.raises(ValueError, match="field required"):
-        DummyProducer()  # type: ignore[call-arg]
-    with pytest.raises(ValueError, match="expected an instance of"):
-        DummyProducer(a1=5)
-    with pytest.raises(ValueError, match="expected an instance of"):
-        DummyProducer(a1=A2())
+    with pytest.raises(ValueError, match="Field required"):
+        DummyProducer()  # pyright: ignore[reportCallIssue]
+    with pytest.raises(ValueError, match="Input should be a valid dictionary or instance of A1"):
+        DummyProducer(a1=5)  # pyright: ignore[reportArgumentType]
+    with pytest.raises(ValueError, match="Input should be a valid dictionary or instance of A1"):
+        DummyProducer(a1=A2())  # pyright: ignore[reportArgumentType]
 
 
 def test_Producer_bad_out() -> None:
@@ -647,7 +636,7 @@ numbers_type = List(element=Int64())
 
 
 class Numbers(Artifact):
-    type = numbers_type
+    type: Type = numbers_type
 
 
 @pytest.mark.parametrize(
@@ -678,14 +667,14 @@ def test_Producer_type_inference(
     annotation: Any, type_: Type, artifact_class: type[Artifact]
 ) -> None:
     numbers_view_read = python_views.List(artifact_class=artifact_class, type=type_, mode="READ")
-    numbers_view_write = numbers_view_read.copy(update={"mode": "WRITE"})
+    numbers_view_write = numbers_view_read.model_copy(update={"mode": "WRITE"})
 
     @producer_decorator()
     def plusone(numbers: annotation) -> annotation:
         return [n + 1 for n in numbers]
 
-    assert plusone._input_artifact_classes_ == frozendict(numbers=artifact_class)
-    assert plusone._build_inputs_ == frozendict(numbers=numbers_view_read)
+    assert plusone._input_artifact_classes_ == {"numbers": artifact_class}
+    assert plusone._build_inputs_ == {"numbers": numbers_view_read}
     assert plusone._outputs_ == (numbers_view_write,)
     assert plusone._map_inputs_ == {"numbers"}
 
@@ -710,7 +699,7 @@ def test_Producer_io_checks() -> None:
         type_system: ClassVar[TypeSystem] = dummy_type_system
 
     good_artifact = Artifact.cast(1)
-    fake_artifact = good_artifact.copy(update={"format": FakeFormat()})
+    fake_artifact = good_artifact.model_copy(update={"format": FakeFormat()})
 
     # Check reading
     producer = CheckIO(m=fake_artifact, b=good_artifact)

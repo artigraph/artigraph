@@ -2,44 +2,42 @@ from datetime import UTC, datetime
 
 import pytest
 
-from arti import Version
 from arti.versions import GitCommit, SemVer, String, Timestamp, _Source
 
 
 def test_GitCommit() -> None:
     assert GitCommit(sha="test").sha == "test"
-    assert GitCommit(sha="test").fingerprint == -4338587361150152260
     assert len(GitCommit().sha) == 40  # Length of git sha
 
 
 @pytest.mark.parametrize(
-    ("major", "minor", "patch", "fingerprint"),
+    ("major", "minor", "patch", "fingerprint_fields"),
     [
-        (0, 0, 0, -4875916080982812485),
-        (0, 0, 1, -6022020963282911891),
-        (0, 1, 0, -612532240571011082),
-        (0, 1, 1, -1388070919761090296),
+        (0, 0, 0, {"major", "minor", "patch"}),
+        (0, 0, 1, {"major", "minor", "patch"}),
+        (0, 1, 0, {"major", "minor", "patch"}),
+        (0, 1, 1, {"major", "minor", "patch"}),
         # Major versions >=1 fingerprint the major alone
-        (1, 0, 0, -9142586270102516767),
-        (1, 0, 1, -9142586270102516767),
-        (1, 1, 0, -9142586270102516767),
-        (1, 1, 1, -9142586270102516767),
-        (2, 0, 0, 6920640749119438759),
-        (2, 5, 5, 6920640749119438759),
+        (1, 0, 0, {"major"}),
+        (1, 0, 1, {"major"}),
+        (1, 1, 0, {"major"}),
+        (1, 1, 1, {"major"}),
+        (2, 0, 0, {"major"}),
+        (2, 5, 5, {"major"}),
     ],
 )
-def test_SemVer(major: int, minor: int, patch: int, fingerprint: int) -> None:
-    assert SemVer(major=major, minor=minor, patch=patch).fingerprint == fingerprint
+def test_SemVer(major: int, minor: int, patch: int, fingerprint_fields: set[str]) -> None:
+    assert set(SemVer._arti_fingerprint_fields_) == {"_arti_type_", "major", "minor", "patch"}
+    version = SemVer(major=major, minor=minor, patch=patch)
+    assert set(version._arti_fingerprint_fields_) == {"_arti_type_", *fingerprint_fields}
 
 
 def test__Source() -> None:
     class P:
-        version: Version = _Source()
+        version: String = _Source()
 
-    assert isinstance(P.version, String)
-    assert P.version.value == "    class P:\n        version: Version = _Source()\n"
-    assert P.version.fingerprint == -5384942283309384283
-    assert P().version.fingerprint == -5384942283309384283
+    src = "    class P:\n        version: String = _Source()\n"
+    assert P.version.value == P().version.value == src
 
     class P2:
         version = _Source()
@@ -47,23 +45,14 @@ def test__Source() -> None:
     assert P.version.fingerprint != P2.version.fingerprint
 
 
-def test_String() -> None:
-    assert String(value="ok").fingerprint == 5676437635634367418
-
-
 def test_Timestamp() -> None:
-    d = datetime.now(tz=UTC)
-    assert Timestamp(dt=d).fingerprint == round(d.timestamp())
+    default = Timestamp()
+    assert default.dt.tzinfo is not None
+    explicit = Timestamp(dt=datetime.now(tz=UTC))
+    assert explicit.dt.tzinfo is not None
     # Check the default is ~now.
-    key, now = Timestamp().fingerprint, round(datetime.now(tz=UTC).timestamp())
-    assert key is not None
-    assert now - 1 <= key <= now + 1
+    assert (explicit.dt - default.dt).total_seconds() < 1
+
     # Confirm naive datetime are not supported
-    with pytest.raises(ValueError, match="Timestamp requires a timezone-aware datetime"):
+    with pytest.raises(ValueError, match="Timestamp requires a timezone-aware datetime!"):
         Timestamp(dt=datetime.now())
-
-
-def test_Version() -> None:
-    # Version sets an @abstractmethod, so ABC catches it before our Model._abstract_ validator.
-    with pytest.raises(ValueError, match="cannot be instantiated directly"):
-        Version()

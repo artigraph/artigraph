@@ -194,7 +194,9 @@ class ListFieldTypeAdapter(TypeAdapter):
             warnings.warn("BigQuery doesn't support nullable arrays", stacklevel=2)
         if type_.element.nullable:
             warnings.warn("BigQuery doesn't support nullable array elements", stacklevel=2)
-            type_ = type_.copy(update={"element": type_.element.copy(update={"nullable": False})})
+            type_ = type_.model_copy(
+                update={"element": type_.element.model_copy(update={"nullable": False})}
+            )
         if isinstance(type_.element, types.List):
             raise ValueError("BigQuery doesn't support nested arrays")
         field = type_system.to_system(type_.element, hints=hints)

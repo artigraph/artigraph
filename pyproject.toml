@@ -6,6 +6,7 @@ build-backend = "poetry.core.masonry.api"
 [tool.coverage.report]
 exclude_lines = [
     "@overload",
+    "coverage: ignore",
     "if TYPE_CHECKING:",
     "if not TYPE_CHECKING:",
     "pragma: no cover",
@@ -49,6 +50,7 @@ include = ["src/arti/py.typed"]
 [tool.poetry.dependencies]
 python = "^3.12"
 
+annotated-types = "*"
 gcsfs = { version = ">=2022.2.0", optional = true }
 google-cloud-bigquery = { version = "^3.5.0", optional = true }
 multimethod = ">=1.6,<1.11"
@@ -56,9 +58,8 @@ numpy = { version = ">=1.23.1", optional = true }
 pandas = { version = ">=1.4.3", optional = true }
 parse = ">=1.19.0"
 pyarrow = { version = ">=8", optional = true }
-pydantic = ">=1.9.0,<2"                                         # We use some pydantic internals, so expect 2.0 to break things.
+pydantic = ">=2,<3"
 pyfarmhash = ">=0.2.2"
-python-box = ">=7.0.0"                                          # Tracking box_namespace requires 7+
 
 [tool.poetry.group.dev.dependencies]
 coverage = { version = ">=6.4", extras = ["toml"] }                         # pyproject.toml support

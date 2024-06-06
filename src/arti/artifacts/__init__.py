@@ -4,17 +4,17 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import json
 from itertools import chain
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Annotated, Any
 
-from pydantic import Field, validator
-from pydantic.fields import ModelField
+from pydantic import Field, ValidationInfo, field_validator
 
 from arti.annotations import Annotation
+from arti.fingerprints import SkipFingerprint
 from arti.formats import Format
 from arti.internal.models import Model, get_field_default
 from arti.internal.type_hints import get_annotation_from_value
 from arti.statistics import Statistic
-from arti.storage import Storage, StoragePartition
+from arti.storage import Storage
 from arti.types import Type
 
 if TYPE_CHECKING:
@@ -35,46 +35,47 @@ class Artifact(Model):
     """
 
     type: Type
-    format: Format = Field(default_factory=Format.get_default)
-    storage: Storage[StoragePartition] = Field(default_factory=Storage.get_default)
+    format: Format = Field(default_factory=Format.get_default, validate_default=True)
+    storage: Storage = Field(default_factory=Storage.get_default, validate_default=True)
 
-    annotations: tuple[Annotation, ...] = ()
-    statistics: tuple[Statistic, ...] = ()
+    annotations: Annotated[tuple[Annotation, ...], Field(validate_default=True)] = ()
+    statistics: Annotated[tuple[Statistic, ...], Field(validate_default=True)] = ()
 
-    # Hide `producer_output` in repr to prevent showing the entire upstream graph.
+    # Omit the `producer_output` (ie: this Artifact's Producer) from the:
+    # - `fingerprint` to prevent upstream changes from triggering cascading fingerprint changes.
+    #     - Artifacts represent a *template* for data, independent of the Producer. We don't want
+    #       Producer changes (including changes to their input Artifacts) to affect this Artifact's
+    #       fingerprint. This isolates the overall fingerprint changes within a Graph to just the
+    #       changed Artifact(s) and Producer(s), instead of cascading. Once we're actually building,
+    #       changes to the Producer or input StoragePartitionSnapshots will be reflected in a new
+    #       `input_fingerprint` that is formatted into the Storage, creating the appropriate
+    #       output StoragePartitions.
+    # - `repr` to prevent showing the entire upstream graph.
     #
-    # ProducerOutput is a ForwardRef/cyclic import. Quote the entire hint to force full resolution
-    # during `.update_forward_refs`, rather than `ForwardRef("ProducerOutput") | None`.
-    producer_output: ProducerOutput | None = Field(None, repr=False)
+    # NOTE : ProducerOutput is a ForwardRef/cyclic import.
+    producer_output: Annotated[ProducerOutput | None, Field(repr=False), SkipFingerprint()] = None
 
-    # NOTE: Narrow the fields that affect the fingerprint to minimize changes (which trigger
-    # recompute). Importantly, avoid fingerprinting the `.producer_output` (ie: the *upstream*
-    # producer) to prevent cascading fingerprint changes (Producer.fingerprint accesses the *input*
-    # Artifact.fingerprints). Even so, this may still be quite sensitive.
-    _fingerprint_includes_ = frozenset(["type", "format", "storage"])
-
-    @validator("format", always=True)
+    @field_validator("format")
     @classmethod
-    def _validate_format(cls, format: Format, values: dict[str, Any]) -> Format:
-        if (type_ := values.get("type")) is not None:
+    def _validate_format(cls, format: Format, info: ValidationInfo) -> Format:
+        if (type_ := info.data.get("type")) is not None:
             return format._visit_type(type_)
         return format
 
-    @validator("storage", always=True)
+    @field_validator("storage")
     @classmethod
-    def _validate_storage(
-        cls, storage: Storage[StoragePartition], values: dict[str, Any]
-    ) -> Storage[StoragePartition]:
-        if (type_ := values.get("type")) is not None:
+    def _validate_storage(cls, storage: Storage, info: ValidationInfo) -> Storage:
+        if (type_ := info.data.get("type")) is not None:
             storage = storage._visit_type(type_)
-        if (format_ := values.get("format")) is not None:
+        if (format_ := info.data.get("format")) is not None:
             storage = storage._visit_format(format_)
         return storage
 
-    @validator("annotations", "statistics", always=True, pre=True)
+    @field_validator("annotations", "statistics", mode="before")
     @classmethod
-    def _merge_class_defaults(cls, value: tuple[Any, ...], field: ModelField) -> tuple[Any, ...]:
-        return tuple(chain(get_field_default(cls, field.name) or (), value))
+    def _merge_class_defaults(cls, value: tuple[Any, ...], info: ValidationInfo) -> tuple[Any, ...]:
+        assert info.field_name is not None
+        return tuple(chain(get_field_default(cls, info.field_name, fallback=()), value))
 
     @classmethod
     def cast(cls, value: Any) -> Artifact:

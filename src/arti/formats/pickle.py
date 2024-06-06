@@ -5,5 +5,5 @@ from arti.types.python import python_type_system
 
 
 class Pickle(Format):
-    extension = ".pickle"
+    extension: str = ".pickle"
     type_system = python_type_system

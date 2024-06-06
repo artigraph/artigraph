@@ -4,6 +4,7 @@ import hashlib
 import tempfile
 from glob import glob
 from pathlib import Path
+from typing import ClassVar
 
 from arti import (
     Fingerprint,
@@ -30,7 +31,7 @@ class LocalFile(Storage[LocalFilePartition]):
     # `_DEFAULT_PATH_TEMPLATE` and `rooted_at` ease testing, where we often want to just override
     # the tempdir, but keep the rest of the template. Eventually, we should introduce Resources and
     # implement a MockFS (to be used in `io.*`).
-    _DEFAULT_PATH_TEMPLATE = str(
+    _DEFAULT_PATH_TEMPLATE: ClassVar[str] = str(
         Path("{graph_name}")
         / "{path_tags}"
         / "{names}"

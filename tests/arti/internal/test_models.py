@@ -1,239 +1,130 @@
-import re
 from collections import defaultdict
-from contextlib import nullcontext
-from typing import Annotated, Any, ClassVar, Generic, Literal, TypeVar, Union
+from typing import Annotated, Any, ClassVar
 
 import pytest
 from pydantic import Field, PrivateAttr, ValidationError
 
 from arti import Fingerprint
+from arti.fingerprints import SkipFingerprint
+from arti.internal.mappings import FrozenMapping, frozendict
 from arti.internal.models import Model
-from arti.internal.utils import frozendict
 
 
 class Abstract(Model):
     _abstract_: ClassVar[bool] = True
 
 
-class Concrete(Model):
-    pass
+class Nested(Model):
+    x: Abstract
 
 
-class Sub(Model):
-    x: int
-
-
-SomeVar = TypeVar("SomeVar")
-
-
-class SomeGeneric(Model, Generic[SomeVar]):
-    x: SomeVar
+class Concrete(Abstract):
+    i: int = 1
 
 
 def test_Model() -> None:
     obj = Concrete()
-    assert str(obj) == repr(obj)
+    assert str(obj) == repr(obj) == "Concrete()"
+    obj = Concrete(i=5)
+    assert str(obj) == repr(obj) == "Concrete(i=5)"
+
     for model in (Model, Abstract):
-        with pytest.raises(ValidationError, match="cannot be instantiated directly"):
+        with pytest.raises(TypeError, match="cannot be instantiated directly"):
             model()
 
+    assert Nested(x=Concrete())
+    with pytest.raises(ValidationError, match="Field required"):
+        assert Nested()  # pyright: ignore[reportCallIssue]
+    with pytest.raises(ValidationError, match="Input should be a valid"):
+        assert Nested(x="junk")  # pyright: ignore[reportArgumentType]
 
-def test_Model_repr() -> None:
+
+def test_Model_fingerprint() -> None:
+    class A(Model):
+        a: int
+        b: int
+        c: Annotated[int, SkipFingerprint()]
+        d: Annotated[int, Field(exclude=True)]
+
+    a, a_repr = A(a=1, b=2, c=3, d=4), '{"_arti_type_":"A","a":1,"b":2}'
+    assert a._arti_fingerprint_fields_ == ("_arti_type_", "a", "b")
+    assert a.fingerprint == Fingerprint.from_string(a_repr)
+
+    # Test wrapped models omit fields with SkipFingerprint.
+    class Wrapper(Model):
+        a: A
+
+    w, w_repr = (
+        Wrapper(a=a),
+        '{"_arti_type_":"Wrapper","a":{"_arti_type_":"A","a":1,"b":2}}',
+    )
+    assert w._arti_fingerprint_fields_ == ("_arti_type_", "a")
+    assert w.fingerprint == Fingerprint.from_string(w_repr)
+
+    # Test we can fingerprint subclasses with additional fields.
+    class B(A):
+        z: int
+
+    w, w_repr = (
+        Wrapper(a=B(a=1, b=2, c=3, d=4, z=26)),
+        '{"_arti_type_":"Wrapper","a":{"_arti_type_":"B","a":1,"b":2,"z":26}}',
+    )
+    assert w.fingerprint == Fingerprint.from_string(w_repr)
+
+
+# The rest more or less test the default Model's configuration of base pydantic functionality.
+
+
+def test_Model_no_extras() -> None:
+    with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
+        Concrete(junk=1)  # type: ignore[call-arg]
+
+
+def test_Model_strict_types() -> None:
     class M(Model):
-        i: int
-        j: int = Field(repr=False)
+        a: int
+        b: tuple[int, ...]
+        c: FrozenMapping[str, int]
+        d: Any
 
-    assert repr(M(i=1, j=1)) == "M(i=1)"
+    class MyInt(int):
+        pass
+
+    a, b, c, d = 1, (1,), {"a": 1}, object()
+
+    m = M(a=a, b=b, c=c, d=d)  # pyright: ignore[reportArgumentType]
+    assert isinstance(m.c, frozendict)  # FrozenModel has a validator to convert
+
+    m = M(a=MyInt(a), b=b, c=c, d=d)  # pyright: ignore[reportArgumentType]
+    assert not isinstance(m.a, MyInt)  # Subclasses of primitive types aren't preserved...
+
+    with pytest.raises(ValidationError, match="Input should be a valid tuple"):
+        M(a=a, b=[1], c=c, d=d)  # pyright: ignore[reportArgumentType]
+
+    with pytest.raises(ValidationError, match="Input should be a valid integer"):
+        M(a=a, b=("a",), c=c, d=d)  # pyright: ignore[reportArgumentType]
 
 
 class Sneaky(Model):
     x: int
-    _stuff = PrivateAttr(default_factory=lambda: defaultdict(list))
-    _unset = PrivateAttr()
+    _stuff: dict[str, list] = PrivateAttr(default_factory=lambda: defaultdict(list))
 
 
-def test_Model_copy_private_attributes() -> None:
+def test_Model_private_attributes() -> None:
     orig = Sneaky(x=1)
     orig._stuff["a"].append("value")
     assert orig._stuff == {"a": ["value"]}
 
-
-@pytest.mark.parametrize("validate", [False, True])
-def test_Model_copy_private_attributes_validation(validate: bool) -> None:
-    orig = Sneaky(x=1)
-    orig._stuff["a"].append("value")
-
-    copy = orig.copy(validate=validate)
+    copy = orig.model_copy()
     # Confirm private attributes are pulled over
     assert orig._stuff == copy._stuff
     # as shared refs.
     assert orig._stuff is copy._stuff
     assert orig._stuff["a"] is copy._stuff["a"]
 
-    copy = orig.copy(deep=True, validate=validate)
+    copy = orig.model_copy(deep=True)
     # Confirm private attributes are pulled over
     assert orig._stuff == copy._stuff
     # but as deepcopies, not shared refs.
     assert orig._stuff is not copy._stuff
     assert orig._stuff["a"] is not copy._stuff["a"]
-
-
-def test_Model_copy_validation() -> None:
-    v = Sub(x=5)
-    v1 = v.copy(update={"x": 10})
-    assert v.x == 5
-    assert v1.x == 10
-    with pytest.raises(ValueError, match="expected an instance"):
-        v.copy(update={"x": "junk"})
-    v2 = v.copy(update={"x": "junk"}, validate=False)  # Skip validation for "trusted" data.
-    assert v2.x == "junk"  # type: ignore[comparison-overlap]
-
-
-def test_Model_fingerprint() -> None:
-    class A(Model):
-        a: int
-        b: str
-
-    a = A(a=1, b="b")
-    assert a.fingerprint == Fingerprint.from_string('A:{"a": 1, "b": "b"}')
-
-    class B(Model):
-        a: A
-        b: set[str]
-
-    assert B(a=a, b={"b"}).fingerprint == Fingerprint.from_string(
-        f'B:{{"a": {a.fingerprint}, "b": ["b"]}}'
-    )
-
-    class Excludes(A):
-        _fingerprint_excludes_ = frozenset(["a"])
-
-    assert Excludes(a=1, b="b").fingerprint == Fingerprint.from_string('Excludes:{"b": "b"}')
-
-    with pytest.raises(ValueError, match=re.escape("Unknown `_fingerprint_excludes_` field(s)")):
-
-        class BadExcludes(A):
-            _fingerprint_excludes_ = frozenset(["z"])
-
-    class Includes(A):
-        _fingerprint_includes_ = frozenset(["a"])
-
-    assert Includes(a=1, b="b").fingerprint == Fingerprint.from_string('Includes:{"a": 1}')
-
-    with pytest.raises(ValueError, match=re.escape("Unknown `_fingerprint_includes_` field(s)")):
-
-        class BadIncludes(A):
-            _fingerprint_includes_ = frozenset(["z"])
-
-
-def test_Model__iter() -> None:
-    class A(Model):
-        a: int
-
-    a = A(a=5)
-    assert dict(a._iter()) == {"a": 5}
-    a.__dict__["b"] = "junk"  # Shouldn't show up!
-    assert dict(a._iter()) == {"a": 5}
-
-
-def test_Model_unknown_kwargs() -> None:
-    with pytest.raises(ValidationError, match="extra fields not permitted"):
-        Concrete(junk=1)  # type: ignore[call-arg]
-
-
-def test_Model_static_types() -> None:
-    class M(Model):
-        a: Any
-        b: Literal["b"]
-        c: int
-        d: frozendict[str, int]
-        e: type[int]
-
-    class MyInt(int):
-        pass
-
-    # frozendict is special cased in the type conversions to automatically convert dicts.
-    m = M(a=5, b="b", c=0, d={"a": 1}, e=MyInt)
-    assert isinstance(m.d, frozendict)
-    with pytest.raises(ValidationError, match="expected an instance of <class 'str'>, got"):
-        M(a=5, b=5, c=0)  # type: ignore[call-arg]
-    with pytest.raises(ValidationError, match=r"expected an instance of <class 'int'>, got"):
-        M(a=5, b="b", c=0.0)  # type: ignore[call-arg]
-    with pytest.raises(ValidationError, match=r"expected a subclass of <class 'int'>, got"):
-        M(a=5, b="b", c=0, d={"a": 1}, e=str)
-
-
-@pytest.mark.parametrize(
-    ("hint", "value", "error_type"),
-    [
-        (Annotated[int, "blah"], 5, None),
-        (Literal[5] | None, 5, None),  # type: ignore[operator] # python/mypy#16778
-        (Literal[5], 5, None),
-        (Sub, Sub(x=5), None),
-        (Union[Literal[5], None], 5, None),  # noqa: UP007
-        (Union[int, str], 5, None),  # noqa: UP007
-        (Union[str, int], 5, None),  # noqa: UP007 # Using "smart_union" to avoid cast to str
-        (dict[int, str], {5: "hi"}, None),
-        (int | None, None, None),
-        (int, 5, None),
-        (int | str, 5, None),
-        (str, "hi", None),
-        (str | int, 5, None),  # Using "smart_union" to avoid cast to str
-        (tuple, ("hi", "bye"), None),
-        (tuple[int | None, ...], (5, None), None),
-        (tuple[int, ...], (1, 2), None),
-        (tuple[int], (5,), None),
-        (tuple[str, int], ("test", 5), None),
-        # Detected bad input:
-        (Literal[5], 6, ValueError),
-        (Union[int, str], 5.0, ValueError),  # noqa: UP007
-        (dict[int, dict[int, Sub]], {5: {"5": Sub(x=5)}}, ValueError),
-        (dict[int, str], {"5": "hi"}, ValueError),
-        (dict[str, int], {"hi": "5"}, ValueError),
-        (int | None, "hi", ValueError),
-        (int, None, ValueError),
-        (int | str, 5.0, ValueError),
-        (tuple[str, int], ("test",), ValueError),
-    ],
-)
-def test_Model_static_types_complex(
-    hint: Any, value: Any, error_type: type[Exception] | None
-) -> None:
-    M = type(str(hint), (Model,), {"__annotations__": {"x": hint}})
-    ctx = nullcontext() if error_type is None else pytest.raises(error_type)
-    with ctx:
-        data = {"x": value}
-        # Ensure data can be round-tripped to (at the least) confirm dict keys are checked.
-        assert dict(M(**data)) == data
-
-
-def test_Model_static_types_generics() -> None:
-    assert SomeGeneric[Any](x=1)
-    assert SomeGeneric[int](x=1)
-    assert SomeGeneric[str](x="hi")
-
-
-@pytest.mark.xfail(reason="TypeVar checking isn't implemented yet")
-def test_Model_static_types_generics_mismatch() -> None:
-    with pytest.raises(ValueError, match="junk"):
-        SomeGeneric[int](x="hi")
-
-
-def test_Model_equality() -> None:
-    class Animal(Model):
-        name: str = ""
-
-    class Dog(Animal):
-        pass
-
-    class Cat(Animal):
-        pass
-
-    class Owner(Model):
-        name: str = ""
-        pets: list[Animal]
-
-    assert Dog() != 5
-    assert Dog() == Dog()
-    assert Dog() != Cat()
-    assert Owner(pets=[Dog()]) != Owner(pets=[Cat()])

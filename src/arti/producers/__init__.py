@@ -13,23 +13,25 @@ from typing import (
     cast,
     get_args,
     get_origin,
+    overload,
 )
 
-from pydantic import validator
-from pydantic.fields import ModelField
+from pydantic import ValidationInfo, field_validator
 
 from arti.annotations import Annotation
 from arti.artifacts import Artifact
-from arti.fingerprints import Fingerprint
+from arti.fingerprints import Fingerprint, SkipFingerprint
 from arti.internal import wrap_exc
+from arti.internal.mappings import FrozenMapping, frozendict
 from arti.internal.models import Model
 from arti.internal.type_hints import (
     NoneType,
     get_item_from_annotated,
+    is_optional_hint,
     lenient_issubclass,
     signature,
 )
-from arti.internal.utils import frozendict, get_module_name, ordinal
+from arti.internal.utils import get_module_name, ordinal
 from arti.partitions import InputFingerprints, NotPartitioned, PartitionKey
 from arti.storage import StoragePartitions, StoragePartitionSnapshots
 from arti.types import is_partitioned
@@ -43,6 +45,7 @@ MapInputs = set[str]
 BuildInputs = frozendict[str, View]
 Outputs = tuple[View, ...]
 
+InputArtifactClasses = frozendict[str, type[Artifact]]
 InputPartitions = frozendict[str, StoragePartitionSnapshots]
 PartitionDependencies = frozendict[PartitionKey, InputPartitions]
 MapSig = Callable[..., PartitionDependencies]
@@ -55,7 +58,7 @@ class Producer(Model):
 
     # User fields/methods
 
-    annotations: tuple[Annotation, ...] = ()
+    annotations: Annotated[tuple[Annotation, ...], SkipFingerprint()] = ()
     version: Version = SemVer(major=0, minor=0, patch=1)
 
     # The map/build/validate_outputs parameters are intended to be dynamic and set by subclasses,
@@ -93,10 +96,9 @@ class Producer(Model):
     # Internal fields/methods
 
     _abstract_: ClassVar[bool] = True
-    _fingerprint_excludes_ = frozenset(["annotations"])
 
-    # NOTE: The following are set in __init_subclass__
-    _input_artifact_classes_: ClassVar[frozendict[str, type[Artifact]]]
+    # NOTE: The following are set in __pydantic_init_subclass__
+    _input_artifact_classes_: ClassVar[InputArtifactClasses]
     _build_inputs_: ClassVar[BuildInputs]
     _build_sig_: ClassVar[Signature]
     _map_inputs_: ClassVar[MapInputs]
@@ -104,8 +106,8 @@ class Producer(Model):
     _outputs_: ClassVar[Outputs]
 
     @classmethod
-    def __init_subclass__(cls, **kwargs: Any) -> None:
-        super().__init_subclass__(**kwargs)
+    def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
+        super().__pydantic_init_subclass__(**kwargs)
         if not cls._abstract_:
             with wrap_exc(ValueError, prefix=cls.__name__):
                 cls._input_artifact_classes_ = cls._validate_fields()
@@ -122,21 +124,30 @@ class Producer(Model):
                 cls._validate_no_unused_fields()
 
     @classmethod
-    def _validate_fields(cls) -> frozendict[str, type[Artifact]]:
+    def _validate_fields(cls) -> InputArtifactClasses:
         # NOTE: Aside from the base producer fields, all others should (currently) be Artifacts.
         #
         # Users can set additional class attributes, but they must be properly hinted as ClassVars.
         # These won't interact with the "framework" and can't be parameters to build/map.
-        artifact_fields = {k: v for k, v in cls.__fields__.items() if k not in Producer.__fields__}
+        artifact_fields = {
+            k: v for k, v in cls.model_fields.items() if k not in Producer.model_fields
+        }
         for name, field in artifact_fields.items():
             with wrap_exc(ValueError, prefix=f".{name}"):
-                if not (field.default is None and field.default_factory is None and field.required):
-                    raise ValueError("field must not have a default nor be Optional.")
-                if not lenient_issubclass(field.outer_type_, Artifact):
+                if is_optional_hint(field.annotation):
+                    raise ValueError("field must not be optional.")
+                if not field.is_required():
+                    raise ValueError("field must not have a default.")
+                if not lenient_issubclass(field.annotation, Artifact):
                     raise ValueError(
-                        f"type hint must be an Artifact subclass, got: {field.outer_type_}"
+                        f"type hint must be an Artifact subclass, got: {field.annotation}"
                     )
-        return frozendict({name: field.outer_type_ for name, field in artifact_fields.items()})
+        return InputArtifactClasses(
+            {
+                name: cast(type[Artifact], field.annotation)
+                for name, field in artifact_fields.items()
+            }
+        )
 
     @classmethod
     def _validate_parameters(
@@ -161,7 +172,7 @@ class Producer(Model):
         annotation = param.annotation
         field_artifact_class = cls._input_artifact_classes_[param.name]
         # If there is no Artifact hint, add in the field value as the default.
-        if get_item_from_annotated(annotation, Artifact, is_subclass=True) is None:
+        if get_item_from_annotated(annotation, Artifact, kind="class") is None:
             annotation = Annotated[annotation, field_artifact_class]
         view = View.from_annotation(annotation, mode="READ")
         if view.artifact_class != field_artifact_class:
@@ -295,10 +306,11 @@ class Producer(Model):
                 f"the following fields aren't used in `.build` or `.map`: {unused_fields}"
             )
 
-    @validator("*")
+    @field_validator("*")
     @classmethod
-    def _validate_instance_artifact_args(cls, value: Artifact, field: ModelField) -> Artifact:
-        if (view := cls._build_inputs_.get(field.name)) is not None:
+    def _validate_instance_artifact_args(cls, value: Artifact, info: ValidationInfo) -> Artifact:
+        assert info.field_name is not None
+        if (view := cls._build_inputs_.get(info.field_name)) is not None:
             view.check_artifact_compatibility(value)
         return value
 
@@ -312,7 +324,7 @@ class Producer(Model):
         return iter(ret)
 
     def compute_input_fingerprint(
-        self, dependency_partitions: frozendict[str, StoragePartitionSnapshots]
+        self, dependency_partitions: FrozenMapping[str, StoragePartitionSnapshots]
     ) -> Fingerprint:
         input_names = set(dependency_partitions)
         expected_names = set(self._build_inputs_)
@@ -322,9 +334,11 @@ class Producer(Model):
             )
         # We only care if the *code* or *input partition contents* changed, not if the input file
         # paths changed (but have the same content as a prior run).
-        return Fingerprint.from_string(self._class_key_).combine(
+        return Fingerprint.from_string(self._arti_type_key_).combine(
             self.version.fingerprint,
             *(
+                # TODO: Include the artifact name here? Do we care if you rename an arg (without
+                # changing the version)?
                 snapshot.content_fingerprint
                 for name, partition_snapshots in dependency_partitions.items()
                 for snapshot in partition_snapshots
@@ -356,6 +370,17 @@ class Producer(Model):
     def inputs(self) -> dict[str, Artifact]:
         return {k: getattr(self, k) for k in self._input_artifact_classes_}
 
+    @overload
+    def out(self) -> Artifact | tuple[Artifact, ...]: ...
+
+    @overload
+    def out(self, a1: Artifact, /) -> Artifact: ...
+
+    @overload
+    def out(self, a1: Artifact, a2: Artifact, /, *rest: Artifact) -> tuple[Artifact, ...]: ...
+
+    # TODO: Look into using variadic type vars here so the return hint can be precisely unpacked
+    # (down to no tuple?). Ideally, they'd support bound constraints (eg: `*T: Artifact`).
     def out(self, *outputs: Artifact) -> Artifact | tuple[Artifact, ...]:
         """Configure the output Artifacts this Producer will build.
 
@@ -367,18 +392,20 @@ class Producer(Model):
         if passed_n != expected_n:
             ret_str = ", ".join([str(v) for v in self._build_sig_.return_annotation])
             raise ValueError(
-                f"{self._class_key_}.out() - expected {expected_n} arguments of ({ret_str}), but got: {outputs}"
+                f"{self._arti_type_key_}.out() - expected {expected_n} arguments of ({ret_str}), but got: {outputs}"
             )
 
         def validate(artifact: Artifact, *, ord: int) -> Artifact:
             view = self._outputs_[ord]
-            with wrap_exc(ValueError, prefix=f"{self._class_key_}.out() {ordinal(ord+1)} argument"):
+            with wrap_exc(
+                ValueError, prefix=f"{self._arti_type_key_}.out() {ordinal(ord+1)} argument"
+            ):
                 view.check_artifact_compatibility(artifact)
                 if artifact.producer_output is not None:
                     raise ValueError(
                         f"{artifact} is produced by {artifact.producer_output.producer}!"
                     )
-            return artifact.copy(
+            return artifact.model_copy(
                 update={"producer_output": ProducerOutput(producer=self, position=ord)}
             )
 
@@ -439,4 +466,4 @@ class ProducerOutput(Model):
     position: int  # TODO: Support named output (defaulting to artifact classname?)
 
 
-Artifact.update_forward_refs(ProducerOutput=ProducerOutput)
+Artifact.model_rebuild()

@@ -182,7 +182,7 @@ class StructTypeAdapter(_PyarrowTypeAdapter):
     ) -> Type:
         ret = type_system.to_artigraph(type_.type, hints=hints)
         if type_.nullable != ret.nullable:  # Avoid setting nullable if matching to minimize repr
-            ret = ret.copy(update={"nullable": type_.nullable})
+            ret = ret.model_copy(update={"nullable": type_.nullable})
         return ret
 
     @classmethod

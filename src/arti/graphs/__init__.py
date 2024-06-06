@@ -7,17 +7,17 @@ from collections.abc import Callable
 from functools import cached_property, wraps
 from graphlib import TopologicalSorter
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Literal, TypeVar
+from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeVar
 
-from pydantic import Field, PrivateAttr, validator
+from pydantic import Field, PrivateAttr, field_validator
 
 import arti
 from arti import io
 from arti.artifacts import Artifact
 from arti.backends import Backend, BackendConnection
-from arti.fingerprints import Fingerprint
+from arti.fingerprints import Fingerprint, SkipFingerprint
+from arti.internal.mappings import FrozenMapping, TypedBox, frozendict
 from arti.internal.models import Model
-from arti.internal.utils import TypedBox, frozendict
 from arti.partitions import PartitionKey
 from arti.producers import Producer
 from arti.storage import StoragePartitionSnapshot, StoragePartitionSnapshots
@@ -27,10 +27,6 @@ from arti.views import View
 if TYPE_CHECKING:
     from arti.backends.memory import MemoryBackend
     from arti.executors import Executor
-else:
-    from arti.internal.patches import patch_TopologicalSorter_class_getitem
-
-    patch_TopologicalSorter_class_getitem()
 
 
 def _get_memory_backend() -> MemoryBackend:
@@ -40,16 +36,9 @@ def _get_memory_backend() -> MemoryBackend:
     return MemoryBackend()
 
 
-SEALED: Literal[True] = True
-OPEN: Literal[False] = False
-BOX_KWARGS = {
-    status: {
-        "box_dots": True,
-        "default_box": status is OPEN,
-        "frozen_box": status is SEALED,
-    }
-    for status in (OPEN, SEALED)
-}
+type STATUS = Literal["open", "closed"]
+OPEN: Literal["open"] = "open"
+CLOSED: Literal["closed"] = "closed"
 
 _Return = TypeVar("_Return")
 
@@ -57,7 +46,7 @@ _Return = TypeVar("_Return")
 def requires_sealed(fn: Callable[..., _Return]) -> Callable[..., _Return]:
     @wraps(fn)
     def check_if_sealed(self: Graph, *args: Any, **kwargs: Any) -> _Return:
-        if self._status is not SEALED:
+        if self._status is not CLOSED:
             raise ValueError(f"{fn.__name__} cannot be used while the Graph is still being defined")
         return fn(self, *args, **kwargs)
 
@@ -65,13 +54,13 @@ def requires_sealed(fn: Callable[..., _Return]) -> Callable[..., _Return]:
 
 
 class ArtifactBox(TypedBox[Artifact]):
-    def _TypedBox__cast_value(self, item: str, value: Any) -> Artifact:
-        artifact: Artifact = super()._TypedBox__cast_value(item, value)  # type: ignore[misc]
+    def _cast_value(self, key: str, value: Any) -> Artifact:
+        artifact = super()._cast_value(key, value)
         storage = artifact.storage
         if (graph := arti.context.graph) is not None:
-            storage = storage._visit_graph(graph)._visit_names(
-                (*self._box_config["box_namespace"], item)
-            )
+            # NOTE: While we could `._visit_names` even without the Graph, it's helpful to late bind
+            # in case the structure changes.
+            storage = storage._visit_graph(graph)._visit_names((*self._namespace, key))
         # Require an {input_fingerprint} template in the Storage if this Artifact is being generated
         # by a Producer. Otherwise, strip the {input_fingerprint} template (if set) for "raw"
         # Artifacts.
@@ -81,11 +70,21 @@ class ArtifactBox(TypedBox[Artifact]):
         # "final" instance until assignment here to the Graph.
         if artifact.producer_output is None:
             storage = storage._visit_input_fingerprint(None)
-        elif not artifact.storage.includes_input_fingerprint_template:
+        elif not storage.includes_input_fingerprint_template:
             raise ValueError(
                 "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
             )
-        return artifact.copy(update={"storage": storage})
+        # TODO: Replace references to the original in any downstream Producers...
+        return artifact.model_copy(update={"storage": storage})
+
+    # Override __getattr__ to Any (instead of `Artifact | ArtifactBox`) to reduce type checking
+    # noise for common usage. Otherwise:
+    # - every access after Graph definition needs to be narrowed to `Artifact`
+    # - every intermediate attribute with nested keys needs to be narrowed to `TypedBox[Artifact]`
+    #
+    # This isn't correct, but the ergonomics are worth the tradeoff.
+    def __getattr__(self, key: str) -> Any:
+        return super().__getattr__(key)
 
 
 Node = Artifact | Producer
@@ -96,21 +95,24 @@ class Graph(Model):
     """Graph stores a web of Artifacts connected by Producers."""
 
     name: str
-    artifacts: ArtifactBox = Field(default_factory=lambda: ArtifactBox(**BOX_KWARGS[SEALED]))
+    artifacts: ArtifactBox = Field(default_factory=ArtifactBox)
     # The Backend *itself* should not affect the results of a Graph build, though the contents
-    # certainly may (eg: stored annotations), so we avoid serializing it. This also prevent
+    # certainly may (eg: stored annotations), so we avoid serializing it. This also prevents
     # embedding any credentials.
-    backend: Backend[BackendConnection] = Field(default_factory=_get_memory_backend, exclude=True)
-    path_tags: frozendict[str, str] = frozendict()
+    backend: Annotated[Backend, SkipFingerprint()] = Field(
+        default_factory=_get_memory_backend, exclude=True
+    )
+    path_tags: FrozenMapping[str, str] = frozendict()
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
-    _status: bool | None = PrivateAttr(None)
-    _artifact_to_key: frozendict[Artifact, str] = PrivateAttr(frozendict())
+    _status: STATUS | None = PrivateAttr(default=None)
+    _artifact_to_key: FrozenMapping[Artifact, str] = frozendict()
 
-    @validator("artifacts")
+    @field_validator("artifacts")
     @classmethod
     def _convert_artifacts(cls, artifacts: ArtifactBox) -> ArtifactBox:
-        return ArtifactBox(artifacts, **BOX_KWARGS[SEALED])
+        artifacts._status.root = CLOSED
+        return artifacts
 
     def __enter__(self) -> Graph:
         if arti.context.graph is not None:
@@ -126,13 +128,13 @@ class Graph(Model):
         exc_traceback: TracebackType | None,
     ) -> None:
         arti.context.graph = None
-        self._toggle(SEALED)
+        self._toggle(CLOSED)
         # Confirm the dependencies are acyclic
         TopologicalSorter(self.dependencies).prepare()
 
-    def _toggle(self, status: bool) -> None:
+    def _toggle(self, status: Literal["open", "closed"]) -> None:
         # The Graph object is "frozen", so we must bypass the assignment checks.
-        object.__setattr__(self, "artifacts", ArtifactBox(self.artifacts, **BOX_KWARGS[status]))
+        self.artifacts._status.root = status
         self._status = status
         self._artifact_to_key = frozendict(
             {artifact: key for key, artifact in self.artifacts.walk()}
@@ -305,7 +307,7 @@ class GraphSnapshot(Model):
         return self.graph.artifacts
 
     @property
-    def backend(self) -> Backend[BackendConnection]:
+    def backend(self) -> Backend:
         return self.graph.backend
 
     @property
@@ -377,7 +379,7 @@ class GraphSnapshot(Model):
         name: str,
         tag: str,
         *,
-        connectable: Backend[BackendConnection] | BackendConnection,
+        connectable: Backend | BackendConnection,
     ) -> GraphSnapshot:
         with connectable.connect() as conn:
             return conn.read_snapshot_tag(name, tag)

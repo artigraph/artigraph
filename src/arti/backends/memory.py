@@ -16,7 +16,6 @@ from arti import (
     GraphSnapshot,
     InputFingerprints,
     Storage,
-    StoragePartition,
     StoragePartitionSnapshot,
     StoragePartitionSnapshots,
 )
@@ -28,9 +27,10 @@ _GraphSnapshotPartitions = dict[
     GraphSnapshot, dict[str, set[StoragePartitionSnapshot]]
 ]  # ...[snapshot][artifact_key]
 _SnapshotTags = dict[str, dict[str, GraphSnapshot]]  # ...[name][tag]
-_StoragePartitions = dict[Storage[StoragePartition], set[StoragePartitionSnapshot]]
+_StoragePartitions = dict[Storage, set[StoragePartitionSnapshot]]
 
 
+# TODO: Determine if the "no copy" behavior is still necessary after the Pydantic v2 upgrade.
 class _NoCopyContainer(NoCopyMixin):
     """Container for MemoryBackend data that bypasses (deep)copying.
 
@@ -54,6 +54,9 @@ class _NoCopyContainer(NoCopyMixin):
         )
         self.snapshot_tags: _SnapshotTags = defaultdict(dict)
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartitionSnapshot])
+
+    def __eq__(self, other: object, /) -> bool:
+        return isinstance(other, _NoCopyContainer) and vars(self) == vars(other)
 
 
 class MemoryConnection(BackendConnection):

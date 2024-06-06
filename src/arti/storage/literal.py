@@ -14,7 +14,7 @@ _not_written_err = FileNotFoundError("Literal has not been written yet")
 
 class StringLiteralPartition(StoragePartition):
     id: str
-    value: str | None
+    value: str | None = None
 
     def compute_content_fingerprint(self) -> Fingerprint:
         if self.value is None:
@@ -26,7 +26,7 @@ class StringLiteral(Storage[StringLiteralPartition]):
     """StringLiteral stores a literal String value directly in the Backend."""
 
     id: str = "{graph_name}/{path_tags}/{names}/{partition_key_spec}/{input_fingerprint}/{name}{extension}"
-    value: str | None
+    value: str | None = None
 
     def discover_partitions(
         self, input_fingerprints: InputFingerprints = InputFingerprints()

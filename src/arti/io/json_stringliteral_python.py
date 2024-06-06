@@ -49,4 +49,4 @@ def _write_json_stringliteral_python(
         # We can't overwrite the original value stored in LiteralStorage - on subsequent
         # `.discover_partitions`, a partition with the original value will still be used.
         raise ValueError("Literals with a value already set cannot be written")
-    return storage_partition.copy(update={"value": json.dumps(data)})
+    return storage_partition.model_copy(update={"value": json.dumps(data)})

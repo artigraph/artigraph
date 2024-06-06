@@ -21,7 +21,7 @@ def test_python_View() -> None:
         view = View.from_annotation(python_type, mode="READWRITE")
         assert isinstance(view, view_class)
         assert view.artifact_class is Artifact
-        assert view.type == view.type_system.to_artigraph(python_type, hints={})  # type: ignore[operator] # likely some pydantic.mypy bug
+        assert view.type == view.type_system.to_artigraph(python_type, hints={})
 
         test_format = Pickle()
         binary = pickle.dumps(val)

@@ -214,7 +214,7 @@ class PyOptional(TypeAdapter):
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         # Optional is represented as a Union; strip out NoneType before dispatching
         type_ = Union[tuple(subtype for subtype in get_args(type_) if subtype is not NoneType)]  # noqa: UP007
-        return type_system.to_artigraph(type_, hints=hints).copy(update={"nullable": True})
+        return type_system.to_artigraph(type_, hints=hints).model_copy(update={"nullable": True})
 
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
@@ -223,7 +223,7 @@ class PyOptional(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         return cls.system[
-            type_system.to_system(type_.copy(update={"nullable": False}), hints=hints)
+            type_system.to_system(type_.model_copy(update={"nullable": False}), hints=hints)
         ]
 
 

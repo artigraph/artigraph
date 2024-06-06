@@ -7,6 +7,7 @@ from arti import (
     PartitionKey,
     StoragePartition,
     StoragePartitionSnapshots,
+    Type,
     View,
     io,
 )
@@ -19,7 +20,7 @@ from tests.arti.dummies import Num
 
 
 class PartitionedNum(Num):
-    type = Collection(element=Struct(fields={"i": Int64()}), partition_by=("i",))
+    type: Type = Collection(element=Struct(fields={"i": Int64()}), partition_by=("i",))
 
 
 @pytest.mark.parametrize("format", [JSON(), Pickle()])
@@ -48,9 +49,9 @@ def test_gcsfile_io_partitioned(gcs_bucket: str, format: Format) -> None:
         ): {"i": i}
         for i in [1, 2]
     }
-    view = View.from_annotation(Annotated[list, a.type], mode="READWRITE")  # type: ignore[operator] # likely some pydantic.mypy bug
+    view = View.from_annotation(Annotated[list, a.type], mode="READWRITE")
     for partition, record in data.items():
-        io.write([record], a.type, a.format, partition, view=view)  # type: ignore[operator] # likely some pydantic.mypy bug
+        io.write([record], a.type, a.format, partition, view=view)
     assert {p.snapshot() for p in data} == set(a.storage.discover_partitions())
     for partition, record in data.items():
-        assert io.read(a.type, a.format, (partition.snapshot(),), view=view) == [record]  # type: ignore[operator] # likely some pydantic.mypy bug
+        assert io.read(a.type, a.format, (partition.snapshot(),), view=view) == [record]

@@ -1,19 +1,19 @@
 import pickle
 import re
+from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, cast
 from unittest.mock import PropertyMock, patch
 
 import pytest
-from box import BoxError
 
 from arti import Artifact, Fingerprint, Graph, GraphSnapshot, PartitionKey, View, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
 from arti.graphs import ArtifactBox
-from arti.internal.utils import frozendict
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
+from arti.types import Int64
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2, div
 from tests.arti.dummies import Num as _Num
 
@@ -22,50 +22,78 @@ class Num(_Num):
     storage: LocalFile
 
 
+def test_ArtifactBox() -> None:
+    with Graph(name="test") as g:
+        g.artifacts.a.b.c = 5
+        g.artifacts.x.y.z = Artifact(type=Int64())
+
+    assert g.artifacts.a.b.c.storage.id == "test/a/b/c/c.json"
+    assert g.artifacts.x.y.z.storage.id == "test/x/y/z/z.json"
+
+    assert g.artifacts == pickle.loads(pickle.dumps(g.artifacts))
+
+
+@pytest.mark.xfail(raises=AssertionError, reason="Templates are not supported yet.")
+def test_ArtifactBox_template() -> None:
+    templates = ArtifactBox(a=5)
+    # We don't expect this part to fail, so avoid an assert to prevent false xfails.
+    if templates.a.storage.id != "{graph_name}/{path_tags}/{names}/{name}.json":
+        raise ValueError("Sanity check in xfail failed!")
+
+    with Graph(name="test", artifacts=templates) as g:
+        g.artifacts.z = 5
+    assert g.artifacts.a.storage.id == "test/a/a.json"
+    assert g.artifacts.z.storage.id == "test/z/z.json"
+
+
 @pytest.fixture()
 def graph() -> Graph:
     # NOTE: .out() supports strict Artifact subclass mypy typing with the mypy_plugin, but Producers
     # also support simple iteration (eg: `a, b = MyProducer(...)`).
     with Graph(name="test") as g:
         g.artifacts.a = A1()
-        g.artifacts.b = P1(a1=g.artifacts.a).out()
-        g.artifacts.c.a, g.artifacts.c.b = P2(a2=g.artifacts.b).out()
+        g.artifacts.b = P1(a1=g.artifacts.a)
+        g.artifacts.c.a, g.artifacts.c.b = P2(a2=g.artifacts.b)
+
     return g
 
 
 def test_Graph(graph: Graph) -> None:
+    assert graph.artifacts._status == "closed"
     assert isinstance(graph.artifacts.a, A1)
     assert isinstance(graph.artifacts.b, A2)
     assert isinstance(graph.artifacts.c.a, A3)
     assert isinstance(graph.artifacts.c.b, A4)
-    assert not graph.artifacts.a.storage.includes_input_fingerprint_template  # type: ignore[operator] # likely some pydantic.mypy bug
-    assert graph.artifacts.b.storage.includes_input_fingerprint_template  # type: ignore[operator] # likely some pydantic.mypy bug
-    assert graph.artifacts.c.a.storage.includes_input_fingerprint_template  # type: ignore[operator] # likely some pydantic.mypy bug
-    assert graph.artifacts.c.b.storage.includes_input_fingerprint_template  # type: ignore[operator] # likely some pydantic.mypy bug
-    # NOTE: We may need to occasionally update this, but ensure graph.backend is not included.
-    assert graph.fingerprint == Fingerprint.from_int(-2341774225960394121)
+    assert not graph.artifacts.a.storage.includes_input_fingerprint_template
+    assert graph.artifacts.b.storage.includes_input_fingerprint_template
+    assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
+    assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
+    assert "backend" not in graph.model_dump()
 
 
-def test_Graph_pickle(graph: Graph) -> None:
-    assert graph == pickle.loads(pickle.dumps(graph))
-
-
-def test_Graph_copy(graph: Graph) -> None:
-    # There are a few edge cases in pydantic when copying a model with a mapping subclass field[1], so
-    # double check things are ok under various conditions.
+@pytest.mark.parametrize(
+    "copier",
+    [
+        lambda g: g.model_copy(),
+        lambda g: pickle.loads(pickle.dumps(g)),
+    ],
+)
+def test_Graph_copy(graph: Graph, copier: Callable[[Graph], Graph]) -> None:
+    # There have been edge cases in pydantic when copying a model with a mapping subclass field[1],
+    # so double check things are ok.
     #
     # 1: https://github.com/pydantic/pydantic/issues/5225
-    for copy in [
-        graph.copy(),
-        graph.copy(exclude={"backend"}),
-        graph.copy(include=set(graph.__fields__)),
-    ]:
-        assert graph == copy
-        assert isinstance(copy.artifacts, ArtifactBox)
-        assert graph.artifacts == copy.artifacts
-        assert graph.fingerprint == copy.fingerprint
-        assert hash(graph) == hash(copy)
-        assert hash(copy) == copy.fingerprint
+    copy = copier(graph)
+
+    assert isinstance(copy.artifacts, ArtifactBox)
+    assert copy.artifacts._status == "closed"
+    assert graph.artifacts == copy.artifacts
+
+    assert graph.model_dump() == copy.model_dump()
+    assert graph == copy
+
+    assert graph.fingerprint == copy.fingerprint
+    assert hash(graph) == hash(copy)
 
 
 def test_Graph_literals(tmp_path: Path) -> None:
@@ -156,7 +184,7 @@ def test_Graph_snapshot() -> None:
         p1.fingerprint,
         *(
             storage_partition_snapshot.fingerprint
-            for storage_partition_snapshot in g.artifacts.a.storage.discover_partitions()  # type: ignore[operator] # Some pydantic.mypy bug
+            for storage_partition_snapshot in g.artifacts.a.storage.discover_partitions()
         ),
     ]
 
@@ -293,7 +321,7 @@ def test_Graph_build(tmp_path: Path) -> None:
     # Artifacts until build. Eventually, we need to allow the Artifact to access the backend
     # directly and automatically compute the input_fingerprints (ie: sync on the fly), which would
     # allow us to read automatically.
-    s = g.copy(update={"backend": MemoryBackend()}).build()
+    s = g.model_copy(update={"backend": MemoryBackend()}).build()
     assert n_builds == 2
     assert s.read(b, annotation=int) == 1
     assert s.read(c, annotation=int) == s.read(d, annotation=int) == 0
@@ -321,16 +349,14 @@ def test_Graph_build_failed_validation(tmp_path: Path) -> None:
 def test_Graph_dependencies(graph: Graph) -> None:
     p1 = graph.artifacts.b.producer_output.producer
     p2 = graph.artifacts.c.a.producer_output.producer
-    assert graph.dependencies == frozendict(
-        {
-            graph.artifacts.a: frozenset(),
-            p1: frozenset({graph.artifacts.a}),
-            graph.artifacts.b: frozenset({p1}),
-            p2: frozenset({graph.artifacts.b}),
-            graph.artifacts.c.a: frozenset({p2}),
-            graph.artifacts.c.b: frozenset({p2}),
-        }
-    )
+    assert graph.dependencies == {
+        graph.artifacts.a: frozenset(),
+        p1: frozenset({graph.artifacts.a}),
+        graph.artifacts.b: frozenset({p1}),
+        p2: frozenset({graph.artifacts.b}),
+        graph.artifacts.c.a: frozenset({p2}),
+        graph.artifacts.c.b: frozenset({p2}),
+    }
 
 
 def test_Graph_errors() -> None:
@@ -338,7 +364,7 @@ def test_Graph_errors() -> None:
         graph.artifacts.a = A1()
         graph.artifacts.b = P1(a1=graph.artifacts.a).out()
 
-    with pytest.raises(BoxError, match="Box is frozen"):
+    with pytest.raises(ValueError, match="ArtifactBox is frozen"):
         graph.artifacts.a = A1()
     with pytest.raises(AttributeError, match="has no attribute"):
         graph.artifacts.z
@@ -358,12 +384,10 @@ def test_Graph_producers(graph: Graph) -> None:
 def test_Graph_producer_output(graph: Graph) -> None:
     p1 = graph.artifacts.b.producer_output.producer
     p2 = graph.artifacts.c.a.producer_output.producer
-    assert graph.producer_outputs == frozendict(
-        {
-            p1: (graph.artifacts.b,),
-            p2: (graph.artifacts.c.a, graph.artifacts.c.b),
-        }
-    )
+    assert graph.producer_outputs == {
+        p1: (graph.artifacts.b,),
+        p2: (graph.artifacts.c.a, graph.artifacts.c.b),
+    }
 
     with Graph(name="test") as g:
         with pytest.raises(
@@ -455,12 +479,3 @@ def test_Graph_storage_resolution() -> None:
     assert g.artifacts.root.a.storage.path.endswith("/test/tag=value/root/a/a.json")
     assert g.artifacts.root.b.storage.path.endswith("/test/tag=value/root/b/b.json")
     assert g.artifacts.c.storage.path.endswith("/test/tag=value/c/{input_fingerprint}/c.json")
-
-
-def test_ArtifactBox() -> None:
-    with Graph(name="test") as g:
-        g.artifacts.a.b.c = 5  # test chained assignment
-        g.artifacts.x = {"y": {"z": 5}}  # test direct nested assignment
-    assert g.artifacts.a.b.c.storage.id == "test/a/b/c/c.json"  # type: ignore[attr-defined]
-    assert g.artifacts.x.y.z.storage.id == "test/x/y/z/z.json"  # type: ignore[attr-defined]
-    assert g.artifacts == pickle.loads(pickle.dumps(g.artifacts))

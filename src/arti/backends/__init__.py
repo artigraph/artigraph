@@ -3,11 +3,9 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from abc import abstractmethod
-from collections.abc import Callable, Iterator
+from collections.abc import Iterator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Generic, Self, TypeVar
-
-from pydantic.fields import ModelField
+from typing import TYPE_CHECKING, Self
 
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
@@ -131,22 +129,8 @@ class BackendConnection:
         """
         yield self
 
-    @classmethod
-    def __get_validators__(cls) -> list[Callable[[Any, ModelField], Any]]:
-        """Return an empty list of "validators".
 
-        Allows using a BackendConnection (which is not a model) as a field in other models without
-        setting `arbitrary_types_allowed` (which applies broadly). [1].
-
-        1: https://docs.pydantic.dev/usage/types/#generic-classes-as-types
-        """
-        return []
-
-
-BackendConnectionVar = TypeVar("BackendConnectionVar", bound=BackendConnection, covariant=True)
-
-
-class Backend(Model, Generic[BackendConnectionVar]):
+class Backend[Connection: BackendConnection](Model):
     """Backend represents a storage for internal Artigraph metadata.
 
     Backend storage is an addressable location (local path, database connection, etc) that
@@ -159,5 +143,5 @@ class Backend(Model, Generic[BackendConnectionVar]):
 
     @contextmanager
     @abstractmethod
-    def connect(self) -> Iterator[BackendConnectionVar]:
+    def connect(self) -> Iterator[Connection]:
         raise NotImplementedError()

@@ -176,7 +176,7 @@ def test_bigquery_type_system_to_system_not_implemented_errors(
 def test_bigquery_type_system_to_artigraph_not_implemented_errors(
     arti_collection: Collection, update: dict[str, Any], error_type: type[Exception], msg: str
 ) -> None:
-    arti_collection = arti_collection.copy(update=update)
+    arti_collection = arti_collection.model_copy(update=update)
     with pytest.raises(error_type, match=re.escape(msg)):
         bigquery_type_system.to_system(arti_collection, hints={})
 
@@ -186,13 +186,13 @@ def test_bigquery_type_system_partition_and_cluster(
 ) -> None:
     bq = deepcopy(bigquery_table)
     bq.time_partitioning = None
-    arti = arti_collection.copy(update={"partition_by": ()})
+    arti = arti_collection.model_copy(update={"partition_by": ()})
     assert bigquery_type_system.to_artigraph(bq, hints={}) == arti
     assert bigquery_type_system.to_system(arti, hints={}) == bq
 
     bq = deepcopy(bigquery_table)
     bq.clustering_fields = None
-    arti = arti_collection.copy(update={"cluster_by": ()})
+    arti = arti_collection.model_copy(update={"cluster_by": ()})
     assert bigquery_type_system.to_artigraph(bq, hints={}) == arti
     assert bigquery_type_system.to_system(arti, hints={}) == bq
 
@@ -201,12 +201,12 @@ def test_bigquery_type_system_partition_and_cluster(
     # clustering fields).
     bq = deepcopy(bigquery_table)
     bq.clustering_fields = ["int64", "float64"]
-    assert bigquery_type_system.to_artigraph(bq, hints={}) == arti_collection.copy(
+    assert bigquery_type_system.to_artigraph(bq, hints={}) == arti_collection.model_copy(
         update={"partition_by": ("date",), "cluster_by": ("int64", "float64")}
     )
     assert (
         bigquery_type_system.to_system(
-            arti_collection.copy(
+            arti_collection.model_copy(
                 update={"partition_by": ("date", "int64"), "cluster_by": ("float64",)}
             ),
             hints={},
@@ -217,12 +217,16 @@ def test_bigquery_type_system_partition_and_cluster(
 
 def test_bigquery_type_system_table_name(arti_collection: Collection) -> None:
     # Confirm the default name maps to fake values (BQ requires fully qualified names)
-    table = bigquery_type_system.to_system(arti_collection.copy(exclude={"name"}), hints={})
+    table = bigquery_type_system.to_system(
+        arti_collection.model_copy(update={"name": DEFAULT_ANONYMOUS_NAME}), hints={}
+    )
     assert table.project == "project"
     assert table.dataset_id == "dataset"
     assert table.table_id == "table"
 
-    table = bigquery_type_system.to_system(arti_collection.copy(update={"name": "p.d.t"}), hints={})
+    table = bigquery_type_system.to_system(
+        arti_collection.model_copy(update={"name": "p.d.t"}), hints={}
+    )
     assert table.project == "p"
     assert table.dataset_id == "d"
     assert table.table_id == "t"
