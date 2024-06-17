@@ -11,9 +11,8 @@ def test_wrap_exc() -> None:
     assert exc.value.__cause__ is root_error
 
     with pytest.raises(ValueError, match="ab - test") as exc:
-        with wrap_exc(ValueError, prefix="a"):
-            with wrap_exc(ValueError, prefix="b"):
-                raise root_error
+        with wrap_exc(ValueError, prefix="a"), wrap_exc(ValueError, prefix="b"):
+            raise root_error
     assert exc.value.__cause__ is root_error
 
     with wrap_exc(ValueError, prefix="shouldn't run"):

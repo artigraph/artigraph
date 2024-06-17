@@ -67,14 +67,14 @@ def test_multipledispatch() -> None:
         def bad_type(a: int, b: str) -> Any:
             return a, b
 
+    @multipledispatch("ok")
+    def ok(a: A) -> str:
+        return "good_a_b"
+
     with pytest.raises(
         TypeError,
         match=re.escape("Expected the `bad` return to match"),
     ):
-
-        @multipledispatch("ok")
-        def ok(a: A) -> str:
-            return "good_a_b"
 
         @ok.register
         def bad(a: A1) -> int:

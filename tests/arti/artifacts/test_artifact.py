@@ -91,22 +91,20 @@ def test_Artifact_validation() -> None:
     with pytest.raises(ValueError, match="type\n  Field required"):
         Artifact()  # type: ignore[call-arg]
 
+    class BadFormatArtifact(Artifact):
+        type: Type = Int64()
+        format: Format = BadFormat()
+        storage: Storage = DummyStorage()
+
     with pytest.raises(ValueError, match="Format - Boo!"):
-
-        class BadFormatArtifact(Artifact):
-            type: Type = Int64()
-            format: Format = BadFormat()
-            storage: Storage = DummyStorage()
-
         BadFormatArtifact()
 
+    class BadStorageArtifact(Artifact):
+        type: Type = Int64()
+        format: Format = DummyFormat()
+        storage: Storage = BadStorage()
+
     with pytest.raises(ValueError, match="Storage - Boo!"):
-
-        class BadStorageArtifact(Artifact):
-            type: Type = Int64()
-            format: Format = DummyFormat()
-            storage: Storage = BadStorage()
-
         BadStorageArtifact()
 
     class GoodArtifact(Artifact):

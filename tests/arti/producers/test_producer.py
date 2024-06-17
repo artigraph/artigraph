@@ -307,10 +307,10 @@ def test_Producer_validate_output_hint_validation() -> None:
 
         assert single_return_build.validate_outputs(5)
 
-    with pytest.raises(ValueError, match="i param - type hint must be `Any` or "):
+    def accepts_vargs_float(*i: float) -> tuple[bool, str]:
+        return bool(i), ""
 
-        def accepts_vargs_float(*i: float) -> tuple[bool, str]:
-            return bool(i), ""
+    with pytest.raises(ValueError, match="i param - type hint must be `Any` or "):
 
         @producer_decorator(validate_outputs=accepts_vargs_float)
         def bad_vargs(x: int) -> int:
@@ -328,23 +328,23 @@ def test_Producer_validate_output_hint_validation() -> None:
         def bad_default(x: int) -> int:
             return x
 
+    def validate_kwarg(*, i: int) -> tuple[bool, str]:
+        return bool(i), ""
+
     with pytest.raises(
         ValueError, match="validate_output i param - must be usable as a positional argument."
     ):
-
-        def validate_kwarg(*, i: int) -> tuple[bool, str]:
-            return bool(i), ""
 
         @producer_decorator(validate_outputs=validate_kwarg)
         def kwarg_only(x: int) -> int:
             return x
 
+    def accepts_float(i: float) -> tuple[bool, str]:
+        return bool(i), ""
+
     with pytest.raises(
         ValueError, match="validate_output i param - type hint must match the 1st `.build` return"
     ):
-
-        def accepts_float(i: float) -> tuple[bool, str]:
-            return bool(i), ""
 
         @producer_decorator(validate_outputs=accepts_float)
         def mismatched_hint(x: int) -> int:
