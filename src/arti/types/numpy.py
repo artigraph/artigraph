@@ -20,6 +20,8 @@ from arti.types import (
 # NOTE: TypeAdapters for some types may still be missing. Please open an issue or PR if you find
 # anything missing.
 #
+# TODO: Support np.dtypes.*DType (esp. `np.dtypes.StringDType`), not just the scalar types.
+#
 # TODO: Handle compound/structured dtypes and recarray
 # - This page will likely be helpful: https://numpy.org/doc/stable/reference/arrays.dtypes.html#arrays-dtypes
 
