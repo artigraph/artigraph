@@ -416,7 +416,7 @@ def test_Producer_bad_signature() -> None:
         match=r"BadProducer.build - the following parameter\(s\) must be defined as a field: {'a1'}",
     ):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             @classmethod
             def build(cls, a1: dict) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
@@ -426,7 +426,7 @@ def test_Producer_bad_signature() -> None:
         match=r"BadProducer.map - the following parameter\(s\) must be defined as a field: {'a1'}",
     ):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             @classmethod
             def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
@@ -440,7 +440,7 @@ def test_Producer_bad_signature() -> None:
         match=r"BadProducer - the following fields aren't used in `.build` or `.map`: {'a2'}",
     ):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
             a2: A2
 
@@ -450,7 +450,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="must have a type hint"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
 
             @classmethod
@@ -459,7 +459,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="type hint must be an Artifact subclass"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: str
 
             @classmethod
@@ -468,7 +468,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="must not have a default"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
 
             @classmethod
@@ -477,7 +477,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
 
             @classmethod
@@ -486,7 +486,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
 
             @classmethod
@@ -495,7 +495,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
 
             @classmethod
@@ -504,7 +504,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="a return value must be set"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
 
             @classmethod
@@ -513,7 +513,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="missing return signature"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
 
             @classmethod
@@ -522,7 +522,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="BadProducer.a1 - field must not have a default."):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1 = None  # type: ignore[assignment]
 
             @classmethod
@@ -531,7 +531,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="BadProducer.a1 - field must not be optional."):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1 | None
 
             @classmethod
@@ -543,7 +543,7 @@ def test_Producer_bad_signature() -> None:
         match=r"BadProducer.a1 - field must not have a default.",
     ):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1 = A1()
 
             @classmethod
@@ -555,7 +555,7 @@ def test_Producer_bad_signature() -> None:
         match=r"BadProducer.build a1 param - annotation Artifact class .* does not match that set on the field",
     ):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1
 
             @classmethod
@@ -564,7 +564,7 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match=r"str.* cannot be used to represent Struct"):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             @classmethod
             def build(cls) -> Annotated[str, A2]:  # type: ignore[empty-body]
                 pass
@@ -574,7 +574,7 @@ def test_Producer_bad_signature() -> None:
         match=r"the specified Type \(`Int64\(.*\)`\) is not compatible with the Artifact's Type",
     ):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             @classmethod
             def build(cls) -> Annotated[int, Int64(), A2]:  # type: ignore[empty-body]
                 pass
@@ -584,7 +584,7 @@ def test_Producer_bad_signature() -> None:
         match=r"BadProducer.build - must be a @classmethod or @staticmethod",
     ):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass
 
@@ -593,7 +593,7 @@ def test_Producer_bad_signature() -> None:
         match=r"BadProducer.map - must be a @classmethod or @staticmethod",
     ):
 
-        class BadProducer(Producer):  # type: ignore[no-redef] # noqa: F811
+        class BadProducer(Producer):  # type: ignore[no-redef]
             @classmethod
             def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
                 pass

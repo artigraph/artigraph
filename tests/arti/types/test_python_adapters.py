@@ -77,7 +77,7 @@ def test_python_list() -> None:
     # Confirm we can convert Collections to a list (NOTE: round trip still goes to List)
     collection = Collection(element=Struct(fields={"x": Int64()}))
     complex = python_type_system.to_system(collection, hints={})
-    assert get_origin(complex) == list
+    assert get_origin(complex) is list
     assert is_typeddict(get_args(complex)[0])
 
 
@@ -183,7 +183,7 @@ def test_python_tuple() -> None:
 
     collection = Collection(element=Struct(fields={"x": Int64()}))
     complex = PyTuple.to_system(collection, hints={}, type_system=python_type_system)
-    assert get_origin(complex) == tuple
+    assert get_origin(complex) is tuple
     assert is_typeddict(get_args(complex)[0])
 
     # We don't (currently) support structure based tuples
