@@ -69,9 +69,10 @@ jobs:
       - name: Publish to TestPyPI
         run: |
           rye publish \
-            --repository-url https://test.pypi.org/legacy/
+            --repository testpypi \
+            --repository-url https://test.pypi.org/legacy/ \
             --username '__token__' \
-            --token '${{ secrets.TEST_PYPI_TOKEN }}'
+            --token '${{ secrets.TEST_PYPI_TOKEN }}' \
             --yes
       - name: Publish to PyPI
         if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
@@ -80,7 +81,7 @@ jobs:
         run: |
           rye publish \
             --username '__token__' \
-            --token '${{ secrets.PYPI_TOKEN }}'
+            --token '${{ secrets.PYPI_TOKEN }}' \
             --yes
 
           # TODO: Fix doc generation - pdocs and portray are not maintained and have various issues.
