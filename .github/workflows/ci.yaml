@@ -52,19 +52,33 @@ jobs:
           files: coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
           token: ${{ vars.CODECOV_TOKEN }}
 
-  # TODO: Update to use Rye
   publish:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v'))
     needs: test
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          # We need to pull the commit and tag history in order to compute a unique version for
+          # non-tagged commits. `fetch-depth: 0` is required even with `fetch-tags: true`:
+          # - https://github.com/actions/checkout/issues/1471
+          fetch-depth: 0
+          fetch-tags: true
       - name: Install rye
         uses: eifinger/setup-rye@v4
-        with:
-          enable-cache: true
       - name: Build distributions
         run: |
+          # Set a deterministic build date to embed in the package metadata.
+          export SOURCE_DATE_EPOCH="$(git log -1 --pretty=%ct HEAD)"
+          # When building off an untagged commit, hatch-vcs will include a local version identifier
+          # with the short commit sha. This is usually desirable locally, but unfortunately these
+          # cannot be uploaded to TestPyPI[1][2].
+          #
+          # 1: https://github.com/pypa/setuptools_scm/issues/455
+          # 2: https://github.com/ofek/hatch-vcs/discussions/12
+          echo '[tool.hatch.version.raw-options]' >> pyproject.toml
+          echo 'local_scheme = "no-local-version"' >> pyproject.toml
+
           rye build
       - name: Publish to TestPyPI
         run: |
