@@ -31,8 +31,8 @@ def worktree_add(
     branch_dir = WORKTREE_BASE_DIR / branch
     typer.secho(f"Creating {branch_dir} worktree...", fg="green")
     git.worktree.add(branch_dir, branch)
-    if (envrc_secrets := REPO_ROOT / ".envrc.secrets").exists():
-        (branch_dir / ".envrc.secrets").symlink_to(envrc_secrets)
+    if (envrc_user := REPO_ROOT / ".envrc.user").exists():
+        (branch_dir / ".envrc.user").symlink_to(envrc_user)
     typer.secho("Bootstrapping direnv...", fg="green")
     bash(".envrc", _cwd=branch_dir, _fg=True)
     typer.echo(
