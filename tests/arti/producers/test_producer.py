@@ -400,8 +400,6 @@ def test_Producer_build_outputs_check() -> None:
 
 
 def test_Producer_bad_signature() -> None:
-    # pylint: disable=function-redefined
-
     # Ensure no error if _abstract_
     class OkProducer(Producer):
         _abstract_ = True

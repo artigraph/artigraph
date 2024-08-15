@@ -19,14 +19,10 @@ def clean_test_name(request: pytest.FixtureRequest) -> str:
 @pytest.fixture(scope="session")
 def gcs_emulator() -> Generator[tuple[str, int], None, None]:
     # port=0 -> run on a random open port; though we have to lookup later.
-    server = gcp_storage_emulator.server.create_server("localhost", 0, in_memory=True)
-    server.start()
-    try:
+    with gcp_storage_emulator.server.create_server("localhost", 0, in_memory=True) as server:
         host, port = server._api._httpd.socket.getsockname()
         with mock.patch.dict(os.environ, {"STORAGE_EMULATOR_HOST": f"{host}:{port}"}):
             yield host, port
-    finally:
-        server.stop()
 
 
 @pytest.fixture()
