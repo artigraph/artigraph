@@ -1,9 +1,10 @@
-default_stages: [commit, manual]
+default_install_hook_types: [pre-commit, pre-merge-commit, pre-push, prepare-commit-msg]
+default_stages: [manual, pre-commit, pre-merge-commit]
 repos:
   - repo: local
     hooks:
       - id: check-dco-sign-off
-        name: Check DCO Sign-off
+        name: check DCO sign-off
         entry: bin/check-dco-signoff.sh
         stages: [prepare-commit-msg]
         language: system
@@ -26,28 +27,29 @@ repos:
       - id: pretty-format-json
         args: [--autofix]
       - id: trailing-whitespace
-  - repo: https://github.com/astral-sh/ruff-pre-commit
-    rev: v0.5.2
-    hooks:
-      - id: ruff
-        args: [--fix]
-        types_or: [python, pyi, jupyter]
-      - id: ruff-format
-        types_or: [python, pyi, jupyter]
   - repo: local
     hooks:
-      - id: poetry-check
-        name: poetry-check
-        entry: poetry check
-        files: ^pyproject.toml$
+      - id: sync-deps
+        name: "sync dependencies"
+        entry: rye sync
+        files: ^(.*/)?(requirements(-dev)?\.lock|pyproject\.toml)$
         language: system
         pass_filenames: false
-      # TODO: Replace mypy with pyright - pyright has much better support for the complex types
-      # (recursive types, type parameter syntax, etc).
-      #
-      # - id: mypy
-      #   name: mypy
-      #   entry: mypy
-      #   language: system
-      #   pass_filenames: false # Running on a subset of files may mask interface breaks
-      #   types: [python]
+        require_serial: true
+        stages:
+          - post-checkout
+          - post-merge
+          - post-rewrite
+          - pre-commit # Run on pre-commit (instead of post-commit) to install/update the tools below.
+      - id: lint
+        name: "lint"
+        entry: rye lint
+        language: system
+        require_serial: true
+        types_or: [python, pyi, jupyter]
+      - id: format
+        name: "format"
+        entry: rye fmt
+        language: system
+        require_serial: true
+        types_or: [python, pyi, jupyter]

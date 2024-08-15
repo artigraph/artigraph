@@ -1,6 +1,29 @@
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+authors = [{ name = "Jacob Hayes", email = "jacob.r.hayes@gmail.com" }]
+dependencies = [
+    "annotated-types",
+    "multimethod>=1.10,<1.11",
+    "parse",
+    "pydantic>=2,<3",
+    "pyfarmhash",
+]
+description = "Artigraph is a tool to improve the authorship, management, and quality of data."
+dynamic = ["version"]
+license = "Apache-2.0"
+name = "arti"
+readme = "README.md"
+requires-python = ">=3.12"
+
+[project.optional-dependencies]
+all = ["gcsfs", "google-cloud-bigquery", "numpy", "pandas", "pyarrow"]
+
+[project.urls]
+Homepage = "https://github.com/artigraph/artigraph"
+Repository = "https://github.com/artigraph/artigraph"
 
 
 [tool.coverage.report]
@@ -21,6 +44,15 @@ branch = true
 omit = ["src/arti/internal/vendored/*"]
 source = ["arti"]
 
+[tool.hatch.build.targets.sdist]
+packages = ["src/arti"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.version]
+source = "vcs"
+
 
 [tool.mypy]
 explicit_package_bases = true
@@ -36,51 +68,26 @@ module = ["gcp_storage_emulator.*", "gcsfs", "pandas", "pyarrow", "sh"]
 ignore_missing_imports = true
 
 
-[tool.poetry]
-name = "arti"
-version = "0.0.5a0"                                   # DO NOT MODIFY - Set in CI during publish to match GitHub Release
-description = ""
-license = "Apache-2.0"
-authors = ["Jacob Hayes <jacob.r.hayes@gmail.com>"]
-readme = "README.md"
-homepage = "https://github.com/artigraph/artigraph"
-repository = "https://github.com/artigraph/artigraph"
-include = ["src/arti/py.typed"]
-
-[tool.poetry.dependencies]
-python = "^3.12"
-
-annotated-types = "*"
-gcsfs = { version = ">=2022.2.0", optional = true }
-google-cloud-bigquery = { version = "^3.5.0", optional = true }
-multimethod = ">=1.6,<1.11"
-numpy = { version = ">=1.23.1", optional = true }
-pandas = { version = ">=1.4.3", optional = true }
-parse = ">=1.19.0"
-pyarrow = { version = ">=8", optional = true }
-pydantic = ">=2,<3"
-pyfarmhash = ">=0.2.2"
-
-[tool.poetry.group.dev.dependencies]
-coverage = { version = ">=6.4", extras = ["toml"] }                         # pyproject.toml support
-gcp-storage-emulator = ">=2022.6.11"
-ipdb = ">=0.13.9"
-ipython = ">=8.4.0"
-mypy = ">=0.961"
-pdocs = { git = "https://github.com/JacobHayes/pdocs.git", rev = "master" } # Fix GenericAlias error https://github.com/timothycrosley/pdocs/pull/29
-portray = ">=1.7.0"
-pre-commit = ">=2.20.0"
-pytest = ">=7.1.2"
-pytest-benchmark = ">=3.4.1"
-pytest-cov = ">=3.0.0"
-pytest-pretty = "*"
-ruff = "*"
-sh = ">=2"
-typer = ">=0.6.1"
-types-pyfarmhash = ">=0.3.1"
-
-[tool.poetry.extras]
-all = ["gcsfs", "google-cloud-bigquery", "numpy", "pandas", "pyarrow"]
+[tool.rye]
+all-features = true
+dev-dependencies = [
+    "coverage",
+    "gcp-storage-emulator",
+    "ipdb",
+    "ipython",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pytest-benchmark",
+    "pytest-cov",
+    "pytest-pretty",
+    "sh",
+    "typer",
+    "types-pyfarmhash",
+]
+generate-hashes = true
+managed = true
+universal = true
 
 
 [tool.portray.mkdocs]
