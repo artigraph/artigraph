@@ -1,1 +1,2 @@
-poetry.lock linguist-generated=true
+requirements-dev.lock linguist-generated=true
+requirements.lock linguist-generated=true

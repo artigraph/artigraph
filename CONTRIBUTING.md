@@ -17,21 +17,18 @@ Project committers will review the contribution in a timely manner and advise of
 
 ## Coding Style
 
-Code is formatted with [`black`](https://black.readthedocs.io/en/stable/) and [`isort`](https://pycqa.github.io/isort/). Docstring style is not yet standardized, but they should generally follow [PEP257](https://www.python.org/dev/peps/pep-0257/).
+Code is formatted and linted with [`ruff`](https://docs.astral.sh/ruff/). Docstring style is not yet standardized, but they should generally follow [PEP257](https://www.python.org/dev/peps/pep-0257/).
 
 ## Development Workflow
 
-The project is managed with [`poetry`](https://python-poetry.org/). We use [`pre-commit`](https://pre-commit.com/) to apply and enforce code formatting and linting with git hooks.
+The project is managed with [`rye`](https://rye.astral.sh). We use [`pre-commit`](https://pre-commit.com/) to apply and enforce code formatting and linting with git hooks.
 
 ### Environment Setup
 
-If you work on macOS, the `.envrc` script (used by [`direnv`](https://direnv.net/)) in the repo root can automate project and environment setup for both Intel and M1 computers. Run `bash .envrc` to:
-- install [`brew`](https://brew.sh/) (if necessary)
-- install useful system packages ([`direnv`](https://direnv.net/), `git`, and [`pyenv`](https://github.com/pyenv/pyenv)) via the [`Brewfile`](Brewfile)
-- install the correct python version with pyenv
+If you work on Linux or macOS, the `.envrc` script (used by [`direnv`](https://direnv.net/)) in the repo root can automate project and environment setup. Run `bash .envrc` to:
+- install [`rye`](https://rye.astral.sh)
+- install the version of python set in `.python-version`
 - create a virtual environment and install dependencies
 - install and configure [`pre-commit`](https://pre-commit.com/)
 
-After that completes, [configure `direnv`](https://direnv.net/docs/hook.html) for your shell and run `exec $SHELL`. With `direnv` configured, the project's virtual environment will automatically be activated (and python and package versions synced!) upon `cd` into the repo.
-
-If you use another platform or would rather install manually, use `poetry` directly to manage your virtual environment(s). Contributions supporting `direnv` for other platforms would be appreciated!
+If you'd like for the virtualenv to be activated automatically when you enter the repo, [install](https://direnv.net/docs/installation.html) and [configure](https://direnv.net/docs/hook.html) `direnv`.
