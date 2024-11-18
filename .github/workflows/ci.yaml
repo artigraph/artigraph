@@ -45,7 +45,7 @@ jobs:
       - name: pytest
         run: |
           rye run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v5
         with:
           env_vars: OS,PYTHON_VERSION
           fail_ci_if_error: true
