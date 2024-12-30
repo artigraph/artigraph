@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 authors = [{ name = "Jacob Hayes", email = "jacob.r.hayes@gmail.com" }]
 dependencies = [
     "annotated-types",
-    "multimethod>=1.10,<1.11",
+    "multimethod>=1.10,<2.1",
     "parse",
     "pydantic>=2,<3",
     "pyfarmhash",
