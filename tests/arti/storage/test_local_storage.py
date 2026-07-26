@@ -13,7 +13,7 @@ from arti.types import Collection, Date, Struct
 from tests.arti.dummies import DummyFormat
 
 
-@pytest.fixture()
+@pytest.fixture
 def date_keys() -> list[PartitionKey]:
     return [
         PartitionKey(date=date_key)

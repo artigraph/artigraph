@@ -54,7 +54,7 @@ def test_cast_literals(value: Any, expected_type: Type) -> None:
     assert artifact.storage.value == json.dumps(value)
 
 
-@pytest.mark.xfail()
+@pytest.mark.xfail
 @pytest.mark.parametrize(
     ("value", "expected_type"),
     [

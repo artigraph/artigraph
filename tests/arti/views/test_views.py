@@ -7,7 +7,7 @@ from arti.types import Int64
 from arti.types.python import python_type_system
 
 
-@pytest.fixture()
+@pytest.fixture
 def MockView() -> type[View]:
     class V(View):
         _abstract_ = True

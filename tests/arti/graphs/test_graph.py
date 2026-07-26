@@ -46,7 +46,7 @@ def test_ArtifactBox_template() -> None:
     assert g.artifacts.z.storage.id == "test/z/z.json"
 
 
-@pytest.fixture()
+@pytest.fixture
 def graph() -> Graph:
     # NOTE: .out() supports strict Artifact subclass mypy typing with the mypy_plugin, but Producers
     # also support simple iteration (eg: `a, b = MyProducer(...)`).

@@ -32,7 +32,7 @@ from arti.types import (
 from arti.types.bigquery import BIGQUERY_HINT_FIELD_NAME, bigquery_type_system
 
 
-@pytest.fixture()
+@pytest.fixture
 def bigquery_table() -> bigquery.Table:
     table = bigquery.Table(
         "project.dataset.table",
@@ -83,7 +83,7 @@ def bigquery_table() -> bigquery.Table:
     return table
 
 
-@pytest.fixture()
+@pytest.fixture
 def arti_collection() -> Collection:
     return Collection(
         name="project.dataset.table",

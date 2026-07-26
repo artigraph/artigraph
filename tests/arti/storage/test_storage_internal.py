@@ -19,22 +19,22 @@ from arti.storage._internal import (
 PathPlaceholders = dict[str, tuple[Fingerprint | None, PartitionKey]]
 
 
-@pytest.fixture()
+@pytest.fixture
 def PKs() -> dict[str, type[PartitionField]]:
     return {"x": Int8Field, "y": Int8Field}
 
 
-@pytest.fixture()
+@pytest.fixture
 def spec() -> str:
     return "/p/{x.value}/{y.hex}"
 
 
-@pytest.fixture()
+@pytest.fixture
 def paths() -> set[str]:
     return {"/p/1/0x1", "/p/2/0x2", "/p/3/0x3"}
 
 
-@pytest.fixture()
+@pytest.fixture
 def paths_to_placeholders() -> PathPlaceholders:
     return {
         "/p/1/0x1": (None, PartitionKey({"x": Int8Field(value=1), "y": Int8Field(value=1)})),

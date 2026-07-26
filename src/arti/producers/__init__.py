@@ -183,7 +183,7 @@ class Producer(Model):
 
     @classmethod
     def _validate_build_sig_return(cls, annotation: Any, *, i: int) -> View:
-        with wrap_exc(ValueError, prefix=f" {ordinal(i+1)} return"):
+        with wrap_exc(ValueError, prefix=f" {ordinal(i + 1)} return"):
             return View.from_annotation(annotation, mode="WRITE")
 
     @classmethod
@@ -257,7 +257,7 @@ class Producer(Model):
                         raise ValueError("must be usable as a positional argument.")
                     if not param_matches(param, (expected := build_output_hints[i])):
                         raise ValueError(
-                            f"type hint must match the {ordinal(i+1)} `.build` return (`{expected}`)"
+                            f"type hint must match the {ordinal(i + 1)} `.build` return (`{expected}`)"
                         )
         # TODO: Validate return signature?
 
@@ -398,7 +398,7 @@ class Producer(Model):
         def validate(artifact: Artifact, *, ord: int) -> Artifact:
             view = self._outputs_[ord]
             with wrap_exc(
-                ValueError, prefix=f"{self._arti_type_key_}.out() {ordinal(ord+1)} argument"
+                ValueError, prefix=f"{self._arti_type_key_}.out() {ordinal(ord + 1)} argument"
             ):
                 view.check_artifact_compatibility(artifact)
                 if artifact.producer_output is not None:

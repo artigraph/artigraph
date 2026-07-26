@@ -12,7 +12,7 @@ import gcsfs
 import pytest
 
 
-@pytest.fixture()
+@pytest.fixture
 def clean_test_name(request: pytest.FixtureRequest) -> str:
     # Strip malformed characters (eg: parametrized test names include brackets). Depending on
     # parametrize inputs, we may have to replace/escape more things.
@@ -29,12 +29,12 @@ def gcs_emulator() -> Generator[tuple[str, int], None, None]:
             yield host, port
 
 
-@pytest.fixture()
+@pytest.fixture
 def gcs(gcs_emulator: tuple[str, int]) -> gcsfs.GCSFileSystem:
     return gcsfs.GCSFileSystem()
 
 
-@pytest.fixture()
+@pytest.fixture
 def gcs_bucket(clean_test_name: str, gcs: gcsfs.GCSFileSystem) -> Generator[str, None, None]:
     bucket = clean_test_name
     gcs.mkdir(bucket)
