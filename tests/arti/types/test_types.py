@@ -1,5 +1,6 @@
+# pyright: reportPrivateUsage=false
 import re
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -31,8 +32,8 @@ class MyInt(int):
 
 def _gen_numeric_adapter(
     artigraph_type: type[Type], system_type: Any, precision: int
-) -> type[TypeAdapter]:
-    class Adapter(TypeAdapter):
+) -> type[TypeAdapter[Any]]:
+    class Adapter(TypeAdapter[Type]):
         key = f"{artigraph_type._arti_type_key_}Adapter"
         artigraph = artigraph_type
         system = system_type
@@ -57,22 +58,22 @@ def _gen_numeric_adapter(
 
 
 @pytest.fixture(scope="session")
-def Float16Adapter() -> type[TypeAdapter]:
+def Float16Adapter() -> type[TypeAdapter[Any]]:
     return _gen_numeric_adapter(artigraph_type=Float16, system_type=MyFloat, precision=16)
 
 
 @pytest.fixture(scope="session")
-def Float32Adapter() -> type[TypeAdapter]:
+def Float32Adapter() -> type[TypeAdapter[Any]]:
     return _gen_numeric_adapter(artigraph_type=Float32, system_type=MyFloat, precision=32)
 
 
 @pytest.fixture(scope="session")
-def Float64Adapter() -> type[TypeAdapter]:
+def Float64Adapter() -> type[TypeAdapter[Any]]:
     return _gen_numeric_adapter(artigraph_type=Float64, system_type=MyFloat, precision=64)
 
 
 @pytest.fixture(scope="session")
-def Int32Adapter() -> type[TypeAdapter]:
+def Int32Adapter() -> type[TypeAdapter[Any]]:
     return _gen_numeric_adapter(artigraph_type=Int32, system_type=MyInt, precision=32)
 
 
@@ -97,7 +98,7 @@ def test_Enum() -> None:
     assert Enum(type=float32, items=items).friendly_key == "Float32Enum"
 
     for other_items in (items, list(items), tuple(items)):
-        other = Enum(name="Rating", type=float32, items=other_items)  # pyright: ignore[reportArgumentType]
+        other = cast(Any, Enum)(name="Rating", type=float32, items=other_items)
         assert enum == other
         assert isinstance(enum.items, frozenset)
 
@@ -143,11 +144,13 @@ def test_Collection_field_references(param: str) -> None:
     match = re.escape("field '{'z'}' does not exist on")
 
     with pytest.raises(ValueError, match=match):
-        Collection(element=Struct(fields={"x": Int32(), "y": Int32()}), **{param: ("z",)})  # pyright: ignore[reportArgumentType]
+        cast(Any, Collection)(
+            element=Struct(fields={"x": Int32(), "y": Int32()}), **{param: ("z",)}
+        )
 
     # Test with a bad `fields` and confirm the error *does not* contain the "unknown field" error.
     with pytest.raises(ValueError, match="Input should be a valid") as exc:
-        Collection(element="junk", **{param: ("z",)})  # pyright: ignore[reportArgumentType]
+        cast(Any, Collection)(element="junk", **{param: ("z",)})
     with pytest.raises(AssertionError):
         exc.match(match)
 
@@ -161,7 +164,7 @@ def test_Collection_partition_cluster_overlapping() -> None:
 
     # Test with a bad `partition_by` and confirm the error *does not* contain the "unknown field" error.
     with pytest.raises(ValueError, match="Input should be a valid") as exc:
-        Collection(element=struct, partition_by="x", cluster_by=("y",))  # pyright: ignore[reportArgumentType]
+        cast(Any, Collection)(element=struct, partition_by="x", cluster_by=("y",))
     with pytest.raises(AssertionError):
         exc.match(match)
 
@@ -195,10 +198,10 @@ def test_Timestamp() -> None:
 
 
 def test_TypeSystem(
-    Float16Adapter: type[TypeAdapter],
-    Float32Adapter: type[TypeAdapter],
-    Float64Adapter: type[TypeAdapter],
-    Int32Adapter: type[TypeAdapter],
+    Float16Adapter: type[TypeAdapter[Any]],
+    Float32Adapter: type[TypeAdapter[Any]],
+    Float64Adapter: type[TypeAdapter[Any]],
+    Int32Adapter: type[TypeAdapter[Any]],
 ) -> None:
     dummy = TypeSystem(key="dummy")
     assert dummy.key == "dummy"
@@ -228,7 +231,7 @@ def test_TypeSystem(
     assert dummy.to_system(Int32(), hints={}) is MyInt
 
 
-def test_TypeSystem_extends(Int32Adapter: type[TypeAdapter]) -> None:
+def test_TypeSystem_extends(Int32Adapter: type[TypeAdapter[Any]]) -> None:
     base = TypeSystem(key="base")
     extended = TypeSystem(key="extended", extends=(base,))
 

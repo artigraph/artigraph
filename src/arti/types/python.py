@@ -4,7 +4,17 @@ import datetime
 from collections.abc import Mapping
 from functools import partial
 from itertools import chain
-from typing import Any, Literal, Optional, TypedDict, Union, get_args, get_origin, get_type_hints
+from typing import (
+    Any,
+    Literal,
+    Optional,
+    TypedDict,
+    Union,
+    cast,
+    get_args,
+    get_origin,
+    get_type_hints,
+)
 
 import arti.types
 from arti.internal.type_hints import (
@@ -14,10 +24,11 @@ from arti.internal.type_hints import (
     is_union,
     lenient_issubclass,
 )
-from arti.types import Type, TypeAdapter, TypeSystem, _ContainerMixin, _ScalarClassTypeAdapter
+from arti.types import ContainerMixin, ScalarClassTypeAdapter, Type, TypeAdapter, TypeSystem
 
 python_type_system = TypeSystem(key="python")
-_generate = partial(_ScalarClassTypeAdapter.generate, type_system=python_type_system)
+_generate = partial(ScalarClassTypeAdapter.generate, type_system=python_type_system)
+
 
 _generate(artigraph=arti.types.Binary, system=bytes)
 # NOTE: issubclass(bool, int) is True, so set higher priority
@@ -39,7 +50,7 @@ for _precision in (8, 16, 32, 64):
 
 
 @python_type_system.register_adapter
-class PyNone(_ScalarClassTypeAdapter):
+class PyNone(ScalarClassTypeAdapter[arti.types.Null]):
     # Python represents None types in type hints with the `None` value (not `NoneType`).
 
     artigraph = arti.types.Null
@@ -51,7 +62,7 @@ class PyNone(_ScalarClassTypeAdapter):
 
 
 @python_type_system.register_adapter
-class PyDatetime(_ScalarClassTypeAdapter):
+class PyDatetime(ScalarClassTypeAdapter[arti.types.Timestamp]):
     artigraph = arti.types.Timestamp
     system = datetime.datetime
     priority = 1  # Prioritize above Date (isinstance(datetime, date) is True)
@@ -61,11 +72,11 @@ class PyDatetime(_ScalarClassTypeAdapter):
         return cls.artigraph(precision="microsecond")
 
 
-class PyValueContainer(TypeAdapter):
+class PyValueContainer(TypeAdapter[arti.types.List | arti.types.Set]):
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         (element,) = get_args(type_)
-        assert issubclass(cls.artigraph, _ContainerMixin)
+        assert issubclass(cls.artigraph, ContainerMixin)
         return cls.artigraph(
             element=type_system.to_artigraph(element, hints=hints),
         )
@@ -77,7 +88,7 @@ class PyValueContainer(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return cls.system[type_system.to_system(type_.element, hints=hints)]  # type: ignore[attr-defined]
+        return cls.system[type_system.to_system(type_.element, hints=hints)]
 
 
 @python_type_system.register_adapter
@@ -132,7 +143,7 @@ class PySet(PyValueContainer):
 
 
 @python_type_system.register_adapter
-class PyLiteral(TypeAdapter):
+class PyLiteral(TypeAdapter[arti.types.Enum]):
     artigraph = arti.types.Enum
     system = Literal
 
@@ -152,10 +163,12 @@ class PyLiteral(TypeAdapter):
         assert isinstance(items, tuple)
         if len(items) == 0:
             raise NotImplementedError(f"Invalid Literal with no values: {type_}")
-        py_type, *other_types = (type(v) for v in items)
+        py_type, *other_types = (cast(type[Any], type(v)) for v in items)
         if not all(t is py_type for t in other_types):
             raise ValueError("All Literals must be the same type, got: {(py_type, *other_types)}")
-        return cls.artigraph(type=type_system.to_artigraph(py_type, hints=hints), items=items)
+        return cls.artigraph(
+            type=type_system.to_artigraph(py_type, hints=hints), items=frozenset(items)
+        )
 
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
@@ -174,7 +187,7 @@ class PyLiteral(TypeAdapter):
 
 
 @python_type_system.register_adapter
-class PyMap(TypeAdapter):
+class PyMap(TypeAdapter[arti.types.Map]):
     artigraph = arti.types.Map
     system = dict
 
@@ -193,14 +206,14 @@ class PyMap(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return cls.system[  # type: ignore[misc]
+        return cls.system[
             type_system.to_system(type_.key, hints=hints),
             type_system.to_system(type_.value, hints=hints),
         ]
 
 
 @python_type_system.register_adapter
-class PyOptional(TypeAdapter):
+class PyOptional(TypeAdapter[arti.types.Type]):
     artigraph = arti.types.Type  # Check against isinstance *and* .nullable
     system = Optional
     # Set very high priority to intercept other matching arti.types.Types/py Union in order to set .nullable
@@ -228,7 +241,7 @@ class PyOptional(TypeAdapter):
 
 
 @python_type_system.register_adapter
-class PyStruct(TypeAdapter):
+class PyStruct(TypeAdapter[arti.types.Struct]):
     artigraph = arti.types.Struct
     system = TypedDict
 
@@ -253,7 +266,7 @@ class PyStruct(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        return TypedDict(  # type: ignore[operator]
+        return cast(Any, TypedDict)(
             type_.name,
             {
                 field_name: type_system.to_system(field_type, hints=hints)

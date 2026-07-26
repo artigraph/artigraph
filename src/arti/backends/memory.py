@@ -1,9 +1,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
-from functools import partial
+from typing import Any
 
 from pydantic import PrivateAttr
 
@@ -27,7 +27,11 @@ _GraphSnapshotPartitions = dict[
     GraphSnapshot, dict[str, set[StoragePartitionSnapshot]]
 ]  # ...[snapshot][artifact_key]
 _SnapshotTags = dict[str, dict[str, GraphSnapshot]]  # ...[name][tag]
-_StoragePartitions = dict[Storage, set[StoragePartitionSnapshot]]
+_StoragePartitions = dict[Storage[Any], set[StoragePartitionSnapshot]]
+
+
+def _new_artifact_partition_sets() -> dict[str, set[StoragePartitionSnapshot]]:
+    return defaultdict(set)
 
 
 # TODO: Determine if the "no copy" behavior is still necessary after the Pydantic v2 upgrade.
@@ -44,14 +48,14 @@ class _NoCopyContainer(NoCopyMixin):
     """
 
     def __init__(self) -> None:
-        # NOTE: lambdas are not pickleable, so use partial for any nested defaultdicts.
+        # NOTE: lambdas are not pickleable, so use a top-level factory for nested defaultdicts.
         self.graphs: _Graphs = defaultdict(dict)
         self.snapshots: _GraphSnapshots = defaultdict(dict)
         # `container.snapshot_partitions` tracks all the partitions for a *specific* GraphSnapshot.
         # `container.storage_partitions` tracks all partitions, across all snapshots. This
         # separation is important to allow for Literals to be used even after a snapshot change.
         self.snapshot_partitions: _GraphSnapshotPartitions = defaultdict(
-            partial(defaultdict, set[StoragePartitionSnapshot])
+            _new_artifact_partition_sets
         )
         self.snapshot_tags: _SnapshotTags = defaultdict(dict)
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartitionSnapshot])
@@ -135,5 +139,5 @@ class MemoryBackend(Backend[MemoryConnection]):
     _container: _NoCopyContainer = PrivateAttr(default_factory=_NoCopyContainer)
 
     @contextmanager
-    def connect(self) -> Iterator[MemoryConnection]:
+    def connect(self) -> Generator[MemoryConnection]:
         yield MemoryConnection(self._container)

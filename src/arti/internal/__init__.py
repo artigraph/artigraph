@@ -1,11 +1,11 @@
 from __future__ import annotations
 
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 
 
 @contextmanager
-def wrap_exc(error_type: type[Exception], *, prefix: str) -> Iterator[None]:
+def wrap_exc(error_type: type[Exception], *, prefix: str) -> Generator[None]:
     """
     Wrap exceptions of `error_type` and add a message prefix.
 
@@ -23,5 +23,5 @@ def wrap_exc(error_type: type[Exception], *, prefix: str) -> Iterator[None]:
             msg = f" - {msg}"
             src = e
         error = error_type(f"{prefix}{msg}")
-        error.wrapped = True  # type: ignore[attr-defined]
+        object.__setattr__(error, "wrapped", True)
         raise error from src

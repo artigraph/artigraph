@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import warnings
 from copy import deepcopy
-from typing import Any
+from typing import Any, ClassVar
 
 from google.cloud import bigquery
 from google.cloud.bigquery.enums import SqlTypeNames
@@ -45,7 +45,7 @@ def _create_schema_field(
     )
 
 
-class _BigQueryTypeAdapter(TypeAdapter):
+class _BigQueryTypeAdapter[ArtigraphType: Type](TypeAdapter[ArtigraphType]):
     @classmethod
     def to_artigraph(
         cls, type_: bigquery.SchemaField, *, hints: dict[str, Any], type_system: TypeSystem
@@ -53,15 +53,17 @@ class _BigQueryTypeAdapter(TypeAdapter):
         return cls.artigraph(description=type_.description, nullable=type_.is_nullable)
 
     @classmethod
-    def matches_system(cls, type_: bigquery.SchemaField, *, hints: dict[str, Any]) -> bool:
-        return isinstance(type_, bigquery.SchemaField) and type_.field_type.upper() == cls.system  # type: ignore[no-any-return]
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
+        return isinstance(type_, bigquery.SchemaField) and type_.field_type.upper() == cls.system
 
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         return _create_schema_field(cls.system, type_, hints)
 
 
-def _gen_adapter(*, artigraph: type[Type], system: Any, priority: int = 0) -> type[TypeAdapter]:
+def _gen_adapter(
+    *, artigraph: type[Type], system: Any, priority: int = 0
+) -> type[TypeAdapter[Any]]:
     return bigquery_type_system.register_adapter(
         type(
             f"BigQuery{system}{artigraph}",
@@ -91,13 +93,13 @@ for _precision in (8, 16, 32, 64):
     )
 
 
-class _BaseTimeTypeAdapter(_BigQueryTypeAdapter):
+class _BaseTimeTypeAdapter(_BigQueryTypeAdapter[types.DateTime | types.Time | types.Timestamp]):
     # BQ time precision is microsecond (https://cloud.google.com/bigquery/docs/reference/standard-sql/data-types#timestamp_type)
-    precision = "microsecond"
+    precision: ClassVar[types.Precision] = "microsecond"
 
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
-        assert issubclass(cls.artigraph, types._TimeMixin)
+        assert issubclass(cls.artigraph, types.TimeMixin)
         return cls.artigraph(
             description=type_.description, nullable=type_.is_nullable, precision=cls.precision
         )
@@ -122,7 +124,7 @@ class TimestampTypeAdapter(_BaseTimeTypeAdapter):
 
 
 @bigquery_type_system.register_adapter
-class StructTypeAdapter(_BigQueryTypeAdapter):
+class StructTypeAdapter(_BigQueryTypeAdapter[types.Struct]):
     # See https://cloud.google.com/bigquery/docs/nested-repeated
 
     artigraph = types.Struct
@@ -155,7 +157,7 @@ class StructTypeAdapter(_BigQueryTypeAdapter):
 
 
 @bigquery_type_system.register_adapter
-class ListFieldTypeAdapter(TypeAdapter):
+class ListFieldTypeAdapter(TypeAdapter[types.List]):
     # See https://cloud.google.com/bigquery/docs/nested-repeated
 
     artigraph = types.List
@@ -169,7 +171,7 @@ class ListFieldTypeAdapter(TypeAdapter):
         # Convert the REPEATED field to REQUIRED (BigQuery only supports non-nullable array
         # elements) for subsequent conversion by other TypeAdapters.
         element_type = deepcopy(type_)
-        element_type._properties["mode"] = BIGQUERY_MODE.REQUIRED
+        element_type._properties["mode"] = BIGQUERY_MODE.REQUIRED  # pyright: ignore[reportPrivateUsage]
         return types.List(
             description=type_.description,
             element=type_system.to_artigraph(element_type, hints=hints),
@@ -177,8 +179,8 @@ class ListFieldTypeAdapter(TypeAdapter):
         )
 
     @classmethod
-    def matches_system(cls, type_: bigquery.SchemaField, *, hints: dict[str, Any]) -> bool:
-        return isinstance(type_, bigquery.SchemaField) and type_.mode == BIGQUERY_MODE.REPEATED  # type: ignore[no-any-return]
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
+        return isinstance(type_, bigquery.SchemaField) and type_.mode == BIGQUERY_MODE.REPEATED
 
     @classmethod
     def matches_artigraph(cls, type_: Type, *, hints: dict[str, Any]) -> bool:
@@ -206,7 +208,7 @@ class ListFieldTypeAdapter(TypeAdapter):
 
 
 @bigquery_type_system.register_adapter
-class TableTypeAdapter(TypeAdapter):
+class TableTypeAdapter(TypeAdapter[types.Collection]):
     artigraph = types.Collection
     system = bigquery.Table
     priority = ListFieldTypeAdapter.priority + 1
@@ -226,23 +228,25 @@ class TableTypeAdapter(TypeAdapter):
             raise NotImplementedError("BigQuery integer range partitioning is not implemented")
         if type_.clustering_fields:
             kwargs["cluster_by"] = tuple(type_.clustering_fields)
+        element = type_system.to_artigraph(
+            bigquery.SchemaField(
+                types.DEFAULT_ANONYMOUS_NAME,
+                SqlTypeNames.STRUCT,
+                fields=type_.schema,  # pyright: ignore[reportUnknownMemberType, reportUnknownArgumentType]
+                mode="REQUIRED",
+            ),
+            hints=hints,
+        )
+        assert isinstance(element, types.Struct)
         return cls.artigraph(
             name=f"{type_.project}.{type_.dataset_id}.{type_.table_id}",
-            element=type_system.to_artigraph(
-                bigquery.SchemaField(
-                    types.DEFAULT_ANONYMOUS_NAME,
-                    SqlTypeNames.STRUCT,
-                    fields=type_.schema,
-                    mode="REQUIRED",
-                ),
-                hints=hints,
-            ),
+            element=element,
             nullable=False,
             **kwargs,
         )
 
     @classmethod
-    def matches_system(cls, type_: bigquery.SchemaField, *, hints: dict[str, Any]) -> bool:
+    def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         return isinstance(type_, cls.system)
 
     @classmethod
@@ -270,7 +274,7 @@ class TableTypeAdapter(TypeAdapter):
                     field=head, type_=bigquery.TimePartitioningType.DAY
                 )
                 table.require_partition_filter = True
-            elif isinstance(type_.element.fields[head], types._Int):
+            elif isinstance(type_.element.fields[head], types._Int):  # pyright: ignore[reportPrivateUsage]
                 raise NotImplementedError("BigQuery integer range partitioning is not implemented")
             else:
                 raise ValueError("BigQuery only supports integer range or time partitioning")

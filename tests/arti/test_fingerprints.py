@@ -1,4 +1,6 @@
+# pyright: reportPrivateUsage=false
 from itertools import permutations
+from typing import Any, cast
 
 import pytest
 
@@ -20,7 +22,8 @@ def test_Fingerprint() -> None:
         Fingerprint.from_int(uint64._max)
 
     f1, f2 = Fingerprint(1), Fingerprint(2)
-    assert f1 != "1"  # type: ignore[comparison-overlap]
+    other: object = "1"
+    assert f1 != other
     assert f1 != f2
     assert not f1.is_identity
     assert Fingerprint.identity().is_identity
@@ -48,4 +51,4 @@ def test_Fingerprint_math() -> None:
 
     for val in [None, "a"]:
         with pytest.raises(TypeError):
-            f1.combine(val)  # type: ignore[arg-type]
+            f1.combine(cast(Any, val))

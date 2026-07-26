@@ -87,10 +87,10 @@ class Executor(Model):
                 storage_partition_snapshots=input_partitions[name],
                 view=view,
             )
-            for name, view in producer._build_inputs_.items()
+            for name, view in producer._build_inputs_.items()  # pyright: ignore[reportPrivateUsage]
         }
         outputs = producer.build(**arguments)
-        if len(producer._outputs_) == 1:
+        if len(producer._outputs_) == 1:  # pyright: ignore[reportPrivateUsage]
             outputs = (outputs,)
         validation_passed, validation_message = producer.validate_outputs(*outputs)
         if not validation_passed:
@@ -101,5 +101,5 @@ class Executor(Model):
                 artifact=snapshot.graph.producer_outputs[producer][i],
                 input_fingerprint=input_fingerprint,
                 partition_key=partition_key,
-                view=producer._outputs_[i],
+                view=producer._outputs_[i],  # pyright: ignore[reportPrivateUsage]
             )

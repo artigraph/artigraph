@@ -19,10 +19,10 @@ pyarrow_type_system = TypeSystem(key="pyarrow")
 #     large_string(),
 
 
-class _PyarrowTypeAdapter(TypeAdapter):
+class _PyarrowTypeAdapter[ArtigraphType: Type](TypeAdapter[ArtigraphType]):
     @classproperty
     def _is_system(cls) -> Callable[[pa.DataType], bool]:
-        return getattr(pa.types, f"is_{cls.system.__name__}")  # type: ignore[no-any-return]
+        return cast(Callable[[pa.DataType], bool], getattr(pa.types, f"is_{cls.system.__name__}"))
 
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
@@ -37,7 +37,9 @@ class _PyarrowTypeAdapter(TypeAdapter):
         return cls.system()
 
 
-def _gen_adapter(*, artigraph: type[Type], system: Any, priority: int = 0) -> type[TypeAdapter]:
+def _gen_adapter(
+    *, artigraph: type[Type], system: Any, priority: int = 0
+) -> type[TypeAdapter[Any]]:
     return pyarrow_type_system.register_adapter(
         type(
             f"Pyarrow{system.__name__}",
@@ -73,7 +75,7 @@ for _precision in (8, 16, 32, 64):
 
 
 @pyarrow_type_system.register_adapter
-class BinaryTypeAdapter(_PyarrowTypeAdapter):
+class BinaryTypeAdapter(_PyarrowTypeAdapter[types.Binary]):
     artigraph = types.Binary
     system = pa.binary
 
@@ -97,7 +99,7 @@ class BinaryTypeAdapter(_PyarrowTypeAdapter):
 
 # The pyarrow bool constructor and checker have different names
 @pyarrow_type_system.register_adapter
-class BoolTypeAdapter(_PyarrowTypeAdapter):
+class BoolTypeAdapter(_PyarrowTypeAdapter[types.Boolean]):
     artigraph = types.Boolean
     system = pa.bool_
 
@@ -107,7 +109,7 @@ class BoolTypeAdapter(_PyarrowTypeAdapter):
 
 
 @pyarrow_type_system.register_adapter
-class GeographyTypeAdapter(_PyarrowTypeAdapter):
+class GeographyTypeAdapter(_PyarrowTypeAdapter[types.Geography]):
     # TODO: Can we do something with pa.field metadata to round trip (eg: format, srid, etc) or
     # infer GeoParquet?
     artigraph = types.Geography
@@ -126,7 +128,7 @@ class GeographyTypeAdapter(_PyarrowTypeAdapter):
 
 
 @pyarrow_type_system.register_adapter
-class ListTypeAdapter(_PyarrowTypeAdapter):
+class ListTypeAdapter(_PyarrowTypeAdapter[types.List]):
     artigraph = types.List
     system = pa.list_
 
@@ -147,7 +149,7 @@ class ListTypeAdapter(_PyarrowTypeAdapter):
 
 
 @pyarrow_type_system.register_adapter
-class MapTypeAdapter(_PyarrowTypeAdapter):
+class MapTypeAdapter(_PyarrowTypeAdapter[types.Map]):
     artigraph = types.Map
     system = pa.map_
 
@@ -172,7 +174,7 @@ class MapTypeAdapter(_PyarrowTypeAdapter):
 
 
 @pyarrow_type_system.register_adapter
-class StructTypeAdapter(_PyarrowTypeAdapter):
+class StructTypeAdapter(_PyarrowTypeAdapter[types.Struct]):
     artigraph = types.Struct
     system = pa.struct
 
@@ -214,7 +216,7 @@ class StructTypeAdapter(_PyarrowTypeAdapter):
 # NOTE: pa.schema and pa.struct are structurally similar, but pa.schema has additional attributes
 # (eg: .metadata) and cannot be nested (like Collection).
 @pyarrow_type_system.register_adapter
-class SchemaTypeAdapter(_PyarrowTypeAdapter):
+class SchemaTypeAdapter(_PyarrowTypeAdapter[types.Collection]):
     artigraph = types.Collection
     system = pa.schema
     priority = ListTypeAdapter.priority + 1
@@ -223,28 +225,24 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
     def matches_artigraph(cls, type_: Type, *, hints: dict[str, Any]) -> bool:
         # Collection can hold arbitrary types, but `pa.schema` is only a struct (but with arbitrary
         # metadata)
-        return super().matches_artigraph(type_=type_, hints=hints) and isinstance(
-            type_.element,  # type: ignore[attr-defined]
-            types.Struct,
-        )
+        return isinstance(type_, types.Collection)
 
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
-        kwargs = {}
+        kwargs: dict[str, Any] = {}
         # NOTE: pyarrow converts all metadata keys/values to bytes
         if type_.metadata and b"artigraph" in type_.metadata:
-            kwargs = json.loads(type_.metadata[b"artigraph"].decode())
+            kwargs = cast(dict[str, Any], json.loads(type_.metadata[b"artigraph"].decode()))
             for key in ["partition_by", "cluster_by"]:
                 if key in kwargs:  # pragma: no cover
                     kwargs[key] = tuple(kwargs[key])
-        return cls.artigraph(
-            element=StructTypeAdapter.to_artigraph(type_, hints=hints, type_system=type_system),
-            **kwargs,
-        )
+        element = StructTypeAdapter.to_artigraph(type_, hints=hints, type_system=type_system)
+        assert isinstance(element, types.Struct)
+        return cls.artigraph(element=element, **kwargs)
 
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
-        return isinstance(type_, pa.lib.Schema)
+        return isinstance(type_, pa.Schema)
 
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
@@ -270,8 +268,8 @@ class SchemaTypeAdapter(_PyarrowTypeAdapter):
         )
 
 
-class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
-    precision_to_unit: ClassVar[dict[str, str]] = {
+class _BaseTimeTypeAdapter(_PyarrowTypeAdapter[types.DateTime | types.Time | types.Timestamp]):
+    precision_to_unit: ClassVar[dict[types.Precision, str]] = {
         "second": "s",
         "millisecond": "ms",
         "microsecond": "us",
@@ -279,7 +277,7 @@ class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
     }
 
     @classproperty
-    def unit_to_precision(cls) -> dict[str, str]:
+    def unit_to_precision(cls) -> dict[str, types.Precision]:
         return {v: k for k, v in cls.precision_to_unit.items()}
 
     @classmethod
@@ -288,12 +286,13 @@ class _BaseTimeTypeAdapter(_PyarrowTypeAdapter):
             raise ValueError(
                 f"{type_}.unit must be one of {tuple(cls.unit_to_precision)}, got {type_.unit}"
             )
-        assert issubclass(cls.artigraph, types._TimeMixin)
+        assert issubclass(cls.artigraph, types.TimeMixin)
         return cls.artigraph(precision=precision)
 
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
-        precision = type_.precision  # type: ignore[attr-defined]
+        assert isinstance(type_, types.TimeMixin)
+        precision = type_.precision
         if (unit := cls.precision_to_unit.get(precision)) is None:  # pragma: no cover
             raise ValueError(
                 f"{type_}.precision must be one of {tuple(cls.precision_to_unit)}, got {precision}"
@@ -340,7 +339,8 @@ class _BaseSizedTimeTypeAdapter(_BaseTimeTypeAdapter):
     def matches_artigraph(cls, type_: Type, *, hints: dict[str, Any]) -> bool:
         return (
             super().matches_artigraph(type_=type_, hints=hints)
-            and type_.precision in cls.precision_to_unit  # type: ignore[attr-defined]
+            and isinstance(type_, types.TimeMixin)
+            and type_.precision in cls.precision_to_unit
         )
 
     @classmethod
@@ -352,7 +352,7 @@ class _BaseSizedTimeTypeAdapter(_BaseTimeTypeAdapter):
 
 @pyarrow_type_system.register_adapter
 class Time32TypeAdapter(_BaseSizedTimeTypeAdapter):
-    precision_to_unit: ClassVar[dict[str, str]] = {
+    precision_to_unit: ClassVar[dict[types.Precision, str]] = {
         "second": "s",
         "millisecond": "ms",
     }
@@ -361,7 +361,7 @@ class Time32TypeAdapter(_BaseSizedTimeTypeAdapter):
 
 @pyarrow_type_system.register_adapter
 class Time64TypeAdapter(_BaseSizedTimeTypeAdapter):
-    precision_to_unit: ClassVar[dict[str, str]] = {
+    precision_to_unit: ClassVar[dict[types.Precision, str]] = {
         "microsecond": "us",
         "nanosecond": "ns",
     }

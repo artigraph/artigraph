@@ -27,7 +27,7 @@ from arti.types.python import python_type_system
 
 
 class Num(Artifact):
-    type: Type = Int64()  # https://github.com/python/mypy/issues/11897
+    type: Type = Int64()
     format: Format = JSON()
     # Omit storage to require callers to set the instance in a separate tempdir.
 
@@ -63,7 +63,7 @@ class DummyStorage(Storage[DummyPartition]):
     ) -> StoragePartitionSnapshots:
         if self.key_types != PartitionKeyTypes():
             raise NotImplementedError()
-        if input_fingerprints is not None and input_fingerprints != InputFingerprints():
+        if input_fingerprints != InputFingerprints():
             raise NotImplementedError()
         return (self.generate_partition().snapshot(),)
 
@@ -86,44 +86,44 @@ def dummy_writer(
     storage_partition: DummyPartition,
     view: View,
 ) -> None:
-    pass
+    return None
 
 
 class DummyStatistic(Statistic):
     type: Type = Int32()
     format: Format = DummyFormat()
-    storage: Storage = DummyStorage()
+    storage: DummyStorage = DummyStorage()
 
 
 class A1(Artifact):
     type: Type = Struct(fields={"a": Int32()})
     format: Format = DummyFormat()
-    storage: Storage = DummyStorage()
+    storage: DummyStorage = DummyStorage()
 
 
 class A2(Artifact):
     type: Type = Struct(fields={"b": Int32()})
     format: Format = DummyFormat()
-    storage: Storage = DummyStorage()
+    storage: DummyStorage = DummyStorage()
 
 
 class A3(Artifact):
     type: Type = Struct(fields={"c": Int32()})
     format: Format = DummyFormat()
-    storage: Storage = DummyStorage()
+    storage: DummyStorage = DummyStorage()
 
 
 class A4(Artifact):
     type: Type = Struct(fields={"d": Int32()})
     format: Format = DummyFormat()
-    storage: Storage = DummyStorage()
+    storage: DummyStorage = DummyStorage()
 
 
 class P1(Producer):
     a1: A1
 
     @staticmethod
-    def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+    def build(a1: dict[Any, Any]) -> Annotated[dict[Any, Any], A2]:
         return {}
 
 
@@ -131,7 +131,9 @@ class P2(Producer):
     a2: A2
 
     @staticmethod
-    def build(a2: dict) -> tuple[Annotated[dict, A3], Annotated[dict, A4]]:  # type: ignore[type-arg]
+    def build(
+        a2: dict[Any, Any],
+    ) -> tuple[Annotated[dict[Any, Any], A3], Annotated[dict[Any, Any], A4]]:
         return {}, {}
 
 
@@ -140,5 +142,7 @@ class P3(Producer):
     a2: A2
 
     @staticmethod
-    def build(a1: dict, a2: dict) -> tuple[Annotated[dict, A3], Annotated[dict, A4]]:  # type: ignore[type-arg]
+    def build(
+        a1: dict[Any, Any], a2: dict[Any, Any]
+    ) -> tuple[Annotated[dict[Any, Any], A3], Annotated[dict[Any, Any], A4]]:
         return {}, {}

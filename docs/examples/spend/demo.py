@@ -1,6 +1,6 @@
 import logging
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any, cast
 
 from arti import Annotation, Artifact, Format, Graph, Storage, Type, producer
 from arti.formats.json import JSON
@@ -29,14 +29,14 @@ class TotalSpend(Artifact):
 
     type: Type = Float64()
     format: Format = JSON()
-    storage: Storage = LocalFile()
+    storage: Storage[Any] = LocalFile()
 
 
 @producer(version=SemVer(major=1, minor=0, patch=0))
 def aggregate_transactions(
-    transactions: Annotated[list[dict], Transactions],
+    transactions: Annotated[list[dict[Any, Any]], Transactions],
 ) -> Annotated[float, TotalSpend]:
-    return sum(txn["amount"] for txn in transactions)
+    return float(sum(txn["amount"] for txn in transactions))
 
 
 with Graph(name="test-graph") as g:
@@ -45,7 +45,9 @@ with Graph(name="test-graph") as g:
         format=JSON(),
         storage=LocalFile(path=str(DIR / "transactions" / "{date.iso}.json")),
     )
-    g.artifacts.spend = aggregate_transactions(transactions=g.artifacts.vendor.transactions)
+    g.artifacts.spend = cast(Any, aggregate_transactions)(
+        transactions=g.artifacts.vendor.transactions
+    )
 
 
 if __name__ == "__main__":

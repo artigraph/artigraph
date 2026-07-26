@@ -5,7 +5,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from abc import abstractmethod
 from collections.abc import Iterable, Mapping
 from operator import attrgetter
-from typing import Annotated, Any, ClassVar, Literal
+from typing import Annotated, Any, ClassVar, Literal, cast
 
 from pydantic import PrivateAttr, ValidationInfo, field_validator
 
@@ -42,11 +42,11 @@ class Type(Model):
         return self._arti_type_key_
 
 
-class _ContainerMixin(Model):
+class ContainerMixin(Model):
     element: Type
 
 
-class _NamedMixin(Model):
+class NamedMixin(Model):
     name: str = DEFAULT_ANONYMOUS_NAME
 
     @property
@@ -59,7 +59,10 @@ class _NamedMixin(Model):
         return self._default_friendly_key if self.name == DEFAULT_ANONYMOUS_NAME else self.name
 
 
-class _TimeMixin(Model):
+type Precision = Literal["second", "millisecond", "microsecond", "nanosecond"]
+
+
+class TimeMixin(Model):
     precision: Literal["second", "millisecond", "microsecond", "nanosecond"]
 
 
@@ -92,11 +95,11 @@ class Date(Type):
     pass
 
 
-class DateTime(_TimeMixin, Type):
+class DateTime(TimeMixin, Type):
     """A Date and Time as shown on a calendar and clock, independent of timezone."""
 
 
-class Enum(_NamedMixin, Type):
+class Enum(NamedMixin, Type):
     type: Type
     items: frozenset[Any]
 
@@ -104,8 +107,8 @@ class Enum(_NamedMixin, Type):
     @classmethod
     def _cast_values(cls, items: Any) -> Any:
         if isinstance(items, Iterable) and not isinstance(items, Mapping):
-            return frozenset(items)
-        return items  # coverage: ignore
+            return frozenset(cast(Iterable[Any], items))
+        return cast(Any, items)  # coverage: ignore
 
     @field_validator("items")
     @classmethod
@@ -161,13 +164,13 @@ class Int64(_Int):
     pass
 
 
-class List(_ContainerMixin, Type):
+class List(ContainerMixin, Type):
     @property
     def friendly_key(self) -> str:
         return f"{self.element.friendly_key}{self._arti_type_key_}"
 
 
-class Collection(_NamedMixin, List):
+class Collection(NamedMixin, List):
     """
     A collection of Structs with partition and cluster metadata.
 
@@ -208,7 +211,7 @@ class Collection(_NamedMixin, List):
 
     @property
     def fields(self) -> frozendict[str, Type]:
-        return self.element.fields
+        return self.element.fields  # pyright: ignore[reportReturnType]
 
     @property
     def partition_fields(self) -> frozendict[str, Type]:
@@ -232,7 +235,7 @@ class Null(Type):
     pass
 
 
-class Set(_ContainerMixin, Type):
+class Set(ContainerMixin, Type):
     @property
     def friendly_key(self) -> str:
         return f"{self.element.friendly_key}{self._arti_type_key_}"
@@ -242,7 +245,7 @@ class String(Type):
     pass
 
 
-class Struct(_NamedMixin, Type):
+class Struct(NamedMixin, Type):
     fields: FrozenMapping[str, Type]
 
     @property
@@ -250,11 +253,11 @@ class Struct(_NamedMixin, Type):
         return f"Custom{self._arti_type_key_}"  # :shrug:
 
 
-class Time(_TimeMixin, Type):
+class Time(TimeMixin, Type):
     pass
 
 
-class Timestamp(_TimeMixin, Type):
+class Timestamp(TimeMixin, Type):
     """UTC timestamp with configurable precision."""
 
     @property
@@ -283,12 +286,12 @@ class UInt64(_Int):
 ##############################
 
 
-class TypeAdapter:
+class TypeAdapter[ArtigraphType]:
     """TypeAdapter maps between Artigraph types and a foreign type system."""
 
     key: ClassVar[str] = class_name()
 
-    artigraph: ClassVar[type[Type]]  # The internal Artigraph Type
+    artigraph: type[ArtigraphType]  # The internal Artigraph Type
     system: ClassVar[Any]  # The external system's type
 
     priority: ClassVar[int] = 0  # Set the priority of this mapping. Higher is better.
@@ -312,7 +315,7 @@ class TypeAdapter:
 
 # _ScalarClassTypeAdapter can be used for scalars defined as python types (eg: int or str for the
 # python TypeSystem).
-class _ScalarClassTypeAdapter(TypeAdapter):
+class ScalarClassTypeAdapter[ScalarType: Type](TypeAdapter[ScalarType]):
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         return cls.artigraph()
@@ -334,8 +337,8 @@ class _ScalarClassTypeAdapter(TypeAdapter):
         priority: int = 0,
         type_system: TypeSystem,
         name: str | None = None,
-    ) -> type[TypeAdapter]:
-        """Generate a _ScalarClassTypeAdapter subclass for the scalar system type."""
+    ) -> type[TypeAdapter[Any]]:
+        """Generate a ScalarClassTypeAdapter subclass for the scalar system type."""
         name = name or f"{type_system.key}{artigraph.__name__}"
         return type_system.register_adapter(
             type(
@@ -353,13 +356,15 @@ class TypeSystem(Model):
     # NOTE: Use a NoCopyDict to avoid copies of the registry. Otherwise, TypeSystems that extend
     # this TypeSystem will only see the adapters registered *as of initialization* (as pydantic
     # would deepcopy the TypeSystems in the `extends` argument).
-    _adapter_by_key: NoCopyDict[str, type[TypeAdapter]] = PrivateAttr(default_factory=NoCopyDict)
+    _adapter_by_key: NoCopyDict[str, type[TypeAdapter[Any]]] = PrivateAttr(
+        default_factory=NoCopyDict
+    )
 
-    def register_adapter(self, adapter: type[TypeAdapter]) -> type[TypeAdapter]:
-        return register(self._adapter_by_key, adapter.key, adapter)
+    def register_adapter[Adapter: type[TypeAdapter[Any]]](self, adapter: Adapter) -> Adapter:
+        return cast(Adapter, register(self._adapter_by_key, adapter.key, adapter))
 
     @property
-    def _priority_sorted_adapters(self) -> list[type[TypeAdapter]]:
+    def _priority_sorted_adapters(self) -> list[type[TypeAdapter[Any]]]:
         return sorted(self._adapter_by_key.values(), key=attrgetter("priority"), reverse=True)
 
     def to_artigraph(

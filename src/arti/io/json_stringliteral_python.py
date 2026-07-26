@@ -21,7 +21,7 @@ def _read_json_literal(partition: StringLiteralPartition) -> Any:
 
 
 @register_reader
-def _read_json_stringliteral_python(
+def read_json_stringliteral_python(
     type_: Type,
     format: JSON,
     storage_partitions: Sequence[StringLiteralPartition],
@@ -38,7 +38,7 @@ def _read_json_stringliteral_python(
 
 
 @register_writer
-def _write_json_stringliteral_python(
+def write_json_stringliteral_python(
     data: Any,
     type_: Type,
     format: JSON,

@@ -14,7 +14,7 @@ pandas_type_system = TypeSystem(key="pandas", extends=(numpy_type_system,))
 
 
 @pandas_type_system.register_adapter
-class SeriesAdapter(TypeAdapter):
+class SeriesAdapter(TypeAdapter[List]):
     artigraph = List
     system = pd.Series
 
@@ -59,7 +59,7 @@ class SeriesAdapter(TypeAdapter):
 
 
 @pandas_type_system.register_adapter
-class DataFrameAdapter(TypeAdapter):
+class DataFrameAdapter(TypeAdapter[List]):
     """
     Convert between a List of Structs and a pd.DataFrame.
 

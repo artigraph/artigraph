@@ -38,17 +38,24 @@ def test_multipledispatch() -> None:
 
     # Check that the non-annotated registration works
     @test.register(A1, B1)
-    def good_a1_b1(a, b) -> Any:  # type: ignore[no-untyped-def]
+    def good_a1_b1(a: Any, b: Any) -> Any:
         return "good_a1_b1"
+
+    assert callable(good_a_b1)
+    assert callable(good_a1_b)
+    assert callable(good_a1_b1)
+
+    def bad_name(a: int) -> Any:
+        return a
 
     with pytest.raises(
         TypeError,
         match=re.escape("Expected `bad_name` to have ['a', 'b'] parameters, got ['a']"),
     ):
+        test.register(bad_name)
 
-        @test.register
-        def bad_name(a: int) -> Any:
-            return a
+    def bad_param_kind(*, a: A, b: B) -> Any:
+        return a, b
 
     with pytest.raises(
         TypeError,
@@ -56,10 +63,10 @@ def test_multipledispatch() -> None:
             "Expected the `bad_param_kind.a` parameter to be POSITIONAL_OR_KEYWORD, got KEYWORD_ONLY"
         ),
     ):
+        test.register(bad_param_kind)
 
-        @test.register
-        def bad_param_kind(*, a: A, b: B) -> Any:
-            return a, b
+    def bad_type(a: int, b: str) -> Any:
+        return a, b
 
     with pytest.raises(
         TypeError,
@@ -67,23 +74,20 @@ def test_multipledispatch() -> None:
             "Expected the `bad_type.a` parameter to be a subclass of <class 'test_dispatch.A'>, got <class 'int'>"
         ),
     ):
-
-        @test.register
-        def bad_type(a: int, b: str) -> Any:
-            return a, b
+        test.register(bad_type)
 
     @multipledispatch("ok")
     def ok(a: A) -> str:
         return "good_a_b"
 
+    def bad(a: A1) -> int:
+        return 5
+
     with pytest.raises(
         TypeError,
         match=re.escape("Expected the `bad` return to match"),
     ):
-
-        @ok.register
-        def bad(a: A1) -> int:
-            return 5
+        ok.register(bad)
 
     assert test(A(), B()) == "good_a_b"
     assert test(A(), B1()) == "good_a_b1"

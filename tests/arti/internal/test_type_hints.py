@@ -1,5 +1,16 @@
 from collections.abc import Mapping, Sequence
-from typing import Annotated, Any, Generic, Literal, Optional, TypedDict, TypeVar, Union, get_origin
+from typing import (
+    Annotated,
+    Any,
+    Generic,
+    Literal,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+    cast,
+    get_origin,
+)
 
 import pytest
 
@@ -15,7 +26,7 @@ from arti.internal.type_hints import (
 )
 
 
-class MyTuple(tuple):  # type: ignore[type-arg]
+class MyTuple[T](tuple[T, ...]):
     pass
 
 
@@ -23,8 +34,9 @@ class MyTypedDict(TypedDict):
     a: int
 
 
-MyTupleVar = TypeVar("MyTupleVar", bound=MyTuple)
-TupleVar = TypeVar("TupleVar", bound=tuple)  # type: ignore[type-arg]
+_make_type_var = cast(Any, TypeVar)
+MyTupleVar: Any = _make_type_var("MyTupleVar", bound=MyTuple)
+TupleVar: Any = _make_type_var("TupleVar", bound=tuple)
 UnboundVar = TypeVar("UnboundVar")
 
 
@@ -84,9 +96,9 @@ def test_get_item_from_annotated(
 _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (Annotated[int, 5], Annotated[int, 5]),
     (Annotated[int, 5], int),
-    (Annotated[list[int], 5], Annotated[list, 5]),
+    (Annotated[list[int], 5], Annotated[list[Any], 5]),
     (Annotated[list[int], 5], Annotated[list[int], 5]),
-    (Annotated[list[int], 5], list),
+    (Annotated[list[int], 5], list[Any]),
     (Annotated[list[int], 5], list[int]),
     (Any, Any),
     (Any, UnboundVar),
@@ -109,7 +121,7 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (int, Union[int, str]),  # noqa: UP007
     (int, int | None),
     (int, int | str),
-    (list[int], Annotated[list, 5]),
+    (list[int], Annotated[list[Any], 5]),
     (list[int], Annotated[list[int], 5]),
     (str, Any),
     (str, Union[int, str]),  # noqa: UP007
@@ -117,8 +129,8 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (tuple, TupleVar),
     (tuple, UnboundVar),
     (tuple, tuple),
-    (tuple[MyTuple[int]], tuple),  # type: ignore[type-arg]
-    (tuple[MyTuple[int]], tuple[tuple[int]]),  # type: ignore[type-arg]
+    (tuple[MyTuple[int]], tuple),
+    (tuple[MyTuple[int]], tuple[tuple[int]]),
     (tuple[int], Sequence),
     (tuple[int], Sequence[int]),
     (tuple[int], tuple),
@@ -153,10 +165,10 @@ _LENIENT_ISSUBCLASS_FALSE_CASES = [
     (str, int | float),
     (tuple, MyTupleVar),
     (tuple, Sequence[int]),
-    (tuple, tuple[MyTuple[int]]),  # type: ignore[type-arg]
+    (tuple, tuple[MyTuple[int]]),
     (tuple, tuple[int]),
     (tuple[str], Sequence[int]),
-    (tuple[tuple[int]], tuple[MyTuple[int]]),  # type: ignore[type-arg]
+    (tuple[tuple[int]], tuple[MyTuple[int]]),
     (tuple[tuple[str]], tuple[tuple[int]]),
     # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for
     # these.

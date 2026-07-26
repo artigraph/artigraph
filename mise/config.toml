@@ -1,4 +1,5 @@
 [env]
+PYRIGHT_PYTHON_IGNORE_WARNINGS = "true" # Avoid the update check, which requires network access
 _.path = ["{{config_root}}/bin"]
 
 [hooks]

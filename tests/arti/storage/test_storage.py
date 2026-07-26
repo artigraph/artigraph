@@ -46,7 +46,9 @@ class MockStorage(Storage[MockStoragePartition]):
 
 def test_StoragePartition_snapshot() -> None:
     storage = MockStorage(path="/tmp/test")
-    partition = MockStoragePartition(path="/tmp/test", partition_key={}, storage=storage)
+    partition = MockStoragePartition(
+        path="/tmp/test", partition_key=PartitionKey(), storage=storage
+    )
     snapshot = partition.snapshot()
     assert snapshot.content_fingerprint == partition.compute_content_fingerprint()
     assert snapshot.storage == storage
@@ -54,21 +56,18 @@ def test_StoragePartition_snapshot() -> None:
 
 
 def test_Storage_init_subclass() -> None:
-    class Abstract(Storage):  # type: ignore[type-arg]
-        _abstract_ = True
+    abstract_class = type("Abstract", (cast(type, Storage),), {"_abstract_": True})
 
-    assert not hasattr(Abstract, "storage_partition_type")
+    assert not hasattr(abstract_class, "storage_partition_type")
 
     with pytest.raises(TypeError, match="Bad fields must match MockStoragePartition"):
-
-        class Bad(Storage[MockStoragePartition]):
-            pass
+        type("Bad", (Storage[MockStoragePartition],), {})
 
     class S(Storage[MockStoragePartition]):
         path: str
 
     assert not hasattr(Storage, "storage_partition_type")
-    assert S.storage_partition_type is MockStoragePartition  # type: ignore[misc]
+    assert S.storage_partition_type is MockStoragePartition
 
 
 def test_Storage_resolve_empty_error() -> None:
@@ -76,36 +75,36 @@ def test_Storage_resolve_empty_error() -> None:
     with pytest.raises(
         ValueError, match=re.escape(".path was empty after removing unused templates")
     ):
-        s._visit_names(())
+        s.visit_names(())
 
 
 def test_Storage_visit_format() -> None:
     p = "somefile{extension}"
-    assert MockStorage(path=p)._visit_format(JSON()).path == "somefile.json"
-    assert MockStorage(path=p)._visit_format(JSON(extension="")).path == "somefile"
+    assert MockStorage(path=p).visit_format(JSON()).path == "somefile.json"
+    assert MockStorage(path=p).visit_format(JSON(extension="")).path == "somefile"
 
 
 def test_Storage_visit_graph() -> None:
     s = MockStorage(path="/{graph_name}/{path_tags}/junk")
-    assert s._visit_graph(Graph(name="test")) == MockStorage(path="/test/junk")
-    assert s._visit_graph(Graph(name="test", path_tags={"a": "b"})) == MockStorage(
+    assert s.visit_graph(Graph(name="test")) == MockStorage(path="/test/junk")
+    assert s.visit_graph(Graph(name="test", path_tags={"a": "b"})) == MockStorage(
         path="/test/a=b/junk"
     )
 
 
 def test_Storage_visit_input_fingerprint() -> None:
     s = MockStorage(path="/{input_fingerprint}/junk")
-    assert s._visit_input_fingerprint(Fingerprint.from_int(10)) == MockStorage(path="/10/junk")
-    assert s._visit_input_fingerprint(None) == MockStorage(path="/junk")
+    assert s.visit_input_fingerprint(Fingerprint.from_int(10)) == MockStorage(path="/10/junk")
+    assert s.visit_input_fingerprint(None) == MockStorage(path="/junk")
 
 
 def test_Storage_visit_names() -> None:
     s = MockStorage(path="/{names}")
-    assert s._visit_names(("a", "b")) == MockStorage(path="/a/b")
+    assert s.visit_names(("a", "b")) == MockStorage(path="/a/b")
 
     s = MockStorage(path="/{names}/junk/{name}")
-    assert s._visit_names(("a", "b")) == MockStorage(path="/a/b/junk/b")
-    assert s._visit_names(()) == MockStorage(path="/junk")
+    assert s.visit_names(("a", "b")) == MockStorage(path="/a/b/junk/b")
+    assert s.visit_names(()) == MockStorage(path="/junk")
 
 
 @pytest.mark.parametrize(
@@ -134,16 +133,20 @@ def test_Storage_visit_names() -> None:
     ],
 )
 def test_Storage_visit_type(spec: str, expected: str, type: Type) -> None:
-    assert MockStorage(path=spec)._visit_type(type).path == expected
+    assert MockStorage(path=spec).visit_type(type).path == expected
 
 
 def test_Storage_key_types() -> None:
-    assert MockStorage(path="test")._visit_type(
+    assert MockStorage(path="test").visit_type(
         Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",))
     ).key_types == PartitionKeyTypes(a=Int8Field)
-    assert MockStorage(path="test")._visit_type(Int8()).key_types == PartitionKeyTypes()
+    assert MockStorage(path="test").visit_type(Int8()).key_types == PartitionKeyTypes()
     with pytest.raises(ValueError, match=re.escape("`key_types` have not been set yet.")):
         assert MockStorage(path="test").key_types
+    # The key types are private state, but still distinguish otherwise identical Storage.
+    assert MockStorage(path="test").visit_type(
+        Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",))
+    ) != MockStorage(path="test").visit_type(Int8())
 
 
 def test_Storage_vist_type_extra() -> None:
@@ -169,7 +172,7 @@ def test_Storage_vist_type_extra() -> None:
             return ()
 
     type = Collection(element=Struct(fields={"a": Int8(), "b": Int8()}), partition_by=("a", "b"))
-    t = Table()._visit_type(type)
+    t = Table().visit_type(type)
     assert t.dataset == "s_{tag}"
     assert t.name == "a_value_{a.value}__b_value_{b.value}"
 
@@ -177,8 +180,8 @@ def test_Storage_vist_type_extra() -> None:
 def test_Storage_discover_partitions() -> None:
     s = (
         MockStorage(path="/test/{i.value}/file")
-        ._visit_type(Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)))
-        ._visit_format(DummyFormat())
+        .visit_type(Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)))
+        .visit_format(DummyFormat())
     )
     partitions = s.discover_partitions()
     for i, sps in enumerate(
@@ -188,7 +191,7 @@ def test_Storage_discover_partitions() -> None:
         assert isinstance(sp, MockStoragePartition)
         assert sp.path == f"/test/{i}/file"
         assert isinstance(sp.partition_key["i"], Int8Field)
-        assert sp.partition_key["i"].value == i
+        assert cast(Int8Field, sp.partition_key["i"]).value == i
 
 
 def test_Storage_generate_partition() -> None:
@@ -196,8 +199,8 @@ def test_Storage_generate_partition() -> None:
     input_fingerprint = Fingerprint.from_int(10)
     s = (
         MockStorage(path="{i.value:02}/{input_fingerprint}")
-        ._visit_type(Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)))
-        ._visit_format(DummyFormat())
+        .visit_type(Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",)))
+        .visit_format(DummyFormat())
     )
     expected_partition = MockStoragePartition(
         input_fingerprint=input_fingerprint, partition_key=partition_key, path="05/10", storage=s
@@ -224,18 +227,18 @@ def test_Storage_generate_partition() -> None:
         s.generate_partition(partition_key=partition_key, input_fingerprint=None)
 
     with pytest.raises(ValueError, match="Expected no partition key but got:"):
-        MockStorage(path="hard coded")._visit_type(Int8()).generate_partition(
+        MockStorage(path="hard coded").visit_type(Int8()).generate_partition(
             partition_key=partition_key
         )
     with pytest.raises(
         ValueError, match=re.escape("Expected partition key with ('i',) but none were passed")
     ):
-        MockStorage(path="hard coded")._visit_type(
+        MockStorage(path="hard coded").visit_type(
             Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",))
         ).generate_partition()
     with pytest.raises(
         ValueError, match=re.escape("does not specify a {input_fingerprint} template")
     ):
-        MockStorage(path="hard coded")._visit_type(Int8()).generate_partition(
+        MockStorage(path="hard coded").visit_type(Int8()).generate_partition(
             input_fingerprint=Fingerprint.from_string("fake")
         )

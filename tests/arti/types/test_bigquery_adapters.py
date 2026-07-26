@@ -28,8 +28,10 @@ from arti.types import (
     Time,
     Timestamp,
     Type,
+    TypeSystem,
 )
 from arti.types.bigquery import BIGQUERY_HINT_FIELD_NAME, bigquery_type_system
+from arti.types.python import python_type_system
 
 
 @pytest.fixture
@@ -121,31 +123,39 @@ def test_bigquery_type_system_comprehensive(
     assert bigquery_table == bigquery_type_system.to_system(arti_collection, hints={})
 
 
+def _set_hour_partitioning(table: bigquery.Table) -> None:
+    table.time_partitioning = bigquery.TimePartitioning(field="date", type_="HOUR")
+
+
+def _set_month_partitioning(table: bigquery.Table) -> None:
+    table.time_partitioning = bigquery.TimePartitioning(field="date", type_="MONTH")
+
+
+def _set_year_partitioning(table: bigquery.Table) -> None:
+    table.time_partitioning = bigquery.TimePartitioning(field="date", type_="YEAR")
+
+
+def _set_range_partitioning(table: bigquery.Table) -> None:
+    table.range_partitioning = bigquery.RangePartitioning(field="int64")
+
+
 @pytest.mark.parametrize(
     ("mutate", "msg"),
     [
         (
-            lambda tbl: setattr(
-                tbl, "time_partitioning", bigquery.TimePartitioning(field="date", type_="HOUR")
-            ),
+            _set_hour_partitioning,
             "BigQuery time partitioning other than 'DAY' is not implemented (got 'HOUR')",
         ),
         (
-            lambda tbl: setattr(
-                tbl, "time_partitioning", bigquery.TimePartitioning(field="date", type_="MONTH")
-            ),
+            _set_month_partitioning,
             "BigQuery time partitioning other than 'DAY' is not implemented (got 'MONTH')",
         ),
         (
-            lambda tbl: setattr(
-                tbl, "time_partitioning", bigquery.TimePartitioning(field="date", type_="YEAR")
-            ),
+            _set_year_partitioning,
             "BigQuery time partitioning other than 'DAY' is not implemented (got 'YEAR')",
         ),
         (
-            lambda tbl: setattr(
-                tbl, "range_partitioning", bigquery.RangePartitioning(field="int64")
-            ),
+            _set_range_partitioning,
             "BigQuery integer range partitioning is not implemented",
         ),
     ],
@@ -319,3 +329,11 @@ def test_bigquery_type_system_list_error() -> None:
         bigquery_type_system.to_system(List(element=Int64(), nullable=True), hints={})
     with pytest.warns(Warning, match="BigQuery doesn't support nullable array elements"):
         bigquery_type_system.to_system(List(element=Int64(nullable=True)), hints={})
+
+
+def test_bigquery_type_system_extended_fallback() -> None:
+    # BigQuery adapters must not match (or error on) foreign system types, so extending TypeSystems
+    # can fall back to other systems.
+    type_system = TypeSystem(key="test", extends=(bigquery_type_system, python_type_system))
+    assert type_system.to_artigraph(int, hints={}) == Int64()
+    assert type_system.to_artigraph(list[int], hints={}) == List(element=Int64())

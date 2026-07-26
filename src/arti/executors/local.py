@@ -7,7 +7,6 @@ from arti.artifacts import Artifact
 from arti.executors import Executor
 from arti.graphs import GraphSnapshot
 from arti.internal.type_hints import assert_not_none
-from arti.producers import Producer
 
 
 class LocalExecutor(Executor):
@@ -27,7 +26,7 @@ class LocalExecutor(Executor):
                     # TODO: Compute Statistics (if not already computed for the partition) and check
                     # Thresholds (every time, as they may be changed, dynamic, or overridden).
                     pass
-                elif isinstance(node, Producer):
+                else:
                     logging.info(f"Building {node}...")
                     input_partitions = self.get_producer_inputs(snapshot, backend, node)
                     (
@@ -52,6 +51,4 @@ class LocalExecutor(Executor):
                             input_partitions=dependencies,
                             partition_key=partition_key,
                         )
-                else:
-                    raise NotImplementedError()
         logging.info("Build finished.")

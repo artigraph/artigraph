@@ -22,7 +22,7 @@ def _read_json_file(path: str) -> Any:
 
 
 @register_reader
-def _read_json_localfile_python(
+def read_json_localfile_python(
     type_: Type,
     format: JSON,
     storage_partitions: Sequence[LocalFilePartition],
@@ -39,7 +39,7 @@ def _read_json_localfile_python(
 
 
 @register_writer
-def _write_json_localfile_python(
+def write_json_localfile_python(
     data: Any, type_: Type, format: JSON, storage_partition: LocalFilePartition, view: PythonBuiltin
 ) -> None:
     path = Path(storage_partition.path)

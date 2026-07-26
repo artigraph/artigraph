@@ -6,7 +6,7 @@ import json
 from itertools import chain
 from typing import TYPE_CHECKING, Annotated, Any
 
-from pydantic import Field, ValidationInfo, field_validator
+from pydantic import Field, InstanceOf, ValidationInfo, field_validator
 
 from arti.annotations import Annotation
 from arti.fingerprints import SkipFingerprint
@@ -37,7 +37,9 @@ class Artifact(Model):
 
     type: Type
     format: Format = Field(default_factory=Format.get_default, validate_default=True)
-    storage: Storage = Field(default_factory=Storage.get_default, validate_default=True)
+    storage: InstanceOf[Storage[Any]] = Field(
+        default_factory=Storage.get_default, validate_default=True
+    )
 
     annotations: Annotated[tuple[Annotation, ...], Field(validate_default=True)] = ()
     statistics: Annotated[tuple[Statistic, ...], Field(validate_default=True)] = ()
@@ -60,16 +62,16 @@ class Artifact(Model):
     @classmethod
     def _validate_format(cls, format: Format, info: ValidationInfo) -> Format:
         if (type_ := info.data.get("type")) is not None:
-            return format._visit_type(type_)
+            return format.visit_type(type_)
         return format
 
     @field_validator("storage")
     @classmethod
-    def _validate_storage(cls, storage: Storage, info: ValidationInfo) -> Storage:
+    def _validate_storage(cls, storage: Storage[Any], info: ValidationInfo) -> Storage[Any]:
         if (type_ := info.data.get("type")) is not None:
-            storage = storage._visit_type(type_)
+            storage = storage.visit_type(type_)
         if (format_ := info.data.get("format")) is not None:
-            storage = storage._visit_format(format_)
+            storage = storage.visit_format(format_)
         return storage
 
     @field_validator("annotations", "statistics", mode="before")

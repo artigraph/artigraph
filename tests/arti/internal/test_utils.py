@@ -1,3 +1,4 @@
+# pyright: reportPrivateUsage=false
 from __future__ import annotations
 
 import math
@@ -7,7 +8,7 @@ from collections.abc import Callable
 from functools import partial
 from pathlib import Path
 from types import ModuleType
-from typing import Any
+from typing import Any, cast
 
 import pytest
 
@@ -36,8 +37,8 @@ def test_class_name() -> None:
 def test_classproperty() -> None:
     class Test:
         @classproperty
-        def a(cls) -> str:
-            return cls.__name__  # type: ignore[attr-defined,no-any-return]
+        def a(cls: Any) -> str:
+            return cast(type[Test], cls).__name__
 
     assert Test.a == "Test"
     assert Test().a == "Test"
@@ -119,21 +120,21 @@ def test_sizedint_unary(type_: type[int], op: Callable[..., Any]) -> None:
     assert isinstance(output, type_)
 
 
-@pytest.mark.parametrize(
-    "op",
-    [
-        operator.add,
-        operator.and_,
-        operator.floordiv,
-        operator.lshift,
-        operator.mod,
-        operator.mul,
-        operator.or_,
-        operator.rshift,
-        operator.sub,
-        operator.xor,
-    ],
-)
+_BINARY_OPERATORS: list[Callable[[Any, Any], Any]] = [
+    cast(Callable[[Any, Any], Any], operator.add),
+    cast(Callable[[Any, Any], Any], getattr(operator, "and_")),  # noqa: B009
+    cast(Callable[[Any, Any], Any], getattr(operator, "floordiv")),  # noqa: B009
+    cast(Callable[[Any, Any], Any], getattr(operator, "lshift")),  # noqa: B009
+    cast(Callable[[Any, Any], Any], operator.mod),
+    cast(Callable[[Any, Any], Any], operator.mul),
+    cast(Callable[[Any, Any], Any], getattr(operator, "or_")),  # noqa: B009
+    cast(Callable[[Any, Any], Any], getattr(operator, "rshift")),  # noqa: B009
+    cast(Callable[[Any, Any], Any], operator.sub),
+    cast(Callable[[Any, Any], Any], getattr(operator, "xor")),  # noqa: B009
+]
+
+
+@pytest.mark.parametrize("op", _BINARY_OPERATORS)
 @pytest.mark.parametrize("type_", [int64, uint64])
 def test_sizedint_binary(type_: type[int], op: Callable[..., Any]) -> None:
     i, _i = 10, type_(10)

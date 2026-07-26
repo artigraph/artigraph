@@ -1,3 +1,4 @@
+# pyright: reportPrivateUsage=false
 import re
 from datetime import date
 from typing import ClassVar
@@ -46,23 +47,28 @@ def test_PartitionField_subclass() -> None:
         key: int
 
     with pytest.raises(TypeError, match="NoDefaultKey must set `default_components`"):
-
-        class NoDefaultKey(AbstractKey):
-            pass
+        type("NoDefaultKey", (AbstractKey,), {"__module__": __name__})
 
     with pytest.raises(TypeError, match="NoMatchingTypeKey must set `matching_type`"):
-
-        class NoMatchingTypeKey(AbstractKey):
-            default_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
+        type(
+            "NoMatchingTypeKey",
+            (AbstractKey,),
+            {"__module__": __name__, "default_components": frozendict(key="key")},
+        )
 
     with pytest.raises(
         TypeError,
         match=re.escape(r"Unknown components in UnknownDefaultKey.default_components: {'junk'}"),
     ):
-
-        class UnknownDefaultKey(AbstractKey):
-            default_components: ClassVar[frozendict[str, str]] = frozendict(junk="junk")
-            matching_type: ClassVar[type[Type]] = Int8
+        type(
+            "UnknownDefaultKey",
+            (AbstractKey,),
+            {
+                "__module__": __name__,
+                "default_components": frozendict(junk="junk"),
+                "matching_type": Int8,
+            },
+        )
 
     class SomeKey(AbstractKey):
         default_components: ClassVar[frozendict[str, str]] = frozendict(key="key")
@@ -70,6 +76,9 @@ def test_PartitionField_subclass() -> None:
 
     assert AbstractKey._by_type_ == {Int8: SomeKey}
     assert SomeKey not in PartitionField._by_type_.values()
+    # `from_components` is abstract, so subclasses must implement it before instantiation.
+    with pytest.raises(TypeError, match="Can't instantiate abstract class SomeKey"):
+        SomeKey(key=1)  # pyright: ignore[reportAbstractUsage]
 
 
 def test_DateField() -> None:

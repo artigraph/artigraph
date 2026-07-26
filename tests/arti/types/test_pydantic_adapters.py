@@ -1,3 +1,4 @@
+# pyright: reportPrivateUsage=false
 from collections.abc import Mapping
 from typing import Literal, get_args, get_origin
 

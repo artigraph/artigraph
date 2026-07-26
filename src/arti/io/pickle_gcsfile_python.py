@@ -24,7 +24,7 @@ def _read_pickle_file(path: str) -> Any:
 
 
 @register_reader
-def _read_pickle_gcsfile_python(
+def read_pickle_gcsfile_python(
     type_: Type,
     format: Pickle,
     storage_partitions: Sequence[GCSFilePartition],
@@ -42,7 +42,7 @@ def _read_pickle_gcsfile_python(
 
 
 @register_writer
-def _write_pickle_gcsfile_python(
+def write_pickle_gcsfile_python(
     data: Any, type_: Type, format: Pickle, storage_partition: GCSFilePartition, view: PythonBuiltin
 ) -> None:
     with GCSFileSystem().open(storage_partition.qualified_path, "wb") as file:

@@ -28,7 +28,7 @@ def _discover() -> None:
 
 
 @multipledispatch("io.read", discovery_func=_discover)
-def _read(
+def reader_dispatch(
     type_: Type, format: Format, storage_partitions: Sequence[StoragePartition], view: View
 ) -> Any:
     raise NotImplementedError(
@@ -36,7 +36,7 @@ def _read(
     )
 
 
-register_reader = _read.register
+register_reader = reader_dispatch.register
 
 
 def read(
@@ -54,7 +54,7 @@ def read(
     #
     # TODO: Check that the returned data matches the Type/View. Likely add a View method that can
     # handle this type + schema checking, filtering to column/row subsets if necessary, etc
-    return _read(
+    return reader_dispatch(
         type_,
         format,
         tuple(snapshot.storage_partition for snapshot in storage_partition_snapshots),
@@ -63,7 +63,7 @@ def read(
 
 
 @multipledispatch("io.write", discovery_func=_discover)
-def _write(
+def writer_dispatch(
     data: Any, type_: Type, format: Format, storage_partition: StoragePartitionVar, view: View
 ) -> StoragePartitionVar | None:
     raise NotImplementedError(
@@ -71,12 +71,12 @@ def _write(
     )
 
 
-register_writer = _write.register
+register_writer = writer_dispatch.register
 
 
 def write(
     data: Any, type_: Type, format: Format, storage_partition: StoragePartition, view: View
 ) -> StoragePartitionSnapshot:
-    if (updated := _write(data, type_, format, storage_partition, view)) is not None:
+    if (updated := writer_dispatch(data, type_, format, storage_partition, view)) is not None:
         storage_partition = updated
     return storage_partition.snapshot()

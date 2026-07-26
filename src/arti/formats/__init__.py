@@ -21,7 +21,7 @@ class Format(Model):
 
     extension: str = ""
 
-    def _visit_type(self, type_: Type) -> Self:
+    def visit_type(self, type_: Type) -> Self:
         # Ensure our type system can handle the provided type.
         self.type_system.to_system(type_, hints={})
         return self

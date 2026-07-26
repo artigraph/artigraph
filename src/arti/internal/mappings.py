@@ -39,7 +39,7 @@ class frozendict[K, V](Mapping[K, V]):
         return repr(self._data)
 
     @classmethod
-    def _get_functional_schema(cls) -> Any:
+    def functional_schema(cls) -> Any:
         return [
             AfterValidator(cls),
             WrapSerializer(
@@ -58,10 +58,11 @@ class frozendict[K, V](Mapping[K, V]):
         # arbitrary mappings types), this is ignored and it instead uses FrozenMapping's Annotated
         # metadata.
         key_type, value_type = cast(tuple[Any, Any], get_class_type_vars(source_type))
-        return handler(Annotated[Mapping[key_type, value_type], *cls._get_functional_schema()])
+        mapping_type = Mapping[key_type, value_type]
+        return handler(Annotated[mapping_type, *cls.functional_schema()])
 
 
-type FrozenMapping[K, V] = Annotated[Mapping[K, V], *frozendict._get_functional_schema()]
+type FrozenMapping[K, V] = Annotated[Mapping[K, V], *frozendict.functional_schema()]
 
 
 # TODO: This is janky, do something better... The important part is this object is shared across
@@ -146,7 +147,11 @@ class TypedBox[V](Mapping[str, TypedNode[V]]):
 
     def _cast(self, key: str, value: Any) -> TypedNode[V]:
         if isinstance(value, Mapping):
-            return type(self)(value, _namespace=(*self._namespace, key), _status=self._status)
+            return type(self)(
+                cast(InputContainer, value),
+                _namespace=(*self._namespace, key),
+                _status=self._status,
+            )
         return self._cast_value(key, value)
 
     def _get_leaf_and_key(
@@ -178,7 +183,7 @@ class TypedBox[V](Mapping[str, TypedNode[V]]):
     def __getattr__(self, key: str) -> TypedNode[V]:
         if key.startswith("_"):
             try:
-                return super().__getattribute__(key)
+                return cast(TypedNode[V], super().__getattribute__(key))
             except AttributeError as e:
                 raise InvalidKeyError(key) from e.__cause__
         try:
@@ -196,7 +201,7 @@ class TypedBox[V](Mapping[str, TypedNode[V]]):
             existing = self._data[key]
             # If the existing and new value are mappings, we want to merge.
             if isinstance(value, Mapping) and isinstance(existing, TypedBox):
-                for k, v in value.items():
+                for k, v in cast(Mapping[str, InputElement], value).items():
                     existing[k] = v
                 return
             raise ValueError(f"{key} is already set")
@@ -220,7 +225,7 @@ class TypedBox[V](Mapping[str, TypedNode[V]]):
     def __repr__(self) -> str:
         return repr(self._data)
 
-    def __setstate__(self, state):
+    def __setstate__(self, state: dict[str, Any]) -> None:
         self.__dict__.update(state)
 
     def __hash__(self) -> int:
@@ -235,11 +240,10 @@ class TypedBox[V](Mapping[str, TypedNode[V]]):
     def walk(self, root: tuple[str, ...] = ()) -> Iterator[tuple[str, V]]:
         for k, v in self.items():
             subroot = (*root, k)
-            if isinstance(v, self.__target_type__):
-                yield ".".join(subroot), v
+            if isinstance(v, TypedBox):
+                yield from cast(TypedBox[V], v).walk(root=subroot)
             else:
-                assert isinstance(v, TypedBox)
-                yield from v.walk(root=subroot)
+                yield ".".join(subroot), cast(V, v)
 
     @classmethod
     def __get_pydantic_core_schema__(

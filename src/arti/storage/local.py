@@ -56,7 +56,7 @@ class LocalFile(Storage[LocalFilePartition]):
             self.generate_partition(
                 input_fingerprint=input_fingerprint, partition_key=partition_key
             ).snapshot()
-            for path, (input_fingerprint, partition_key) in path_metadata.items()
+            for input_fingerprint, partition_key in path_metadata.values()
         )
 
     @classmethod

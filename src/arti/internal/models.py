@@ -29,6 +29,11 @@ from arti.fingerprints import Fingerprint, SkipFingerprint
 from arti.internal.type_hints import get_item_from_annotated
 from arti.internal.utils import class_name
 
+if TYPE_CHECKING:
+    from pydantic._internal._model_construction import ModelMetaclass as _PydanticModelMeta
+else:
+    _PydanticModelMeta = type(BaseModel)
+
 
 # Create a `Model` base class that can be used for (most of) our internal classes. Notably, our
 # models:
@@ -52,7 +57,7 @@ from arti.internal.utils import class_name
 @dataclass_transform(
     field_specifiers=(Field, PrivateAttr), frozen_default=True, kw_only_default=True
 )
-class ModelMeta(type(BaseModel)):
+class ModelMeta(_PydanticModelMeta):
     pass
 
 
@@ -64,7 +69,8 @@ ModelTypeSerializer = PlainSerializer(
 class Model(BaseModel, metaclass=ModelMeta):
     _abstract_: ClassVar[bool] = True  # Prevent instantiation; defaults to False in subclasses
     _arti_type_key_: ClassVar[str] = class_name()
-    _arti_fingerprint_fields_: tuple[str, ...] = ()  # defaulted in __pydantic_init_subclass__
+    # Defaulted in __pydantic_init_subclass__
+    _arti_fingerprint_fields_: ClassVar[tuple[str, ...]] = ()
 
     # TODO: Support looking up the correct subclass when instantiating from serialized data.
     @computed_field(repr=False)
@@ -144,11 +150,11 @@ class Model(BaseModel, metaclass=ModelMeta):
         # Sort the serialized data to reduce variability - but still allow excluding fields.
         return {field: data[field] for field in self._arti_fingerprint_fields_ if field in data}
 
-    def model_dump(self, **kwargs) -> dict[str, Any]:
+    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
         _set_dump_kwargs_defaults(kwargs)
         return super().model_dump(**kwargs)
 
-    def model_dump_json(self, **kwargs) -> str:
+    def model_dump_json(self, **kwargs: Any) -> str:
         _set_dump_kwargs_defaults(kwargs)
         return super().model_dump_json(**kwargs)
 
@@ -202,7 +208,7 @@ def get_field_default[T](model: type[Model], field: str, *, fallback: T) -> T: .
 
 
 def get_field_default[T](
-    model: type[Model], field: str, *, fallback: T = PydanticUndefined
+    model: type[Model], field: str, *, fallback: T | PydanticUndefinedType = PydanticUndefined
 ) -> Any | T:
     default = model.model_fields[field].get_default(call_default_factory=True)
     if default is PydanticUndefined:

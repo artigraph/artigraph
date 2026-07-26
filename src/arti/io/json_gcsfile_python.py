@@ -24,7 +24,7 @@ def _read_json_file(path: str) -> Any:
 
 
 @register_reader
-def _read_json_gcsfile_python(
+def read_json_gcsfile_python(
     type_: Type,
     format: JSON,
     storage_partitions: Sequence[GCSFilePartition],
@@ -42,7 +42,7 @@ def _read_json_gcsfile_python(
 
 
 @register_writer
-def _write_json_gcsfile_python(
+def write_json_gcsfile_python(
     data: Any, type_: Type, format: JSON, storage_partition: GCSFilePartition, view: PythonBuiltin
 ) -> None:
     with GCSFileSystem().open(storage_partition.qualified_path, "w") as file:

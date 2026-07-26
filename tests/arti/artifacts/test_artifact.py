@@ -2,11 +2,11 @@ import json
 import pickle
 import re
 from datetime import date, datetime
-from typing import Any, Self
+from typing import Any, Self, cast
 
 import pytest
 
-from arti import Annotation, Artifact, Format, Statistic, Storage, Type
+from arti import Annotation, Artifact, Format, Statistic, Type
 from arti.formats.json import JSON
 from arti.storage.literal import StringLiteral
 from arti.types import (
@@ -62,6 +62,7 @@ def test_cast_literals(value: Any, expected_type: Type) -> None:
         (date(1970, 1, 1), Date()),
         (datetime(1970, 1, 1), Date()),
         ({1, 2, 3}, Set(element=Int64())),
+        (frozenset({1, 2, 3}), Set(element=Int64())),
     ],
 )
 def test_cast_literals_not_yet_implemented(value: Any, expected_type: Type) -> None:
@@ -78,23 +79,23 @@ def test_cast_literals_errors(value: Any) -> None:
 
 def test_Artifact_validation() -> None:
     class BadFormat(DummyFormat):
-        def _visit_type(self, type_: Type) -> Self:
+        def visit_type(self, type_: Type) -> Self:
             raise ValueError("Format - Boo!")
 
     class BadStorage(DummyStorage):
-        def _visit_type(self, type_: Type) -> Self:
+        def visit_type(self, type_: Type) -> Self:
             raise ValueError("Storage - Boo!")
 
-        def _visit_format(self, format: Format) -> Self:
+        def visit_format(self, format_: Format) -> Self:
             raise ValueError("Storage - Boo!")
 
     with pytest.raises(ValueError, match="type\n  Field required"):
-        Artifact()  # type: ignore[call-arg]
+        cast(Any, Artifact)()
 
     class BadFormatArtifact(Artifact):
         type: Type = Int64()
         format: Format = BadFormat()
-        storage: Storage = DummyStorage()
+        storage: DummyStorage = DummyStorage()
 
     with pytest.raises(ValueError, match="Format - Boo!"):
         BadFormatArtifact()
@@ -102,7 +103,7 @@ def test_Artifact_validation() -> None:
     class BadStorageArtifact(Artifact):
         type: Type = Int64()
         format: Format = DummyFormat()
-        storage: Storage = BadStorage()
+        storage: BadStorage = BadStorage()
 
     with pytest.raises(ValueError, match="Storage - Boo!"):
         BadStorageArtifact()
@@ -110,7 +111,7 @@ def test_Artifact_validation() -> None:
     class GoodArtifact(Artifact):
         type: Type = Int64()
         format: Format = DummyFormat()
-        storage: Storage = DummyStorage()
+        storage: DummyStorage = DummyStorage()
 
     GoodArtifact()
 
@@ -132,7 +133,10 @@ def test_instance_attr_merging() -> None:
         annotations: tuple[Annotation, ...] = (Ann1(x=5),)
         statistics: tuple[Statistic, ...] = (Stat1(),)
 
-    artifact = MyArtifact(annotations=[Ann2(y=10)], statistics=[Stat2()])
+    artifact = cast(
+        MyArtifact,
+        cast(Any, MyArtifact)(annotations=[Ann2(y=10)], statistics=[Stat2()]),
+    )
     assert tuple(type(a) for a in artifact.annotations) == (Ann1, Ann2)
     assert tuple(type(s) for s in artifact.statistics) == (Stat1, Stat2)
 
@@ -144,7 +148,7 @@ def test_Artifact_storage_path_resolution() -> None:
     class A(Artifact):
         type: Type = Collection(element=Struct(fields={"a": Int64()}), partition_by=("a",))
         format: Format = DummyFormat()
-        storage: S
+        storage: S = S()
 
     assert A(storage=S()).storage.key == "test-a_value={a.value}"
 

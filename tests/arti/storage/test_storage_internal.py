@@ -1,10 +1,11 @@
+# pyright: reportPrivateUsage=false
 import re
 
 import parse
 import pytest
 
 from arti import Fingerprint, PartitionField, PartitionKey, PartitionKeyTypes
-from arti.partitions import Int8Field
+from arti.partitions import DateField, Int8Field
 from arti.storage._internal import (
     FormatDict,
     FormatPlaceholder,
@@ -168,6 +169,14 @@ def test_strip_partition_indexes(spec: str, expected: str) -> None:
     assert strip_partition_indexes(spec) == expected
 
 
+def test_placeholders_do_not_shadow_spec_attributes(PKs: dict[str, type[PartitionField]]) -> None:
+    # Placeholders capture arbitrary attribute access, so they must not define public attributes.
+    assert partial_format("{a.key}/{a.attribute}") == "{a.key}/{a.attribute}"
+    assert strip_partition_indexes("{a.key[1]}") == "{a.key}"
+    with pytest.raises(AttributeError, match="has no field or key component 'attribute'"):
+        spec_to_wildcard("/p/{x.attribute}/", PKs)
+
+
 def test_spec_to_wildcard(PKs: dict[str, type[PartitionField]]) -> None:
     assert spec_to_wildcard("/p/{x.value}/", PKs) == "/p/*/"
     assert spec_to_wildcard("/p/{x.value[5]}/", PKs) == "/p/5/"
@@ -209,6 +218,19 @@ def test_extract_placeholders(
             spec=spec,
         )
         is None
+    )
+
+
+def test_extract_placeholders_mixed_key_types() -> None:
+    spec = "/{date.iso}/{i.value}"
+    assert extract_placeholders(
+        key_types={"date": DateField, "i": Int8Field},
+        parser=parse.compile(spec),
+        path="/2020-01-01/5",
+        spec=spec,
+    ) == (
+        None,
+        PartitionKey(date=DateField.from_components(iso="2020-01-01"), i=Int8Field(value=5)),
     )
 
 

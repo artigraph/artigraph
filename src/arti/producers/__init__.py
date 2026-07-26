@@ -62,8 +62,8 @@ class Producer(Model):
     version: Version = SemVer(major=0, minor=0, patch=1)
 
     # The map/build/validate_outputs parameters are intended to be dynamic and set by subclasses,
-    # however mypy doesn't like the "incompatible" signature on subclasses if actually defined here
-    # (nor support ParamSpec yet). `map` is generated during subclassing if not set, `build` is
+    # however static type checkers cannot represent the signatures set by arbitrary subclasses.
+    # `map` is generated during subclassing if not set, `build` is
     # required, and `validate_outputs` defaults to no-op checks (hence is the only one with a
     # provided method).
     #
@@ -283,10 +283,10 @@ class Producer(Model):
 
             # Narrow the map signature, which is validated below and used at graph build time (via
             # cls._map_inputs_) to determine what arguments to pass to map.
-            map.__signature__ = Signature(  # type: ignore[attr-defined]
+            map.__signature__ = Signature(  # pyright: ignore[reportFunctionMemberAccess]
                 [
                     Parameter(name=name, annotation=StoragePartitions, kind=Parameter.KEYWORD_ONLY)
-                    for name, artifact in cls._input_artifact_classes_.items()
+                    for name in cls._input_artifact_classes_
                     if name in cls._build_inputs_
                 ],
                 return_annotation=PartitionDependencies,
@@ -318,7 +318,7 @@ class Producer(Model):
     # NOTE: pydantic defines .__iter__ to return `self.__dict__.items()` to support `dict(model)`,
     # but we want to override to support easy expansion/assignment to a Graph  without `.out()` (eg:
     # `g.artifacts.a, g.artifacts.b = MyProducer(...)`).
-    def __iter__(self) -> Iterator[Artifact]:  # type: ignore[override]
+    def __iter__(self) -> Iterator[Artifact]:  # pyright: ignore[reportIncompatibleMethodOverride]
         ret = self.out()
         if not isinstance(ret, tuple):
             ret = (ret,)
@@ -341,7 +341,7 @@ class Producer(Model):
                 # TODO: Include the artifact name here? Do we care if you rename an arg (without
                 # changing the version)?
                 snapshot.content_fingerprint
-                for name, partition_snapshots in dependency_partitions.items()
+                for partition_snapshots in dependency_partitions.values()
                 for snapshot in partition_snapshots
             ),
         )

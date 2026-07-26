@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from types import ModuleType
-from typing import IO, Any, Self, SupportsIndex, cast
+from typing import IO, Any, Self, SupportsIndex, cast, overload
 
 from arti.internal.vendored.setuptools import find_namespace_packages
 
@@ -24,8 +24,8 @@ class_name = cast(Callable[[], str], ClassName)
 
 def classproperty[Ret](meth: Callable[..., Ret]) -> Ret:
     """Access a @classmethod like a @property."""
-    # mypy doesn't understand class properties yet: https://github.com/python/mypy/issues/2563
-    return classmethod(property(meth))  # type: ignore[arg-type,return-value]
+    classmethod_factory = cast(Callable[[property], Ret], classmethod)
+    return classmethod_factory(property(meth))
 
 
 def get_module_name(depth: int = 1) -> str | None:
@@ -180,10 +180,10 @@ class _int(int):
 class int64(_int):
     _min, _max = -(2**63), (2**63) - 1
 
-    def __new__(cls, i: int | int64 | uint64) -> int64:
+    def __new__(cls, i: int | int64 | uint64) -> Self:
         if i > cls._max:
             if isinstance(i, uint64):
-                i = int(i) - uint64._max - 1
+                i = int(i) - uint64._max - 1  # pyright: ignore[reportPrivateUsage]
             else:
                 raise ValueError(f"{i} is too large for int64. Hint: cast to uint64 first.")
         if i < cls._min:
@@ -194,7 +194,7 @@ class int64(_int):
 class uint64(_int):
     _min, _max = 0, (2**64) - 1
 
-    def __new__(cls, i: int | int64 | uint64) -> uint64:
+    def __new__(cls, i: int | int64 | uint64) -> Self:
         if i > cls._max:
             raise ValueError(f"{i} is too large for uint64.")
         if i < cls._min:
@@ -212,7 +212,17 @@ def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any], None, None]:
         yield f
 
 
-def one_or_none[V, D](values: list[V] | None, *, default: D = None, item_name: str) -> V | D:
+@overload
+def one_or_none[V](values: list[V] | None, *, default: None = None, item_name: str) -> V | None: ...
+
+
+@overload
+def one_or_none[V, D](values: list[V] | None, *, default: D, item_name: str) -> V | D: ...
+
+
+def one_or_none[V, D](
+    values: list[V] | None, *, default: D | None = None, item_name: str
+) -> V | D | None:
     if values is None or len(values) == 0:
         return default
     if len(values) > 1:

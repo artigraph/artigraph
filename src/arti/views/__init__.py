@@ -3,7 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import builtins
-from typing import Annotated, Any, ClassVar, Literal, Self, get_origin
+from typing import Annotated, Any, ClassVar, Literal, Self, cast, get_origin
 
 from pydantic import ValidationInfo, field_validator
 
@@ -89,7 +89,7 @@ class View(Model):
 
     @classmethod
     def get_class_for(cls, annotation: Any) -> builtins.type[Self]:
-        view_class = get_item_from_annotated(annotation, cls, kind="class")
+        view_class: type[View] | None = get_item_from_annotated(annotation, cls, kind="class")
         if view_class is None:
             # We've already searched for a View instance in the original Annotated args, so just
             # extract the root annotation.
@@ -105,7 +105,7 @@ class View(Model):
                 raise ValueError(
                     f"{annotation} cannot be matched to a View, try setting one explicitly (eg: `Annotated[int, arti.views.python.Int]`)"
                 )
-        return view_class
+        return cast(builtins.type[Self], view_class)
 
     @classmethod
     def from_annotation(cls, annotation: Any, *, mode: MODE) -> Self:
@@ -130,14 +130,14 @@ class View(Model):
             raise ValueError(f"expected an instance of {self.artifact_class}, got {type(artifact)}")
         self._check_type_compatibility(view_type=self.type, artifact_type=artifact.type)
         if self.mode in {"READ", "READWRITE"}:
-            io._read.lookup(
+            io.reader_dispatch.lookup(
                 type(artifact.type),
                 type(artifact.format),
-                list[artifact.storage.storage_partition_type],  # type: ignore[name-defined]
+                list[artifact.storage.storage_partition_type],
                 type(self),
             )
         if self.mode in {"WRITE", "READWRITE"}:
-            io._write.lookup(
+            io.writer_dispatch.lookup(
                 self.python_type,
                 type(artifact.type),
                 type(artifact.format),

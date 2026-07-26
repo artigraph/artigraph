@@ -32,10 +32,8 @@ def test_pandas_type_system(arti_type: Type, pd_type: pd.DataFrame | pd.Series) 
     output_pd_type = pandas_type_system.to_system(arti_type, hints={})
     if isinstance(pd_type, pd.DataFrame):
         pd.testing.assert_frame_equal(output_pd_type, pd_type)
-    elif isinstance(pd_type, pd.Series):
-        pd.testing.assert_series_equal(output_pd_type, pd_type)
     else:
-        raise NotImplementedError()
+        pd.testing.assert_series_equal(output_pd_type, pd_type)
 
     output_arti_type = pandas_type_system.to_artigraph(pd_type, hints={})
     assert output_arti_type == arti_type

@@ -1,9 +1,10 @@
 from __future__ import annotations
 
 import inspect
+import typing
 from collections.abc import Callable, Iterable
 from datetime import date, datetime
-from types import GenericAlias, UnionType
+from types import GenericAlias, NoneType, UnionType
 from typing import (
     Annotated,
     Any,
@@ -19,7 +20,9 @@ from typing import (
 )
 from typing import is_typeddict as is_typeddict  # Expose along with the other `is_*` helpers below.
 
-NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
+
+def _runtime_type(value: Any) -> type[Any]:
+    return cast(type[Any], type(value))
 
 
 def assert_not_none[T](v: T | None) -> T:
@@ -34,7 +37,7 @@ def assert_all_instances[T](values: Iterable[Any], *, type: type[T]) -> Iterable
 
 
 # TODO: Determine if we can replace this logic with `beartype` or related packages.
-def _check_issubclass(klass: Any, check_type: type) -> bool:
+def _check_issubclass(klass: Any, check_type: Any) -> bool:
     # If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the
     # metadata.
     klass = discard_Annotated(klass)
@@ -63,10 +66,12 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
         return issubclass(klass_origin, check_type)
     # eg: issubclass(tuple, tuple[int])
     if klass_origin is None and check_type_origin is not None:
-        return issubclass(klass, check_type_origin) and not check_type_args
+        return issubclass(klass, check_type_origin) and (
+            not check_type_args or all(arg is Any for arg in check_type_args)
+        )
     # eg: issubclass(tuple[int], tuple[int])
     if klass_origin is not None and check_type_origin is not None:
-        # NOTE: Considering all container types covariant for simplicity (mypy may be more strict).
+        # NOTE: Considering all container types covariant for simplicity.
         #
         # The builtin mutable containers (list, dict, etc) are invariant (klass_args ==
         # check_type_args), but the interfaces (Mapping, Sequence, etc) and immutable containers are
@@ -81,7 +86,7 @@ def _check_issubclass(klass: Any, check_type: type) -> bool:
         ):
             return False
         return lenient_issubclass(klass_origin, check_type_origin)
-    # Shouldn't happen, but need to explicitly say "x is not None" to narrow mypy types.
+    # Shouldn't happen because the origin conditions cover all cases.
     raise NotImplementedError("The origin conditions don't cover all cases!")
 
 
@@ -101,8 +106,15 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
     #
     # 1: https://github.com/pydantic/pydantic/issues/3559
     if args := getattr(klass, "__pydantic_generic_metadata__", {}).get("args"):
-        return args  # coverage: ignore
-    bases = (klass,) if is_generic_alias(klass) else klass.__orig_bases__  # type: ignore[attr-defined]
+        return cast(tuple[type, ...], args)  # coverage: ignore
+    bases = (
+        (klass,)
+        if is_generic_alias(klass)
+        else cast(
+            tuple[type, ...],
+            getattr(klass, "__orig_bases__"),  # noqa: B009
+        )
+    )
     for base in bases:
         base_origin = get_origin(base)
         if base_origin is None:
@@ -115,29 +127,47 @@ def get_class_type_vars(klass: type) -> tuple[type, ...]:
 
 
 @overload
-def get_item_from_annotated[T, D](
-    annotation: Any, klass: type[T], *, kind: Literal["class"], default: D = None
-) -> type[T] | D: ...
+def get_item_from_annotated[T](
+    annotation: Any, klass: type[T], *, kind: Literal["class"], default: None = None
+) -> type[T] | None: ...
 
 
 @overload
 def get_item_from_annotated[T, D](
-    annotation: Any, klass: type[T], *, kind: Literal["object"], default: D = None
+    annotation: Any, klass: type[T], *, kind: Literal["class"], default: D
+) -> type[T] | D: ...
+
+
+@overload
+def get_item_from_annotated[T](
+    annotation: Any, klass: type[T], *, kind: Literal["object"], default: None = None
+) -> T | None: ...
+
+
+@overload
+def get_item_from_annotated[T, D](
+    annotation: Any, klass: type[T], *, kind: Literal["object"], default: D
 ) -> T | D: ...
 
 
-def get_item_from_annotated[T, D](
-    annotation: Any, klass: type[T], *, kind: Literal["class", "object"], default: D = None
-) -> T | type[T] | D:
+def get_item_from_annotated(
+    annotation: Any,
+    klass: type[Any],
+    *,
+    kind: Literal["class", "object"],
+    default: Any = None,
+) -> Any:
     from arti.internal.utils import one_or_none
 
     if not is_annotated_hint(annotation):
         return default
     _, *hints = get_args(annotation)
-    checker = {"class": lenient_issubclass, "object": isinstance}[kind]
-    return one_or_none(
-        [hint for hint in hints if checker(hint, klass)], default=default, item_name=klass.__name__
+    matches = (
+        [hint for hint in hints if lenient_issubclass(hint, klass)]
+        if kind == "class"
+        else [hint for hint in hints if isinstance(hint, klass)]
     )
+    return one_or_none(matches, default=default, item_name=klass.__name__)
 
 
 def get_annotation_from_value(value: Any) -> Any:
@@ -146,19 +176,22 @@ def get_annotation_from_value(value: Any) -> Any:
     if isinstance(value, bool | bytes | date | datetime | float | int | str):
         return type(value)
     if isinstance(value, tuple | list | set | frozenset):
-        first, *tail = tuple(value)
-        first_type = type(first)
+        values = tuple(cast(Iterable[Any], value))
+        first, *tail = values
+        first_type = _runtime_type(first)
         if all(isinstance(v, first_type) for v in tail):
             if isinstance(value, tuple):
-                return tuple[first_type, ...]  # type: ignore[valid-type]
-            return type(value)[first_type]  # type: ignore[index]
+                return tuple[first_type, ...]
+            return GenericAlias(_runtime_type(value), (first_type,))
     if isinstance(value, dict):
-        items = value.items()
-        first_key_type, first_value_type = (type(v) for v in next(iter(items)))
+        items = cast(dict[Any, Any], value).items()
+        first_key, first_value = next(iter(items))
+        first_key_type = _runtime_type(first_key)
+        first_value_type = _runtime_type(first_value)
         if all(
             isinstance(k, first_key_type) and isinstance(v, first_value_type) for (k, v) in items
         ):
-            return dict[first_key_type, first_value_type]  # type: ignore[valid-type]
+            return dict[first_key_type, first_value_type]
         # TODO: Implement with TypedDict to support Struct types...?
     raise NotImplementedError(f"Unable to determine type of {value}")
 
@@ -250,9 +283,8 @@ def is_annotated_hint(type_: Any) -> bool:
 
 
 def is_generic_alias(type_: Any) -> bool:
-    from typing import _GenericAlias  # type: ignore[attr-defined]
-
-    return isinstance(type_, _GenericAlias | GenericAlias)
+    generic_alias_type = cast(type, getattr(typing, "_GenericAlias"))  # noqa: B009
+    return isinstance(type_, generic_alias_type | GenericAlias)
 
 
 def is_optional_hint(type_: Any) -> bool:

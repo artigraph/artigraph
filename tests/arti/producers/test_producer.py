@@ -1,6 +1,7 @@
+# pyright: reportPrivateUsage=false
 import re
-from collections.abc import Sequence
-from typing import Annotated, Any, ClassVar
+from collections.abc import Callable, Sequence
+from typing import Annotated, Any, ClassVar, Literal, cast
 
 import pytest
 
@@ -32,12 +33,44 @@ class DummyProducer(Producer):
     a1: A1
 
     @staticmethod
-    def build(a1: dict) -> tuple[Annotated[dict, A2], Annotated[dict, A3]]:  # type: ignore[empty-body,type-arg]
-        pass
+    def build(
+        a1: dict[Any, Any],
+    ) -> tuple[Annotated[dict[Any, Any], A2], Annotated[dict[Any, Any], A3]]:
+        raise NotImplementedError
 
     @staticmethod
-    def map(a1: StoragePartitions) -> PartitionDependencies:  # type: ignore[empty-body]
-        pass
+    def map(a1: StoragePartitions) -> PartitionDependencies:
+        raise NotImplementedError
+
+
+def _define_bad_producer(
+    *,
+    name: str = "BadProducer",
+    base: type[Producer] = Producer,
+    annotations: dict[str, Any] | None = None,
+    defaults: dict[str, Any] | None = None,
+    build: Callable[..., Any] | None = None,
+    build_kind: Literal["class", "instance", "static"] = "class",
+    map_: Callable[..., Any] | None = None,
+    map_kind: Literal["class", "instance", "static"] = "class",
+) -> type[Producer]:
+    namespace: dict[str, Any] = {"__annotations__": annotations or {}} | (defaults or {})
+    if build is not None:
+        namespace["build"] = _wrap_method(build, build_kind)
+    if map_ is not None:
+        namespace["map"] = _wrap_method(map_, map_kind)
+    return cast(type[Producer], type(name, (base,), namespace))
+
+
+def _wrap_method(
+    method: Callable[..., Any],
+    kind: Literal["class", "instance", "static"],
+) -> Any:
+    if kind == "class":
+        return classmethod(method)
+    if kind == "static":
+        return staticmethod(method)
+    return method
 
 
 def test_Producer() -> None:
@@ -52,15 +85,20 @@ def test_Producer() -> None:
 
 def test_producer_decorator() -> None:
     @producer_decorator()
-    def dummy_producer(a1: Annotated[dict, A1]) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+    def dummy_producer(
+        a1: Annotated[dict[Any, Any], A1],
+    ) -> Annotated[dict[Any, Any], A2]:
         return {}
 
     assert dummy_producer.__name__ == "dummy_producer"
     assert dummy_producer._input_artifact_classes_ == {"a1": A1}
     assert len(dummy_producer._outputs_) == 1
     assert dummy_producer._outputs_[0].artifact_class == A2
-    assert dummy_producer(a1=A1()).annotations == Producer.model_fields["annotations"].default  # type: ignore[call-arg]
-    assert dummy_producer(a1=A1()).version == Producer.model_fields["version"].default  # type: ignore[call-arg]
+    assert (
+        cast(Any, dummy_producer)(a1=A1()).annotations
+        == Producer.model_fields["annotations"].default
+    )
+    assert cast(Any, dummy_producer)(a1=A1()).version == Producer.model_fields["version"].default
 
     class MyAnnotation(Annotation):
         pass
@@ -71,26 +109,28 @@ def test_producer_decorator() -> None:
     @producer_decorator(
         annotations=(MyAnnotation(),), map=mapper, name="test", version=StringVersion(value="test")
     )
-    def dummy_producer2(a1: Annotated[dict, A1]) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+    def dummy_producer2(
+        a1: Annotated[dict[Any, Any], A1],
+    ) -> Annotated[dict[Any, Any], A2]:
         return {}
 
     assert dummy_producer2.__name__ == "test"
     assert dummy_producer2.map == mapper
-    assert dummy_producer2(a1=A1()).annotations == (MyAnnotation(),)  # type: ignore[call-arg]
-    assert dummy_producer2(a1=A1()).version == StringVersion(value="test")  # type: ignore[call-arg]
+    assert cast(Any, dummy_producer2)(a1=A1()).annotations == (MyAnnotation(),)
+    assert cast(Any, dummy_producer2)(a1=A1()).version == StringVersion(value="test")
 
 
 def test_Producer_input_artifact_classes() -> None:
     @producer_decorator()
     def dummy_producer(
-        a1: Annotated[dict, A1],  # type: ignore[type-arg]
+        a1: Annotated[dict[Any, Any], A1],
         *,
         a: int,
         b: Annotated[int, "non-Artifact"],
-    ) -> Annotated[dict, A2]:  # type: ignore[type-arg]
+    ) -> Annotated[dict[Any, Any], A2]:
         return {}
 
-    assert dummy_producer._input_artifact_classes_ == {"a1": A1, "a": Artifact, "b": Artifact}  # type: ignore[arg-type,unused-ignore] # errors with arg-type when uncached...
+    assert dummy_producer._input_artifact_classes_ == {"a1": A1, "a": Artifact, "b": Artifact}
 
 
 def test_Producer_partitioned_input_validation() -> None:
@@ -101,33 +141,39 @@ def test_Producer_partitioned_input_validation() -> None:
         a: A
 
         @staticmethod
-        def build(a: list[dict]) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
-            pass
+        def build(
+            a: list[dict[Any, Any]],
+        ) -> Annotated[dict[Any, Any], A2]:
+            raise NotImplementedError
 
     assert P._input_artifact_classes_ == {"a": A}
     assert P._build_inputs_ == {
         "a": python_views.List(artifact_class=A, type=get_field_default(A, "type"), mode="READ")
     }
 
+    def singular_build(a: dict[Any, Any]) -> Annotated[dict[Any, Any], A2]:
+        raise NotImplementedError
+
     with pytest.raises(ValueError, match=r"dict.* cannot be used to represent Collection"):
+        _define_bad_producer(
+            name="SingularInput",
+            annotations={"a": A},
+            build=singular_build,
+            build_kind="static",
+        )
 
-        class SingularInput(Producer):
-            a: A
-
-            @staticmethod
-            def build(a: dict) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
-                pass
+    def incompatible_build(a: list[int]) -> Annotated[dict[Any, Any], A]:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError, match=re.escape("list[int] cannot be used to represent Collection")
     ):
-
-        class IncompatibleInput(Producer):
-            a: A
-
-            @staticmethod
-            def build(a: list[int]) -> Annotated[dict, A]:  # type: ignore[empty-body,type-arg]
-                pass
+        _define_bad_producer(
+            name="IncompatibleInput",
+            annotations={"a": A},
+            build=incompatible_build,
+            build_kind="static",
+        )
 
 
 def test_Producer_outputs() -> None:
@@ -140,8 +186,8 @@ def test_Producer_outputs() -> None:
         a1: A1
 
         @classmethod
-        def build(cls, a1: dict) -> tuple[int, Annotated[dict, A2]]:  # type: ignore[empty-body,type-arg]
-            pass
+        def build(cls, a1: dict[Any, Any]) -> tuple[int, Annotated[dict[Any, Any], A2]]:
+            raise NotImplementedError
 
     assert ImplicitArtifact._outputs_ == (
         python_views.Int(artifact_class=Artifact, type=Int64(), mode="WRITE"),
@@ -152,34 +198,44 @@ def test_Producer_outputs() -> None:
         a1: A1
 
         @staticmethod
-        def build(a1: dict) -> Annotated[dict, A2, python_views.Dict]:  # type: ignore[empty-body,type-arg]
-            pass
+        def build(
+            a1: dict[Any, Any],
+        ) -> Annotated[dict[Any, Any], A2, python_views.Dict]:
+            raise NotImplementedError
 
     assert ExplicitView._outputs_ == (
         python_views.Dict(artifact_class=A2, type=get_field_default(A2, "type"), mode="WRITE"),
     )
 
+    def duplicate_view_build(
+        a1: dict[Any, Any],
+    ) -> Annotated[dict[Any, Any], A2, python_views.Dict, python_views.Int]:
+        raise NotImplementedError
+
     with pytest.raises(
         ValueError, match=re.escape("DupView.build 1st return - multiple View values found")
     ):
+        _define_bad_producer(
+            name="DupView",
+            annotations={"a1": A1},
+            build=duplicate_view_build,
+            build_kind="static",
+        )
 
-        class DupView(Producer):
-            a1: A1
-
-            @staticmethod
-            def build(a1: dict) -> Annotated[dict, A2, python_views.Dict, python_views.Int]:  # type: ignore[empty-body,type-arg]
-                pass
+    def duplicate_artifact_build(
+        a1: dict[Any, Any],
+    ) -> Annotated[dict[Any, Any], A1, A2]:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError, match=re.escape("DupArtifact.build 1st return - multiple Artifact values found")
     ):
-
-        class DupArtifact(Producer):
-            a1: A1
-
-            @staticmethod
-            def build(a1: dict) -> Annotated[dict, A1, A2]:  # type: ignore[empty-body,type-arg]
-                pass
+        _define_bad_producer(
+            name="DupArtifact",
+            annotations={"a1": A1},
+            build=duplicate_artifact_build,
+            build_kind="static",
+        )
 
 
 def test_Producer_string_annotation() -> None:
@@ -188,8 +244,10 @@ def test_Producer_string_annotation() -> None:
         a1: "A1"
 
         @staticmethod
-        def build(a1: "dict") -> "Annotated[dict, A2]":  # type: ignore[empty-body,type-arg]
-            pass
+        def build(
+            a1: "dict[Any, Any]",
+        ) -> "Annotated[dict[Any, Any], A2]":
+            raise NotImplementedError
 
     assert isinstance(StrAnnotation(a1=A1()).out(), A2)
 
@@ -205,7 +263,9 @@ def test_Producer_compute_input_fingerprint() -> None:
         {"a1": StoragePartitionSnapshots()}
     ) == Fingerprint.from_string(p1._arti_type_key_).combine(p1.version.fingerprint)
 
-    storage_partition_snapshot = p1.a1.storage.generate_partition().snapshot()
+    storage_partition_snapshot = (
+        cast(DummyStorage, cast(Any, p1.a1).storage).generate_partition().snapshot()
+    )
     assert p1.compute_input_fingerprint(
         {"a1": StoragePartitionSnapshots([storage_partition_snapshot])}
     ) == Fingerprint.from_string(p1._arti_type_key_).combine(
@@ -248,24 +308,28 @@ def test_Producer_map_artifacts() -> None:
         a1: A1
 
         @staticmethod
-        def build(a1: dict) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
-            pass
+        def build(a1: dict[Any, Any]) -> Annotated[dict[Any, Any], A2]:
+            raise NotImplementedError
 
         @staticmethod
-        def map(a1: StoragePartitions) -> PartitionDependencies:  # type: ignore[empty-body]
-            pass
+        def map(a1: StoragePartitions) -> PartitionDependencies:
+            raise NotImplementedError
 
     assert P._map_inputs_ == {"a1"}
+
+    def bad_map(a1: list[Any]) -> PartitionDependencies:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=re.escape("BadMapParam.map a1 param - type hint must be `StoragePartitions`"),
     ):
-
-        class BadMapParam(P):
-            @staticmethod
-            def map(a1: list) -> PartitionDependencies:  # type: ignore[override,empty-body,type-arg]
-                pass
+        _define_bad_producer(
+            name="BadMapParam",
+            base=P,
+            map_=bad_map,
+            map_kind="static",
+        )
 
 
 def test_Producer_validate_output() -> None:
@@ -292,9 +356,12 @@ def test_Producer_validate_output_hint_validation() -> None:
     def validate_int(i: int) -> tuple[bool, str]:
         return bool(i), ""
 
+    def validate_untyped(x: Any) -> tuple[bool, str]:
+        return True, ""
+
     for validate_outputs in list[ValidateSig](
         [
-            lambda x: (True, ""),
+            validate_untyped,
             validate_any,
             validate_vargs_any,
             validate_int,
@@ -305,56 +372,59 @@ def test_Producer_validate_output_hint_validation() -> None:
         def single_return_build(x: int) -> int:
             return x
 
-        assert single_return_build.validate_outputs(5)
+        assert single_return_build.validate_outputs(5)[0]
 
     def accepts_vargs_float(*i: float) -> tuple[bool, str]:
         return bool(i), ""
 
-    with pytest.raises(ValueError, match="i param - type hint must be `Any` or "):
+    def bad_vargs(x: int) -> int:
+        return x
 
-        @producer_decorator(validate_outputs=accepts_vargs_float)
-        def bad_vargs(x: int) -> int:
-            return x
+    with pytest.raises(ValueError, match="i param - type hint must be `Any` or "):
+        producer_decorator(validate_outputs=accepts_vargs_float)(bad_vargs)
+
+    def too_few_arg(x: int) -> tuple[int, int]:
+        return x, x + 1
 
     with pytest.raises(
         ValueError, match=re.escape("validate_output - must match the `.build` return")
     ):
+        producer_decorator(validate_outputs=validate_int)(too_few_arg)
 
-        @producer_decorator(validate_outputs=validate_int)
-        def too_few_arg(x: int) -> tuple[int, int]:
-            return x, x + 1
+    def validate_default(i: int = 5) -> tuple[bool, str]:
+        return bool(i), ""
+
+    def bad_default(x: int) -> int:
+        return x
 
     with pytest.raises(
         ValueError, match=re.escape("validate_output i param - must not have a default.")
     ):
-
-        @producer_decorator(validate_outputs=lambda i=5: (True, ""))
-        def bad_default(x: int) -> int:
-            return x
+        producer_decorator(validate_outputs=validate_default)(bad_default)
 
     def validate_kwarg(*, i: int) -> tuple[bool, str]:
         return bool(i), ""
+
+    def kwarg_only(x: int) -> int:
+        return x
 
     with pytest.raises(
         ValueError,
         match=re.escape("validate_output i param - must be usable as a positional argument."),
     ):
-
-        @producer_decorator(validate_outputs=validate_kwarg)
-        def kwarg_only(x: int) -> int:
-            return x
+        producer_decorator(validate_outputs=validate_kwarg)(kwarg_only)
 
     def accepts_float(i: float) -> tuple[bool, str]:
         return bool(i), ""
+
+    def mismatched_hint(x: int) -> int:
+        return x
 
     with pytest.raises(
         ValueError,
         match=re.escape("validate_output i param - type hint must match the 1st `.build` return"),
     ):
-
-        @producer_decorator(validate_outputs=accepts_float)
-        def mismatched_hint(x: int) -> int:
-            return x
+        producer_decorator(validate_outputs=accepts_float)(mismatched_hint)
 
 
 def test_Producer_build_outputs_check() -> None:
@@ -374,35 +444,46 @@ def test_Producer_build_outputs_check() -> None:
 
     class NoPartitioning(Producer):
         @staticmethod
-        def build() -> tuple[Annotated[int, A], Annotated[int, B]]:  # type: ignore[empty-body]
-            pass
+        def build() -> tuple[Annotated[int, A], Annotated[int, B]]:
+            raise NotImplementedError
 
     class MatchingPartitioning(Producer):
         @staticmethod
-        def build() -> tuple[Annotated[list[dict], C], Annotated[list[dict], C]]:  # type: ignore[empty-body,type-arg]
-            pass
+        def build() -> tuple[
+            Annotated[list[dict[Any, Any]], C],
+            Annotated[list[dict[Any, Any]], C],
+        ]:
+            raise NotImplementedError
 
         @staticmethod
         def map() -> PartitionDependencies:
             return PartitionDependencies()
 
-    for first_output in [Annotated[int, A], Annotated[list[dict], C]]:  # type: ignore[type-arg]
-        with pytest.raises(ValueError, match="all outputs must have the same partitioning scheme"):
+    assert NoPartitioning._outputs_
+    assert MatchingPartitioning._outputs_
 
-            class MixedPartitioning(Producer):
-                @staticmethod
-                def build() -> tuple[first_output, Annotated[list[dict], D]]:  # type: ignore[empty-body,type-arg,valid-type]
-                    pass
+    for first_output in [
+        Annotated[int, A],
+        Annotated[list[dict[Any, Any]], C],
+    ]:
+
+        def mixed_build() -> Any:
+            raise NotImplementedError
+
+        mixed_build.__annotations__["return"] = cast(Any, tuple).__class_getitem__(
+            (first_output, Annotated[list[dict[Any, Any]], D])
+        )
+        with pytest.raises(ValueError, match="all outputs must have the same partitioning scheme"):
+            _define_bad_producer(build=mixed_build, build_kind="static")
+
+    def partitioned_build() -> Annotated[list[dict[Any, Any]], C]:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=r"BadProducer.map - must be implemented when the `build` outputs are partitioned",
     ):
-
-        class BadProducer(Producer):
-            @staticmethod
-            def build() -> Annotated[list[dict], C]:  # type: ignore[empty-body,type-arg]
-                pass
+        _define_bad_producer(build=partitioned_build, build_kind="static")
 
 
 def test_Producer_bad_signature() -> None:
@@ -410,225 +491,196 @@ def test_Producer_bad_signature() -> None:
     class OkProducer(Producer):
         _abstract_ = True
 
-    with pytest.raises(ValueError, match=re.escape("BadProducer.build - must be implemented")):
+    assert getattr(OkProducer, "_abstract_")  # noqa: B009
 
-        class BadProducer(Producer):
-            pass
+    with pytest.raises(ValueError, match=re.escape("BadProducer.build - must be implemented")):
+        _define_bad_producer()
+
+    def build_with_undefined_field(
+        cls: type[Producer], a1: dict[Any, Any]
+    ) -> Annotated[dict[Any, Any], A2]:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=r"BadProducer.build - the following parameter\(s\) must be defined as a field: {'a1'}",
     ):
+        _define_bad_producer(build=build_with_undefined_field)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            @classmethod
-            def build(cls, a1: dict) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
-                pass
+    def build_without_inputs(cls: type[Producer]) -> Annotated[dict[Any, Any], A2]:
+        raise NotImplementedError
+
+    def map_with_undefined_field(
+        cls: type[Producer], a1: StoragePartitions
+    ) -> PartitionDependencies:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=r"BadProducer.map - the following parameter\(s\) must be defined as a field: {'a1'}",
     ):
+        _define_bad_producer(build=build_without_inputs, map_=map_with_undefined_field)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            @classmethod
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
-                pass
-
-            @classmethod
-            def map(cls, a1: StoragePartitions) -> PartitionDependencies:  # type: ignore[empty-body]
-                pass
+    def build_with_unused_field(
+        cls: type[Producer], a1: dict[Any, Any]
+    ) -> Annotated[dict[Any, Any], A3]:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=r"BadProducer - the following fields aren't used in `.build` or `.map`: {'a2'}",
     ):
+        _define_bad_producer(annotations={"a1": A1, "a2": A2}, build=build_with_unused_field)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
-            a2: A2
+    def build_untyped(cls: type[Producer], a1: Any) -> Any:
+        raise NotImplementedError
 
-            @classmethod
-            def build(cls, a1: dict) -> Annotated[dict, A3]:  # type: ignore[empty-body,type-arg]
-                pass
+    build_untyped.__annotations__.pop("a1")
 
     with pytest.raises(ValueError, match="must have a type hint"):
+        _define_bad_producer(annotations={"a1": A1}, build=build_untyped)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
-
-            @classmethod
-            def build(cls, a1):  # type: ignore[no-untyped-def]
-                pass
+    def build_with_non_artifact_field(cls: type[Producer], a1: str) -> tuple[A2, A3]:
+        raise NotImplementedError
 
     with pytest.raises(ValueError, match="type hint must be an Artifact subclass"):
+        _define_bad_producer(annotations={"a1": str}, build=build_with_non_artifact_field)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: str
-
-            @classmethod
-            def build(cls, a1: str) -> tuple[A2, A3]:  # type: ignore[empty-body]
-                pass
+    def build_with_default(
+        cls: type[Producer],
+        a1: dict[Any, Any] = cast(Any, A1()),
+    ) -> Any:
+        raise NotImplementedError
 
     with pytest.raises(ValueError, match="must not have a default"):
+        _define_bad_producer(annotations={"a1": A1}, build=build_with_default)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
-
-            @classmethod
-            def build(cls, a1: dict = A1()):  # type: ignore[assignment,no-untyped-def,type-arg]
-                pass
+    def build_positional_only(cls: type[Producer], a1: dict[Any, Any], /) -> Any:
+        raise NotImplementedError
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
+        _define_bad_producer(annotations={"a1": A1}, build=build_positional_only)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
-
-            @classmethod
-            def build(cls, a1: dict, /):  # type: ignore[no-untyped-def,type-arg]
-                pass
+    def build_varargs(cls: type[Producer], *a1: dict[Any, Any]) -> Any:
+        raise NotImplementedError
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
+        _define_bad_producer(annotations={"a1": A1}, build=build_varargs)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
-
-            @classmethod
-            def build(cls, *a1: dict):  # type: ignore[no-untyped-def,type-arg]
-                pass
+    def build_kwargs(cls: type[Producer], **a1: dict[Any, Any]) -> Any:
+        raise NotImplementedError
 
     with pytest.raises(ValueError, match="must be usable as a keyword argument"):
+        _define_bad_producer(annotations={"a1": A1}, build=build_kwargs)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
+    def build_without_return(cls: type[Producer], a1: dict[Any, Any]) -> Any:
+        raise NotImplementedError
 
-            @classmethod
-            def build(cls, **a1: dict):  # type: ignore[no-untyped-def,type-arg]
-                pass
+    build_without_return.__annotations__.pop("return")
 
     with pytest.raises(ValueError, match="a return value must be set"):
+        _define_bad_producer(annotations={"a1": A1}, build=build_without_return)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
-
-            @classmethod
-            def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]
-                pass
+    def build_returning_none(cls: type[Producer], a1: dict[Any, Any]) -> None:
+        raise NotImplementedError
 
     with pytest.raises(ValueError, match="missing return signature"):
-
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
-
-            @classmethod
-            def build(cls, a1: dict) -> None:  # type: ignore[type-arg]
-                pass
+        _define_bad_producer(annotations={"a1": A1}, build=build_returning_none)
 
     with pytest.raises(
         ValueError, match=re.escape("BadProducer.a1 - field must not have a default.")
     ):
-
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1 = None  # type: ignore[assignment]
-
-            @classmethod
-            def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]
-                pass
+        _define_bad_producer(
+            annotations={"a1": A1},
+            defaults={"a1": None},
+            build=build_without_return,
+        )
 
     with pytest.raises(ValueError, match=re.escape("BadProducer.a1 - field must not be optional.")):
-
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1 | None
-
-            @classmethod
-            def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]
-                pass
+        _define_bad_producer(annotations={"a1": A1 | None}, build=build_without_return)
 
     with pytest.raises(
         ValueError,
         match=r"BadProducer.a1 - field must not have a default.",
     ):
+        _define_bad_producer(
+            annotations={"a1": A1},
+            defaults={"a1": A1()},
+            build=build_with_undefined_field,
+        )
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1 = A1()
-
-            @classmethod
-            def build(cls, a1: dict) -> A2:  # type: ignore[empty-body,type-arg]
-                pass
+    def build_with_mismatched_artifact(
+        cls: type[Producer],
+        a1: Annotated[dict[Any, Any], A2],
+    ) -> A2:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=r"BadProducer.build a1 param - annotation Artifact class .* does not match that set on the field",
     ):
+        _define_bad_producer(annotations={"a1": A1}, build=build_with_mismatched_artifact)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            a1: A1
-
-            @classmethod
-            def build(cls, a1: Annotated[dict, A2]) -> A2:  # type: ignore[empty-body,type-arg]
-                pass
+    def build_with_incompatible_view(cls: type[Producer]) -> Annotated[str, A2]:
+        raise NotImplementedError
 
     with pytest.raises(ValueError, match=r"str.* cannot be used to represent Struct"):
+        _define_bad_producer(build=build_with_incompatible_view)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            @classmethod
-            def build(cls) -> Annotated[str, A2]:  # type: ignore[empty-body]
-                pass
+    def build_with_incompatible_type(
+        cls: type[Producer],
+    ) -> Annotated[int, Int64(), A2]:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=r"the specified Type \(`Int64\(.*\)`\) is not compatible with the Artifact's Type",
     ):
+        _define_bad_producer(build=build_with_incompatible_type)
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            @classmethod
-            def build(cls) -> Annotated[int, Int64(), A2]:  # type: ignore[empty-body]
-                pass
+    def instance_build(self: Producer) -> Annotated[dict[Any, Any], A2]:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=r"BadProducer.build - must be a @classmethod or @staticmethod",
     ):
+        _define_bad_producer(build=instance_build, build_kind="instance")
 
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
-                pass
+    def class_build(cls: type[Producer]) -> Annotated[dict[Any, Any], A2]:
+        raise NotImplementedError
+
+    def instance_map(self: Producer) -> PartitionDependencies:
+        raise NotImplementedError
 
     with pytest.raises(
         ValueError,
         match=r"BadProducer.map - must be a @classmethod or @staticmethod",
     ):
-
-        class BadProducer(Producer):  # type: ignore[no-redef]
-            @classmethod
-            def build(cls) -> Annotated[dict, A2]:  # type: ignore[empty-body,type-arg]
-                pass
-
-            def map(cls) -> PartitionDependencies:  # type: ignore[empty-body]
-                pass
+        _define_bad_producer(build=class_build, map_=instance_map, map_kind="instance")
 
 
 def test_Producer_bad_init() -> None:
     with pytest.raises(TypeError, match="cannot be instantiated directly"):
         Producer()
     with pytest.raises(ValueError, match="Extra inputs are not permitted"):
-        DummyProducer(junk=5)  # type: ignore[call-arg]
+        cast(Any, DummyProducer)(junk=5)
     with pytest.raises(ValueError, match="Field required"):
-        DummyProducer()  # pyright: ignore[reportCallIssue]
+        cast(Any, DummyProducer)()
     with pytest.raises(ValueError, match="Input should be a valid dictionary or instance of A1"):
-        DummyProducer(a1=5)  # pyright: ignore[reportArgumentType]
+        cast(Any, DummyProducer)(a1=5)
     with pytest.raises(ValueError, match="Input should be a valid dictionary or instance of A1"):
-        DummyProducer(a1=A2())  # pyright: ignore[reportArgumentType]
+        cast(Any, DummyProducer)(a1=A2())
 
 
 def test_Producer_bad_out() -> None:
     producer = DummyProducer(a1=A1())
     with pytest.raises(ValueError, match="expected 2 arguments of"):
-        producer.out(1)  # type: ignore[arg-type]
+        cast(Any, producer.out)(1)
     with pytest.raises(
         ValueError, match=r"DummyProducer.out\(\) 1st argument - expected an instance of"
     ):
-        producer.out(1, 2)  # type: ignore[arg-type]
+        cast(Any, producer.out)(1, 2)
     with pytest.raises(
         ValueError, match=r"DummyProducer.out\(\) 2nd argument - expected an instance of"
     ):
@@ -675,9 +727,11 @@ def test_Producer_type_inference(
     numbers_view_read = python_views.List(artifact_class=artifact_class, type=type_, mode="READ")
     numbers_view_write = numbers_view_read.model_copy(update={"mode": "WRITE"})
 
-    @producer_decorator()
-    def plusone(numbers: annotation) -> annotation:
+    def plusone_build(numbers: list[int]) -> list[int]:
         return [n + 1 for n in numbers]
+
+    plusone_build.__annotations__ = {"numbers": annotation, "return": annotation}
+    plusone = producer_decorator()(plusone_build)
 
     assert plusone._input_artifact_classes_ == {"numbers": artifact_class}
     assert plusone._build_inputs_ == {"numbers": numbers_view_read}
@@ -693,8 +747,8 @@ def test_Producer_io_checks() -> None:
         b: Artifact
 
         @staticmethod
-        def map(m: StoragePartitions) -> PartitionDependencies:  # type: ignore[empty-body]
-            pass
+        def map(m: StoragePartitions) -> PartitionDependencies:
+            raise NotImplementedError
 
         @staticmethod
         def build(b: int) -> int:
@@ -725,6 +779,8 @@ def test_Producer_io_checks() -> None:
     ) -> Any:
         return "test-read"
 
+    assert callable(dummy_reader)
+
     # We should now be able to read it...
     CheckIO(m=fake_artifact, b=fake_artifact)
 
@@ -736,7 +792,9 @@ def test_Producer_io_checks() -> None:
         storage_partition: StoragePartition,
         view: View,
     ) -> None:
-        pass
+        return None
+
+    assert callable(dummy_writer)
 
     # and write it.
     producer.out(fake_artifact)

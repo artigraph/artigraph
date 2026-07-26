@@ -3,7 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from abc import abstractmethod
-from collections.abc import Iterator
+from collections.abc import Generator
 from contextlib import contextmanager
 from typing import TYPE_CHECKING, Self
 
@@ -122,7 +122,7 @@ class BackendConnection:
         self.write_snapshot_partitions(snapshot, artifact_key, artifact, partitions)
 
     @contextmanager
-    def connect(self) -> Iterator[Self]:
+    def connect(self) -> Generator[Self]:
         """
         Return self.
 
@@ -147,5 +147,5 @@ class Backend[Connection: BackendConnection](Model):
 
     @contextmanager
     @abstractmethod
-    def connect(self) -> Iterator[Connection]:
+    def connect(self) -> Generator[Connection]:
         raise NotImplementedError()

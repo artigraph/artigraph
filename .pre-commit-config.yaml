@@ -61,6 +61,13 @@ repos:
         language: system
         require_serial: true
         types_or: [python, pyi, jupyter]
+      - id: pyright
+        name: pyright
+        entry: pyright
+        language: system
+        require_serial: true
+        types_or: [python, pyi]
+        exclude: ^(src/arti/internal/vendored/|stubs/)
       - id: pytest
         name: pytest
         entry: pytest

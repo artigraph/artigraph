@@ -1,3 +1,4 @@
+# pyright: reportPrivateUsage=false
 from typing import Annotated, ClassVar
 
 import pytest

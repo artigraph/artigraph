@@ -19,7 +19,7 @@ def _read_pickle_file(path: str) -> Any:
 
 
 @register_reader
-def _read_pickle_localfile_python(
+def read_pickle_localfile_python(
     type_: Type,
     format: Pickle,
     storage_partitions: Sequence[LocalFilePartition],
@@ -37,7 +37,7 @@ def _read_pickle_localfile_python(
 
 
 @register_writer
-def _write_pickle_localfile_python(
+def write_pickle_localfile_python(
     data: Any,
     type_: Type,
     format: Pickle,

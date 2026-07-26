@@ -3,6 +3,7 @@ import re
 from datetime import date
 from itertools import repeat
 from pathlib import Path
+from typing import cast
 
 import pytest
 
@@ -39,8 +40,8 @@ def generate_partition_files(storage: LocalFile, input_fingerprints: InputFinger
 def test_local_partitioning(tmp_path: Path, date_keys: list[PartitionKey]) -> None:
     storage = (
         LocalFile(path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test"))
-        ._visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
-        ._visit_format(DummyFormat())
+        .visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
+        .visit_format(DummyFormat())
     )
     generate_partition_files(storage, InputFingerprints(zip(date_keys, repeat(None))))
     snapshots = storage.discover_partitions()
@@ -54,7 +55,7 @@ def test_local_partitioning(tmp_path: Path, date_keys: list[PartitionKey]) -> No
 
 
 def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[PartitionKey]) -> None:
-    for year in {k["date"].Y for k in date_keys}:  # type: ignore[attr-defined]
+    for year in {cast(DateField, k["date"]).Y for k in date_keys}:
         storage = (
             LocalFile(
                 path=str(
@@ -66,10 +67,8 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[PartitionKe
                     / "test"
                 )
             )
-            ._visit_type(
-                Collection(element=Struct(fields={"date": Date()}), partition_by=("date",))
-            )
-            ._visit_format(DummyFormat())
+            .visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
+            .visit_format(DummyFormat())
         )
         # Generate files for *all* years - we want discover_partitions to do the filtering.
         generate_partition_files(storage, InputFingerprints(zip(date_keys, repeat(None))))
@@ -81,7 +80,7 @@ def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[PartitionKe
             assert set(partition.partition_key) == {"date"}
             assert partition.partition_key in date_keys
             assert isinstance(partition.partition_key["date"], DateField)
-            assert year == partition.partition_key["date"].Y
+            assert year == cast(DateField, partition.partition_key["date"]).Y
 
 
 def test_local_partitioning_with_input_fingerprints(
@@ -93,8 +92,8 @@ def test_local_partitioning_with_input_fingerprints(
                 tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "{input_fingerprint}" / "test"
             ),
         )
-        ._visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
-        ._visit_format(DummyFormat())
+        .visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
+        .visit_format(DummyFormat())
     )
     input_fingerprint = Fingerprint.from_int(42)
     input_fingerprints = InputFingerprints(zip(date_keys, repeat(input_fingerprint)))
@@ -113,7 +112,7 @@ def test_local_partitioning_with_input_fingerprints(
 def test_local_partitioning_errors(tmp_path: Path) -> None:
     storage = LocalFile(
         path=str(tmp_path / "{date.Y}" / "{date.m}" / "{date.d}" / "test")
-    )._visit_type(
+    ).visit_type(
         Collection(element=Struct(fields={"data_date": Date()}), partition_by=("data_date",))
     )
     with pytest.raises(
@@ -129,7 +128,7 @@ def test_local_file_partition_fingerprint(tmp_path: Path) -> None:
     with path.open("w") as f:
         f.write("hello world")
     partition = LocalFilePartition(
-        partition_key={}, path=str(path), storage=LocalFile(path=str(path))
+        partition_key=PartitionKey(), path=str(path), storage=LocalFile(path=str(path))
     ).snapshot()
     assert partition.content_fingerprint == Fingerprint.from_string(
         hashlib.sha256(text.encode()).hexdigest()

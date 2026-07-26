@@ -6,7 +6,7 @@ import abc
 import os
 from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Self, TypeVar, cast
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field, InstanceOf, PrivateAttr
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class StoragePartition(Model):
     input_fingerprint: Fingerprint | None = None
     partition_key: PartitionKey = PartitionKey()
-    storage: Annotated[Storage, Field(repr=False)]
+    storage: Annotated[InstanceOf[Storage[Any]], Field(repr=False)]
 
     @abc.abstractmethod
     def compute_content_fingerprint(self) -> Fingerprint:
@@ -55,7 +55,7 @@ class StoragePartitionSnapshot(Model):
         return self.storage_partition.partition_key
 
     @property
-    def storage(self) -> Storage:
+    def storage(self) -> Storage[Any]:
         return self.storage_partition.storage
 
 
@@ -72,7 +72,7 @@ class Storage[SP: StoragePartition](Model):
     """
 
     _abstract_ = True
-    storage_partition_type: ClassVar[type[SP]]  # type: ignore[misc]
+    storage_partition_type: ClassVar[type[SP]]  # pyright: ignore[reportGeneralTypeIssues]
 
     # These separators are used in the default resolve_* helpers to format metadata into
     # the storage fields.
@@ -85,7 +85,7 @@ class Storage[SP: StoragePartition](Model):
     _key_types: PartitionKeyTypes | None = PrivateAttr(default=None)
 
     @classmethod
-    def __class_getitem__(cls, item: type[SP]) -> type[Self]:  # type: ignore[override]
+    def __class_getitem__(cls, item: Any) -> Any:
         # An unconstrained Storage must remain the base class at runtime so Pydantic's
         # polymorphic serialization includes concrete fields (paths, buckets, literal values).
         # Concrete partition specializations still need their own classes and validation.
@@ -122,15 +122,15 @@ class Storage[SP: StoragePartition](Model):
             )
 
     @classmethod
-    def get_default(cls) -> Storage:
+    def get_default(cls) -> Storage[Any]:
         from arti.storage.literal import StringLiteral
 
         return StringLiteral()  # TODO: Support some sort of configurable defaults.
 
-    def _visit_type(self, type_: Type) -> Self:
+    def visit_type(self, type_: Type) -> Self:
         # TODO: Check support for the types and partitioning on the specified field(s).
         copy = self.model_copy()
-        copy._key_types = PartitionKey.types_from(type_)
+        copy._key_types = PartitionKey.types_from(type_)  # pyright: ignore[reportAttributeAccessIssue]
         assert copy.key_types is not None
         field_component_specs = {
             f"{name}{self.partition_name_component_sep}{component_name}": f"{{{name}.{component_spec}}}"
@@ -143,10 +143,10 @@ class Storage[SP: StoragePartition](Model):
             )
         )
 
-    def _visit_format(self, format_: Format) -> Self:
+    def visit_format(self, format_: Format) -> Self:
         return self.resolve(extension=format_.extension)
 
-    def _visit_graph(self, graph: Graph) -> Self:
+    def visit_graph(self, graph: Graph) -> Self:
         return self.resolve(
             graph_name=graph.name,
             path_tags=self.segment_sep.join(
@@ -154,12 +154,12 @@ class Storage[SP: StoragePartition](Model):
             ),
         )
 
-    def _visit_input_fingerprint(self, input_fingerprint: Fingerprint | None) -> Self:
+    def visit_input_fingerprint(self, input_fingerprint: Fingerprint | None) -> Self:
         return self.resolve(
             input_fingerprint="" if input_fingerprint is None else str(input_fingerprint)
         )
 
-    def _visit_names(self, names: tuple[str, ...]) -> Self:
+    def visit_names(self, names: tuple[str, ...]) -> Self:
         return self.resolve(name=names[-1] if names else "", names=self.segment_sep.join(names))
 
     @property
@@ -211,7 +211,7 @@ class Storage[SP: StoragePartition](Model):
             if not self.includes_input_fingerprint_template:
                 raise ValueError(f"{self} does not specify a {{input_fingerprint}} template")
             format_kwargs["input_fingerprint"] = str(input_fingerprint)
-        field_values = {
+        field_values: dict[str, Any] = {
             name: (
                 strip_partition_indexes(original).format(**format_kwargs)
                 if lenient_issubclass(type(original := getattr(self, name)), str)

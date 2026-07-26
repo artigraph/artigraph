@@ -29,12 +29,13 @@ def worktree_add(
             typer.secho(f"Creating `{branch}` branch from `origin/{branch}`...", fg="yellow")
             git.branch(branch, f"origin/{branch}")
     branch_dir = WORKTREE_BASE_DIR / branch
+    branch_dir_str = str(branch_dir)
     typer.secho(f"Creating {branch_dir} worktree...", fg="green")
     git.worktree.add(branch_dir, branch)
     typer.secho("Bootstrapping mise and uv...", fg="green")
-    mise("trust", branch_dir / "mise/config.toml", _cwd=branch_dir)
-    mise("install", _cwd=branch_dir, _fg=True)
-    uv("sync", "--all-extras", _cwd=branch_dir, _fg=True)
+    mise("trust", branch_dir / "mise/config.toml", _cwd=branch_dir_str)
+    mise("install", _cwd=branch_dir_str, _fg=True)
+    uv("sync", "--all-extras", _cwd=branch_dir_str, _fg=True)
     typer.echo(
         f"`{branch}` worktree created - when finished, clean up with: git worktree remove '{branch}'"
     )

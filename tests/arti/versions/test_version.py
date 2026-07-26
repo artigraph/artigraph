@@ -1,3 +1,4 @@
+# pyright: reportPrivateUsage=false
 from datetime import UTC, datetime
 
 import pytest
@@ -32,7 +33,7 @@ def test_SemVer(major: int, minor: int, patch: int, fingerprint_fields: set[str]
     assert set(version._arti_fingerprint_fields_) == {"_arti_type_", *fingerprint_fields}
 
 
-def test__Source() -> None:
+def test_Source() -> None:
     class P:
         version: String = _Source()
 

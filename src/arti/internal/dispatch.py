@@ -12,8 +12,7 @@ RETURN = TypeVar("RETURN")
 REGISTERED = TypeVar("REGISTERED", bound=Callable[..., Any])
 
 
-# This may be less useful once mypy supports ParamSpecs - after that, we might be able to define
-# multidispatch with a ParamSpec and have mypy check the handlers' arguments are covariant.
+# The dynamic multimethod implementation cannot currently express the handlers' covariance.
 class _multipledispatch(_multimethod.multidispatch[RETURN]):
     """
     Multiple dispatch for a set of functions based on parameter type.
@@ -31,7 +30,11 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
         self.pending = set()
         self.generics = []
         self.signatures = {}
-        _multimethod.multimethod.__init__(self, func)
+        base_init = cast(
+            Callable[[Any, Callable[..., RETURN]], None],
+            getattr(_multimethod.multimethod, "__init__"),  # noqa: B009
+        )
+        base_init(self, func)
         self.canonical_name: str | None = None
         self.discovery_func: Callable[[], None] | None = None
         self.clean_signature = tidy_signature(func, inspect.signature(func))
@@ -39,19 +42,28 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
     def __missing__(self, types: tuple[Any, ...]) -> Callable[..., RETURN]:
         if self.discovery_func is not None:
             self.discovery_func()
-        return super().__missing__(types)
+        missing = cast(
+            Callable[[tuple[Any, ...]], Callable[..., RETURN]],
+            getattr(super(), "__missing__"),  # noqa: B009
+        )
+        return missing(types)
 
     def dispatch(self, *args: Any) -> Callable[..., RETURN]:
         # multimethod 2 resolves generic parameters (eg: `Sequence[...]`) with instance checks that
         # bypass `__missing__`, so discover implementations before every dispatch.
         if self.discovery_func is not None:
             self.discovery_func()
-        return cast(Callable[..., RETURN], super().dispatch(*args))
+        dispatch = cast(
+            Callable[..., Callable[..., RETURN]],
+            getattr(super(), "dispatch"),  # noqa: B009
+        )
+        return dispatch(*args)
 
     def lookup(self, *args: type[Any] | None) -> Callable[..., Any]:
         # multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same
         # before looking up. Non-Generics pass through as is.
-        args = tuple(_multimethod.subtype(arg) for arg in args)  # type: ignore[no-untyped-call]
+        subtype = cast(Callable[[type[Any] | None], Any], _multimethod.subtype)
+        args = tuple(subtype(arg) for arg in args)
         # NOTE: multimethod doesn't override __contains__ (likely so __missing__ will still run), so
         # "args in self" will be False when using subclasses of any arg.
         missing_error = ValueError(f"No `{self.canonical_name}` implementation found for: {args}")
@@ -104,8 +116,8 @@ def multipledispatch(
 ) -> Callable[[Callable[..., RETURN]], _multipledispatch[RETURN]]:
     def wrap(func: Callable[..., RETURN]) -> _multipledispatch[RETURN]:
         # The base handler is expected to `raise NotImplementedError`
-        func._abstract_ = True  # type: ignore[attr-defined]
-        dispatch = _multipledispatch(func)
+        object.__setattr__(func, "_abstract_", True)
+        dispatch = cast(_multipledispatch[RETURN], _multipledispatch(func))
         dispatch.canonical_name = canonical_name
         dispatch.discovery_func = discovery_func
         return dispatch

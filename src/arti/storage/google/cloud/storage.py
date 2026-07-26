@@ -29,7 +29,9 @@ class GCSFilePartition(_GCSMixin, StoragePartition):
         # TODO: GCSFileSystem needs to be injected somehow
         info = GCSFileSystem().info(f"{self.bucket}/{self.path}")
         # Prefer md5Hash if available
-        return Fingerprint.from_string(info["md5Hash"] if "md5Hash" in info else info["crc32c"])
+        return Fingerprint.from_string(
+            str(info["md5Hash"] if "md5Hash" in info else info["crc32c"])
+        )
 
 
 class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
@@ -52,13 +54,11 @@ class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
         # TODO: GCSFileSystem needs to be injected somehow
         paths = GCSFileSystem().glob(wildcard)
         path_metadata = parse_spec(
-            paths, spec=spec, key_types=self.key_types, input_fingerprints=input_fingerprints
+            set(paths), spec=spec, key_types=self.key_types, input_fingerprints=input_fingerprints
         )
         return tuple(
             self.generate_partition(
                 input_fingerprint=input_fingerprint, partition_key=partition_key
             ).snapshot()
-            for (bucket, path), (input_fingerprint, partition_key) in {
-                tuple(path.split("/", 1)): metadata for path, metadata in path_metadata.items()
-            }.items()
+            for input_fingerprint, partition_key in path_metadata.values()
         )

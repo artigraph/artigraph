@@ -7,9 +7,9 @@ from collections.abc import Callable
 from functools import cached_property, wraps
 from graphlib import TopologicalSorter
 from types import TracebackType
-from typing import TYPE_CHECKING, Annotated, Any, Literal
+from typing import TYPE_CHECKING, Annotated, Any, Literal, cast
 
-from pydantic import Field, PrivateAttr, field_validator
+from pydantic import Field, InstanceOf, PrivateAttr, field_validator
 
 import arti
 from arti import io
@@ -44,7 +44,7 @@ CLOSED: Literal["closed"] = "closed"
 def requires_sealed[Return](fn: Callable[..., Return]) -> Callable[..., Return]:
     @wraps(fn)
     def check_if_sealed(self: Graph, *args: Any, **kwargs: Any) -> Return:
-        if self._status is not CLOSED:
+        if self._status is not CLOSED:  # pyright: ignore[reportPrivateUsage]
             raise ValueError(f"{fn.__name__} cannot be used while the Graph is still being defined")
         return fn(self, *args, **kwargs)
 
@@ -58,7 +58,7 @@ class ArtifactBox(TypedBox[Artifact]):
         if (graph := arti.context.graph) is not None:
             # NOTE: While we could `._visit_names` even without the Graph, it's helpful to late bind
             # in case the structure changes.
-            storage = storage._visit_graph(graph)._visit_names((*self._namespace, key))
+            storage = storage.visit_graph(graph).visit_names((*self._namespace, key))
         # Require an {input_fingerprint} template in the Storage if this Artifact is being generated
         # by a Producer. Otherwise, strip the {input_fingerprint} template (if set) for "raw"
         # Artifacts.
@@ -67,7 +67,7 @@ class ArtifactBox(TypedBox[Artifact]):
         # copying the instance and setting the `producer_output` attribute). We won't know the
         # "final" instance until assignment here to the Graph.
         if artifact.producer_output is None:
-            storage = storage._visit_input_fingerprint(None)
+            storage = storage.visit_input_fingerprint(None)
         elif not storage.includes_input_fingerprint_template:
             raise ValueError(
                 "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
@@ -97,19 +97,19 @@ class Graph(Model):
     # The Backend *itself* should not affect the results of a Graph build, though the contents
     # certainly may (eg: stored annotations), so we avoid serializing it. This also prevents
     # embedding any credentials.
-    backend: Annotated[Backend, SkipFingerprint()] = Field(
+    backend: Annotated[InstanceOf[Backend[Any]], SkipFingerprint()] = Field(
         default_factory=_get_memory_backend, exclude=True
     )
     path_tags: FrozenMapping[str, str] = frozendict()
 
     # Graph starts off sealed, but is opened within a `with Graph(...)` context
     _status: STATUS | None = PrivateAttr(default=None)
-    _artifact_to_key: FrozenMapping[Artifact, str] = frozendict()
+    _artifact_to_key: frozendict[Artifact, str] = frozendict()
 
     @field_validator("artifacts")
     @classmethod
     def _convert_artifacts(cls, artifacts: ArtifactBox) -> ArtifactBox:
-        artifacts._status.root = CLOSED
+        artifacts._status.root = CLOSED  # pyright: ignore[reportPrivateUsage]
         return artifacts
 
     def __enter__(self) -> Graph:
@@ -132,9 +132,9 @@ class Graph(Model):
 
     def _toggle(self, status: Literal["open", "closed"]) -> None:
         # The Graph object is "frozen", so we must bypass the assignment checks.
-        self.artifacts._status.root = status
-        self._status = status
-        self._artifact_to_key = frozendict(
+        self.artifacts._status.root = status  # pyright: ignore[reportPrivateUsage]
+        self._status = status  # pyright: ignore[reportAttributeAccessIssue]
+        self._artifact_to_key = frozendict(  # pyright: ignore[reportAttributeAccessIssue]
             {artifact: key for key, artifact in self.artifacts.walk()}
         )
 
@@ -163,7 +163,7 @@ class Graph(Model):
     @cached_property
     @requires_sealed
     def dependencies(self) -> NodeDependencies:
-        artifact_deps = {
+        artifact_deps: dict[Artifact, frozenset[Node]] = {
             artifact: (
                 frozenset({artifact.producer_output.producer})
                 if artifact.producer_output is not None
@@ -177,7 +177,7 @@ class Graph(Model):
             for artifact in artifact_deps
             if (producer_output := artifact.producer_output) is not None
         }
-        return NodeDependencies(artifact_deps | producer_deps)  # type: ignore[operator]
+        return NodeDependencies(artifact_deps | producer_deps)
 
     @cached_property
     @requires_sealed
@@ -223,7 +223,7 @@ class Graph(Model):
             )
             view.check_annotation_compatibility(annotation)
             view.check_artifact_compatibility(artifact)
-        assert view is not None  # mypy gets mixed up with ^
+        assert view is not None
         if storage_partition_snapshots is None:
             # We want to allow reading raw Artifacts even if other raw Artifacts are missing (which
             # prevents snapshotting).
@@ -238,6 +238,7 @@ class Graph(Model):
                     storage_partition_snapshots = conn.read_snapshot_partitions(
                         snapshot, key, artifact
                     )
+        assert storage_partition_snapshots is not None
         return io.read(
             type_=artifact.type,
             format=artifact.format,
@@ -307,7 +308,7 @@ class GraphSnapshot(Model):
         return self.graph.artifacts
 
     @property
-    def backend(self) -> Backend:
+    def backend(self) -> Backend[Any]:
         return self.graph.backend
 
     @property
@@ -356,7 +357,7 @@ class GraphSnapshot(Model):
             conn.write_snapshot(snapshot)
             for key, partitions in known_artifact_partitions.items():
                 conn.write_artifact_and_graph_partitions(
-                    snapshot, key, snapshot.artifacts[key], partitions
+                    snapshot, key, cast(Artifact, snapshot.artifacts[key]), partitions
                 )
         return snapshot
 
@@ -380,7 +381,7 @@ class GraphSnapshot(Model):
         name: str,
         tag: str,
         *,
-        connectable: Backend | BackendConnection,
+        connectable: Backend[Any] | BackendConnection,
     ) -> GraphSnapshot:
         with connectable.connect() as conn:
             return conn.read_snapshot_tag(name, tag)

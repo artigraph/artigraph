@@ -9,8 +9,10 @@ dev = [
     "gcp-storage-emulator",
     "ipdb",
     "ipython",
-    "mypy",
+    "pandas-stubs",
     "pre-commit",
+    "pyarrow-stubs",
+    "pyright",
     "pytest",
     "pytest-benchmark",
     "pytest-cov",
@@ -78,18 +80,13 @@ allow-direct-references = true
 source = "vcs"
 
 
-[tool.mypy]
-explicit_package_bases = true
-files = "docs/,src/,tests/"
-mypy_path = "$MYPY_CONFIG_FILE_DIR/src,$MYPY_CONFIG_FILE_DIR/stubs"
-namespace_packages = true
-plugins = ["pydantic.mypy"]
-show_error_codes = true
-strict = true
-
-[[tool.mypy.overrides]]
-module = ["gcp_storage_emulator.*", "gcsfs", "pandas", "pyarrow", "sh"]
-ignore_missing_imports = true
+[tool.pyright]
+enableExperimentalFeatures = true
+include = ["bin/", "docs/", "src/", "tests/"]
+reportImplicitStringConcatenation = true
+reportUnnecessaryTypeIgnoreComment = true
+stubPath = "stubs"
+typeCheckingMode = "strict"
 
 
 [tool.portray.mkdocs]

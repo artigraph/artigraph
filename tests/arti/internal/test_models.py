@@ -1,5 +1,6 @@
+# pyright: reportPrivateUsage=false
 from collections import defaultdict
-from typing import Annotated, Any, ClassVar
+from typing import Annotated, Any, ClassVar, cast
 
 import pytest
 from pydantic import Field, PrivateAttr, ValidationError
@@ -34,9 +35,9 @@ def test_Model() -> None:
 
     assert Nested(x=Concrete())
     with pytest.raises(ValidationError, match="Field required"):
-        assert Nested()  # pyright: ignore[reportCallIssue]
+        assert cast(Any, Nested)()
     with pytest.raises(ValidationError, match="Input should be a valid"):
-        assert Nested(x="junk")  # pyright: ignore[reportArgumentType]
+        assert cast(Any, Nested)(x="junk")
 
 
 def test_Model_fingerprint() -> None:
@@ -81,7 +82,7 @@ def test_Model_fingerprint() -> None:
 
 def test_Model_no_extras() -> None:
     with pytest.raises(ValidationError, match="Extra inputs are not permitted"):
-        Concrete(junk=1)  # type: ignore[call-arg]
+        cast(Any, Concrete)(junk=1)
 
 
 def test_Model_strict_types() -> None:
@@ -96,39 +97,47 @@ def test_Model_strict_types() -> None:
 
     a, b, c, d = 1, (1,), {"a": 1}, object()
 
-    m = M(a=a, b=b, c=c, d=d)  # pyright: ignore[reportArgumentType]
+    m = M(a=a, b=b, c=c, d=d)
     assert isinstance(m.c, frozendict)  # FrozenModel has a validator to convert
 
-    m = M(a=MyInt(a), b=b, c=c, d=d)  # pyright: ignore[reportArgumentType]
+    m = M(a=MyInt(a), b=b, c=c, d=d)
     assert not isinstance(m.a, MyInt)  # Subclasses of primitive types aren't preserved...
 
     with pytest.raises(ValidationError, match="Input should be a valid tuple"):
-        M(a=a, b=[1], c=c, d=d)  # pyright: ignore[reportArgumentType]
+        cast(Any, M)(a=a, b=[1], c=c, d=d)
 
     with pytest.raises(ValidationError, match="Input should be a valid integer"):
-        M(a=a, b=("a",), c=c, d=d)  # pyright: ignore[reportArgumentType]
+        cast(Any, M)(a=a, b=("a",), c=c, d=d)
+
+
+def _new_stuff() -> dict[str, list[Any]]:
+    return defaultdict(list)
 
 
 class Sneaky(Model):
     x: int
-    _stuff: dict[str, list] = PrivateAttr(default_factory=lambda: defaultdict(list))
+    _stuff: dict[str, list[Any]] = PrivateAttr(default_factory=_new_stuff)
+
+    @property
+    def stuff(self) -> dict[str, list[Any]]:
+        return self._stuff
 
 
 def test_Model_private_attributes() -> None:
     orig = Sneaky(x=1)
-    orig._stuff["a"].append("value")
-    assert orig._stuff == {"a": ["value"]}
+    orig.stuff["a"].append("value")
+    assert orig.stuff == {"a": ["value"]}
 
     copy = orig.model_copy()
     # Confirm private attributes are pulled over
-    assert orig._stuff == copy._stuff
+    assert orig.stuff == copy.stuff
     # as shared refs.
-    assert orig._stuff is copy._stuff
-    assert orig._stuff["a"] is copy._stuff["a"]
+    assert orig.stuff is copy.stuff
+    assert orig.stuff["a"] is copy.stuff["a"]
 
     copy = orig.model_copy(deep=True)
     # Confirm private attributes are pulled over
-    assert orig._stuff == copy._stuff
+    assert orig.stuff == copy.stuff
     # but as deepcopies, not shared refs.
-    assert orig._stuff is not copy._stuff
-    assert orig._stuff["a"] is not copy._stuff["a"]
+    assert orig.stuff is not copy.stuff
+    assert orig.stuff["a"] is not copy.stuff["a"]

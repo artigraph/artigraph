@@ -9,7 +9,7 @@ from typing import Any
 import parse
 
 from arti.fingerprints import Fingerprint
-from arti.partitions import InputFingerprints, PartitionField, PartitionKey, PartitionKeyTypes
+from arti.partitions import InputFingerprints, PartitionField, PartitionKey
 
 
 class Placeholder:
@@ -41,7 +41,7 @@ class StripIndexPlaceholder(FormatPlaceholder):
 
 
 class WildcardPlaceholder(Placeholder):
-    def __init__(self, key: str, key_types: PartitionKeyTypes):
+    def __init__(self, key: str, key_types: Mapping[str, type[PartitionField]]):
         super().__init__(key)
         if key not in key_types:
             raise ValueError(f"No '{key}' partition key found, expected one of {tuple(key_types)}")
@@ -147,7 +147,7 @@ def extract_placeholders(
 
     partition_key = PartitionKey(
         {
-            field_name: key_types[key].from_components(**components)
+            field_name: key_types[field_name].from_components(**components)
             for field_name, components in field_components.items()
         }
     )

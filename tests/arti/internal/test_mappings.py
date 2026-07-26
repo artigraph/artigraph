@@ -1,9 +1,10 @@
+# pyright: reportPrivateUsage=false
 from __future__ import annotations
 
 import copy
 import pickle
 import re
-from typing import Any, get_args, get_origin
+from typing import Any, cast, get_args, get_origin
 
 import pytest
 
@@ -16,7 +17,7 @@ def test_frozendict() -> None:
     assert frozendict([("a", 5)], b=10)
     assert frozendict(a=5)
     assert frozendict(a=5, b=10)
-    assert frozendict(a=5, b=frozendict(b=10))
+    assert frozendict[str, object](a=5, b=frozendict[str, int](b=10))
     assert frozendict({"a": 5})
     assert frozendict({"a": 5}, b=10)
     with pytest.raises(TypeError, match="unhashable type: 'dict'"):
@@ -26,15 +27,15 @@ def test_frozendict() -> None:
 def test_frozendict_immutability() -> None:
     val = frozendict({"x": 5})
     with pytest.raises(TypeError, match="does not support item assignment"):
-        val["x"] = 10  # type: ignore[index]
+        cast(Any, val)["x"] = 10
     with pytest.raises(TypeError, match="does not support item assignment"):
-        val["y"] = 10  # type: ignore[index]
+        cast(Any, val)["y"] = 10
     with pytest.raises(TypeError, match="does not support item deletion"):
-        del val["x"]  # type: ignore[attr-defined]
+        del cast(Any, val)["x"]
 
 
 def test_frozendict_hash() -> None:
-    assert hash(frozendict(a=5)) == hash(frozenset((("a", 5),)))
+    assert hash(frozendict[str, int](a=5)) == hash(frozenset((("a", 5),)))
 
 
 def test_frozendict_union() -> None:
@@ -76,7 +77,7 @@ class CoordBox(TypedBox[Coord]):
     pass
 
 
-def _validate_box_copy(box: TypedBox) -> None:
+def _validate_box_copy(box: TypedBox[Any]) -> None:
     dup = copy.copy(box)
     assert dup == box
     assert dup is not box
@@ -97,7 +98,7 @@ def _validate_box_copy(box: TypedBox) -> None:
 
 def test_TypedBox() -> None:
     with pytest.raises(TypeError, match="TypedBox expects a single value type"):
-        TypedBox[str, str]  # type: ignore[misc]
+        cast(Any, TypedBox).__class_getitem__((str, str))
 
     assert CoordBox.__target_type__ is Coord
 
@@ -132,6 +133,14 @@ def test_TypedBox() -> None:
     _validate_box_copy(box)
 
 
+def test_TypedBox_status_key() -> None:
+    # Internal state must not shadow or intercept user keys.
+    box = CoordBox(status=coord)
+    assert box.status == coord
+    box.status_quo = coord
+    assert dict(box) == {"status": coord, "status_quo": coord}
+
+
 def test_TypedBox_contains() -> None:
     box = CoordBox()
     assert "a" not in box
@@ -140,7 +149,7 @@ def test_TypedBox_contains() -> None:
     assert len(box) == 0
 
     box.a = Coord(1, 1)
-    box.x.y.z = Coord(1, 1)
+    cast(Any, box).x.y.z = Coord(1, 1)
     assert "a" in box
     assert "x" in box
     assert "x.y" in box
@@ -158,9 +167,9 @@ def test_TypedBox_InvalidKeyError() -> None:
     with pytest.raises(InvalidKeyError):
         box._dne
     with pytest.raises(InvalidKeyError):
-        box.x._dne
+        cast(Any, box.x)._dne
     with pytest.raises(InvalidKeyError):
-        box.x._dne = coord
+        cast(Any, box.x)._dne = coord
 
 
 def test_TypedBox_nesting() -> None:
@@ -170,7 +179,7 @@ def test_TypedBox_nesting() -> None:
             "init.key.child.coord": coord,
         }
     )
-    box.post.attribute.child.coord = coord  # pyright: ignore[reportAttributeAccessIssue]
+    cast(Any, box).post.attribute.child.coord = coord
     box["post"] = {"dict": {"child": {"coord": coord}}}
     box["post.key.child.coord"] = coord
 
@@ -213,9 +222,13 @@ def test_TypedBox_nesting() -> None:
 class CastCoord(Coord):
     @classmethod
     def cast(cls, value: Any) -> Any:
-        if isinstance(value, tuple):
-            return cls(*value)
-        return value  # Don't handle unknown values and let the box handle it.
+        if not isinstance(value, tuple):
+            return value
+        items = cast(tuple[Any, ...], value)
+        if len(items) == 2 and all(isinstance(item, int) for item in items):
+            x, y = cast(tuple[int, int], items)
+            return cls(x, y)
+        return cast(Any, items)  # Don't handle unknown values and let the box handle it.
 
 
 cast_coord = CastCoord(2, 2)
@@ -227,10 +240,13 @@ class CastCoordBox(TypedBox[CastCoord]):
 
 def test_TypedBox_cast() -> None:
     box = CastCoordBox(
-        {  # pyright: ignore[reportArgumentType]
-            "home": cast_coord,  # Existing values will be used directly
-            "work": (cast_coord.x, cast_coord.y),  # (2, 2) -> Coord.cast((2, 2))
-        }
+        cast(
+            Any,
+            {
+                "home": cast_coord,  # Existing values will be used directly
+                "work": (cast_coord.x, cast_coord.y),  # (2, 2) -> Coord.cast((2, 2))
+            },
+        )
     )
     box.school = (cast_coord.x, cast_coord.y)
 

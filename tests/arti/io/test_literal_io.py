@@ -12,7 +12,7 @@ from tests.arti.dummies import Num as _Num
 
 
 class Num(_Num):
-    storage: StringLiteral
+    storage: StringLiteral = StringLiteral()
 
 
 def test_stringliteral_io() -> None:

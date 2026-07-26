@@ -2,9 +2,7 @@ from __future__ import annotations
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
-import operator
 from dataclasses import dataclass
-from functools import reduce
 from typing import Any, final
 
 import annotated_types
@@ -28,7 +26,10 @@ class Fingerprint(int64):
     """
 
     def combine(self, *others: Fingerprint) -> Fingerprint:
-        return reduce(operator.xor, others, self)
+        result = self
+        for other in others:
+            result ^= other
+        return result
 
     @classmethod
     def from_int(cls, x: int, /) -> Fingerprint:

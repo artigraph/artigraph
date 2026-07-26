@@ -10,11 +10,11 @@ from arti.types import (
     Binary,
     Boolean,
     List,
+    ScalarClassTypeAdapter,
     String,
     Type,
     TypeAdapter,
     TypeSystem,
-    _ScalarClassTypeAdapter,
 )
 
 # NOTE: TypeAdapters for some types may still be missing. Please open an issue or PR if you find
@@ -28,7 +28,7 @@ from arti.types import (
 numpy_type_system = TypeSystem(key="numpy")
 
 
-class _NumpyScalarTypeAdapter(_ScalarClassTypeAdapter):
+class _NumpyScalarTypeAdapter(ScalarClassTypeAdapter[Type]):
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
         if isinstance(type_, np.ndarray):
@@ -64,7 +64,7 @@ for _precision in (8, 16, 32, 64):
 
 
 @numpy_type_system.register_adapter
-class ArrayAdapter(TypeAdapter):
+class ArrayAdapter(TypeAdapter[List]):
     artigraph = List
     system = np.ndarray
 
@@ -77,7 +77,7 @@ class ArrayAdapter(TypeAdapter):
     def to_artigraph(
         cls, type_: np.ndarray[Any, Any], *, hints: dict[str, Any], type_system: TypeSystem
     ) -> Type:
-        value = type_[0] if isinstance(type_[0], np.ndarray) else type(type_[0])
+        value = cast(Any, type_[0] if isinstance(type_[0], np.ndarray) else type(type_[0]))
         return cls.artigraph(element=type_system.to_artigraph(value, hints=hints))
 
     @classmethod
@@ -91,5 +91,5 @@ class ArrayAdapter(TypeAdapter):
         assert isinstance(type_, List)
         element_type = type_system.to_system(type_.element, hints=hints)
         # scalar numpy dtypes can be instantiated to return a zero value, like the python types
-        value = element_type if isinstance(element_type, np.ndarray) else element_type()
+        value = cast(Any, element_type if isinstance(element_type, np.ndarray) else element_type())
         return np.array([value])

@@ -1,13 +1,15 @@
+# pyright: reportPrivateUsage=false
+import json
 import pickle
 import re
 from collections.abc import Callable
 from pathlib import Path
-from typing import Annotated, cast
+from typing import Annotated, Any, cast
 from unittest.mock import PropertyMock, patch
 
 import pytest
 
-from arti import Artifact, Fingerprint, Graph, GraphSnapshot, PartitionKey, View, producer
+from arti import Artifact, Fingerprint, Graph, GraphSnapshot, PartitionKey, Type, View, producer
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
 from arti.graphs import ArtifactBox
@@ -19,7 +21,7 @@ from tests.arti.dummies import Num as _Num
 
 
 class Num(_Num):
-    storage: LocalFile
+    storage: LocalFile = LocalFile()
 
 
 def test_ArtifactBox() -> None:
@@ -27,8 +29,12 @@ def test_ArtifactBox() -> None:
         g.artifacts.a.b.c = 5
         g.artifacts.x.y.z = Artifact(type=Int64())
 
-    assert g.artifacts.a.b.c.storage.id == "test/a/b/c/c.json"
-    assert g.artifacts.x.y.z.storage.id == "test/x/y/z/z.json"
+    assert (
+        cast(StringLiteral, cast(Artifact, g.artifacts["a.b.c"]).storage).id == "test/a/b/c/c.json"
+    )
+    assert (
+        cast(StringLiteral, cast(Artifact, g.artifacts["x.y.z"]).storage).id == "test/x/y/z/z.json"
+    )
 
     assert g.artifacts == pickle.loads(pickle.dumps(g.artifacts))
 
@@ -37,23 +43,26 @@ def test_ArtifactBox() -> None:
 def test_ArtifactBox_template() -> None:
     templates = ArtifactBox(a=5)
     # We don't expect this part to fail, so avoid an assert to prevent false xfails.
-    if templates.a.storage.id != "{graph_name}/{path_tags}/{names}/{name}.json":
+    if (
+        cast(StringLiteral, cast(Artifact, templates.a).storage).id
+        != "{graph_name}/{path_tags}/{names}/{name}.json"
+    ):
         raise ValueError("Sanity check in xfail failed!")
 
     with Graph(name="test", artifacts=templates) as g:
         g.artifacts.z = 5
     assert g.artifacts.a.storage.id == "test/a/a.json"
-    assert g.artifacts.z.storage.id == "test/z/z.json"
+    assert cast(StringLiteral, cast(Artifact, g.artifacts.z).storage).id == "test/z/z.json"
 
 
 @pytest.fixture
 def graph() -> Graph:
-    # NOTE: .out() supports strict Artifact subclass mypy typing with the mypy_plugin, but Producers
-    # also support simple iteration (eg: `a, b = MyProducer(...)`).
+    # NOTE: .out() preserves concrete Artifact subclasses, while Producers also support simple
+    # iteration (eg: `a, b = MyProducer(...)`).
     with Graph(name="test") as g:
         g.artifacts.a = A1()
         g.artifacts.b = P1(a1=g.artifacts.a)
-        g.artifacts.c.a, g.artifacts.c.b = P2(a2=g.artifacts.b)
+        g.artifacts.c.a, g.artifacts.c.b = P2(a2=cast(A2, g.artifacts.b))
 
     return g
 
@@ -64,19 +73,50 @@ def test_Graph(graph: Graph) -> None:
     assert isinstance(graph.artifacts.b, A2)
     assert isinstance(graph.artifacts.c.a, A3)
     assert isinstance(graph.artifacts.c.b, A4)
-    assert not graph.artifacts.a.storage.includes_input_fingerprint_template
-    assert graph.artifacts.b.storage.includes_input_fingerprint_template
-    assert graph.artifacts.c.a.storage.includes_input_fingerprint_template
-    assert graph.artifacts.c.b.storage.includes_input_fingerprint_template
+    assert not cast(Artifact, graph.artifacts.a).storage.includes_input_fingerprint_template
+    assert cast(Artifact, graph.artifacts.b).storage.includes_input_fingerprint_template
+    assert cast(Artifact, graph.artifacts.c.a).storage.includes_input_fingerprint_template
+    assert cast(Artifact, graph.artifacts.c.b).storage.includes_input_fingerprint_template
     assert "backend" not in graph.model_dump()
+
+
+def _model_copy_graph(graph: Graph) -> Graph:
+    return graph.model_copy()
+
+
+def _pickle_graph(graph: Graph) -> Graph:
+    return cast(Graph, pickle.loads(pickle.dumps(graph)))
+
+
+def test_Graph_serialization_is_stable(graph: Graph) -> None:
+    # Pin the serialized form and fingerprints so refactors can't silently change Graph identity.
+    assert graph.artifacts.b.fingerprint == 7954616637240085606
+    assert graph.artifacts.b.producer_output.producer.fingerprint == -46238299892531143
+    assert graph.fingerprint == -5172931774348243978
+
+    # Artifact subclass fields and concrete Storage fields must be included.
+    class Noted(Artifact):
+        type: Type = Int64()
+        note: str = "hi"
+
+    with Graph(name="test") as g:
+        g.artifacts.n = Noted(storage=StringLiteral(value="1"))
+    assert json.loads(g.model_dump_json())["artifacts"] == {
+        "n": {
+            "_arti_type_": "Noted",
+            "annotations": [],
+            "format": {"_arti_type_": "JSON", "extension": ".json"},
+            "note": "hi",
+            "statistics": [],
+            "storage": {"_arti_type_": "StringLiteral", "id": "test/n/n.json", "value": "1"},
+            "type": {"_arti_type_": "Int64", "nullable": False},
+        }
+    }
 
 
 @pytest.mark.parametrize(
     "copier",
-    [
-        lambda g: g.model_copy(),
-        lambda g: pickle.loads(pickle.dumps(g)),
-    ],
+    [_model_copy_graph, _pickle_graph],
     ids=["model-copy", "pickle"],
 )
 def test_Graph_copy(graph: Graph, copier: Callable[[Graph], Graph]) -> None:
@@ -97,6 +137,53 @@ def test_Graph_copy(graph: Graph, copier: Callable[[Graph], Graph]) -> None:
     assert hash(graph) == hash(copy)
 
 
+def test_Graph_user_names_do_not_collide_with_internals() -> None:
+    # Producer inputs and Graph artifact names are user-defined, so internal metadata must not
+    # shadow them.
+    @producer()
+    def add(
+        outputs: int,
+        build_inputs: int,
+        map_inputs: int,
+        input_artifact_classes: int,
+        build_signature: int,
+        map_signature: int,
+        iter_outputs: int,
+        arti_type_key: int,
+        arti_fingerprint_fields: int,
+    ) -> int:
+        return (
+            outputs
+            + build_inputs
+            + map_inputs
+            + input_artifact_classes
+            + build_signature
+            + map_signature
+            + iter_outputs
+            + arti_type_key
+            + arti_fingerprint_fields
+        )
+
+    names = [
+        "outputs",
+        "build_inputs",
+        "map_inputs",
+        "input_artifact_classes",
+        "build_signature",
+        "map_signature",
+        "iter_outputs",
+        "arti_type_key",
+        "arti_fingerprint_fields",
+    ]
+    with Graph(name="test") as g:
+        g.artifacts.status = 1
+        g.artifacts.total = cast(Any, add)(**dict.fromkeys(names, g.artifacts.status))
+
+    assert isinstance(g.artifacts.status, Artifact)
+    g.build()
+    assert g.read(g.artifacts.total, annotation=int) == len(names)
+
+
 def test_Graph_literals(tmp_path: Path) -> None:
     n_add_runs = 0
 
@@ -109,7 +196,7 @@ def test_Graph_literals(tmp_path: Path) -> None:
     with Graph(name="Test") as g:
         g.artifacts.x = 1
         g.artifacts.y = Num(storage=LocalFile(path=str(tmp_path / "y.json")))
-        g.artifacts.z = add(x=g.artifacts.x, y=g.artifacts.y).out()  # type: ignore[call-arg]
+        g.artifacts.z = cast(Any, add)(x=g.artifacts.x, y=g.artifacts.y).out()
         # Changes to `phase` will cause a new GraphSnapshot. However, since `phase` isn't an input
         # to `add`, we *shouldn't* have to recompute `z` - assuming the backend properly stores
         # storage->storage_partitions separate from the set of storage_partitions associated with a
@@ -185,7 +272,9 @@ def test_Graph_snapshot() -> None:
         p1.fingerprint,
         *(
             storage_partition_snapshot.fingerprint
-            for storage_partition_snapshot in g.artifacts.a.storage.discover_partitions()
+            for storage_partition_snapshot in cast(
+                Artifact, g.artifacts.a
+            ).storage.discover_partitions()
         ),
     ]
 
@@ -221,9 +310,9 @@ def test_Graph_snapshot_id_producer_arg_order(tmp_path: Path) -> None:
 
     # Create two Graphs, varying only by the arg order to the Producer.
     with Graph(name="test") as g_ab:
-        g_ab.artifacts.c = div(a=a, b=b).out(c)  # type: ignore[call-arg]
+        g_ab.artifacts.c = cast(Any, div)(a=a, b=b).out(c)
     with Graph(name="test") as g_ba:
-        g_ba.artifacts.c = div(a=b, b=a).out(c)  # type: ignore[call-arg]
+        g_ba.artifacts.c = cast(Any, div)(a=b, b=a).out(c)
 
     assert g_ab.snapshot().id != g_ba.snapshot().id
 
@@ -274,11 +363,11 @@ def test_Graph_build(tmp_path: Path) -> None:
         g.artifacts.root.a = Num(storage=LocalFile(path=str(tmp_path / "a.json")))
         # NOTE: We're using a Num w/ LocalFile output so that the file can be discovered even if we
         # wipe the default MemoryBackend.
-        g.artifacts.b = increment(i=g.artifacts.root.a).out(  # type: ignore[call-arg]
+        g.artifacts.b = cast(Any, increment)(i=g.artifacts.root.a).out(
             Num(storage=LocalFile.rooted_at(tmp_path))
         )
         # Test multiple return values
-        g.artifacts.c, g.artifacts.d = dup(i=g.artifacts.root.a).out(  # type: ignore[call-arg]
+        g.artifacts.c, g.artifacts.d = cast(Any, dup)(i=g.artifacts.root.a).out(
             Num(storage=LocalFile.rooted_at(tmp_path)),
             Num(storage=LocalFile.rooted_at(tmp_path)),
         )
@@ -331,14 +420,17 @@ def test_Graph_build(tmp_path: Path) -> None:
 def test_Graph_build_failed_validation(tmp_path: Path) -> None:
     failed_validation_msg = "This is junk data!"
 
-    @producer(validate_outputs=lambda i: (False, failed_validation_msg))
+    def reject_output(output: int) -> tuple[bool, str]:
+        return False, failed_validation_msg
+
+    @producer(validate_outputs=reject_output)
     def angry_add(i: Annotated[int, Num]) -> Annotated[int, Num]:
         return i + 1
 
     num = Num(storage=LocalFile.rooted_at(tmp_path))  # Immutable, thus can reuse
     with Graph(name="test") as g:
         g.artifacts.a = num
-        g.artifacts.b = cast(Num, angry_add(i=g.artifacts.a).out(num))  # type: ignore[call-arg]
+        g.artifacts.b = cast(Num, cast(Any, angry_add)(i=g.artifacts.a).out(num))
 
     g.write(0, artifact=g.artifacts.a)
     with pytest.raises(ValueError, match=failed_validation_msg):
@@ -405,7 +497,7 @@ def test_Graph_read_write(tmp_path: Path) -> None:
 
     with Graph(name="test") as g:
         g.artifacts.i = Num(storage=LocalFile(path=str(tmp_path / "i.json")))
-        g.artifacts.j = plus1(i=g.artifacts.i).out()  # type: ignore[call-arg]
+        g.artifacts.j = cast(Any, plus1)(i=g.artifacts.i).out()
 
     i, j = g.artifacts.i, g.artifacts.j
     assert isinstance(j, Artifact)
@@ -465,7 +557,9 @@ def test_Graph_storage_resolution() -> None:
         g.artifacts.root.b = Num(storage=LocalFile())
         g.artifacts.c = cast(
             Num,
-            div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(Num(storage=LocalFile())),  # type: ignore[call-arg]
+            cast(Any, div)(a=g.artifacts.root.a, b=g.artifacts.root.b).out(
+                Num(storage=LocalFile())
+            ),
         )
         with pytest.raises(
             ValueError,
@@ -473,7 +567,7 @@ def test_Graph_storage_resolution() -> None:
                 "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
             ),
         ):
-            g.artifacts.d = div(a=g.artifacts.root.a, b=g.artifacts.root.b).out(  # type: ignore[call-arg]
+            g.artifacts.d = cast(Any, div)(a=g.artifacts.root.a, b=g.artifacts.root.b).out(
                 Num(storage=LocalFile(path="junk"))
             )
 

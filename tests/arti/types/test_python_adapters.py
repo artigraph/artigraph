@@ -1,6 +1,7 @@
+# pyright: reportPrivateUsage=false
 import re
 from datetime import date, datetime
-from typing import Any, Literal, TypedDict, get_args, get_origin, get_type_hints
+from typing import Any, Literal, TypedDict, cast, get_args, get_origin, get_type_hints
 
 import pytest
 
@@ -83,19 +84,19 @@ def test_python_list() -> None:
 
 def test_python_literal() -> None:
     # Order shouldn't matter
-    a = Enum(type=Int64(), items=(1, 2, 3))
+    a = Enum(type=Int64(), items=frozenset((1, 2, 3)))
     p = Literal[3, 2, 1]
 
     assert python_type_system.to_system(a, hints={}) == p
     assert python_type_system.to_artigraph(p, hints={}) == a
     assert python_type_system.to_artigraph(Literal[1.0, 2.0], hints={}) == Enum(
-        type=Float64(), items=(1.0, 2.0)
+        type=Float64(), items=frozenset((1.0, 2.0))
     )
     # Check for Union+Literal combos
-    assert python_type_system.to_artigraph(Literal[1] | Literal[2, 3], hints={}) == a  # type: ignore[operator] # python/mypy#16778
+    assert python_type_system.to_artigraph(Literal[1] | Literal[2, 3], hints={}) == a
     # Optional uses a Union as well, so check that too.
     nullable_a = a.model_copy(update={"nullable": True})
-    assert python_type_system.to_artigraph(Literal[1, 2, 3] | None, hints={}) == nullable_a  # type: ignore[operator] # python/mypy#16778
+    assert python_type_system.to_artigraph(Literal[1, 2, 3] | None, hints={}) == nullable_a
 
 
 def test_python_literal_errors() -> None:
@@ -134,7 +135,10 @@ def test_python_null() -> None:
     [
         (Int64(nullable=True), int | None),
         (Float64(nullable=True), float | None),
-        (Enum(type=Int64(), items=(1, 2, 3), nullable=True), Literal[1, 2, 3] | None),  # type: ignore[operator] # python/mypy#16778
+        (
+            cast(Any, Enum)(type=Int64(), items=(1, 2, 3), nullable=True),
+            Literal[1, 2, 3] | None,
+        ),
     ],
 )
 def test_python_optional(arti: Type, py: Any) -> None:

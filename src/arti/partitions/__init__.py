@@ -39,7 +39,7 @@ class PartitionField(Model):
 
     @classproperty
     def components(cls) -> frozenset[str]:
-        return frozenset(cls.model_fields) | frozenset(
+        return frozenset(cls.model_fields) | frozenset(  # pyright: ignore[reportDeprecated]
             name for name in dir(cls) if isinstance(getattr_static(cls, name), field_component)
         )
 
@@ -105,7 +105,7 @@ class DateField(PartitionField):
             return cls(value=date.fromisoformat(components["iso"]))
         if names == {"Y", "m", "d"}:
             return cls(value=date(*[int(components[k]) for k in ("Y", "m", "d")]))
-        return super().from_components(**components)
+        return super().from_components(**components)  # pyright: ignore[reportAbstractUsage]
 
 
 class _IntField(PartitionField):
@@ -125,7 +125,7 @@ class _IntField(PartitionField):
             return cls(value=int(components["value"]))
         if names == {"hex"}:
             return cls(value=int(components["hex"], base=16))
-        return super().from_components(**components)
+        return super().from_components(**components)  # pyright: ignore[reportAbstractUsage]
 
 
 class Int8Field(_IntField):
@@ -156,7 +156,7 @@ class NullField(PartitionField):
             if components["value"] != "None":
                 raise ValueError(f"'{cls.__name__}' can only be used with 'None'!")
             return cls()
-        return super().from_components(**components)
+        return super().from_components(**components)  # pyright: ignore[reportAbstractUsage]
 
 
 InputFingerprints = frozendict[PartitionKey, Fingerprint | None]
