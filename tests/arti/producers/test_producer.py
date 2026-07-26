@@ -94,11 +94,8 @@ def test_producer_decorator() -> None:
     assert dummy_producer._input_artifact_classes_ == {"a1": A1}
     assert len(dummy_producer._outputs_) == 1
     assert dummy_producer._outputs_[0].artifact_class == A2
-    assert (
-        cast(Any, dummy_producer)(a1=A1()).annotations
-        == Producer.model_fields["annotations"].default
-    )
-    assert cast(Any, dummy_producer)(a1=A1()).version == Producer.model_fields["version"].default
+    assert dummy_producer(a1=A1()).annotations == Producer.model_fields["annotations"].default
+    assert dummy_producer(a1=A1()).version == Producer.model_fields["version"].default
 
     class MyAnnotation(Annotation):
         pass
@@ -116,8 +113,8 @@ def test_producer_decorator() -> None:
 
     assert dummy_producer2.__name__ == "test"
     assert dummy_producer2.map == mapper
-    assert cast(Any, dummy_producer2)(a1=A1()).annotations == (MyAnnotation(),)
-    assert cast(Any, dummy_producer2)(a1=A1()).version == StringVersion(value="test")
+    assert dummy_producer2(a1=A1()).annotations == (MyAnnotation(),)
+    assert dummy_producer2(a1=A1()).version == StringVersion(value="test")
 
 
 def test_Producer_input_artifact_classes() -> None:

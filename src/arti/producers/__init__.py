@@ -61,6 +61,11 @@ class Producer(Model):
     annotations: Annotated[tuple[Annotation, ...], SkipFingerprint()] = ()
     version: Version = SemVer(major=0, minor=0, patch=1)
 
+    if TYPE_CHECKING:
+        # Producers created by the `producer` decorator are only known statically as
+        # `type[Producer]`. Producer subclasses still get pydantic's synthesized `__init__`.
+        def __init__(self, **inputs: Artifact) -> None: ...
+
     # The map/build/validate_outputs parameters are intended to be dynamic and set by subclasses,
     # however static type checkers cannot represent the signatures set by arbitrary subclasses.
     # `map` is generated during subclassing if not set, `build` is

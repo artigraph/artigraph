@@ -34,6 +34,29 @@ class MyTypedDict(TypedDict):
     a: int
 
 
+class NarrowTypedDict(TypedDict):
+    a: int
+
+
+class WideTypedDict(TypedDict):
+    a: int
+    b: str
+
+
+class MismatchedTypedDict(TypedDict):
+    a: str
+
+
+class NullableTypedDict(TypedDict):
+    a: int | None
+    b: list[int | None]
+
+
+class OptionalTypedDict(TypedDict):
+    a: Optional[int]
+    b: list[Optional[int]]
+
+
 _make_type_var = cast(Any, TypeVar)
 MyTupleVar: Any = _make_type_var("MyTupleVar", bound=MyTuple)
 TupleVar: Any = _make_type_var("TupleVar", bound=tuple)
@@ -106,6 +129,10 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (MyTuple, tuple),
     (MyTupleVar, TupleVar),
     (MyTypedDict, dict),
+    (MyTypedDict, MyTypedDict),
+    (WideTypedDict, NarrowTypedDict),
+    (NullableTypedDict, NullableTypedDict),
+    (OptionalTypedDict, NullableTypedDict),
     (NoneType, (int, NoneType)),
     (NoneType, Optional[int]),
     (NoneType, int | None),
@@ -153,6 +180,10 @@ _LENIENT_ISSUBCLASS_FALSE_CASES = [
     (Any, bool),
     (MyTypedDict, dict[str, int]),  # Might implement in the future
     (MyTypedDict, dict[str, str]),
+    (dict, NarrowTypedDict),
+    (MismatchedTypedDict, NarrowTypedDict),
+    (NarrowTypedDict, WideTypedDict),
+    (NullableTypedDict, NarrowTypedDict),
     (TupleVar, MyTupleVar),
     (UnboundVar, bool),
     (dict, Mapping[str, int]),

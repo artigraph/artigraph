@@ -21,6 +21,9 @@ if TYPE_CHECKING:
     from arti.producers import ProducerOutput
 
 
+type ArtifactStorage = InstanceOf[Storage[Any]]
+
+
 class Artifact(Model):
     """
     An Artifact is the base structure describing an existing or generated dataset.
@@ -37,9 +40,7 @@ class Artifact(Model):
 
     type: Type
     format: Format = Field(default_factory=Format.get_default, validate_default=True)
-    storage: InstanceOf[Storage[Any]] = Field(
-        default_factory=Storage.get_default, validate_default=True
-    )
+    storage: ArtifactStorage = Field(default_factory=Storage.get_default, validate_default=True)
 
     annotations: Annotated[tuple[Annotation, ...], Field(validate_default=True)] = ()
     statistics: Annotated[tuple[Statistic, ...], Field(validate_default=True)] = ()

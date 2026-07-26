@@ -8,7 +8,7 @@ __version__ = importlib.metadata.version("arti")
 import threading
 
 from arti.annotations import Annotation
-from arti.artifacts import Artifact
+from arti.artifacts import Artifact, ArtifactStorage
 from arti.backends import Backend, BackendConnection
 from arti.executors import Executor
 from arti.fingerprints import Fingerprint
@@ -34,6 +34,7 @@ from arti.views import View
 __all__ = [
     "Annotation",
     "Artifact",
+    "ArtifactStorage",
     "Backend",
     "BackendConnection",
     "Executor",

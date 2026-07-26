@@ -52,6 +52,20 @@ def _check_issubclass(klass: Any, check_type: Any) -> bool:
     if isinstance(check_type, TypeVar):
         check_type = cast(type, Any) if check_type.__bound__ is None else check_type.__bound__
         check_type_origin, check_type_args = get_origin(check_type), get_args(check_type)
+    if is_typeddict(klass):
+        if is_typeddict(check_type):
+            klass_hints = get_type_hints(klass)
+            check_type_hints = get_type_hints(check_type)
+            # NOTE: Compare with `==` first because lenient_issubclass rejects Union subtypes (eg:
+            # nullable fields like `int | None`).
+            return check_type_hints.keys() <= klass_hints.keys() and all(
+                klass_hints[name] == field_type or lenient_issubclass(klass_hints[name], field_type)
+                for name, field_type in check_type_hints.items()
+            )
+        klass = dict
+        klass_origin, klass_args = None, ()
+    elif is_typeddict(check_type):
+        return False
     if klass is Any:
         return check_type is Any
     if check_type is Any:
