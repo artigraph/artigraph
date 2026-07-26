@@ -81,7 +81,8 @@ type InputContainer = Iterable[tuple[str, InputElement]] | Mapping[str, InputEle
 
 
 class InvalidKeyError(AttributeError):
-    """Error raised when a TypedBox key is invalid.
+    """
+    Error raised when a TypedBox key is invalid.
 
     This does not subclass KeyError - the key is not "missing", but invalid.
     """
@@ -92,7 +93,8 @@ class InvalidKeyError(AttributeError):
 
 
 class TypedBox[V](Mapping[str, TypedNode[V]]):
-    """TypedBox holds a collection of typed values.
+    """
+    TypedBox holds a collection of typed values.
 
     Subclasses must set the __target_type__ to a base class for the contained values.
     """

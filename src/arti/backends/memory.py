@@ -32,7 +32,8 @@ _StoragePartitions = dict[Storage, set[StoragePartitionSnapshot]]
 
 # TODO: Determine if the "no copy" behavior is still necessary after the Pydantic v2 upgrade.
 class _NoCopyContainer(NoCopyMixin):
-    """Container for MemoryBackend data that bypasses (deep)copying.
+    """
+    Container for MemoryBackend data that bypasses (deep)copying.
 
     The MemoryBackend is *intended* to be stateful, like a connection to an external database in
     other backends. However, we usually prefer immutable data structures and Pydantic models, which

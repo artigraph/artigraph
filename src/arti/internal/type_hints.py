@@ -91,7 +91,8 @@ def discard_Annotated(type_: Any) -> Any:
 
 
 def get_class_type_vars(klass: type) -> tuple[type, ...]:
-    """Get the bound type variables from a class
+    """
+    Get the bound type variables from a class
 
     NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.
     """
@@ -215,7 +216,8 @@ def signature(
     force_tuple_return: bool = False,
     remove_owner: bool = True,
 ) -> inspect.Signature:
-    """Convenience wrapper around `inspect.signature`.
+    """
+    Convenience wrapper around `inspect.signature`.
 
     The returned Signature will have `cls`/`self` parameters removed if `remove_owner` is `True` and
     `tuple[...]` converted to `tuple(...)` in the `return_annotation`.

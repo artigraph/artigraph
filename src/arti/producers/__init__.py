@@ -76,7 +76,8 @@ class Producer(Model):
 
         @staticmethod
         def validate_outputs(*outputs: Any) -> bool | tuple[bool, str]:
-            """Validate the `Producer.build` outputs, returning the status and a message.
+            """
+            Validate the `Producer.build` outputs, returning the status and a message.
 
             The validation status is applied to all outputs. If validation does not pass, the
             outputs will not be written to storage to prevent checkpointing the output. In the
@@ -382,7 +383,8 @@ class Producer(Model):
     # TODO: Look into using variadic type vars here so the return hint can be precisely unpacked
     # (down to no tuple?). Ideally, they'd support bound constraints (eg: `*T: Artifact`).
     def out(self, *outputs: Artifact) -> Artifact | tuple[Artifact, ...]:
-        """Configure the output Artifacts this Producer will build.
+        """
+        Configure the output Artifacts this Producer will build.
 
         The arguments are matched to the `Producer.build` return signature in order.
         """

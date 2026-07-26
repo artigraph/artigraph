@@ -25,7 +25,8 @@ if TYPE_CHECKING:
 
 
 class BackendConnection:
-    """BackendConnection is a wrapper around an active connection to a Backend resource.
+    """
+    BackendConnection is a wrapper around an active connection to a Backend resource.
 
     For example, a Backend connecting to a database might wrap up a SQLAlchemy connection in a
     BackendConnection subclass implementing the required methods.
@@ -37,7 +38,8 @@ class BackendConnection:
     def read_artifact_partitions(
         self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> StoragePartitionSnapshots:
-        """Read all known Partitions for this Storage spec.
+        """
+        Read all known Partitions for this Storage spec.
 
         If `input_fingerprints` is provided, the returned partitions will be filtered accordingly.
 
@@ -121,7 +123,8 @@ class BackendConnection:
 
     @contextmanager
     def connect(self) -> Iterator[Self]:
-        """Return self
+        """
+        Return self
 
         This makes it easier to work with an optional connection, eg:
             with (connection or backend).connect() as conn:
@@ -131,7 +134,8 @@ class BackendConnection:
 
 
 class Backend[Connection: BackendConnection](Model):
-    """Backend represents a storage for internal Artigraph metadata.
+    """
+    Backend represents a storage for internal Artigraph metadata.
 
     Backend storage is an addressable location (local path, database connection, etc) that
     tracks metadata for a collection of Graphs over time, including:

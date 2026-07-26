@@ -34,7 +34,8 @@ class Type(Model):
 
     @property
     def friendly_key(self) -> str:
-        """A human-readable class-name like key representing this Type.
+        """
+        A human-readable class-name like key representing this Type.
 
         The key doesn't have to be unique, just a best effort, meaningful string.
         """
@@ -167,7 +168,8 @@ class List(_ContainerMixin, Type):
 
 
 class Collection(_NamedMixin, List):
-    """A collection of Structs with partition and cluster metadata.
+    """
+    A collection of Structs with partition and cluster metadata.
 
     Collections should not be nested in other types.
     """

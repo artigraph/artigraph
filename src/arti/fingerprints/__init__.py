@@ -17,7 +17,8 @@ from arti.internal.utils import int64, uint64
 
 @final
 class Fingerprint(int64):
-    """Fingerprint represents a unique identity as an int64 value.
+    """
+    Fingerprint represents a unique identity as an int64 value.
 
     Using an int(64) has a number of convenient properties:
     - can be combined independent of order with XOR
@@ -39,7 +40,8 @@ class Fingerprint(int64):
 
     @classmethod
     def from_string(cls, x: str, /) -> Fingerprint:
-        """Fingerprint an arbitrary string.
+        """
+        Fingerprint an arbitrary string.
 
         Fingerprints using Farmhash Fingerprint64, converted to int64 via two's complement.
         """
@@ -68,7 +70,8 @@ class Fingerprint(int64):
 
 @dataclass(frozen=True, slots=True)
 class SkipFingerprint(annotated_types.BaseMetadata):
-    """Determine whether the field contributes a model's fingerprint.
+    """
+    Determine whether the field contributes a model's fingerprint.
 
     Set with `Annotated`, eg: `x: Annotated[int, SkipFingerprint()]`.
     """
@@ -78,5 +81,5 @@ class SkipFingerprint(annotated_types.BaseMetadata):
     def __bool__(self) -> bool:
         return self.value
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return self.value == other

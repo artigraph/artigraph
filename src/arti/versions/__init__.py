@@ -21,15 +21,18 @@ class Version(Model):
 class GitCommit(Version):
     sha: str = Field(
         default_factory=(
-            lambda: subprocess.check_output(["git", "rev-parse", "HEAD"])  # noqa: S603 S607
-            .decode()
-            .strip()
+            lambda: (
+                subprocess.check_output(["git", "rev-parse", "HEAD"])  # noqa: S603 S607
+                .decode()
+                .strip()
+            )
         )
     )
 
 
 class SemVer(Version):
-    """SemVer fingerprinting only considers the major component, unless it is less than 0.
+    """
+    SemVer fingerprinting only considers the major component, unless it is less than 0.
 
     By only considering the major version, we can add incremental bumps to a Producer without triggering
     historical backfills. The major version MUST be incremented on schema or methodological changes.

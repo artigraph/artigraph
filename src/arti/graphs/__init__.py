@@ -150,7 +150,8 @@ class Graph(Model):
 
     @requires_sealed
     def snapshot(self, *, connection: BackendConnection | None = None) -> GraphSnapshot:
-        """Identify a "unique" ID for this Graph at this point in time.
+        """
+        Identify a "unique" ID for this Graph at this point in time.
 
         The ID aims to encode the structure of the Graph plus a _snapshot_ of the raw Artifact data
         (partition kinds and contents). Any change that would affect data should prompt an ID
@@ -292,7 +293,8 @@ class Graph(Model):
 
 
 class GraphSnapshot(Model):
-    """GraphSnapshot represents the state of a Graph and the referenced raw data at a point in time.
+    """
+    GraphSnapshot represents the state of a Graph and the referenced raw data at a point in time.
 
     GraphSnapshot encodes the structure of the Graph plus a snapshot of the raw Artifact data
     (partition kinds and contents) at a point in time. Any change that would affect data should
@@ -318,7 +320,8 @@ class GraphSnapshot(Model):
     def from_graph(
         cls, graph: Graph, *, connection: BackendConnection | None = None
     ) -> GraphSnapshot:
-        """Snapshot the Graph and all existing raw data.
+        """
+        Snapshot the Graph and all existing raw data.
 
         NOTE: There is currently a gap (and thus race condition) between when the Graph ID is
         computed and when we read raw Artifact data during Producer builds.

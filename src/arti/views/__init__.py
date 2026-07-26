@@ -18,7 +18,8 @@ MODE = Literal["READ", "WRITE", "READWRITE"]
 
 
 class View(Model):
-    """View represents the in-memory representation of the artifact.
+    """
+    View represents the in-memory representation of the artifact.
 
     Examples include pandas.DataFrame, dask.DataFrame, a BigQuery table.
     """

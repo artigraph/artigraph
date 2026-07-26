@@ -15,7 +15,8 @@ REGISTERED = TypeVar("REGISTERED", bound=Callable[..., Any])
 # This may be less useful once mypy supports ParamSpecs - after that, we might be able to define
 # multidispatch with a ParamSpec and have mypy check the handlers' arguments are covariant.
 class _multipledispatch(_multimethod.multidispatch[RETURN]):
-    """Multiple dispatch for a set of functions based on parameter type.
+    """
+    Multiple dispatch for a set of functions based on parameter type.
 
     Usage is similar to `@functools.singledispatch`. The original definition defines the "spec" that
     subsequent handlers must follow, namely the name and (base)class of parameters.

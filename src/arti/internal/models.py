@@ -69,7 +69,8 @@ class Model(BaseModel, metaclass=ModelMeta):
     # TODO: Support looking up the correct subclass when instantiating from serialized data.
     @computed_field(repr=False)
     def _arti_type_(self) -> Annotated[type[Self], ModelTypeSerializer]:
-        """Include the type name in the serialized output by default.
+        """
+        Include the type name in the serialized output by default.
 
         This avoids information loss and ambiguous serialization (different model, same fields, eg:
         Int32 and Int64).

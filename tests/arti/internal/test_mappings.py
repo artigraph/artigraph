@@ -55,7 +55,7 @@ class Coord:
     def __init__(self, x: int, y: int):
         self.x, self.y = (x, y)
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, type(self)) and (self.x, self.y) == (other.x, other.y)
 
     def __repr__(self) -> str:

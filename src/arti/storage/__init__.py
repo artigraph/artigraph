@@ -63,7 +63,8 @@ StoragePartitionSnapshots = tuple[StoragePartitionSnapshot, ...]
 
 
 class Storage[SP: StoragePartition](Model):
-    """Storage is a data reference identifying 1 or more partitions of data.
+    """
+    Storage is a data reference identifying 1 or more partitions of data.
 
     Storage fields should have defaults set with placeholders for tags and partition
     keys. This allows automatic injection of the tags and partition keys for simple

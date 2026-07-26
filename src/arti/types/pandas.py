@@ -60,7 +60,8 @@ class SeriesAdapter(TypeAdapter):
 
 @pandas_type_system.register_adapter
 class DataFrameAdapter(TypeAdapter):
-    """Convert between a List of Structs and a pd.DataFrame.
+    """
+    Convert between a List of Structs and a pd.DataFrame.
 
     Expects a List type like:
     >>> from arti.types import Float64, Int8, List, Struct

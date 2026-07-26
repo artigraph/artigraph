@@ -29,7 +29,8 @@ def classproperty[Ret](meth: Callable[..., Ret]) -> Ret:
 
 
 def get_module_name(depth: int = 1) -> str | None:
-    """Return the module name of a specific level in the stack.
+    """
+    Return the module name of a specific level in the stack.
 
     Depth describes how many levels to traverse, for example:
     - depth=0: return get_module_name's module
@@ -53,7 +54,8 @@ def import_submodules(
     *,
     lock: threading.Lock = threading.Lock(),
 ) -> dict[str, ModuleType]:
-    """Recursively import submodules.
+    """
+    Recursively import submodules.
 
     This can be useful with registry patterns to automatically discover and import submodules
     defining additional implementations.
@@ -68,7 +70,7 @@ def import_submodules(
     # pkgutil.iter_modules is not recursive and pkgutil.walk_packages does not handle namespace
     # packages... however we can leverage setuptools.find_namespace_packages, which was built for
     # exactly this.
-    path_names = {p: name for p in path}
+    path_names = dict.fromkeys(path, name)
     path_names.update(
         {
             str(Path(path).joinpath(*name.split("."))): f"{root_name}.{name}"
@@ -246,7 +248,8 @@ def register[K, V](
 
 
 class NoCopyMixin:
-    """Mixin to bypass (deep)copying.
+    """
+    Mixin to bypass (deep)copying.
 
     This is useful for objects that are *intended* to be stateful and preserved, despite usually
     preferring immutable data structures and Pydantic models, which (deep)copy often.

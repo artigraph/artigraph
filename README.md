@@ -63,7 +63,7 @@ class TotalSpend(Artifact):
 
 @producer(version=SemVer(major=1, minor=0, patch=0))
 def aggregate_transactions(
-    transactions: Annotated[list[dict], Transactions]
+    transactions: Annotated[list[dict], Transactions],
 ) -> Annotated[float, TotalSpend]:
     return sum(txn["amount"] for txn in transactions)
 
@@ -74,9 +74,7 @@ with Graph(name="test-graph") as g:
         format=JSON(),
         storage=LocalFile(path=str(DIR / "transactions" / "{date.iso}.json")),
     )
-    g.artifacts.spend = aggregate_transactions(
-        transactions=g.artifacts.vendor.transactions
-    )
+    g.artifacts.spend = aggregate_transactions(transactions=g.artifacts.vendor.transactions)
 ```
 
 The full example can be run easily with `docker run --rm artigraph/example-spend`:

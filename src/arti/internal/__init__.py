@@ -6,7 +6,8 @@ from contextlib import contextmanager
 
 @contextmanager
 def wrap_exc(error_type: type[Exception], *, prefix: str) -> Iterator[None]:
-    """Wrap exceptions of `error_type` and add a message prefix.
+    """
+    Wrap exceptions of `error_type` and add a message prefix.
 
     `error_type` must be initializable with a single string message argument.
 

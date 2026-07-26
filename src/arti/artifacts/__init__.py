@@ -22,7 +22,8 @@ if TYPE_CHECKING:
 
 
 class Artifact(Model):
-    """An Artifact is the base structure describing an existing or generated dataset.
+    """
+    An Artifact is the base structure describing an existing or generated dataset.
 
     An Artifact is comprised of three key elements:
     - `type`: spec of the data's structure, such as data types, nullable, etc.
@@ -79,7 +80,8 @@ class Artifact(Model):
 
     @classmethod
     def cast(cls, value: Any) -> Artifact:
-        """Attempt to convert an arbitrary value to an appropriate Artifact instance.
+        """
+        Attempt to convert an arbitrary value to an appropriate Artifact instance.
 
         `Artifact.cast` is used to convert values assigned to an `ArtifactBox` (such as
         `Graph.artifacts`) into an Artifact. When called with:
