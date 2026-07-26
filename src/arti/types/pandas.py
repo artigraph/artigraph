@@ -29,6 +29,8 @@ class SeriesAdapter(TypeAdapter):
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
         dtype = type_.dtype
+        if isinstance(dtype, pd.StringDtype):
+            return List(element=String())
         if dtype == np.dtype("O"):
             # TODO: Should we handle empty series by defaulting to "String", but issuing
             # a warning?
@@ -48,7 +50,11 @@ class SeriesAdapter(TypeAdapter):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
-        dtype = type_system.to_system(type_.element, hints=hints)
+        dtype = (
+            str
+            if isinstance(type_.element, String)
+            else type_system.to_system(type_.element, hints=hints)
+        )
         return pd.Series([dtype()], dtype=dtype)
 
 

@@ -40,6 +40,10 @@ def test_Model() -> None:
 
 
 def test_Model_fingerprint() -> None:
+    skip = SkipFingerprint()
+    assert skip
+    assert skip == 1
+
     class A(Model):
         a: int
         b: int

@@ -182,11 +182,12 @@ def _set_dump_kwargs_defaults(kwargs: dict[str, Any]) -> None:
     # By default, Pydantic v2 only serializes the fields defined in the class used in the type hint
     # to prevent accidental serialization of sensitive fields. However, we won't be storing any
     # sensitive data in the models (or at least, shouldn't be). The alternative to
-    # `serialize_as_any` is to add `SerializeAsAny[...]` to the type hint for nested models, but
-    # that will be our normal behavior, easy to forget, and hard to debug when forgotten.
+    # `polymorphic_serialization` is to add `SerializeAsAny[...]` to the type hint for nested
+    # models, but that will be our normal behavior, easy to forget, and hard to debug when
+    # forgotten.
     #
     # 1: https://docs.pydantic.dev/latest/concepts/serialization/#serializing-with-duck-typing
-    kwargs.setdefault("serialize_as_any", True)
+    kwargs.setdefault("polymorphic_serialization", True)
 
 
 @overload

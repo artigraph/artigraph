@@ -22,9 +22,9 @@ jobs:
       PRE_COMMIT_HOME: /tmp/pre-commit-cache
       PYTHON_VERSION: ${{ matrix.python-version }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: Cache pre-commit hooks
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ${{ env.PRE_COMMIT_HOME }}
@@ -45,7 +45,7 @@ jobs:
       - name: pytest
         run: |
           rye run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
-      - uses: codecov/codecov-action@v4
+      - uses: codecov/codecov-action@v7
         with:
           env_vars: OS,PYTHON_VERSION
           fail_ci_if_error: true
@@ -57,7 +57,7 @@ jobs:
     needs: test
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # We need to pull the commit and tag history in order to compute a unique version for
           # non-tagged commits. `fetch-depth: 0` is required even with `fetch-tags: true`:

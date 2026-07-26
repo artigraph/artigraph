@@ -25,16 +25,27 @@ class _multipledispatch(_multimethod.multidispatch[RETURN]):
     # called for each *registered* func in the multimethod  internals (a bit confusing). Instead, we
     # can just set attrs in a helper func below.
     def __init__(self, func: Callable[..., RETURN]) -> None:
-        super().__init__(func)
+        # multimethod 2 registers the initial multidispatch function as an untyped fallback.
+        # Register it through the typed base class to preserve our strict annotated dispatch.
+        self.pending = set()
+        self.generics = []
+        self.signatures = {}
+        _multimethod.multimethod.__init__(self, func)
         self.canonical_name: str | None = None
         self.discovery_func: Callable[[], None] | None = None
-        assert self.signature is not None
-        self.clean_signature = tidy_signature(func, self.signature)
+        self.clean_signature = tidy_signature(func, inspect.signature(func))
 
     def __missing__(self, types: tuple[Any, ...]) -> Callable[..., RETURN]:
         if self.discovery_func is not None:
             self.discovery_func()
         return super().__missing__(types)
+
+    def dispatch(self, *args: Any) -> Callable[..., RETURN]:
+        # multimethod 2 resolves generic parameters (eg: `Sequence[...]`) with instance checks that
+        # bypass `__missing__`, so discover implementations before every dispatch.
+        if self.discovery_func is not None:
+            self.discovery_func()
+        return cast(Callable[..., RETURN], super().dispatch(*args))
 
     def lookup(self, *args: type[Any] | None) -> Callable[..., Any]:
         # multimethod wraps Generics (eg: `list[int]`) with an internal helper. We must do the same

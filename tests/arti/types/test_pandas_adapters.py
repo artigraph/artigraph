@@ -39,3 +39,8 @@ def test_pandas_type_system(arti_type: Type, pd_type: pd.DataFrame | pd.Series) 
 
     output_arti_type = pandas_type_system.to_artigraph(pd_type, hints={})
     assert output_arti_type == arti_type
+
+
+def test_pandas_object_string_type() -> None:
+    output_arti_type = pandas_type_system.to_artigraph(pd.Series([""], dtype=object), hints={})
+    assert output_arti_type == List(element=String())

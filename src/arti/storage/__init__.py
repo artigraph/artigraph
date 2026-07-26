@@ -85,6 +85,11 @@ class Storage[SP: StoragePartition](Model):
 
     @classmethod
     def __class_getitem__(cls, item: type[SP]) -> type[Self]:  # type: ignore[override]
+        # An unconstrained Storage must remain the base class at runtime so Pydantic's
+        # polymorphic serialization includes concrete fields (paths, buckets, literal values).
+        # Concrete partition specializations still need their own classes and validation.
+        if cls is Storage and item is Any:
+            return cls
         subclass = cast(type[Self], super().__class_getitem__(item))
         subclass._abstract_ = True
         subclass.storage_partition_type = item
@@ -171,7 +176,7 @@ class Storage[SP: StoragePartition](Model):
         return frozendict(
             {
                 name: value
-                for name in self.model_fields
+                for name in type(self).model_fields
                 if lenient_issubclass(type(value := getattr(self, name)), str)
             }
         )
@@ -211,7 +216,7 @@ class Storage[SP: StoragePartition](Model):
                 if lenient_issubclass(type(original := getattr(self, name)), str)
                 else original
             )
-            for name in self.model_fields
+            for name in type(self).model_fields
             if name in self.storage_partition_type.model_fields
         }
         return self.storage_partition_type(

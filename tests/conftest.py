@@ -4,6 +4,10 @@ from typing import cast
 from unittest import mock
 
 import gcp_storage_emulator.server
+
+# The experimental gcsfs backend uses gRPC APIs that the local HTTP emulator does not implement.
+os.environ["GCSFS_EXPERIMENTAL_ZB_HNS_SUPPORT"] = "false"
+
 import gcsfs
 import pytest
 

@@ -1,4 +1,6 @@
 import json
+import subprocess
+import sys
 
 import pytest
 
@@ -48,3 +50,18 @@ def test_stringliteral_io() -> None:
     assert partition.value == json.dumps(n)  # Confirm no mutation
     with pytest.raises(ValueError, match="Literals with a value already set cannot be written"):
         io.write(10, a.type, a.format, new_partition, view=view)
+
+
+def test_stringliteral_read_discovers_io_in_fresh_interpreter() -> None:
+    # Run in a fresh interpreter so other tests' `arti.io.*` imports can't mask missing discovery.
+    code = """
+from arti import Artifact, View, io
+from arti.formats.json import JSON
+from arti.storage.literal import StringLiteral
+from arti.types import Int64
+
+a = Artifact(type=Int64(), format=JSON(), storage=StringLiteral(id="test", value="5"))
+view = View.from_annotation(int, mode="READ")
+assert io.read(a.type, a.format, a.storage.discover_partitions(), view=view) == 5
+"""
+    subprocess.run([sys.executable, "-c", code], check=True)  # noqa: S603

@@ -66,7 +66,7 @@ class Fingerprint(int64):
         return core_schema.no_info_after_validator_function(cls, handler.generate_schema(int))
 
 
-@dataclass(frozen=True, **annotated_types.SLOTS)
+@dataclass(frozen=True, slots=True)
 class SkipFingerprint(annotated_types.BaseMetadata):
     """Determine whether the field contributes a model's fingerprint.
 

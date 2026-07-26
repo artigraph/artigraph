@@ -1,4 +1,5 @@
 import re
+from collections.abc import Sequence
 from typing import Any
 
 import pytest
@@ -108,3 +109,23 @@ def test_multipledispatch_lookup() -> None:
         return value
 
     assert reg.lookup(list[int]) is _list_int
+
+
+def test_multipledispatch_discovery_with_generic_param() -> None:
+    discovered: list[bool] = []
+
+    def read_a1(values: Sequence[A1]) -> str:
+        return "a1"
+
+    def discover() -> None:
+        if not discovered:
+            discovered.append(True)
+            reg.register(read_a1)
+
+    @multipledispatch("test-discovery", discovery_func=discover)
+    def reg(values: Sequence[A]) -> str:
+        raise NotImplementedError()
+
+    # The generic base handler matches everything, so discovery must not rely on a cache miss.
+    assert reg((A1(),)) == "a1"
+    assert discovered == [True]
