@@ -17,18 +17,29 @@ Project committers will review the contribution in a timely manner and advise of
 
 ## Coding Style
 
-Code is formatted and linted with [`ruff`](https://docs.astral.sh/ruff/). Docstring style is not yet standardized, but they should generally follow [PEP257](https://www.python.org/dev/peps/pep-0257/).
+Code is formatted and linted with [`ruff`](https://docs.astral.sh/ruff/) and spell checked with
+[`codespell`](https://github.com/codespell-project/codespell).
 
 ## Development Workflow
 
-The project is managed with [`rye`](https://rye.astral.sh). We use [`pre-commit`](https://pre-commit.com/) to apply and enforce code formatting and linting with git hooks.
+The project uses [`mise`](https://mise.jdx.dev/) to manage development tools and
+[`uv`](https://docs.astral.sh/uv/) to manage Python and project dependencies. We use
+[`pre-commit`](https://pre-commit.com/) to apply and enforce all project checks.
 
 ### Environment Setup
 
-If you work on Linux or macOS, the `.envrc` script (used by [`direnv`](https://direnv.net/)) in the repo root can automate project and environment setup. Run `bash .envrc` to:
-- install [`rye`](https://rye.astral.sh)
-- install the version of python set in `.python-version`
-- create a virtual environment and install dependencies
-- install and configure [`pre-commit`](https://pre-commit.com/)
+Install [`mise`](https://mise.jdx.dev/getting-started.html), trust this repository's
+configuration, and enter the directory:
 
-If you'd like for the virtualenv to be activated automatically when you enter the repo, [install](https://direnv.net/docs/installation.html) and [configure](https://direnv.net/docs/hook.html) `direnv`.
+```shell
+mise trust
+mise install
+uv sync --all-extras
+pre-commit install --install-hooks
+```
+
+Run the complete local check suite with:
+
+```shell
+mise check
+```

@@ -1,0 +1,24 @@
+[env]
+_.path = ["{{config_root}}/bin"]
+
+[hooks]
+enter = """
+mise install
+uv sync --all-extras
+"""
+
+[tools]
+uv = "latest"
+
+[settings]
+lockfile = true
+python.uv_venv_auto = "create|source"
+
+[[watch_files]]
+patterns = [".python-version", "pyproject.toml", "uv.lock"]
+run = "uv sync --all-extras"
+
+[tasks.check]
+description = "Run all pre-commit checks"
+quiet = true
+run = "pre-commit run --all-files"

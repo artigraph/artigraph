@@ -2,6 +2,25 @@
 requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
+[dependency-groups]
+dev = [
+    "codespell",
+    "coverage",
+    "gcp-storage-emulator",
+    "ipdb",
+    "ipython",
+    "mypy",
+    "pre-commit",
+    "pytest",
+    "pytest-benchmark",
+    "pytest-cov",
+    "pytest-pretty",
+    "ruff",
+    "sh",
+    "typer",
+    "types-pyfarmhash",
+]
+
 [project]
 authors = [{ name = "Jacob Hayes", email = "jacob.r.hayes@gmail.com" }]
 dependencies = [
@@ -24,6 +43,11 @@ all = ["gcsfs", "google-cloud-bigquery", "numpy", "pandas", "pyarrow"]
 [project.urls]
 Homepage = "https://github.com/artigraph/artigraph"
 Repository = "https://github.com/artigraph/artigraph"
+
+
+[tool.codespell]
+ignore-words-list = ["nd"] # ordinal suffix
+skip = ["src/arti/internal/vendored/*", "stubs/*"]
 
 
 [tool.coverage.report]
@@ -68,34 +92,19 @@ module = ["gcp_storage_emulator.*", "gcsfs", "pandas", "pyarrow", "sh"]
 ignore_missing_imports = true
 
 
-[tool.rye]
-all-features = true
-dev-dependencies = [
-    "coverage",
-    "gcp-storage-emulator",
-    "ipdb",
-    "ipython",
-    "mypy",
-    "pre-commit",
-    "pytest",
-    "pytest-benchmark",
-    "pytest-cov",
-    "pytest-pretty",
-    "sh",
-    "typer",
-    "types-pyfarmhash",
-]
-generate-hashes = true
-managed = true
-universal = true
-
-
 [tool.portray.mkdocs]
 edit_uri = 'edit/main/'
 
 
-[tool.pytest.ini_options]
-addopts = "--cov --cov-report=term-missing --doctest-modules --durations=5 --ignore-glob='tests/arti/internal/import_submodules_test_modules/' --no-cov-on-fail"
+[tool.pytest]
+addopts = [
+    "--cov",
+    "--cov-report=term-missing",
+    "--doctest-modules",
+    "--durations=5",
+    "--ignore-glob=tests/arti/internal/import_submodules_test_modules/",
+    "--no-cov-on-fail",
+]
 filterwarnings = [
     "error",
     # Ignore uncompiled crc32c warning on py 3.11 (which doesn't have wheels on older versions) - https://github.com/oittaa/gcp-storage-emulator/pull/217
@@ -106,46 +115,59 @@ filterwarnings = [
     # Ignore other upstream DeprecationWarnings
     "ignore:Type google._upb._message..* uses PyType_Spec with a metaclass.*:DeprecationWarning",
 ]
+strict = true
 testpaths = ["src/", "tests/"]
-xfail_strict = true
 
 
 [tool.ruff]
+extend-exclude = ["src/arti/internal/vendored/*", "stubs/*"]
 fix = true
+force-exclude = true
 line-length = 100
-src = ["src"]
+src = ["bin/", "src/", "tests/"]
 target-version = "py312"
 
 [tool.ruff.format]
 docstring-code-format = true
 
 [tool.ruff.lint]
-extend-select = [
+select = [
     "ASYNC", # check for blocking calls in async funcs
     "B",     # bugbear
     "BLE",   # prevent bare `except:`
     "C4",    # standardize comprehensions
+    "D",     # pydocstyle
     "E",     # pycodestyle errors
+    "ERA",   # prevent commented out code
     "EXE",   # check executables/shebangs
     "F",     # pyflakes
     "I",     # isort
     "ISC",   # disable implicit str concat
+    "N",     # naming conventions
     "PGH",   # pygrep-hooks
     "PIE",   # misc tidy checks
     "PT",    # standardize pytest usage
+    "PTH",   # prefer pathlib.Path over os.path ops
     "RET",   # standardize return (or not)
     "RUF",   # misc ruff checks
     "S",     # bandit
     "SIM",   # simplify code when possible
     "UP",    # pyupgrade
     "W",     # pycodestyle
-    # "D",     # pydocstyle
-    # "ERA",   # prevent commented out code
-    # "N",     # naming conventions
-    # "PTH",   # prefer pathlib.Path over os.path ops
 ]
 ignore = [
     "B008", # don't call function in arg defaults (eg: InputFingerprint or PartitionKey)
+    "D100", # undocumented public module
+    "D101", # undocumented public class
+    "D102", # undocumented public method
+    "D103", # undocumented public function
+    "D104", # undocumented public package
+    "D105", # undocumented magic method
+    "D106", # undocumented public nested class
+    "D107", # undocumented public __init__
+    "D203", # prefer D211 (no blank line before class docstring)
+    "D212", # prefer D213 (summary on second line)
+    "D400", # redundant with D415
     "E501", # line too long (covered by `ruff format`, except intentionally long strings)
     "S101", # use of assert (used for type checker type narrowing)
 ]
@@ -154,10 +176,22 @@ isort = { known-first-party = ["tests"] }
 pyupgrade = { keep-runtime-typing = true } # Preserve types, even if a file imports `from __future__ import annotations`.
 
 [tool.ruff.lint.per-file-ignores]
+"src/arti/internal/dispatch.py" = ["N801"] # Preserve multimethod's public naming convention
+"src/arti/internal/mappings.py" = ["N801"] # Preserve the dict-compatible public API
+"src/arti/internal/type_hints.py" = ["ERA001", "N802"] # Typing examples and typing API names
+"src/arti/internal/utils.py" = ["N801"] # Preserve the int-compatible public API
+"src/arti/partitions/__init__.py" = ["N801", "N802", "N805"] # Public partition component names
+"src/arti/statistics/__init__.py" = ["ERA001"] # Planned model sketches
+"src/arti/types/bigquery.py" = ["N801"] # Match BigQuery's constant naming
+"src/arti/types/numpy.py" = ["ERA001"] # Unsupported NumPy type inventory
+"src/arti/types/pyarrow.py" = ["ERA001", "N805"] # PyArrow inventory and class properties
 "tests/*" = [
     "B018",   # disable "Found useless expression"
     "N802",   # disable "Function name `...` should be lowercase" when testing classes or writing fixtures
+    "N803",   # preserve pytest fixture names
+    "N805",   # exercise deliberately invalid method signatures
     "S301",   # disable pickle.load warnings
     "SIM117", # disable merging `with pytest.raises(...)` contexts with others in one line
 ]
+"tests/arti/internal/test_type_hints.py" = ["UP045"] # Exercise Optional's runtime representation
 "tests/arti/storage/test_storage.py" = ["S108"] # insecure usage of /tmp

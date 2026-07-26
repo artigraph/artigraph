@@ -1,5 +1,6 @@
 default_install_hook_types: [pre-commit, pre-merge-commit, pre-push, prepare-commit-msg]
 default_stages: [manual, pre-commit, pre-merge-commit]
+fail_fast: true
 repos:
   - repo: local
     hooks:
@@ -29,27 +30,40 @@ repos:
       - id: trailing-whitespace
   - repo: local
     hooks:
-      - id: sync-deps
-        name: "sync dependencies"
-        entry: rye sync
-        files: ^(.*/)?(requirements(-dev)?\.lock|pyproject\.toml)$
+      - id: uv-lock
+        name: uv lock
+        entry: uv lock
+        files: ^(pyproject\.toml|uv\.lock|uv\.toml)$
         language: system
         pass_filenames: false
-        require_serial: true
-        stages:
-          - post-checkout
-          - post-merge
-          - post-rewrite
-          - pre-commit # Run on pre-commit (instead of post-commit) to install/update the tools below.
-      - id: lint
-        name: "lint"
-        entry: rye lint
+      - id: uv-sync # Runs before the hooks below to install/update their tools.
+        name: uv sync
+        entry: uv sync
+        args: ["--all-extras", "--frozen"]
+        files: ^uv\.lock$
+        language: system
+        pass_filenames: false
+      - id: codespell
+        name: codespell
+        entry: codespell
+        language: system
+        types: [text]
+      - id: ruff-check
+        name: ruff check
+        entry: ruff check
         language: system
         require_serial: true
         types_or: [python, pyi, jupyter]
-      - id: format
-        name: "format"
-        entry: rye fmt
+        exclude: ^stubs/
+      - id: ruff-format
+        name: ruff format
+        entry: ruff format
         language: system
         require_serial: true
         types_or: [python, pyi, jupyter]
+      - id: pytest
+        name: pytest
+        entry: pytest
+        language: system
+        pass_filenames: false
+        types_or: [python]

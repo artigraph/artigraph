@@ -9,6 +9,7 @@ on:
   workflow_dispatch:
 env:
   COLUMNS: 120
+  MISE_LOCKED: "1"
 jobs:
   test:
     strategy:
@@ -21,6 +22,8 @@ jobs:
       OS: ${{ matrix.os }}
       PRE_COMMIT_HOME: /tmp/pre-commit-cache
       PYTHON_VERSION: ${{ matrix.python-version }}
+      UV_CACHE_DIR: /tmp/uv-cache
+      UV_PYTHON: ${{ matrix.python-version }} # Otherwise, `uv run` recreates the venv for .python-version.
     steps:
       - uses: actions/checkout@v7
       - name: Cache pre-commit hooks
@@ -29,28 +32,36 @@ jobs:
           path: |
             ${{ env.PRE_COMMIT_HOME }}
           key: pre-commit-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('.pre-commit-config.yaml') }}
-      - name: Install rye
-        uses: eifinger/setup-rye@v4
+      - name: Cache uv
+        uses: actions/cache@v6
         with:
-          enable-cache: true
+          path: |
+            ${{ env.UV_CACHE_DIR }}
+          key: uv-${{ matrix.os }}-${{ matrix.python-version }}-${{ hashFiles('uv.lock') }}
+          restore-keys: |
+            uv-${{ matrix.os }}-${{ matrix.python-version }}-
+      - name: Install mise and uv
+        uses: jdx/mise-action@v4
+        with:
+          install_args: uv
       - name: Install dependencies
-        run: |
-          rye pin ${{ matrix.python-version }}
-          rye sync --all-features --no-lock
+        run: uv sync --all-extras --locked
       - name: pre-commit
         run: |
-          export RUFF_FORMAT=github # Configure ruff to annotate commits
-          export SKIP=no-commit-to-branch # This workflow runs on commits to main too
-          rye run pre-commit run -a
+          export RUFF_OUTPUT_FORMAT=github # Configure ruff to annotate commits
+          export SKIP=no-commit-to-branch,pytest # This workflow runs on commits to main; pytest runs next.
+          uv run pre-commit run --all-files --show-diff-on-failure
       - name: pytest
         run: |
-          rye run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
+          uv run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
       - uses: codecov/codecov-action@v7
         with:
           env_vars: OS,PYTHON_VERSION
           fail_ci_if_error: true
           files: coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml
           token: ${{ vars.CODECOV_TOKEN }}
+      - name: Minimize uv cache
+        run: uv cache prune --ci # Keep locally built wheels, drop ones that are faster to re-download.
 
   publish:
     if: (github.event_name == 'push' && github.ref == 'refs/heads/main') || (github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v'))
@@ -64,8 +75,10 @@ jobs:
           # - https://github.com/actions/checkout/issues/1471
           fetch-depth: 0
           fetch-tags: true
-      - name: Install rye
-        uses: eifinger/setup-rye@v4
+      - name: Install mise and uv
+        uses: jdx/mise-action@v4
+        with:
+          install_args: uv
       - name: Build distributions
         run: |
           # Set a deterministic build date to embed in the package metadata.
@@ -79,24 +92,18 @@ jobs:
           echo '[tool.hatch.version.raw-options]' >> pyproject.toml
           echo 'local_scheme = "no-local-version"' >> pyproject.toml
 
-          rye build
+          uv build
       - name: Publish to TestPyPI
         run: |
-          rye publish \
-            --repository testpypi \
-            --repository-url https://test.pypi.org/legacy/ \
-            --username '__token__' \
-            --token '${{ secrets.TEST_PYPI_TOKEN }}' \
-            --yes
+          uv publish \
+            --publish-url https://test.pypi.org/legacy/ \
+            --token '${{ secrets.TEST_PYPI_TOKEN }}'
       - name: Publish to PyPI
         if: github.event_name == 'release' && startsWith(github.ref, 'refs/tags/v')
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          rye publish \
-            --username '__token__' \
-            --token '${{ secrets.PYPI_TOKEN }}' \
-            --yes
+          uv publish --token '${{ secrets.PYPI_TOKEN }}'
 
           # TODO: Fix doc generation - pdocs and portray are not maintained and have various issues.
           #

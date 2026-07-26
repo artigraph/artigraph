@@ -46,7 +46,9 @@ class LocalFile(Storage[LocalFilePartition]):
         self, input_fingerprints: InputFingerprints = InputFingerprints()
     ) -> StoragePartitionSnapshots:
         wildcard = spec_to_wildcard(self.path, self.key_types)
-        paths = set(glob(wildcard))
+        # The glob can be absolute and contain wildcards in multiple path components, which
+        # pathlib's glob methods do not support directly.
+        paths = set(glob(wildcard))  # noqa: PTH207
         path_metadata = parse_spec(
             paths, spec=self.path, key_types=self.key_types, input_fingerprints=input_fingerprints
         )

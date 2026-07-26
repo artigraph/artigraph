@@ -95,7 +95,7 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (MyTupleVar, TupleVar),
     (MyTypedDict, dict),
     (NoneType, (int, NoneType)),
-    (NoneType, Optional[int]),  # noqa: UP007
+    (NoneType, Optional[int]),
     (NoneType, int | None),
     (bool, Any),
     (dict[str, int], Any),
@@ -105,7 +105,7 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (dict[str, int], dict[str, int]),
     (int, (int, str)),
     (int, Annotated[int, 5]),
-    (int, Optional[int]),  # noqa: UP007
+    (int, Optional[int]),
     (int, Union[int, str]),  # noqa: UP007
     (int, int | None),
     (int, int | str),
@@ -174,7 +174,7 @@ def test_lenient_issubclass_false(klass: type, class_or_tuple: type | tuple[type
 
 
 def test_is_optional_hint() -> None:
-    assert is_optional_hint(Optional[int])  # noqa: UP007
+    assert is_optional_hint(Optional[int])
     assert is_optional_hint(Union[int, None])  # noqa: UP007
     assert is_optional_hint(int | None)
     assert is_optional_hint(int | str | None)

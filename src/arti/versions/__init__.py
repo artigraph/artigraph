@@ -22,7 +22,7 @@ class GitCommit(Version):
     sha: str = Field(
         default_factory=(
             lambda: (
-                subprocess.check_output(["git", "rev-parse", "HEAD"])  # noqa: S603 S607
+                subprocess.check_output(["git", "rev-parse", "HEAD"])  # noqa: S607
                 .decode()
                 .strip()
             )
