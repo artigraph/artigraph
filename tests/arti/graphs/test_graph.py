@@ -77,6 +77,7 @@ def test_Graph(graph: Graph) -> None:
         lambda g: g.model_copy(),
         lambda g: pickle.loads(pickle.dumps(g)),
     ],
+    ids=["model-copy", "pickle"],
 )
 def test_Graph_copy(graph: Graph, copier: Callable[[Graph], Graph]) -> None:
     # There have been edge cases in pydantic when copying a model with a mapping subclass field[1],

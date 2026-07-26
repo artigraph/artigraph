@@ -81,85 +81,93 @@ def test_get_item_from_annotated(
     assert get_item_from_annotated(annotation, klass, kind=kind) == expected
 
 
+_LENIENT_ISSUBCLASS_TRUE_CASES = [
+    (Annotated[int, 5], Annotated[int, 5]),
+    (Annotated[int, 5], int),
+    (Annotated[list[int], 5], Annotated[list, 5]),
+    (Annotated[list[int], 5], Annotated[list[int], 5]),
+    (Annotated[list[int], 5], list),
+    (Annotated[list[int], 5], list[int]),
+    (Any, Any),
+    (Any, UnboundVar),
+    (MyTuple, TupleVar),
+    (MyTuple, tuple),
+    (MyTupleVar, TupleVar),
+    (MyTypedDict, dict),
+    (NoneType, (int, NoneType)),
+    (NoneType, Optional[int]),  # noqa: UP007
+    (NoneType, int | None),
+    (bool, Any),
+    (dict[str, int], Any),
+    (dict[str, int], Mapping),
+    (dict[str, int], Mapping[str, int]),
+    (dict[str, int], dict),
+    (dict[str, int], dict[str, int]),
+    (int, (int, str)),
+    (int, Annotated[int, 5]),
+    (int, Optional[int]),  # noqa: UP007
+    (int, Union[int, str]),  # noqa: UP007
+    (int, int | None),
+    (int, int | str),
+    (list[int], Annotated[list, 5]),
+    (list[int], Annotated[list[int], 5]),
+    (str, Any),
+    (str, Union[int, str]),  # noqa: UP007
+    (str, int | str),
+    (tuple, TupleVar),
+    (tuple, UnboundVar),
+    (tuple, tuple),
+    (tuple[MyTuple[int]], tuple),  # type: ignore[type-arg]
+    (tuple[MyTuple[int]], tuple[tuple[int]]),  # type: ignore[type-arg]
+    (tuple[int], Sequence),
+    (tuple[int], Sequence[int]),
+    (tuple[int], tuple),
+    (tuple[int], tuple[int]),
+    (tuple[tuple[int]], tuple),
+    (tuple[tuple[int]], tuple[tuple[int]]),
+]
+
+
 @pytest.mark.parametrize(
     ("klass", "class_or_tuple"),
-    [
-        (Annotated[int, 5], Annotated[int, 5]),
-        (Annotated[int, 5], int),
-        (Annotated[list[int], 5], Annotated[list, 5]),
-        (Annotated[list[int], 5], Annotated[list[int], 5]),
-        (Annotated[list[int], 5], list),
-        (Annotated[list[int], 5], list[int]),
-        (Any, Any),
-        (Any, UnboundVar),
-        (MyTuple, TupleVar),
-        (MyTuple, tuple),
-        (MyTupleVar, TupleVar),
-        (MyTypedDict, dict),
-        (NoneType, (int, NoneType)),
-        (NoneType, Optional[int]),  # noqa: UP007
-        (NoneType, int | None),
-        (bool, Any),
-        (dict[str, int], Any),
-        (dict[str, int], Mapping),
-        (dict[str, int], Mapping[str, int]),
-        (dict[str, int], dict),
-        (dict[str, int], dict[str, int]),
-        (int, (int, str)),
-        (int, Annotated[int, 5]),
-        (int, Optional[int]),  # noqa: UP007
-        (int, Union[int, str]),  # noqa: UP007
-        (int, int | None),
-        (int, int | str),
-        (list[int], Annotated[list, 5]),
-        (list[int], Annotated[list[int], 5]),
-        (str, Any),
-        (str, Union[int, str]),  # noqa: UP007
-        (str, int | str),
-        (tuple, TupleVar),
-        (tuple, UnboundVar),
-        (tuple, tuple),
-        (tuple[MyTuple[int]], tuple),  # type: ignore[type-arg]
-        (tuple[MyTuple[int]], tuple[tuple[int]]),  # type: ignore[type-arg]
-        (tuple[int], Sequence),
-        (tuple[int], Sequence[int]),
-        (tuple[int], tuple),
-        (tuple[int], tuple[int]),
-        (tuple[tuple[int]], tuple),
-        (tuple[tuple[int]], tuple[tuple[int]]),
-    ],
+    _LENIENT_ISSUBCLASS_TRUE_CASES,
+    ids=[f"case-{index}" for index in range(len(_LENIENT_ISSUBCLASS_TRUE_CASES))],
 )
 def test_lenient_issubclass_true(klass: type, class_or_tuple: type | tuple[type, ...]) -> None:
     assert lenient_issubclass(klass, class_or_tuple)
 
 
+_LENIENT_ISSUBCLASS_FALSE_CASES = [
+    (Any, bool),
+    (MyTypedDict, dict[str, int]),  # Might implement in the future
+    (MyTypedDict, dict[str, str]),
+    (TupleVar, MyTupleVar),
+    (UnboundVar, bool),
+    (dict, Mapping[str, int]),
+    (dict, dict[str, int]),
+    (dict[str, str], Mapping[str, int]),
+    (list, tuple),
+    (str, (int, float)),
+    (str, Union[int, float]),  # noqa: UP007
+    (str, int | None),
+    (str, int | float),
+    (tuple, MyTupleVar),
+    (tuple, Sequence[int]),
+    (tuple, tuple[MyTuple[int]]),  # type: ignore[type-arg]
+    (tuple, tuple[int]),
+    (tuple[str], Sequence[int]),
+    (tuple[tuple[int]], tuple[MyTuple[int]]),  # type: ignore[type-arg]
+    (tuple[tuple[str]], tuple[tuple[int]]),
+    # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for
+    # these.
+    (int | None, int),
+]
+
+
 @pytest.mark.parametrize(
     ("klass", "class_or_tuple"),
-    [
-        (Any, bool),
-        (MyTypedDict, dict[str, int]),  # Might implement in the future
-        (MyTypedDict, dict[str, str]),
-        (TupleVar, MyTupleVar),
-        (UnboundVar, bool),
-        (dict, Mapping[str, int]),
-        (dict, dict[str, int]),
-        (dict[str, str], Mapping[str, int]),
-        (list, tuple),
-        (str, (int, float)),
-        (str, Union[int, float]),  # noqa: UP007
-        (str, int | None),
-        (str, int | float),
-        (tuple, MyTupleVar),
-        (tuple, Sequence[int]),
-        (tuple, tuple[MyTuple[int]]),  # type: ignore[type-arg]
-        (tuple, tuple[int]),
-        (tuple[str], Sequence[int]),
-        (tuple[tuple[int]], tuple[MyTuple[int]]),  # type: ignore[type-arg]
-        (tuple[tuple[str]], tuple[tuple[int]]),
-        # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for
-        # these.
-        (int | None, int),
-    ],
+    _LENIENT_ISSUBCLASS_FALSE_CASES,
+    ids=[f"case-{index}" for index in range(len(_LENIENT_ISSUBCLASS_FALSE_CASES))],
 )
 def test_lenient_issubclass_false(klass: type, class_or_tuple: type | tuple[type, ...]) -> None:
     assert not lenient_issubclass(klass, class_or_tuple)
