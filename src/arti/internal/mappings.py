@@ -57,8 +57,8 @@ class frozendict[K, V](Mapping[K, V]):
         # hint on a model field. If the type hint is FrozenMapping (which allows input from
         # arbitrary mappings types), this is ignored and it instead uses FrozenMapping's Annotated
         # metadata.
-        K, V = cast(tuple[Any, Any], get_class_type_vars(source_type))
-        return handler(Annotated[Mapping[K, V], *cls._get_functional_schema()])
+        key_type, value_type = cast(tuple[Any, Any], get_class_type_vars(source_type))
+        return handler(Annotated[Mapping[key_type, value_type], *cls._get_functional_schema()])
 
 
 type FrozenMapping[K, V] = Annotated[Mapping[K, V], *frozendict._get_functional_schema()]

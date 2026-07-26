@@ -19,16 +19,15 @@ from typing import (
 )
 from typing import is_typeddict as is_typeddict  # Expose along with the other `is_*` helpers below.
 
-_T = TypeVar("_T")
 NoneType = cast(type, type(None))  # mypy otherwise treats type(None) as an object
 
 
-def assert_not_none(v: _T | None) -> _T:
+def assert_not_none[T](v: T | None) -> T:
     assert v is not None
     return v
 
 
-def assert_all_instances(values: Iterable[Any], *, type: type[_T]) -> Iterable[_T]:
+def assert_all_instances[T](values: Iterable[Any], *, type: type[T]) -> Iterable[T]:
     if not all(isinstance(v, type) for v in values):
         raise TypeError(f"Expected {type.__name__} instances")
     return values
@@ -92,7 +91,7 @@ def discard_Annotated(type_: Any) -> Any:
 
 def get_class_type_vars(klass: type) -> tuple[type, ...]:
     """
-    Get the bound type variables from a class
+    Get the bound type variables from a class.
 
     NOTE: Only vars from the *first* Generic in the mro *with all variables bound* will be returned.
     """
@@ -217,7 +216,7 @@ def signature(
     remove_owner: bool = True,
 ) -> inspect.Signature:
     """
-    Convenience wrapper around `inspect.signature`.
+    Wrap `inspect.signature` with Artigraph's annotation normalization.
 
     The returned Signature will have `cls`/`self` parameters removed if `remove_owner` is `True` and
     `tuple[...]` converted to `tuple(...)` in the `return_annotation`.

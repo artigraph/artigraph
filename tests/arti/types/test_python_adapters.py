@@ -105,7 +105,7 @@ def test_python_literal_errors() -> None:
         PyLiteral.to_artigraph(Literal[()], hints={}, type_system=python_type_system)
     # Confirm other Unions aren't handled
     for invalid_hint in (int | str, int | Literal[1]):
-        with pytest.raises(NotImplementedError, match="No TypeSystem.* adapter for system type"):
+        with pytest.raises(NotImplementedError, match=r"No TypeSystem.* adapter for system type"):
             assert python_type_system.to_artigraph(invalid_hint, hints={})
     # This path shouldn't normally be accessible (ie: `match_system` should guard against it, as
     # above), but are there for extra safety.
@@ -167,9 +167,9 @@ def test_python_struct() -> None:
         x: int
 
     # TypedDicts don't support equality (they must check on id or similar).
-    P1 = python_type_system.to_system(a, hints={})
-    assert P1.__name__ == P.__name__
-    assert get_type_hints(P1) == {"x": int}
+    p1 = python_type_system.to_system(a, hints={})
+    assert p1.__name__ == P.__name__
+    assert get_type_hints(p1) == {"x": int}
     assert python_type_system.to_artigraph(P, hints={}) == a
 
 

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import copy
 import pickle
+import re
 from typing import Any, get_args, get_origin
 
 import pytest
@@ -124,7 +125,7 @@ def test_TypedBox() -> None:
 
     assert hash(box)
 
-    with pytest.raises(ValueError, match="CoordBox is frozen."):
+    with pytest.raises(ValueError, match=re.escape("CoordBox is frozen.")):
         box.shop = coord
 
     assert len(box) == 3  # Ensure we didn't add any keys

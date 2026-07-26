@@ -19,7 +19,7 @@ DEFAULT_ANONYMOUS_NAME = "anon"
 
 
 def is_partitioned(type_: Type) -> bool:
-    """Helper function to determine whether the type is partitioned."""
+    """Determine whether the type is partitioned."""
     return isinstance(type_, Collection) and bool(type_.partition_fields)
 
 

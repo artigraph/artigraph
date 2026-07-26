@@ -189,7 +189,7 @@ class Producer(Model):
 
     @classmethod
     def _validate_build_sig(cls) -> tuple[Signature, BuildInputs, Outputs]:
-        """Validate the .build method"""
+        """Validate the .build method."""
         if not hasattr(cls, "build"):
             raise ValueError("must be implemented")
         if not isinstance(getattr_static(cls, "build"), classmethod | staticmethod):
@@ -271,7 +271,7 @@ class Producer(Model):
 
     @classmethod
     def _validate_map_sig(cls) -> tuple[Signature, MapInputs]:
-        """Validate partitioned Artifacts and the .map method"""
+        """Validate partitioned Artifacts and the .map method."""
         if not hasattr(cls, "map"):
             # TODO: Add runtime checking of `map` output (ie: output aligns w/ output
             # artifacts and such).

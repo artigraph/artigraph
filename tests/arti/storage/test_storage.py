@@ -73,7 +73,9 @@ def test_Storage_init_subclass() -> None:
 
 def test_Storage_resolve_empty_error() -> None:
     s = MockStorage(path="/{name}")
-    with pytest.raises(ValueError, match=".path was empty after removing unused templates"):
+    with pytest.raises(
+        ValueError, match=re.escape(".path was empty after removing unused templates")
+    ):
         s._visit_names(())
 
 
@@ -140,7 +142,7 @@ def test_Storage_key_types() -> None:
         Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",))
     ).key_types == PartitionKeyTypes(a=Int8Field)
     assert MockStorage(path="test")._visit_type(Int8()).key_types == PartitionKeyTypes()
-    with pytest.raises(ValueError, match="`key_types` have not been set yet."):
+    with pytest.raises(ValueError, match=re.escape("`key_types` have not been set yet.")):
         assert MockStorage(path="test").key_types
 
 
@@ -231,7 +233,9 @@ def test_Storage_generate_partition() -> None:
         MockStorage(path="hard coded")._visit_type(
             Collection(element=Struct(fields={"i": Int8()}), partition_by=("i",))
         ).generate_partition()
-    with pytest.raises(ValueError, match="does not specify a {input_fingerprint} template"):
+    with pytest.raises(
+        ValueError, match=re.escape("does not specify a {input_fingerprint} template")
+    ):
         MockStorage(path="hard coded")._visit_type(Int8()).generate_partition(
             input_fingerprint=Fingerprint.from_string("fake")
         )

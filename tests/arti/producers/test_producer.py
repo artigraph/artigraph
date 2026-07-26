@@ -109,7 +109,7 @@ def test_Producer_partitioned_input_validation() -> None:
         "a": python_views.List(artifact_class=A, type=get_field_default(A, "type"), mode="READ")
     }
 
-    with pytest.raises(ValueError, match="dict.* cannot be used to represent Collection"):
+    with pytest.raises(ValueError, match=r"dict.* cannot be used to represent Collection"):
 
         class SingularInput(Producer):
             a: A
@@ -171,7 +171,7 @@ def test_Producer_outputs() -> None:
                 pass
 
     with pytest.raises(
-        ValueError, match="DupArtifact.build 1st return - multiple Artifact values found"
+        ValueError, match=re.escape("DupArtifact.build 1st return - multiple Artifact values found")
     ):
 
         class DupArtifact(Producer):
@@ -259,7 +259,7 @@ def test_Producer_map_artifacts() -> None:
 
     with pytest.raises(
         ValueError,
-        match="BadMapParam.map a1 param - type hint must be `StoragePartitions`",
+        match=re.escape("BadMapParam.map a1 param - type hint must be `StoragePartitions`"),
     ):
 
         class BadMapParam(P):
@@ -316,13 +316,17 @@ def test_Producer_validate_output_hint_validation() -> None:
         def bad_vargs(x: int) -> int:
             return x
 
-    with pytest.raises(ValueError, match="validate_output - must match the `.build` return"):
+    with pytest.raises(
+        ValueError, match=re.escape("validate_output - must match the `.build` return")
+    ):
 
         @producer_decorator(validate_outputs=validate_int)
         def too_few_arg(x: int) -> tuple[int, int]:
             return x, x + 1
 
-    with pytest.raises(ValueError, match="validate_output i param - must not have a default."):
+    with pytest.raises(
+        ValueError, match=re.escape("validate_output i param - must not have a default.")
+    ):
 
         @producer_decorator(validate_outputs=lambda i=5: (True, ""))
         def bad_default(x: int) -> int:
@@ -332,7 +336,8 @@ def test_Producer_validate_output_hint_validation() -> None:
         return bool(i), ""
 
     with pytest.raises(
-        ValueError, match="validate_output i param - must be usable as a positional argument."
+        ValueError,
+        match=re.escape("validate_output i param - must be usable as a positional argument."),
     ):
 
         @producer_decorator(validate_outputs=validate_kwarg)
@@ -343,7 +348,8 @@ def test_Producer_validate_output_hint_validation() -> None:
         return bool(i), ""
 
     with pytest.raises(
-        ValueError, match="validate_output i param - type hint must match the 1st `.build` return"
+        ValueError,
+        match=re.escape("validate_output i param - type hint must match the 1st `.build` return"),
     ):
 
         @producer_decorator(validate_outputs=accepts_float)
@@ -404,7 +410,7 @@ def test_Producer_bad_signature() -> None:
     class OkProducer(Producer):
         _abstract_ = True
 
-    with pytest.raises(ValueError, match="BadProducer.build - must be implemented"):
+    with pytest.raises(ValueError, match=re.escape("BadProducer.build - must be implemented")):
 
         class BadProducer(Producer):
             pass
@@ -518,7 +524,9 @@ def test_Producer_bad_signature() -> None:
             def build(cls, a1: dict) -> None:  # type: ignore[type-arg]
                 pass
 
-    with pytest.raises(ValueError, match="BadProducer.a1 - field must not have a default."):
+    with pytest.raises(
+        ValueError, match=re.escape("BadProducer.a1 - field must not have a default.")
+    ):
 
         class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1 = None  # type: ignore[assignment]
@@ -527,7 +535,7 @@ def test_Producer_bad_signature() -> None:
             def build(cls, a1: dict):  # type: ignore[no-untyped-def,type-arg]
                 pass
 
-    with pytest.raises(ValueError, match="BadProducer.a1 - field must not be optional."):
+    with pytest.raises(ValueError, match=re.escape("BadProducer.a1 - field must not be optional.")):
 
         class BadProducer(Producer):  # type: ignore[no-redef]
             a1: A1 | None
@@ -701,11 +709,11 @@ def test_Producer_io_checks() -> None:
 
     # Check reading
     producer = CheckIO(m=fake_artifact, b=good_artifact)
-    with pytest.raises(ValueError, match="No `io.read` implementation found for: "):
+    with pytest.raises(ValueError, match=re.escape("No `io.read` implementation found for: ")):
         CheckIO(m=fake_artifact, b=fake_artifact)
     # Check writing
     producer.out(good_artifact)
-    with pytest.raises(ValueError, match="No `io.write` implementation found for: "):
+    with pytest.raises(ValueError, match=re.escape("No `io.write` implementation found for: ")):
         producer.out(fake_artifact)
 
     @io.register_reader

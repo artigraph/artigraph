@@ -7,7 +7,7 @@ from collections.abc import Callable
 from functools import cached_property, wraps
 from graphlib import TopologicalSorter
 from types import TracebackType
-from typing import TYPE_CHECKING, Annotated, Any, Literal, TypeVar
+from typing import TYPE_CHECKING, Annotated, Any, Literal
 
 from pydantic import Field, PrivateAttr, field_validator
 
@@ -40,12 +40,10 @@ type STATUS = Literal["open", "closed"]
 OPEN: Literal["open"] = "open"
 CLOSED: Literal["closed"] = "closed"
 
-_Return = TypeVar("_Return")
 
-
-def requires_sealed(fn: Callable[..., _Return]) -> Callable[..., _Return]:
+def requires_sealed[Return](fn: Callable[..., Return]) -> Callable[..., Return]:
     @wraps(fn)
-    def check_if_sealed(self: Graph, *args: Any, **kwargs: Any) -> _Return:
+    def check_if_sealed(self: Graph, *args: Any, **kwargs: Any) -> Return:
         if self._status is not CLOSED:
             raise ValueError(f"{fn.__name__} cannot be used while the Graph is still being defined")
         return fn(self, *args, **kwargs)

@@ -124,7 +124,7 @@ class BackendConnection:
     @contextmanager
     def connect(self) -> Iterator[Self]:
         """
-        Return self
+        Return self.
 
         This makes it easier to work with an optional connection, eg:
             with (connection or backend).connect() as conn:

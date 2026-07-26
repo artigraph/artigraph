@@ -14,7 +14,7 @@ from arti.views.python import PythonBuiltin
 
 
 def _read_pickle_file(path: str) -> Any:
-    with open(path, "rb") as file:
+    with Path(path).open("rb") as file:
         return pickle.load(file)  # noqa: S301 # User opted into pickle, ignore bandit check
 
 

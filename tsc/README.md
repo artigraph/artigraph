@@ -9,7 +9,7 @@ This is a checklist for TSC's to review as part of the intake process. The TSC s
 ### Prior to Project Contribution Proposal
 
 - [ ] Project license identified and exists in root directory of all repos (named LICENSE)
-- [ ] Any third-party components/dependencies included are listed along with thier licenses (example template at [THIRD_PARTY.md](../THIRD_PARTY.md))
+- [ ] Any third-party components/dependencies included are listed along with their licenses (example template at [THIRD_PARTY.md](../THIRD_PARTY.md))
 - [ ] Code scan completed and any recommendations remedied.
 - [ ] README.md file exists (template started at [README.md](../README.md))
 - [ ] Governance defined, outlining community roles and how decisions are made (starting point at [GOVERNANCE.md](../GOVERNANCE.md) if needed).

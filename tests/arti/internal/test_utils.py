@@ -148,7 +148,7 @@ def test_sizedint_binary(type_: type[int], op: Callable[..., Any]) -> None:
 def test_named_temporary_file(mode: str) -> None:
     with named_temporary_file(mode=mode) as f:
         assert f.mode == mode
-        with open(f.name, mode=f.mode) as f1:
+        with Path(f.name).open(mode=f.mode) as f1:
             assert f1
 
 

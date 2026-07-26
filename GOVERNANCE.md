@@ -42,7 +42,7 @@ If a committer is no longer interested or cannot perform the committer duties li
 
 ## Lead
 
-The project committers will elect a lead (and optionally a co-lead) which will be the primary point of contact for the project and representative to the TAC upon becoming an Active stage project. The lead(s) will be responsible for the overall project health and direction, coordination of activities, and working with other projects and committees as needed for the continuted growth of the project.
+The project committers will elect a lead (and optionally a co-lead) which will be the primary point of contact for the project and representative to the TAC upon becoming an Active stage project. The lead(s) will be responsible for the overall project health and direction, coordination of activities, and working with other projects and committees as needed for the continued growth of the project.
 
 The current project lead is: @JacobHayes.
 

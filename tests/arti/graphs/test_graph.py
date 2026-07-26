@@ -212,10 +212,10 @@ def test_Graph_snapshot_missing_input_artifact(tmp_path: Path) -> None:
 
 def test_Graph_snapshot_id_producer_arg_order(tmp_path: Path) -> None:
     a = Num(storage=LocalFile(path=str(tmp_path / "a.json")))
-    with open(a.storage.path, "w") as f:
+    with Path(a.storage.path).open("w") as f:
         f.write("10")
     b = Num(storage=LocalFile(path=str(tmp_path / "b.json")))
-    with open(b.storage.path, "w") as f:
+    with Path(b.storage.path).open("w") as f:
         f.write("5")
     c = Num(storage=LocalFile.rooted_at(tmp_path))
 

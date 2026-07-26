@@ -52,7 +52,9 @@ def test_multipledispatch() -> None:
 
     with pytest.raises(
         TypeError,
-        match="Expected the `bad_param_kind.a` parameter to be POSITIONAL_OR_KEYWORD, got KEYWORD_ONLY",
+        match=re.escape(
+            "Expected the `bad_param_kind.a` parameter to be POSITIONAL_OR_KEYWORD, got KEYWORD_ONLY"
+        ),
     ):
 
         @test.register
@@ -61,7 +63,9 @@ def test_multipledispatch() -> None:
 
     with pytest.raises(
         TypeError,
-        match="Expected the `bad_type.a` parameter to be a subclass of <class 'test_dispatch.A'>, got <class 'int'>",
+        match=re.escape(
+            "Expected the `bad_type.a` parameter to be a subclass of <class 'test_dispatch.A'>, got <class 'int'>"
+        ),
     ):
 
         @test.register
