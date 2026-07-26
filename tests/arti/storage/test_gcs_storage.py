@@ -1,11 +1,15 @@
 import base64
 import hashlib
+import sys
+from typing import Any, cast
+from unittest import mock
 
+import pytest
 from gcsfs import GCSFileSystem
 
 from arti import Fingerprint, PartitionKey
 from arti.partitions import Int32Field
-from arti.storage.google.cloud.storage import GCSFile, GCSFilePartition
+from arti.storage.google.cloud.storage import GCSFile, GCSFilePartition, gcs_file_system
 from arti.types import Collection, Int32, Struct
 from tests.arti.dummies import DummyFormat
 
@@ -13,6 +17,14 @@ from tests.arti.dummies import DummyFormat
 def test_GCSFile() -> None:
     f = GCSFile(bucket="test", path="folder/file")
     assert f.qualified_path == "test/folder/file"
+
+
+def test_GCSFile_requires_extra() -> None:
+    with (
+        mock.patch.dict(sys.modules, {"gcsfs": cast(Any, None)}),
+        pytest.raises(ModuleNotFoundError, match=r"GCS support requires the `all` extra"),
+    ):
+        gcs_file_system()
 
 
 def test_GCSFile_discover_partitions(gcs: GCSFileSystem, gcs_bucket: str) -> None:

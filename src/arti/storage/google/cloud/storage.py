@@ -1,8 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-
-from gcsfs import GCSFileSystem
+from typing import TYPE_CHECKING
 
 from arti import (
     Fingerprint,
@@ -13,6 +12,19 @@ from arti import (
 )
 from arti.internal.models import Model
 from arti.storage._internal import parse_spec, spec_to_wildcard
+
+if TYPE_CHECKING:
+    from gcsfs import GCSFileSystem
+
+
+def gcs_file_system() -> GCSFileSystem:
+    try:
+        from gcsfs import GCSFileSystem
+    except ModuleNotFoundError as exc:
+        raise ModuleNotFoundError(
+            "GCS support requires the `all` extra: `pip install 'arti[all]'`"
+        ) from exc
+    return GCSFileSystem()
 
 
 class _GCSMixin(Model):
@@ -27,7 +39,7 @@ class _GCSMixin(Model):
 class GCSFilePartition(_GCSMixin, StoragePartition):
     def compute_content_fingerprint(self) -> Fingerprint:
         # TODO: GCSFileSystem needs to be injected somehow
-        info = GCSFileSystem().info(f"{self.bucket}/{self.path}")
+        info = gcs_file_system().info(f"{self.bucket}/{self.path}")
         # Prefer md5Hash if available
         return Fingerprint.from_string(
             str(info["md5Hash"] if "md5Hash" in info else info["crc32c"])
@@ -52,7 +64,7 @@ class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
         spec = f"{self.bucket}/{self.path}"
         wildcard = spec_to_wildcard(spec, self.key_types)
         # TODO: GCSFileSystem needs to be injected somehow
-        paths = GCSFileSystem().glob(wildcard)
+        paths = gcs_file_system().glob(wildcard)
         path_metadata = parse_spec(
             set(paths), spec=spec, key_types=self.key_types, input_fingerprints=input_fingerprints
         )

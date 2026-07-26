@@ -29,9 +29,9 @@ This sample from the [spend example](docs/examples/spend/demo.py) highlights com
 
 ```python
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any, cast
 
-from arti import Annotation, Artifact, Graph, producer
+from arti import Annotation, Artifact, Format, Graph, Storage, Type, producer
 from arti.formats.json import JSON
 from arti.storage.local import LocalFile
 from arti.types import Collection, Date, Float64, Int64, Struct
@@ -47,7 +47,7 @@ class Vendor(Annotation):
 class Transactions(Artifact):
     """Transactions partitioned by day."""
 
-    type = Collection(
+    type: Type = Collection(
         element=Struct(fields={"id": Int64(), "date": Date(), "amount": Float64()}),
         partition_by=("date",),
     )
@@ -56,34 +56,44 @@ class Transactions(Artifact):
 class TotalSpend(Artifact):
     """Aggregate spend over all time."""
 
-    type = Float64()
-    format = JSON()
-    storage = LocalFile()
+    type: Type = Float64()
+    format: Format = JSON()
+    storage: Storage[Any] = LocalFile()
 
 
 @producer(version=SemVer(major=1, minor=0, patch=0))
 def aggregate_transactions(
-    transactions: Annotated[list[dict], Transactions],
+    transactions: Annotated[list[dict[Any, Any]], Transactions],
 ) -> Annotated[float, TotalSpend]:
-    return sum(txn["amount"] for txn in transactions)
+    return float(sum(txn["amount"] for txn in transactions))
 
 
 with Graph(name="test-graph") as g:
     g.artifacts.vendor.transactions = Transactions(
-        annotations=[Vendor(name="Acme")],
+        annotations=(Vendor(name="Acme"),),
         format=JSON(),
         storage=LocalFile(path=str(DIR / "transactions" / "{date.iso}.json")),
     )
-    g.artifacts.spend = aggregate_transactions(transactions=g.artifacts.vendor.transactions)
+    g.artifacts.spend = cast(Any, aggregate_transactions)(
+        transactions=g.artifacts.vendor.transactions
+    )
 ```
 
-The full example can be run easily with `docker run --rm artigraph/example-spend`:
+The [full, tested example](docs/examples/spend/demo.py) can be run from a checkout:
+
+```shell
+uv run python docs/examples/spend/demo.py
 ```
-INFO:root:Writing mock Transactions data:
-INFO:root:      /usr/src/app/transactions/2021-10-01.json: [{'id': 1, 'amount': 9.95}, {'id': 2, 'amount': 7.5}]
-INFO:root:      /usr/src/app/transactions/2021-10-02.json: [{'id': 3, 'amount': 5.0}, {'id': 4, 'amount': 12.0}, {'id': 4, 'amount': 7.55}]
-INFO:root:Building aggregate_transactions(transactions=Transactions(format=JSON(), storage=LocalFile(path='/usr/src/app/transactions/{date.iso}.json'), annotations=(Vendor(name='Acme'),)))...
-INFO:root:Build finished.
-INFO:root:Final Spend data:
-INFO:root:      /tmp/test-graph/spend/7564053533177891797/spend.json: 42.0
+
+Or build and run it in Docker:
+
+```shell
+docker build --file docs/examples/spend/Dockerfile --tag artigraph/example-spend .
+docker run --rm artigraph/example-spend
+```
+
+Both commands finish with:
+
+```
+INFO:root:Total Spend: 42.0
 ```

@@ -1,15 +1,34 @@
-FROM python:3.10
+FROM ghcr.io/astral-sh/uv:0.11.32 AS uv
 
-ENV VERSION=0.0.1
-ENV WORKDIR=/usr/src/app
-WORKDIR $WORKDIR
 
-RUN python3 -m venv .venv
-ENV VIRTUAL_ENV=$WORKDIR/.venv
-ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+FROM python:3.12-slim-bookworm AS build
 
-RUN pip3 install "arti==${VERSION}"
+COPY --from=uv /uv /uvx /bin/
 
-COPY demo.py .
+ENV SETUPTOOLS_SCM_PRETEND_VERSION=0.0.0
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
 
-CMD ["python3", "demo.py"]
+WORKDIR /app
+
+RUN apt-get update \
+    && apt-get install --yes --no-install-recommends build-essential \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY README.md pyproject.toml uv.lock ./
+COPY src/ src/
+
+RUN uv sync --frozen --no-dev --no-editable
+
+
+FROM python:3.12-slim-bookworm
+
+WORKDIR /app
+
+ENV PATH="/app/.venv/bin:$PATH"
+
+COPY --from=build /app/.venv .venv/
+COPY docs/examples/spend/demo.py .
+COPY docs/examples/spend/transactions/ transactions/
+
+CMD ["python", "demo.py"]

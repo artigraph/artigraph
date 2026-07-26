@@ -54,6 +54,11 @@ jobs:
       - name: pytest
         run: |
           uv run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
+      - name: Test minimal wheel installation
+        run: |
+          uv build --wheel --out-dir dist/smoke
+          uv run --isolated --no-project --with dist/smoke/*.whl \
+            python docs/examples/spend/demo.py
       - uses: codecov/codecov-action@v7
         with:
           env_vars: OS,PYTHON_VERSION

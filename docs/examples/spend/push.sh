@@ -5,7 +5,8 @@ set -o nounset
 set -o pipefail
 
 IMAGE="artigraph/example-spend"
-VERSION="$(python3 -c 'from arti.internal import version; print(version)')"
+SCRIPT_DIR="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(git -C "${SCRIPT_DIR}" rev-parse --show-toplevel)"
 
-docker build --build-arg VERSION="${VERSION}" -t "${IMAGE}" .
+docker build --file "${SCRIPT_DIR}/Dockerfile" --tag "${IMAGE}" "${REPO_ROOT}"
 docker push "${IMAGE}"

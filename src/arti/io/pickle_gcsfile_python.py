@@ -5,11 +5,9 @@ from collections.abc import Sequence
 from itertools import chain
 from typing import Any
 
-from gcsfs import GCSFileSystem
-
 from arti.formats.pickle import Pickle
 from arti.io import register_reader, register_writer
-from arti.storage.google.cloud.storage import GCSFilePartition
+from arti.storage.google.cloud.storage import GCSFilePartition, gcs_file_system
 from arti.types import Type, is_partitioned
 from arti.views.python import PythonBuiltin
 
@@ -19,7 +17,7 @@ from arti.views.python import PythonBuiltin
 
 def _read_pickle_file(path: str) -> Any:
     # TODO: GCSFileSystem needs to be injected somehow
-    with GCSFileSystem().open(path, "rb") as file:
+    with gcs_file_system().open(path, "rb") as file:
         return pickle.load(file)  # noqa: S301 # User opted into pickle, ignore bandit check
 
 
@@ -45,5 +43,5 @@ def read_pickle_gcsfile_python(
 def write_pickle_gcsfile_python(
     data: Any, type_: Type, format: Pickle, storage_partition: GCSFilePartition, view: PythonBuiltin
 ) -> None:
-    with GCSFileSystem().open(storage_partition.qualified_path, "wb") as file:
+    with gcs_file_system().open(storage_partition.qualified_path, "wb") as file:
         pickle.dump(data, file)
