@@ -33,7 +33,7 @@ from arti.internal.type_hints import (
 )
 from arti.internal.utils import get_module_name, ordinal
 from arti.partitions import InputFingerprints, NotPartitioned, PartitionKey
-from arti.storage import StoragePartitions, StoragePartitionSnapshots
+from arti.storage import StoragePartitionSnapshots
 from arti.types import is_partitioned
 from arti.versions import SemVer, Version
 from arti.views import View
@@ -270,8 +270,8 @@ class Producer(Model):
     @classmethod
     def _validate_map_param(cls, name: str, param: Parameter) -> str:
         # TODO: Should we add some ArtifactPartition[MyArtifact] type?
-        if param.annotation != StoragePartitions:
-            raise ValueError("type hint must be `StoragePartitions`")
+        if param.annotation != StoragePartitionSnapshots:
+            raise ValueError("type hint must be `StoragePartitionSnapshots`")
         return name
 
     @classmethod
@@ -290,7 +290,9 @@ class Producer(Model):
             # cls._map_inputs_) to determine what arguments to pass to map.
             map.__signature__ = Signature(  # pyright: ignore[reportFunctionMemberAccess]
                 [
-                    Parameter(name=name, annotation=StoragePartitions, kind=Parameter.KEYWORD_ONLY)
+                    Parameter(
+                        name=name, annotation=StoragePartitionSnapshots, kind=Parameter.KEYWORD_ONLY
+                    )
                     for name in cls._input_artifact_classes_
                     if name in cls._build_inputs_
                 ],

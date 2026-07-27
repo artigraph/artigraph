@@ -13,7 +13,6 @@ from arti import (
     PartitionDependencies,
     Producer,
     StoragePartition,
-    StoragePartitions,
     StoragePartitionSnapshots,
     Type,
     TypeSystem,
@@ -39,7 +38,7 @@ class DummyProducer(Producer):
         raise NotImplementedError
 
     @staticmethod
-    def map(a1: StoragePartitions) -> PartitionDependencies:
+    def map(a1: StoragePartitionSnapshots) -> PartitionDependencies:
         raise NotImplementedError
 
 
@@ -309,7 +308,7 @@ def test_Producer_map_artifacts() -> None:
             raise NotImplementedError
 
         @staticmethod
-        def map(a1: StoragePartitions) -> PartitionDependencies:
+        def map(a1: StoragePartitionSnapshots) -> PartitionDependencies:
             raise NotImplementedError
 
     assert P._map_inputs_ == {"a1"}
@@ -319,7 +318,7 @@ def test_Producer_map_artifacts() -> None:
 
     with pytest.raises(
         ValueError,
-        match=re.escape("BadMapParam.map a1 param - type hint must be `StoragePartitions`"),
+        match=re.escape("BadMapParam.map a1 param - type hint must be `StoragePartitionSnapshots`"),
     ):
         _define_bad_producer(
             name="BadMapParam",
@@ -508,7 +507,7 @@ def test_Producer_bad_signature() -> None:
         raise NotImplementedError
 
     def map_with_undefined_field(
-        cls: type[Producer], a1: StoragePartitions
+        cls: type[Producer], a1: StoragePartitionSnapshots
     ) -> PartitionDependencies:
         raise NotImplementedError
 
@@ -744,7 +743,7 @@ def test_Producer_io_checks() -> None:
         b: Artifact
 
         @staticmethod
-        def map(m: StoragePartitions) -> PartitionDependencies:
+        def map(m: StoragePartitionSnapshots) -> PartitionDependencies:
             raise NotImplementedError
 
         @staticmethod
