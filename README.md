@@ -26,6 +26,7 @@ Artigraph can be installed from PyPI with `pip install arti`.
 Install a durable metadata backend as an optional extra:
 
 ```shell
+pip install 'arti[parquet]'
 pip install 'arti[sqlite]'
 pip install 'arti[postgres]'
 ```

@@ -52,6 +52,7 @@ all = [
     "pyarrow",
     "sqlalchemy>=2",
 ]
+parquet = ["pandas", "pyarrow"]
 postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2"]
 sqlite = ["alembic", "sqlalchemy>=2"]
 

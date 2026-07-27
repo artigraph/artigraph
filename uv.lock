@@ -192,6 +192,10 @@ all = [
     { name = "pyarrow" },
     { name = "sqlalchemy" },
 ]
+parquet = [
+    { name = "pandas" },
+    { name = "pyarrow" },
+]
 postgres = [
     { name = "alembic" },
     { name = "psycopg", extra = ["binary"] },
@@ -236,17 +240,19 @@ requires-dist = [
     { name = "multimethod", specifier = ">=2.0,<2.1" },
     { name = "numpy", marker = "extra == 'all'" },
     { name = "pandas", marker = "extra == 'all'" },
+    { name = "pandas", marker = "extra == 'parquet'" },
     { name = "parse" },
     { name = "psycopg", extras = ["binary"], marker = "extra == 'all'" },
     { name = "psycopg", extras = ["binary"], marker = "extra == 'postgres'" },
     { name = "pyarrow", marker = "extra == 'all'" },
+    { name = "pyarrow", marker = "extra == 'parquet'" },
     { name = "pydantic", specifier = ">=2.13,<3" },
     { name = "pyfarmhash" },
     { name = "sqlalchemy", marker = "extra == 'all'", specifier = ">=2" },
     { name = "sqlalchemy", marker = "extra == 'postgres'", specifier = ">=2" },
     { name = "sqlalchemy", marker = "extra == 'sqlite'", specifier = ">=2" },
 ]
-provides-extras = ["all", "postgres", "sqlite"]
+provides-extras = ["all", "parquet", "postgres", "sqlite"]
 
 [package.metadata.requires-dev]
 dev = [
