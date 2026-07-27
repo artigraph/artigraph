@@ -20,35 +20,36 @@ class LocalExecutor(Executor):
 
     def build(self, snapshot: GraphSnapshot) -> None:
         # NOTE: Raw Artifacts will already be discovered and linked in the backend to this snapshot.
-        with snapshot.backend.connect() as backend:
-            for node in TopologicalSorter(snapshot.graph.dependencies).static_order():
-                if isinstance(node, Artifact):
-                    # TODO: Compute Statistics (if not already computed for the partition) and check
-                    # Thresholds (every time, as they may be changed, dynamic, or overridden).
-                    pass
-                else:
-                    logging.info(f"Building {node}...")
-                    input_partitions = self.get_producer_inputs(snapshot, backend, node)
-                    (
-                        partition_dependencies,
-                        partition_input_fingerprints,
-                    ) = node.compute_dependencies(input_partitions)
-                    existing_keys = self.discover_producer_partitions(
-                        snapshot,
-                        backend,
-                        node,
-                        partition_input_fingerprints=partition_input_fingerprints,
-                    )
-                    for partition_key, dependencies in partition_dependencies.items():
-                        self.build_producer_partition(
-                            snapshot,
-                            backend,
-                            node,
-                            existing_partition_keys=existing_keys,
-                            input_fingerprint=assert_not_none(
-                                partition_input_fingerprints[partition_key]
-                            ),
-                            input_partitions=dependencies,
-                            partition_key=partition_key,
-                        )
+        for node in TopologicalSorter(snapshot.graph.dependencies).static_order():
+            if isinstance(node, Artifact):
+                # TODO: Compute Statistics (if not already computed for the partition) and check
+                # Thresholds (every time, as they may be changed, dynamic, or overridden).
+                continue
+
+            logging.info(f"Building {node}...")
+            # Keep database transactions away from user-defined map/build functions. Besides
+            # reducing lock contention, this avoids trying to nest a second connection on the
+            # shared physical connection used by an in-memory SQLite backend.
+            with snapshot.backend.connect() as backend:
+                input_partitions = self.get_producer_inputs(snapshot, backend, node)
+            (
+                partition_dependencies,
+                partition_input_fingerprints,
+            ) = node.compute_dependencies(input_partitions)
+            with snapshot.backend.connect() as backend:
+                existing_keys = self.discover_producer_partitions(
+                    snapshot,
+                    backend,
+                    node,
+                    partition_input_fingerprints=partition_input_fingerprints,
+                )
+            for partition_key, dependencies in partition_dependencies.items():
+                self.build_producer_partition(
+                    snapshot,
+                    node,
+                    existing_partition_keys=existing_keys,
+                    input_fingerprint=assert_not_none(partition_input_fingerprints[partition_key]),
+                    input_partitions=dependencies,
+                    partition_key=partition_key,
+                )
         logging.info("Build finished.")

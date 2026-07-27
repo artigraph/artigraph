@@ -23,6 +23,46 @@ We're excited to hear from anyone interested in the project - feel free to intro
 
 Artigraph can be installed from PyPI with `pip install arti`.
 
+Install a durable metadata backend as an optional extra:
+
+```shell
+pip install 'arti[sqlite]'
+pip install 'arti[postgres]'
+```
+
+## Durable metadata backends
+
+Graphs use an in-process memory backend by default. SQLite and Postgres backends persist graphs,
+snapshots, tags, and storage-partition metadata with SQLAlchemy:
+
+```python
+from pathlib import Path
+
+from arti import Graph
+from arti.backends.sqlite import SQLiteBackend
+
+backend = SQLiteBackend(path=Path("artigraph.sqlite"))
+with Graph(name="example", backend=backend) as graph:
+    ...
+```
+
+Use `path=":memory:"` for a shared in-memory SQLite database. Postgres accepts a SQLAlchemy
+psycopg URL:
+
+```python
+from arti.backends.postgres import PostgresBackend
+
+backend = PostgresBackend.from_url("postgresql+psycopg://artigraph:password@localhost/artigraph")
+```
+
+Both backends apply bundled Alembic migrations on first use. Pass `auto_upgrade=False` to require
+an explicit `backend.upgrade()` instead.
+
+Persisted metadata is structured JSON/JSONB containing module-qualified Python type paths. Artifact
+and Producer classes therefore need to be defined at module scope in an importable module; local
+classes, local decorated functions, and definitions run only as `__main__` cannot be restored in a
+future process. Treat the database as trusted: restoring metadata imports the recorded modules.
+
 ## Example
 
 This sample from the [spend example](docs/examples/spend/demo.py) highlights computing the total amount spent from a series of purchase transactions:

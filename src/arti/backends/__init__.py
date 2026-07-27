@@ -149,3 +149,12 @@ class Backend[Connection: BackendConnection](Model):
     @abstractmethod
     def connect(self) -> Generator[Connection]:
         raise NotImplementedError()
+
+    def close(self) -> None:
+        """Release any resources held by the backend."""
+
+    def __enter__(self) -> Self:
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.close()

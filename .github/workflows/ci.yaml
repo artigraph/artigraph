@@ -15,7 +15,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [macos-latest, ubuntu-latest]
+        # Testcontainers needs a Docker daemon. macos-latest is arm64 and cannot run Colima, so
+        # use GitHub's Intel runner for the macOS leg.
+        os: [macos-15-intel, ubuntu-latest]
         python-version: ["3.12"] # NOTE: Quote to ensure trailing 0s aren't dropped
     runs-on: ${{ matrix.os }}
     env:
@@ -26,6 +28,9 @@ jobs:
       UV_PYTHON: ${{ matrix.python-version }} # Otherwise, `uv run` recreates the venv for .python-version.
     steps:
       - uses: actions/checkout@v7
+      - name: Set up Docker on macOS
+        if: runner.os == 'macOS'
+        uses: douglascamata/setup-docker-macos-action@v1.0.1
       - name: Cache pre-commit hooks
         uses: actions/cache@v6
         with:

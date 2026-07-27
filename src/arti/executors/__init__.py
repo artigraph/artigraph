@@ -62,7 +62,6 @@ class Executor(Model):
     def build_producer_partition(
         self,
         snapshot: GraphSnapshot,
-        connection: BackendConnection,
         producer: Producer,
         *,
         existing_partition_keys: set[PartitionKey],

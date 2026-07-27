@@ -112,6 +112,12 @@ class Graph(Model):
         artifacts._status.root = CLOSED  # pyright: ignore[reportPrivateUsage]
         return artifacts
 
+    def model_post_init(self, __context: Any) -> None:
+        super().model_post_init(__context)
+        # Restore the private lookup derived from the sealed model fields. This applies both to
+        # direct construction and to structured metadata rehydration.
+        self._toggle(CLOSED)
+
     def __enter__(self) -> Graph:
         if arti.context.graph is not None:
             raise ValueError(f"Another graph is being defined: {arti.context.graph}")

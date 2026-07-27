@@ -19,6 +19,7 @@ dev = [
     "pytest-pretty",
     "ruff",
     "sh",
+    "testcontainers[postgres]",
     "typer",
     "types-pyfarmhash",
 ]
@@ -40,7 +41,18 @@ readme = "README.md"
 requires-python = ">=3.12"
 
 [project.optional-dependencies]
-all = ["gcsfs", "google-cloud-bigquery", "numpy", "pandas", "pyarrow"]
+all = [
+    "alembic",
+    "gcsfs",
+    "google-cloud-bigquery",
+    "numpy",
+    "pandas",
+    "psycopg[binary]",
+    "pyarrow",
+    "sqlalchemy>=2",
+]
+postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2"]
+sqlite = ["alembic", "sqlalchemy>=2"]
 
 [project.urls]
 Homepage = "https://github.com/artigraph/artigraph"
@@ -99,6 +111,7 @@ addopts = [
     "--cov-report=term-missing",
     "--doctest-modules",
     "--durations=5",
+    "--ignore-glob=src/arti/backends/sql/migrations/*",
     "--ignore-glob=tests/arti/internal/import_submodules_test_modules/",
     "--no-cov-on-fail",
 ]
