@@ -63,6 +63,7 @@ postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2"]
 sqlite = ["alembic", "sqlalchemy>=2"]
 
 [project.urls]
+Documentation = "https://artigraph.github.io/artigraph/"
 Homepage = "https://github.com/artigraph/artigraph"
 Repository = "https://github.com/artigraph/artigraph"
 

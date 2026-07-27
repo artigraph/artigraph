@@ -20,6 +20,13 @@ moving parts:
 uv run python docs/examples/spend/demo.py
 ```
 
+Or build and run it in Docker:
+
+```shell
+docker build --file docs/examples/spend/Dockerfile --tag artigraph/example-spend .
+docker run --rm artigraph/example-spend
+```
+
 ## Ecosystem interop
 
 Artigraph-managed files are ordinary files. The difference is that Artigraph also records enough

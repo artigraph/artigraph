@@ -147,10 +147,3 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           uv publish --token '${{ secrets.PYPI_TOKEN }}'
-
-          # TODO: Fix doc generation - pdocs and portray are not maintained and have various issues.
-          #
-          # echo "Updating docs in GitHub Pages..."
-          # git fetch origin gh-pages # Fetch the gh-pages branch so portray commits on top of existing commits.
-          # git branch gh-pages origin/gh-pages
-          # portray on_github_pages

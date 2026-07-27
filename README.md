@@ -1,4 +1,4 @@
-# artigraph
+# Artigraph
 
 [![pypi](https://img.shields.io/pypi/v/arti.svg)](https://pypi.python.org/pypi/arti)
 [![changelog](https://img.shields.io/github/v/release/artigraph/artigraph?label=changelog)](https://github.com/artigraph/artigraph/releases)
@@ -9,42 +9,128 @@
 [![codecov](https://codecov.io/gh/artigraph/artigraph/branch/main/graph/badge.svg?token=6LUCpjcGdN)](https://codecov.io/gh/artigraph/artigraph)
 [![OpenSSF Best Practices](https://bestpractices.coreinfrastructure.org/projects/5561/badge)](https://bestpractices.coreinfrastructure.org/projects/5561)
 
-Declarative Data Production
+**Declarative data production for Python.**
 
-Artigraph is a tool to improve the authorship, management, and quality of data. It emphasizes that the core deliverable of a data pipeline or workflow is the data, not the tasks.
+Artigraph is a Python library for building data as **versioned, fingerprinted artifacts** instead of
+loose files scattered across a filesystem. You declare the artifacts your workflow should produce and
+the producers that build them; Artigraph records a fingerprint for every partition and a snapshot of
+every graph version, so you can reproduce, inspect, and hand off a coherent version of your data
+later.
 
-Artigraph is hosted by the [LF AI and Data Foundation](https://lfaidata.foundation) as a Sandbox project. See our [deck](https://docs.google.com/presentation/d/1KLM9r0L5sTbpb_UPR5nx4fil-7fO-UnmhTeatSiaN3Y) or [presentation](https://wiki.lfaidata.foundation/download/attachments/7733341/GMT20220127-140219_Recording_3840x2160.mp4?version=1&modificationDate=1643716019000&api=v2) (@6m35s) requesting Sandbox incubation.
+The problem it solves: once a pipeline has run a few times, "which files make up this dataset?"
+becomes guesswork. A glob can pick up stale partitions; a rerun can overwrite an output you still
+needed; a downstream tool can silently mix versions. Artigraph makes snapshot membership explicit, so
+a version is something you can tag and load — not a directory you hope is clean.
 
-## Community
+Artigraph is not a scheduler or orchestrator. Bring your own runner — a script, cron, Airflow,
+Dagster, or anything else. Artigraph owns the data contract: types, storage, fingerprints, and
+snapshot lineage.
 
-We're excited to hear from anyone interested in the project - feel free to introduce yourself over in the [Intro Discussions](https://github.com/artigraph/artigraph/discussions/categories/intros)! See our [support page](SUPPORT.md) for help or our [contributing page](CONTRIBUTING.md) for guidelines.
+Read the docs at [artigraph.github.io/artigraph](https://artigraph.github.io/artigraph/) or try the
+[browser playground](https://artigraph.github.io/artigraph/playground/).
+
+Artigraph is an early-stage, pre-1.0 project hosted by the
+[LF AI & Data Foundation](https://lfaidata.foundation) as a Sandbox project. See
+[Status and fit](https://artigraph.github.io/artigraph/status/) for what works today and where it
+belongs in a stack.
 
 ## Installation
 
-Artigraph can be installed from PyPI with `pip install arti`.
+Artigraph can be installed from PyPI with:
+
+```shell
+pip install arti
+```
 
 Install optional data format and metadata backend extras as needed:
 
 ```shell
-pip install 'arti[parquet]'  # Parquet/Pandas data files
+pip install 'arti[parquet]'  # Pandas/Parquet data files
 pip install 'arti[sqlite]'   # local durable metadata
 pip install 'arti[postgres]' # Postgres durable metadata
 ```
 
-## Flagship local demo
+## Build a first graph
 
-The best starting point is the
-[snapshot-aware Pandas/Parquet demo](docs/examples/snapshot_parquet_duckdb/README.md). It shows the
-core Artigraph workflow: define artifacts, produce partitioned data with Pandas, preserve output
-versions with fingerprints, tag graph snapshots, and read a specific snapshot back through ordinary
-Python APIs. The final step uses in-memory DuckDB only as an ecosystem interop check against the
-exact Parquet files recorded in Artigraph metadata.
+This complete example defines one raw artifact and one produced artifact, writes input data, builds a
+snapshot, and reads the result back.
+
+```python
+from typing import Annotated, TypedDict
+
+from arti import Artifact, ArtifactStorage, Format, Graph, Type, producer
+from arti.formats.json import JSON
+from arti.storage.local import LocalFile
+from arti.types import Collection, Float64, Int64, Struct
+from arti.versions import SemVer
+
+
+class Transactions(Artifact):
+    type: Type = Collection(element=Struct(fields={"id": Int64(), "amount": Float64()}))
+    format: Format = JSON()
+    storage: ArtifactStorage = LocalFile(path="/tmp/artigraph-first-graph/transactions.json")
+
+
+class TotalSpend(Artifact):
+    type: Type = Float64()
+    format: Format = JSON()
+    storage: ArtifactStorage = LocalFile(
+        path="/tmp/artigraph-first-graph/produced/{input_fingerprint}/total.json",
+    )
+
+
+class Transaction(TypedDict):
+    id: int
+    amount: float
+
+
+@producer(version=SemVer(major=1, minor=0, patch=0))
+def aggregate(
+    transactions: Annotated[list[Transaction], Transactions],
+) -> Annotated[float, TotalSpend]:
+    return float(sum(transaction["amount"] for transaction in transactions))
+
+
+with Graph(name="first-graph") as graph:
+    graph.artifacts.transactions = Transactions()
+    graph.artifacts.total = aggregate(transactions=graph.artifacts.transactions)
+
+
+graph.write(
+    [{"id": 1, "amount": 18.0}, {"id": 2, "amount": 24.0}],
+    artifact=graph.artifacts.transactions,
+)
+snapshot = graph.build()
+total = snapshot.read(snapshot.artifacts.total, annotation=float)
+print(total)  # 42.0
+```
+
+The core loop is `write → build → read`: write raw inputs, build a fingerprinted snapshot, then read
+an artifact from that exact version.
+
+## Run the local demo
+
+The best local starting point is the
+[snapshot-aware Pandas/Parquet demo](https://github.com/artigraph/artigraph/blob/main/docs/examples/snapshot_parquet_duckdb/README.md).
+It shows the core Artigraph workflow with partitioned Pandas data, Parquet files, SQLite metadata,
+versioned outputs, tagged snapshots, and snapshot-aware readback.
 
 Run it from a checkout with:
 
 ```shell
 uv run --all-extras --with duckdb python docs/examples/snapshot_parquet_duckdb/demo.py
 ```
+
+Expected output includes:
+
+```text
+Baseline snapshot total: 42.00
+Corrected snapshot total: 39.50
+Naive glob total: 51.50
+```
+
+The final step uses in-memory DuckDB only as an ecosystem interop check: DuckDB gets the exact
+Parquet files recorded in Artigraph snapshot metadata instead of guessing from a path glob.
 
 ## Durable metadata backends
 
@@ -71,88 +157,17 @@ from arti.backends.postgres import PostgresBackend
 backend = PostgresBackend.from_url("postgresql+psycopg://artigraph:password@localhost/artigraph")
 ```
 
-Both backends apply bundled Alembic migrations on first use. Pass `auto_upgrade=False` to require
-an explicit `backend.upgrade()` instead.
+Both backends apply bundled Alembic migrations on first use. Pass `auto_upgrade=False` to require an
+explicit `backend.upgrade()` instead.
 
 Persisted metadata is structured JSON/JSONB containing module-qualified Python type paths. Artifact
-and Producer classes therefore need to be defined at module scope in an importable module; local
+and producer classes therefore need to be defined at module scope in an importable module; local
 classes, local decorated functions, and definitions run only as `__main__` cannot be restored in a
 future process. Treat the database as trusted: restoring metadata imports the recorded modules.
 
-## Example
+## Community
 
-This sample from the [spend example](docs/examples/spend/demo.py) highlights computing the total amount spent from a series of purchase transactions:
-
-```python
-from pathlib import Path
-from typing import Annotated, TypedDict
-
-from arti import Annotation, Artifact, ArtifactStorage, Format, Graph, Type, producer
-from arti.formats.json import JSON
-from arti.storage.local import LocalFile
-from arti.types import Collection, Date, Float64, Int64, Struct
-from arti.versions import SemVer
-
-DIR = Path(__file__).parent
-
-
-class Vendor(Annotation):
-    name: str
-
-
-class Transactions(Artifact):
-    """Transactions partitioned by day."""
-
-    type: Type = Collection(
-        element=Struct(fields={"id": Int64(), "date": Date(), "amount": Float64()}),
-        partition_by=("date",),
-    )
-
-
-class TotalSpend(Artifact):
-    """Aggregate spend over all time."""
-
-    type: Type = Float64()
-    format: Format = JSON()
-    storage: ArtifactStorage = LocalFile()
-
-
-class Transaction(TypedDict):
-    id: int
-    amount: float
-
-
-@producer(version=SemVer(major=1, minor=0, patch=0))
-def aggregate_transactions(
-    transactions: Annotated[list[Transaction], Transactions],
-) -> Annotated[float, TotalSpend]:
-    return float(sum(txn["amount"] for txn in transactions))
-
-
-with Graph(name="test-graph") as g:
-    g.artifacts.vendor.transactions = Transactions(
-        annotations=(Vendor(name="Acme"),),
-        format=JSON(),
-        storage=LocalFile(path=str(DIR / "transactions" / "{date.iso}.json")),
-    )
-    g.artifacts.spend = aggregate_transactions(transactions=g.artifacts.vendor.transactions)
-```
-
-The [full, tested example](docs/examples/spend/demo.py) can be run from a checkout:
-
-```shell
-uv run python docs/examples/spend/demo.py
-```
-
-Or build and run it in Docker:
-
-```shell
-docker build --file docs/examples/spend/Dockerfile --tag artigraph/example-spend .
-docker run --rm artigraph/example-spend
-```
-
-Both commands finish with:
-
-```
-INFO:root:Total Spend: 42.0
-```
+We're excited to hear from anyone interested in the project. Feel free to introduce yourself in the
+[Intro Discussions](https://github.com/artigraph/artigraph/discussions/categories/intros). See our
+[support page](https://github.com/artigraph/artigraph/blob/main/SUPPORT.md) for help or our
+[contributing page](https://github.com/artigraph/artigraph/blob/main/CONTRIBUTING.md) for guidelines.
