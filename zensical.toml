@@ -8,6 +8,7 @@ repo_name = "artigraph/artigraph"
 edit_uri = "edit/main/docs/"
 docs_dir = "docs"
 site_dir = "site"
+extra_css = ["assets/stylesheets/playground.css"]
 nav = [
   {"Home" = "index.md"},
   {"Get started" = [
@@ -33,6 +34,10 @@ nav = [
     "reference/core.md",
   ]},
 ]
+
+[[project.extra_javascript]]
+path = "assets/javascripts/playground.js"
+type = "module"
 
 [project.theme]
 variant = "modern"
