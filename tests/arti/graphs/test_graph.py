@@ -4,7 +4,7 @@ import pickle
 import re
 from collections.abc import Callable
 from pathlib import Path
-from typing import Annotated, Any, cast
+from typing import Annotated, Any, assert_type, cast
 from unittest.mock import PropertyMock, patch
 
 import pytest
@@ -519,8 +519,9 @@ def test_Graph_read_write(tmp_path: Path) -> None:
     g.snapshot().write(5, artifact=j, input_fingerprint=Fingerprint.from_int(1))
 
     # Test read
-    assert g.read(i, annotation=int) == 5
-    assert g.read(i, view=View.from_annotation(int, mode="READ")) == 5
+    assert assert_type(g.read(i, annotation=int), int) == 5
+    assert assert_type(g.read(i, annotation=Annotated[int, "hint"]), Any) == 5
+    assert assert_type(g.read(i, view=View.from_annotation(int, mode="READ")), Any) == 5
     assert g.read(i, annotation=int, storage_partition_snapshots=(snapshot,)) == 5
     with pytest.raises(ValueError, match="Either `annotation` or `view` must be passed"):
         g.read(i)
@@ -538,7 +539,7 @@ def test_Graph_read_write(tmp_path: Path) -> None:
 
         s = g.snapshot(connection=conn)
         s.write(10, artifact=j, connection=conn, input_fingerprint=Fingerprint.from_int(1))
-        assert s.read(j, annotation=int, connection=conn) == 10
+        assert assert_type(s.read(j, annotation=int, connection=conn), int) == 10
 
         assert not connect_mock.called
         g.backend.connect()  # Confirm we are mocking correctly

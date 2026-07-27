@@ -7,7 +7,7 @@ from collections.abc import Callable
 from functools import cached_property, wraps
 from graphlib import TopologicalSorter
 from types import TracebackType
-from typing import TYPE_CHECKING, Annotated, Any, Literal, cast
+from typing import TYPE_CHECKING, Annotated, Any, Literal, cast, overload
 
 from pydantic import Field, InstanceOf, PrivateAttr, field_validator
 
@@ -207,6 +207,32 @@ class Graph(Model):
     # TODO: io.read/write probably need a bit of sanity checking (probably somewhere else), eg: type
     # ~= view. Doing validation on the data, etc. Should some of this live on the View?
 
+    # Infer the return type from a plain `annotation` class. Other annotations (eg: `Annotated`) and
+    # explicit `view`s still return `Any`.
+    @overload
+    def read[T](
+        self,
+        artifact: Artifact,
+        *,
+        annotation: type[T],
+        connection: BackendConnection | None = None,
+        snapshot: GraphSnapshot | None = None,
+        storage_partition_snapshots: StoragePartitionSnapshots | None = None,
+        view: None = None,
+    ) -> T: ...
+
+    @overload
+    def read(
+        self,
+        artifact: Artifact,
+        *,
+        annotation: Any | None = None,
+        connection: BackendConnection | None = None,
+        snapshot: GraphSnapshot | None = None,
+        storage_partition_snapshots: StoragePartitionSnapshots | None = None,
+        view: View | None = None,
+    ) -> Any: ...
+
     @requires_sealed
     def read(
         self,
@@ -391,6 +417,28 @@ class GraphSnapshot(Model):
     ) -> GraphSnapshot:
         with connectable.connect() as conn:
             return conn.read_snapshot_tag(name, tag)
+
+    @overload
+    def read[T](
+        self,
+        artifact: Artifact,
+        *,
+        annotation: type[T],
+        connection: BackendConnection | None = None,
+        storage_partition_snapshots: StoragePartitionSnapshots | None = None,
+        view: None = None,
+    ) -> T: ...
+
+    @overload
+    def read(
+        self,
+        artifact: Artifact,
+        *,
+        annotation: Any | None = None,
+        connection: BackendConnection | None = None,
+        storage_partition_snapshots: StoragePartitionSnapshots | None = None,
+        view: View | None = None,
+    ) -> Any: ...
 
     def read(
         self,
