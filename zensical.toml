@@ -1,0 +1,65 @@
+[project]
+site_name = "Artigraph"
+site_url = "https://artigraph.github.io/artigraph/"
+site_description = "Declarative data production for reproducible, versioned data artifacts."
+site_author = "Artigraph contributors"
+repo_url = "https://github.com/artigraph/artigraph"
+repo_name = "artigraph/artigraph"
+edit_uri = "edit/main/docs/"
+docs_dir = "docs"
+site_dir = "site"
+nav = [
+  {"Home" = "index.md"},
+  {"Get started" = [
+    "getting-started.md",
+    "playground.md",
+    "status.md",
+  ]},
+  {"Concepts" = [
+    "concepts/lifecycle.md",
+    "concepts/artifacts.md",
+    "concepts/producers.md",
+    "concepts/snapshots-and-fingerprints.md",
+    "concepts/storage-formats-and-views.md",
+    "concepts/metadata-backends.md",
+  ]},
+  {"Examples" = [
+    "examples/index.md",
+    {"Snapshot-aware Pandas + Parquet" = "examples/snapshot_parquet_duckdb/README.md"},
+    "examples/ecosystem-duckdb.md",
+  ]},
+  {"Reference" = [
+    "reference/index.md",
+    "reference/core.md",
+  ]},
+]
+
+[project.theme]
+variant = "modern"
+features = [
+  "content.action.edit",
+  "content.action.view",
+  "navigation.instant",
+  "navigation.path",
+  "navigation.sections",
+  "navigation.top",
+  "toc.follow",
+]
+
+[project.theme.icon]
+repo = "fontawesome/brands/github"
+
+[project.plugins.mkdocstrings.handlers.python]
+paths = ["src"]
+inventories = ["https://docs.python.org/3/objects.inv"]
+
+[project.plugins.mkdocstrings.handlers.python.options]
+docstring_style = "google"
+filters = ["!^_", "!^model_"]
+inherited_members = false
+members_order = "source"
+show_if_no_docstring = true
+show_root_heading = true
+show_source = false
+show_symbol_type_heading = true
+show_symbol_type_toc = true

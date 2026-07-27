@@ -3,7 +3,12 @@ requires = ["hatchling", "hatch-vcs"]
 build-backend = "hatchling.build"
 
 [dependency-groups]
+docs = [
+    "mkdocstrings-python>=2.0.5",
+    "zensical>=0.0.51",
+]
 dev = [
+    { include-group = "docs" },
     "codespell",
     "coverage",
     "duckdb",
@@ -64,7 +69,7 @@ Repository = "https://github.com/artigraph/artigraph"
 
 [tool.codespell]
 ignore-words-list = ["nd"] # ordinal suffix
-skip = ["src/arti/internal/vendored/*", "stubs/*"]
+skip = ["./site", "src/arti/internal/vendored/*", "stubs/*"] # ./site: docs build output
 
 
 [tool.coverage.report]
@@ -103,9 +108,6 @@ reportUnnecessaryTypeIgnoreComment = true
 stubPath = "stubs"
 typeCheckingMode = "strict"
 
-
-[tool.portray.mkdocs]
-edit_uri = 'edit/main/'
 
 
 [tool.pytest]

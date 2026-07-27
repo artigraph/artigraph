@@ -51,6 +51,9 @@ jobs:
           export RUFF_OUTPUT_FORMAT=github # Configure ruff to annotate commits
           export SKIP=no-commit-to-branch,pytest # This workflow runs on commits to main; pytest runs next.
           uv run pre-commit run --all-files --show-diff-on-failure
+      - name: Build docs
+        if: runner.os == 'Linux'
+        run: uv run --frozen --all-extras zensical build --clean --strict
       - name: Start native Postgres on macOS
         if: runner.os == 'macOS'
         run: |
