@@ -1,7 +1,9 @@
+from datetime import date
+
 import pandas as pd
 import pytest
 
-from arti.types import Float64, Int64, List, Map, String, Struct, Type
+from arti.types import Date, Float64, Int64, List, Map, String, Struct, Timestamp, Type
 from arti.types.pandas import pandas_type_system
 
 
@@ -26,6 +28,11 @@ from arti.types.pandas import pandas_type_system
         pytest.param(List(element=Float64()), pd.Series([0.0]), id="series[float64]"),
         pytest.param(List(element=Int64()), pd.Series([0]), id="series[int64]"),
         pytest.param(List(element=String()), pd.Series([""]), id="series[string]"),
+        pytest.param(
+            List(element=Date()),
+            pd.Series([date.min], dtype=object),
+            id="series[date]",
+        ),
     ],
 )
 def test_pandas_type_system(arti_type: Type, pd_type: pd.DataFrame | pd.Series) -> None:
@@ -42,3 +49,8 @@ def test_pandas_type_system(arti_type: Type, pd_type: pd.DataFrame | pd.Series) 
 def test_pandas_object_string_type() -> None:
     output_arti_type = pandas_type_system.to_artigraph(pd.Series([""], dtype=object), hints={})
     assert output_arti_type == List(element=String())
+
+
+def test_pandas_unsupported_element_type() -> None:
+    with pytest.raises(NotImplementedError, match=r"No TypeSystem.* adapter for Artigraph type"):
+        pandas_type_system.to_system(List(element=Timestamp(precision="microsecond")), hints={})

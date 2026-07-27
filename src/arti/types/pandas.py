@@ -1,14 +1,16 @@
 from __future__ import annotations
 
+from datetime import date
 from typing import Any, cast
 
 import numpy as np
 import pandas as pd
 
-from arti.types import List, String, Struct, Type, TypeAdapter, TypeSystem
+from arti.types import Date, List, String, Struct, Type, TypeAdapter, TypeSystem
 from arti.types.numpy import numpy_type_system
 
-# TODO: How should (multi)indexes be handled; perhaps as a "hint"?
+# NOTE: The DataFrame index is not part of the Artigraph type; only columns map to Struct fields.
+# Call `reset_index()` first to keep an index as columns.
 
 pandas_type_system = TypeSystem(key="pandas", extends=(numpy_type_system,))
 
@@ -37,6 +39,8 @@ class SeriesAdapter(TypeAdapter[List]):
             example_value = type_.iloc[0]
             if isinstance(example_value, str):
                 return List(element=String())
+            if type(example_value) is date:
+                return List(element=Date())
             # TODO: Handle dicts, lists, etc.
             raise NotImplementedError(
                 f"Non-string {dtype} is not supported yet, got values of: {example_value}"
@@ -50,6 +54,8 @@ class SeriesAdapter(TypeAdapter[List]):
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
         assert isinstance(type_, cls.artigraph)
+        if isinstance(type_.element, Date):
+            return pd.Series([date.min], dtype=object)
         dtype = (
             str
             if isinstance(type_.element, String)
