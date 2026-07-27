@@ -6,6 +6,7 @@ build-backend = "hatchling.build"
 dev = [
     "codespell",
     "coverage",
+    "duckdb",
     "gcp-storage-emulator",
     "hypothesis",
     "ipdb",

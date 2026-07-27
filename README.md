@@ -23,12 +23,27 @@ We're excited to hear from anyone interested in the project - feel free to intro
 
 Artigraph can be installed from PyPI with `pip install arti`.
 
-Install a durable metadata backend as an optional extra:
+Install optional data format and metadata backend extras as needed:
 
 ```shell
-pip install 'arti[parquet]'
-pip install 'arti[sqlite]'
-pip install 'arti[postgres]'
+pip install 'arti[parquet]'  # Parquet/Pandas data files
+pip install 'arti[sqlite]'   # local durable metadata
+pip install 'arti[postgres]' # Postgres durable metadata
+```
+
+## Flagship local demo
+
+The best starting point is the
+[snapshot-aware Pandas/Parquet demo](docs/examples/snapshot_parquet_duckdb/README.md). It shows the
+core Artigraph workflow: define artifacts, produce partitioned data with Pandas, preserve output
+versions with fingerprints, tag graph snapshots, and read a specific snapshot back through ordinary
+Python APIs. The final step uses in-memory DuckDB only as an ecosystem interop check against the
+exact Parquet files recorded in Artigraph metadata.
+
+Run it from a checkout with:
+
+```shell
+uv run --all-extras --with duckdb python docs/examples/snapshot_parquet_duckdb/demo.py
 ```
 
 ## Durable metadata backends
