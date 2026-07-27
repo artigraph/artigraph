@@ -2,7 +2,7 @@ from __future__ import annotations
 
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
-from collections.abc import Callable, Iterator
+from collections.abc import Callable, Iterable, Iterator
 from inspect import Parameter, Signature, getattr_static
 from typing import (
     TYPE_CHECKING,
@@ -51,6 +51,41 @@ PartitionDependencies = frozendict[PartitionKey, InputPartitions]
 MapSig = Callable[..., PartitionDependencies]
 BuildSig = Callable[..., Any]
 ValidateSig = Callable[..., tuple[bool, str]]
+
+
+def _set_map_signature(map: MapSig, input_names: Iterable[str]) -> None:
+    """Narrow a `**kwargs` map function's signature to the named input partitions."""
+    map.__signature__ = Signature(  # pyright: ignore[reportFunctionMemberAccess]
+        [
+            Parameter(name=name, annotation=StoragePartitionSnapshots, kind=Parameter.KEYWORD_ONLY)
+            for name in input_names
+        ],
+        return_annotation=PartitionDependencies,
+    )
+
+
+def one_to_one(input_name: str) -> MapSig:
+    """
+    Create a map function where each output partition depends on one input partition.
+
+    Output partitions reuse the `input_name` partition keys. `input_name` must be the Producer's
+    only `build` input (enforced when the Producer class is created).
+    """
+
+    def map(**inputs: StoragePartitionSnapshots) -> PartitionDependencies:
+        partition_dependencies: dict[PartitionKey, InputPartitions] = {}
+        for partition_snapshot in inputs[input_name]:
+            partition_key = partition_snapshot.partition_key
+            if partition_key in partition_dependencies:
+                raise ValueError(f"Multiple `{input_name}` partitions found for {partition_key}")
+            partition_dependencies[partition_key] = InputPartitions(
+                {input_name: (partition_snapshot,)}
+            )
+        return PartitionDependencies(partition_dependencies)
+
+    map.__name__ = f"one_to_one_{input_name}"
+    _set_map_signature(map, [input_name])
+    return map
 
 
 class Producer(Model):
@@ -288,21 +323,17 @@ class Producer(Model):
 
             # Narrow the map signature, which is validated below and used at graph build time (via
             # cls._map_inputs_) to determine what arguments to pass to map.
-            map.__signature__ = Signature(  # pyright: ignore[reportFunctionMemberAccess]
-                [
-                    Parameter(
-                        name=name, annotation=StoragePartitionSnapshots, kind=Parameter.KEYWORD_ONLY
-                    )
-                    for name in cls._input_artifact_classes_
-                    if name in cls._build_inputs_
-                ],
-                return_annotation=PartitionDependencies,
+            _set_map_signature(
+                map, [name for name in cls._input_artifact_classes_ if name in cls._build_inputs_]
             )
             cls.map = cast(MapSig, staticmethod(map))
         if not isinstance(getattr_static(cls, "map"), classmethod | staticmethod):
             raise ValueError("must be a @classmethod or @staticmethod")
         map_sig = signature(cls.map)
         map_inputs = MapInputs(cls._validate_parameters(map_sig, validator=cls._validate_map_param))
+        # The partition dependencies returned by `map` must cover every `build` input.
+        if missing := set(cls._build_inputs_) - map_inputs:
+            raise ValueError(f"must accept every `build` input, missing: {sorted(missing)}")
         return map_sig, map_inputs  # TODO: Verify map output hint matches TBD spec
 
     @classmethod

@@ -16,7 +16,7 @@ from arti.formats import Format
 from arti.graphs import Graph, GraphSnapshot
 from arti.io import read, register_reader, register_writer, write
 from arti.partitions import InputFingerprints, PartitionField, PartitionKey, PartitionKeyTypes
-from arti.producers import PartitionDependencies, Producer, producer
+from arti.producers import PartitionDependencies, Producer, one_to_one, producer
 from arti.statistics import Statistic
 from arti.storage import (
     Storage,
@@ -60,6 +60,7 @@ __all__ = [
     "TypeSystem",
     "Version",
     "View",
+    "one_to_one",
     "producer",
     "read",
     "register_reader",

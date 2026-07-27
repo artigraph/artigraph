@@ -18,10 +18,11 @@ from arti import (
     TypeSystem,
     View,
     io,
+    one_to_one,
 )
 from arti import producer as producer_decorator  # Avoid shadowing
 from arti.internal.models import get_field_default
-from arti.producers import ValidateSig
+from arti.producers import InputPartitions, ValidateSig
 from arti.types import Collection, Int64, List, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views
@@ -99,7 +100,7 @@ def test_producer_decorator() -> None:
     class MyAnnotation(Annotation):
         pass
 
-    def mapper() -> PartitionDependencies:
+    def mapper(a1: StoragePartitionSnapshots) -> PartitionDependencies:
         return PartitionDependencies()
 
     @producer_decorator(
@@ -297,6 +298,38 @@ def test_Producer_out() -> None:
         )
     assert list(p1) == [a2_]
     assert list(p2) == [a3_, a4_]
+
+
+def test_one_to_one_map_helper() -> None:
+    partition = A1(storage=DummyStorage(key="test")).storage.generate_partition().snapshot()
+    mapper = one_to_one("a1")
+
+    class P(Producer):
+        a1: A1
+
+        map = staticmethod(mapper)
+
+        @staticmethod
+        def build(a1: dict[Any, Any]) -> Annotated[dict[Any, Any], A2]:
+            raise NotImplementedError
+
+    assert P._map_inputs_ == {"a1"}
+    assert mapper(a1=StoragePartitionSnapshots((partition,))) == PartitionDependencies(
+        {partition.partition_key: InputPartitions({"a1": (partition,)})}
+    )
+    with pytest.raises(ValueError, match="Multiple `a1` partitions found"):
+        mapper(a1=StoragePartitionSnapshots((partition, partition)))
+
+    def two_inputs(
+        a1: Annotated[dict[Any, Any], A1], a2: Annotated[dict[Any, Any], A2]
+    ) -> Annotated[dict[Any, Any], A3]:
+        raise NotImplementedError
+
+    with pytest.raises(
+        ValueError,
+        match=re.escape("two_inputs.map - must accept every `build` input, missing: ['a2']"),
+    ):
+        producer_decorator(map=mapper)(two_inputs)
 
 
 def test_Producer_map_artifacts() -> None:
@@ -743,7 +776,9 @@ def test_Producer_io_checks() -> None:
         b: Artifact
 
         @staticmethod
-        def map(m: StoragePartitionSnapshots) -> PartitionDependencies:
+        def map(
+            m: StoragePartitionSnapshots, b: StoragePartitionSnapshots
+        ) -> PartitionDependencies:
             raise NotImplementedError
 
         @staticmethod
