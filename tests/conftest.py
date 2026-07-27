@@ -13,9 +13,9 @@ os.environ["GCSFS_EXPERIMENTAL_ZB_HNS_SUPPORT"] = "false"
 
 import gcsfs
 import pytest
-from testcontainers.community.postgres import PostgresContainer
 
 from arti.backends.postgres import PostgresBackend
+from tests.arti.backends.postgres import postgres_server_url
 
 
 class _NamedNode(Protocol):
@@ -67,19 +67,22 @@ def _database_url(url: str, database: str) -> str:
 
 @pytest.fixture(scope="session")
 def postgres_admin_url() -> Generator[str, None, None]:
-    """Run one Postgres container and prepare a migrated template database."""
-    with PostgresContainer("postgres:17-alpine", driver="psycopg") as postgres:
-        admin_url = postgres.get_connection_url()
+    """Acquire a Postgres server and prepare a migrated template database."""
+    with postgres_server_url() as admin_url:
         template_name = "artigraph_template"
         engine = sa.create_engine(admin_url, isolation_level="AUTOCOMMIT")
         with engine.connect() as connection:
             connection.execute(sa.text(f'CREATE DATABASE "{template_name}"'))
-        engine.dispose()
-
-        template_backend = PostgresBackend.from_url(_database_url(admin_url, template_name))
-        template_backend.upgrade()
-        template_backend.close()
-        yield admin_url
+        try:
+            template_backend = PostgresBackend.from_url(_database_url(admin_url, template_name))
+            template_backend.upgrade()
+            template_backend.close()
+            yield admin_url
+        finally:
+            # A configured server outlives the session, so remove the template for the next run.
+            with engine.connect() as connection:
+                connection.execute(sa.text(f'DROP DATABASE "{template_name}"'))
+            engine.dispose()
 
 
 @pytest.fixture

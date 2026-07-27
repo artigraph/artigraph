@@ -15,9 +15,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        # Testcontainers needs a Docker daemon. macos-latest is arm64 and cannot run Colima, so
-        # use GitHub's Intel runner for the macOS leg.
-        os: [macos-15-intel, ubuntu-latest]
+        os: [macos-latest, ubuntu-latest]
         python-version: ["3.12"] # NOTE: Quote to ensure trailing 0s aren't dropped
     runs-on: ${{ matrix.os }}
     env:
@@ -28,9 +26,6 @@ jobs:
       UV_PYTHON: ${{ matrix.python-version }} # Otherwise, `uv run` recreates the venv for .python-version.
     steps:
       - uses: actions/checkout@v7
-      - name: Set up Docker on macOS
-        if: runner.os == 'macOS'
-        uses: douglascamata/setup-docker-macos-action@v1.0.1
       - name: Cache pre-commit hooks
         uses: actions/cache@v6
         with:
@@ -56,9 +51,42 @@ jobs:
           export RUFF_OUTPUT_FORMAT=github # Configure ruff to annotate commits
           export SKIP=no-commit-to-branch,pytest # This workflow runs on commits to main; pytest runs next.
           uv run pre-commit run --all-files --show-diff-on-failure
+      - name: Start native Postgres on macOS
+        if: runner.os == 'macOS'
+        run: |
+          # GitHub's hosted ARM macOS runners cannot run the nested VM required by Docker.
+          # Use the native Postgres bottle while retaining Testcontainers on Linux and locally.
+          brew install postgresql@17
+          postgres_bin="$(brew --prefix postgresql@17)/bin"
+          postgres_data="$RUNNER_TEMP/postgresql"
+          postgres_socket="$RUNNER_TEMP/postgresql-socket"
+          mkdir -p "$postgres_socket"
+          "$postgres_bin/initdb" \
+            --pgdata="$postgres_data" \
+            --username=postgres \
+            --auth=trust \
+            --no-locale \
+            --encoding=UTF8
+          "$postgres_bin/pg_ctl" \
+            --pgdata="$postgres_data" \
+            --options="-F -p 55432 -h 127.0.0.1 -k $postgres_socket" \
+            --wait \
+            start
+          echo "ARTIGRAPH_TEST_POSTGRES_URL=postgresql+psycopg://postgres@127.0.0.1:55432/postgres" >> "$GITHUB_ENV"
       - name: pytest
         run: |
           uv run pytest --cov-report='xml:coverage-${{ matrix.os }}-${{ matrix.python-version }}.xml'
+      - name: Stop native Postgres on macOS
+        if: always() && runner.os == 'macOS'
+        run: |
+          postgres_data="$RUNNER_TEMP/postgresql"
+          if [[ -f "$postgres_data/postmaster.pid" ]]; then
+            "$(brew --prefix postgresql@17)/bin/pg_ctl" \
+              --pgdata="$postgres_data" \
+              --mode=fast \
+              --wait \
+              stop
+          fi
       - name: Test minimal wheel installation
         run: |
           uv build --wheel --out-dir dist/smoke

@@ -18,6 +18,7 @@ from arti.backends.sql.models import GraphRow, StoragePartitionRow
 from arti.backends.sqlite import SQLiteBackend
 from arti.storage.literal import StringLiteral
 from tests.arti.backends.pipeline import Number, build_pipeline
+from tests.arti.backends.postgres import POSTGRES_TEST_URL_ENV, postgres_server_url
 
 
 def test_sqlite_in_memory_pipeline() -> None:
@@ -235,3 +236,11 @@ def test_postgres_pipeline_reopens_with_jsonb(
     assert restored.read(restored.artifacts.incremented, annotation=int) == 2
     assert restored.backend is reopened
     reopened.close()
+
+
+def test_postgres_server_uses_configured_url(monkeypatch: pytest.MonkeyPatch) -> None:
+    configured_url = "postgresql+psycopg://postgres@127.0.0.1:55432/postgres"
+    monkeypatch.setenv(POSTGRES_TEST_URL_ENV, configured_url)
+
+    with postgres_server_url() as url:
+        assert url == configured_url
