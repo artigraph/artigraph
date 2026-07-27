@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from contextlib import suppress
 from copy import deepcopy
 from datetime import UTC, date, datetime, time
 from enum import Enum
@@ -7,6 +8,8 @@ from pathlib import Path
 from typing import Any, cast
 
 import pytest
+from hypothesis import given
+from hypothesis import strategies as st
 from pydantic import create_model
 
 from arti import Fingerprint, Graph
@@ -313,6 +316,56 @@ def test_metadata_codec_rejects_invalid_storage_state() -> None:
 def test_metadata_codec_rejects_invalid_items() -> None:
     with pytest.raises(MetadataCodecError, match="Expected list items to be a list"):
         decode_document(_document({"kind": "list", "items": {}}), Anything)
+
+
+@given(
+    st.recursive(
+        st.none() | st.booleans() | st.integers() | st.floats() | st.text(),
+        lambda children: (
+            st.lists(children, max_size=5) | st.dictionaries(st.text(), children, max_size=5)
+        ),
+        max_leaves=20,
+    )
+)
+def test_metadata_codec_rejects_arbitrary_json_without_internal_errors(value: Any) -> None:
+    with suppress(MetadataCodecError):
+        decode_document(_document(value), Anything)
+
+
+@given(
+    kind=st.sampled_from(
+        (
+            "model",
+            "typed_box",
+            "mapping",
+            "tuple",
+            "list",
+            "set",
+            "frozenset",
+            "enum",
+            "type",
+            "int",
+            "float",
+            "bytes",
+            "date",
+            "datetime",
+            "time",
+            "path",
+        )
+    ),
+    fields=st.dictionaries(
+        st.text(),
+        st.none() | st.booleans() | st.integers() | st.floats() | st.text(),
+        max_size=8,
+    ),
+)
+def test_metadata_codec_rejects_malformed_known_kinds_without_internal_errors(
+    kind: str,
+    fields: dict[str, Any],
+) -> None:
+    value = {**fields, "kind": kind}
+    with suppress(MetadataCodecError):
+        decode_document(_document(value), Anything)
 
 
 def test_metadata_codec_expected_type() -> None:

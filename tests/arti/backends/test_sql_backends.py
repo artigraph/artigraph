@@ -3,42 +3,21 @@ from __future__ import annotations
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from pathlib import Path
-from typing import Annotated, Any, cast
+from typing import Any, cast
 
 import pytest
 import sqlalchemy as sa
 from pydantic import ValidationError
 from sqlalchemy.pool import StaticPool
 
-from arti import Artifact, ArtifactStorage, Fingerprint, Graph, GraphSnapshot, Type, producer
+from arti import Fingerprint, Graph, GraphSnapshot
 from arti.backends.postgres import PostgresBackend
 from arti.backends.sql.backend import BackendSchemaError
 from arti.backends.sql.codec import MetadataCodecError
 from arti.backends.sql.models import GraphRow, StoragePartitionRow
 from arti.backends.sqlite import SQLiteBackend
-from arti.formats.json import JSON
 from arti.storage.literal import StringLiteral
-from arti.types import Int64
-
-
-class Number(Artifact):
-    type: Type = Int64()
-    format: JSON = JSON()
-    storage: ArtifactStorage = StringLiteral()
-
-
-@producer()
-def increment(value: Annotated[int, Number]) -> Annotated[int, Number]:
-    return value + 1
-
-
-def build_pipeline(backend: SQLiteBackend | PostgresBackend, name: str) -> GraphSnapshot:
-    with Graph(name=name, backend=backend) as graph:
-        graph.artifacts.value = Number(storage=StringLiteral(value="1"))
-        graph.artifacts.incremented = increment(value=graph.artifacts.value)
-    snapshot = graph.build()
-    snapshot.tag("latest")
-    return snapshot
+from tests.arti.backends.pipeline import Number, build_pipeline
 
 
 def test_sqlite_in_memory_pipeline() -> None:
