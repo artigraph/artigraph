@@ -112,6 +112,7 @@ def test_sizedint_cast() -> None:
         operator.invert,
         operator.neg,
         operator.pos,
+        round,
         partial(round, ndigits=-1),
     ],
 )

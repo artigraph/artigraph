@@ -45,7 +45,7 @@ dynamic = ["version"]
 license = "Apache-2.0"
 name = "arti"
 readme = "README.md"
-requires-python = ">=3.12"
+requires-python = ">=3.13"
 
 [project.optional-dependencies]
 all = [
@@ -123,7 +123,7 @@ addopts = [
 ]
 filterwarnings = [
     "error",
-    # Ignore uncompiled crc32c warning on py 3.11 (which doesn't have wheels on older versions) - https://github.com/oittaa/gcp-storage-emulator/pull/217
+    # Ignore uncompiled crc32c warning from gcp-storage-emulator - https://github.com/oittaa/gcp-storage-emulator/pull/217
     "ignore:As the c extension couldn't be imported:RuntimeWarning:google_crc32c",
     # Ignore a couple external tools that use old form namespace packages
     "ignore:Deprecated call to `pkg_resources.declare_namespace.*:DeprecationWarning",
@@ -141,7 +141,7 @@ fix = true
 force-exclude = true
 line-length = 100
 src = ["bin/", "src/", "tests/"]
-target-version = "py312"
+target-version = "py313"
 
 [tool.ruff.format]
 docstring-code-format = true

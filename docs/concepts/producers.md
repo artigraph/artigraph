@@ -52,7 +52,8 @@ from arti import one_to_one, producer
 @producer(map=one_to_one("raw"))
 def clean_transactions(
     raw: Annotated[pd.DataFrame, RawTransactions],
-) -> Annotated[pd.DataFrame, CleanTransactions]: ...
+) -> Annotated[pd.DataFrame, CleanTransactions]:
+    return raw.copy()
 ```
 
 Mapping is part of the data contract. It lets Artigraph record exactly which input partition

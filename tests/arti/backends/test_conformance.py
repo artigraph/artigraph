@@ -60,9 +60,7 @@ def _harness(
 
 
 @pytest.fixture(params=["memory", "sqlite-memory", "sqlite-file", "postgres"])
-def backend_harness(
-    request: pytest.FixtureRequest, tmp_path: Path
-) -> Generator[BackendHarness, None, None]:
+def backend_harness(request: pytest.FixtureRequest, tmp_path: Path) -> Generator[BackendHarness]:
     harness = _harness(cast(BackendKind, request.param), request=request, tmp_path=tmp_path)
     try:
         yield harness
@@ -73,7 +71,7 @@ def backend_harness(
 @pytest.fixture(params=["sqlite-file", "postgres"])
 def persistent_backend_harness(
     request: pytest.FixtureRequest, tmp_path: Path
-) -> Generator[BackendHarness, None, None]:
+) -> Generator[BackendHarness]:
     harness = _harness(cast(BackendKind, request.param), request=request, tmp_path=tmp_path)
     try:
         yield harness

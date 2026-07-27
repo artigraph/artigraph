@@ -161,7 +161,9 @@ class _int(int):
     def __ror__(self, n: int) -> Self:
         return type(self)(super().__ror__(n))
 
-    def __round__(self, ndigits: SupportsIndex = 0) -> Self:
+    def __round__(self, ndigits: SupportsIndex | None = None) -> Self:
+        if ndigits is None:
+            return type(self)(super().__round__())
         return type(self)(super().__round__(ndigits))
 
     def __rrshift__(self, n: int) -> Self:
@@ -215,7 +217,7 @@ class uint64(_int):
 
 
 @contextmanager
-def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any], None, None]:
+def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any]]:
     """Minimal alternative to tempfile.NamedTemporaryFile that can be re-opened on Windows."""
     with TemporaryDirectory() as d, (Path(d) / "contents").open(mode=mode) as f:
         yield f

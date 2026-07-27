@@ -280,7 +280,7 @@ def signature(
 # Helpers for typing across python versions #
 #############################################
 #
-# Focusing on  3.12+ (for now)
+# Focusing on 3.13+ (for now)
 
 
 # TODO: Update the `is_*_hint` ones to use TypeForm[1] when available.

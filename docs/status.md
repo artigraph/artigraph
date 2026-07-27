@@ -9,6 +9,7 @@ surface to start from; other modules may change faster. Use the project
 
 ## What works today
 
+- **Python:** 3.13 and 3.14, both tested in CI.
 - **Storage:** local files.
 - **Formats:** JSON and Parquet, with Parquet support focused on Pandas DataFrames.
 - **Metadata backends:** in-memory by default, SQLite for durable local metadata, and Postgres for a

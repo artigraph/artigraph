@@ -229,9 +229,9 @@ def test_is_optional_hint() -> None:
 @pytest.mark.parametrize(
     ("hint", "should_match"),
     [
-        (Literal[5], False),
-        (Union[int, str], True),  # noqa: UP007
-        (int | None, True),
+        pytest.param(Literal[5], False, id="literal"),
+        pytest.param(Union[int, str], True, id="typing-union"),  # noqa: UP007
+        pytest.param(int | None, True, id="pep604-union"),
     ],
 )
 def test_is_union(hint: Any, should_match: bool) -> None:

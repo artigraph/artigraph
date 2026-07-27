@@ -16,7 +16,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [macos-latest, ubuntu-latest]
-        python-version: ["3.12"] # NOTE: Quote to ensure trailing 0s aren't dropped
+        python-version: ["3.13", "3.14"] # NOTE: Quote to ensure trailing 0s aren't dropped
     runs-on: ${{ matrix.os }}
     env:
       OS: ${{ matrix.os }}

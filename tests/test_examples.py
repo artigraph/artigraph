@@ -54,45 +54,45 @@ def test_snapshot_duckdb_rejects_changed_partition(tmp_path: Path) -> None:
         "naive": 51.5,
     }
 
-    backend = SQLiteBackend(path=work_dir / "artigraph.sqlite")
-    snapshot = GraphSnapshot.from_tag(
-        GRAPH_NAME,
-        "baseline",
-        connectable=backend,
-    )
-    corrected = GraphSnapshot.from_tag(
-        GRAPH_NAME,
-        "corrected",
-        connectable=backend,
-    )
-    artifact = snapshot.artifacts.clean
-    paths = snapshot_parquet_paths(snapshot, artifact)
-    corrected_paths = snapshot_parquet_paths(corrected, corrected.artifacts.clean)
-    assert len(paths) == len(corrected_paths) == 2
-    assert len(set(paths) & set(corrected_paths)) == 1
-    assert len(set(paths) | set(corrected_paths)) == 3
-
-    with pytest.raises(TypeError, match="only supports Parquet"):
-        snapshot_parquet_paths(
-            snapshot,
-            artifact.model_copy(update={"format": JSON()}),
+    with SQLiteBackend(path=work_dir / "artigraph.sqlite") as backend:
+        snapshot = GraphSnapshot.from_tag(
+            GRAPH_NAME,
+            "baseline",
+            connectable=backend,
         )
+        corrected = GraphSnapshot.from_tag(
+            GRAPH_NAME,
+            "corrected",
+            connectable=backend,
+        )
+        artifact = snapshot.artifacts.clean
+        paths = snapshot_parquet_paths(snapshot, artifact)
+        corrected_paths = snapshot_parquet_paths(corrected, corrected.artifacts.clean)
+        assert len(paths) == len(corrected_paths) == 2
+        assert len(set(paths) & set(corrected_paths)) == 1
+        assert len(set(paths) | set(corrected_paths)) == 3
 
-    changed_path = Path(paths[0])
-    with changed_path.open("ab") as file:
-        file.write(b"changed")
-    with duckdb.connect(":memory:") as connection:
-        with pytest.raises(ValueError, match="Partition content changed since snapshot"):
-            register_snapshot_view(
-                connection,
-                snapshot=snapshot,
-                artifact=artifact,
-                view_name="changed_transactions",
+        with pytest.raises(TypeError, match="only supports Parquet"):
+            snapshot_parquet_paths(
+                snapshot,
+                artifact.model_copy(update={"format": JSON()}),
             )
 
-    changed_path.unlink()
-    with pytest.raises(FileNotFoundError, match="Snapshot partition is missing"):
-        snapshot_parquet_paths(snapshot, artifact)
+        changed_path = Path(paths[0])
+        with changed_path.open("ab") as file:
+            file.write(b"changed")
+        with duckdb.connect(":memory:") as connection:
+            with pytest.raises(ValueError, match="Partition content changed since snapshot"):
+                register_snapshot_view(
+                    connection,
+                    snapshot=snapshot,
+                    artifact=artifact,
+                    view_name="changed_transactions",
+                )
+
+        changed_path.unlink()
+        with pytest.raises(FileNotFoundError, match="Snapshot partition is missing"):
+            snapshot_parquet_paths(snapshot, artifact)
 
 
 def test_minimal_import_without_parquet_dependencies() -> None:

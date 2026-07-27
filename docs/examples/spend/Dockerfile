@@ -1,7 +1,7 @@
 FROM ghcr.io/astral-sh/uv:0.11.32 AS uv
 
 
-FROM python:3.12-slim-bookworm AS build
+FROM python:3.13-slim-bookworm AS build
 
 COPY --from=uv /uv /uvx /bin/
 
@@ -21,7 +21,7 @@ COPY src/ src/
 RUN uv sync --frozen --no-dev --no-editable
 
 
-FROM python:3.12-slim-bookworm
+FROM python:3.13-slim-bookworm
 
 WORKDIR /app
 

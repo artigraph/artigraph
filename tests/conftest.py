@@ -36,7 +36,7 @@ def clean_test_name(request: pytest.FixtureRequest) -> str:
 
 # For now, run a single emulator per session. Tests should use separate buckets for isolation.
 @pytest.fixture(scope="session")
-def gcs_emulator() -> Generator[tuple[str, int], None, None]:
+def gcs_emulator() -> Generator[tuple[str, int]]:
     # port=0 -> run on a random open port; though we have to lookup later.
     with gcp_storage_emulator.server.create_server("localhost", 0, in_memory=True) as server:
         api = cast(object, getattr(server, "_api"))  # noqa: B009
@@ -52,7 +52,7 @@ def gcs(gcs_emulator: tuple[str, int]) -> gcsfs.GCSFileSystem:
 
 
 @pytest.fixture
-def gcs_bucket(clean_test_name: str, gcs: gcsfs.GCSFileSystem) -> Generator[str, None, None]:
+def gcs_bucket(clean_test_name: str, gcs: gcsfs.GCSFileSystem) -> Generator[str]:
     bucket = clean_test_name
     gcs.mkdir(bucket)
     try:
@@ -66,7 +66,7 @@ def _database_url(url: str, database: str) -> str:
 
 
 @pytest.fixture(scope="session")
-def postgres_admin_url() -> Generator[str, None, None]:
+def postgres_admin_url() -> Generator[str]:
     """Acquire a Postgres server and prepare a migrated template database."""
     with postgres_server_url() as admin_url:
         template_name = "artigraph_template"
@@ -86,7 +86,7 @@ def postgres_admin_url() -> Generator[str, None, None]:
 
 
 @pytest.fixture
-def postgres_backend(postgres_admin_url: str) -> Generator[PostgresBackend, None, None]:
+def postgres_backend(postgres_admin_url: str) -> Generator[PostgresBackend]:
     """Clone the migrated Postgres template into an isolated database for one test."""
     database = f"artigraph_test_{uuid4().hex}"
     engine = sa.create_engine(postgres_admin_url, isolation_level="AUTOCOMMIT")
