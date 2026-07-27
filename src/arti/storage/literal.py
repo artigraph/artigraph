@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import Self
+
 from arti import (
     Fingerprint,
     InputFingerprints,
@@ -20,6 +22,13 @@ class StringLiteralPartition(StoragePartition):
         if self.value is None:
             raise _not_written_err
         return Fingerprint.from_string(self.value)
+
+    def with_value(self, value: str) -> Self:
+        if self.value is not None:
+            # We can't overwrite the original value stored in LiteralStorage - on subsequent
+            # `.discover_partitions`, a partition with the original value will still be used.
+            raise ValueError("Literals with a value already set cannot be written")
+        return self.model_copy(update={"value": value})
 
 
 class StringLiteral(Storage[StringLiteralPartition]):

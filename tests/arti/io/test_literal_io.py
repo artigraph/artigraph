@@ -1,13 +1,19 @@
 import json
+import pickle
 import subprocess
 import sys
+from base64 import b64encode
+from collections.abc import Callable
+from datetime import date
+from typing import Any
 
 import pytest
 
-from arti import View, io
+from arti import Format, View, io
 from arti.formats.json import JSON
+from arti.formats.pickle import Pickle
 from arti.storage.literal import StringLiteral, StringLiteralPartition
-from arti.types import Collection, Int64, Struct
+from arti.types import Collection, Date, Int64, Struct
 from tests.arti.dummies import Num as _Num
 
 
@@ -15,16 +21,21 @@ class Num(_Num):
     storage: StringLiteral = StringLiteral()
 
 
-def test_stringliteral_io() -> None:
+def _pickle_dumps(value: Any) -> str:
+    return b64encode(pickle.dumps(value)).decode()
+
+
+@pytest.mark.parametrize(("format", "dumps"), [(JSON(), json.dumps), (Pickle(), _pickle_dumps)])
+def test_stringliteral_io(format: Format, dumps: Callable[[Any], str]) -> None:
     n = 5
-    a = Num(format=JSON(), storage=StringLiteral(id="test", value=json.dumps(n)))
+    a = Num(format=format, storage=StringLiteral(id="test", value=dumps(n)))
     view = View.from_annotation(int, mode="READWRITE")
 
     snapshots = a.storage.discover_partitions()
     assert len(snapshots) == 1
     partition = snapshots[0].storage_partition
     assert isinstance(partition, StringLiteralPartition)
-    assert partition.value == json.dumps(n)
+    assert partition.value == dumps(n)
 
     assert io.read(a.type, a.format, snapshots, view=view) == n
     # Read "partitioned" literal
@@ -34,8 +45,8 @@ def test_stringliteral_io() -> None:
         tuple(
             p.snapshot()
             for p in [
-                partition.model_copy(update={"value": '[{"a": 1}]'}),
-                partition.model_copy(update={"value": '[{"a": 2}]'}),
+                partition.model_copy(update={"value": dumps([{"a": 1}])}),
+                partition.model_copy(update={"value": dumps([{"a": 2}])}),
             ]
         ),
         view=view,
@@ -46,8 +57,8 @@ def test_stringliteral_io() -> None:
     new_snapshot = io.write(10, a.type, a.format, unwritten, view=view)
     new_partition = new_snapshot.storage_partition
     assert isinstance(new_partition, StringLiteralPartition)
-    assert new_partition.value == json.dumps(10)
-    assert partition.value == json.dumps(n)  # Confirm no mutation
+    assert new_partition.value == dumps(10)
+    assert partition.value == dumps(n)  # Confirm no mutation
     with pytest.raises(ValueError, match="Literals with a value already set cannot be written"):
         io.write(10, a.type, a.format, new_partition, view=view)
 
@@ -65,3 +76,10 @@ view = View.from_annotation(int, mode="READ")
 assert io.read(a.type, a.format, a.storage.discover_partitions(), view=view) == 5
 """
     subprocess.run([sys.executable, "-c", code], check=True)  # noqa: S603
+
+
+def test_pickle_stringliteral_io_non_json_value() -> None:
+    view = View.from_annotation(date, mode="READWRITE")
+    unwritten = StringLiteralPartition(id="junk", storage=StringLiteral())
+    snapshot = io.write(date(1970, 1, 1), Date(), Pickle(), unwritten, view=view)
+    assert io.read(Date(), Pickle(), (snapshot,), view=view) == date(1970, 1, 1)
