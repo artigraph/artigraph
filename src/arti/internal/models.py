@@ -27,7 +27,7 @@ from pydantic_core import PydanticUndefined, PydanticUndefinedType
 
 from arti.fingerprints import Fingerprint, SkipFingerprint
 from arti.internal.type_hints import get_item_from_annotated
-from arti.internal.utils import class_name
+from arti.internal.utils import ClassProperty, class_name
 
 if TYPE_CHECKING:
     from pydantic._internal._model_construction import ModelMetaclass as _PydanticModelMeta
@@ -90,6 +90,7 @@ class Model(BaseModel, metaclass=ModelMeta):
         validate_assignment=True,  # Unused with frozen, unless that is overridden in subclass.
         validate_default=True,
         validate_return=True,
+        ignored_types=(ClassProperty,),
     )
 
     @classmethod

@@ -13,6 +13,7 @@ from typing import Any, cast
 import pytest
 
 from arti.internal.utils import (
+    ClassProperty,
     class_name,
     classproperty,
     get_module_name,
@@ -42,6 +43,10 @@ def test_classproperty() -> None:
 
     assert Test.a == "Test"
     assert Test().a == "Test"
+
+    descriptor = vars(Test)["a"]
+    assert isinstance(descriptor, ClassProperty)
+    assert descriptor.__get__(Test()) == "Test"
 
 
 def test_get_module_name() -> None:

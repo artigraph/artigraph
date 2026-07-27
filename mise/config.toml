@@ -23,3 +23,9 @@ run = "uv sync --all-extras"
 description = "Run all pre-commit checks"
 quiet = true
 run = "pre-commit run --all-files"
+
+[tasks.playground-wheel]
+description = "Build the Artigraph wheel served by the docs playground"
+# A fixed version keeps the wheel name in docs/assets/playground/manifest.json stable.
+env = { SETUPTOOLS_SCM_PRETEND_VERSION = "0.0.0+playground" }
+run = "uv build --wheel --no-create-gitignore --out-dir docs/assets/playground/packages"

@@ -22,10 +22,19 @@ class ClassName:
 class_name = cast(Callable[[], str], ClassName)
 
 
-def classproperty[Ret](meth: Callable[..., Ret]) -> Ret:
-    """Access a @classmethod like a @property."""
-    classmethod_factory = cast(Callable[[property], Ret], classmethod)
-    return classmethod_factory(property(meth))
+class ClassProperty[Ret]:
+    def __init__(self, meth: Callable[[Any], Ret]) -> None:
+        self.meth = meth
+
+    def __get__(self, obj: Any, type_: type[Any] | None = None) -> Ret:
+        if type_ is None:
+            type_ = cast(type[Any], type(obj))
+        return self.meth(type_)
+
+
+def classproperty[Ret](meth: Callable[[Any], Ret]) -> Ret:
+    """Access a class-level method like a property."""
+    return cast(Ret, ClassProperty(meth))
 
 
 def get_module_name(depth: int = 1) -> str | None:

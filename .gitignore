@@ -1,3 +1,8 @@
+#### Artigraph ####
+
+# Built by `mise run playground-wheel`.
+/docs/assets/playground/packages/arti-*.whl
+
 #### https://raw.githubusercontent.com/github/gitignore/main/Python.gitignore ####
 
 # Byte-compiled / optimized / DLL files

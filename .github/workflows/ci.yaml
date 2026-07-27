@@ -53,7 +53,9 @@ jobs:
           uv run pre-commit run --all-files --show-diff-on-failure
       - name: Build docs
         if: runner.os == 'Linux'
-        run: uv run --frozen --all-extras zensical build --clean --strict
+        run: |
+          mise run playground-wheel
+          uv run --frozen --all-extras zensical build --clean --strict
       - name: Start native Postgres on macOS
         if: runner.os == 'macOS'
         run: |
