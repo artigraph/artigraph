@@ -2,6 +2,7 @@
 import json
 import pickle
 import re
+import shutil
 from collections.abc import Callable
 from pathlib import Path
 from typing import Annotated, Any, assert_type, cast
@@ -9,13 +10,28 @@ from unittest.mock import PropertyMock, patch
 
 import pytest
 
-from arti import Artifact, Fingerprint, Graph, GraphSnapshot, PartitionKey, Type, View, producer
+from arti import (
+    Artifact,
+    Fingerprint,
+    Format,
+    Graph,
+    GraphSnapshot,
+    PartitionDependencies,
+    PartitionKey,
+    StoragePartitionSnapshots,
+    Type,
+    View,
+    producer,
+)
 from arti.backends.memory import MemoryBackend
 from arti.executors.local import LocalExecutor
+from arti.formats.json import JSON
 from arti.graphs import ArtifactBox
+from arti.partitions import Int64Field
+from arti.producers import InputPartitions
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
-from arti.types import Int64
+from arti.types import Collection, Int64, Struct
 from tests.arti.dummies import A1, A2, A3, A4, P1, P2, div
 from tests.arti.dummies import Num as _Num
 
@@ -437,6 +453,43 @@ def test_Graph_build_failed_validation(tmp_path: Path) -> None:
         g.build()
     with pytest.raises(FileNotFoundError, match="No data"):
         g.read(g.artifacts.b, annotation=int)
+
+
+def test_Graph_build_empty_map_links_no_partitions(tmp_path: Path) -> None:
+    class Rows(Artifact):
+        type: Type = Collection(element=Struct(fields={"k": Int64()}), partition_by=("k",))
+        format: Format = JSON()
+        storage: LocalFile = LocalFile.rooted_at(tmp_path / "produced")
+
+    def positive_keys(rows: StoragePartitionSnapshots) -> PartitionDependencies:
+        return PartitionDependencies(
+            {
+                partition.partition_key: InputPartitions(rows=(partition,))
+                for partition in rows
+                if cast(Int64Field, partition.partition_key["k"]).value > 0
+            }
+        )
+
+    @producer(map=positive_keys)
+    def copy_rows(
+        rows: Annotated[list[dict[Any, Any]], Rows],
+    ) -> Annotated[list[dict[Any, Any]], Rows]:
+        return rows
+
+    with Graph(name="test") as g:
+        g.artifacts.raw = Rows(storage=LocalFile.rooted_at(tmp_path / "raw"))
+        g.artifacts.copied = cast(Any, copy_rows)(rows=g.artifacts.raw).out()
+
+    raw, copied = g.artifacts.raw, cast(Rows, g.artifacts.copied)
+    g.write([{"k": 1}], artifact=raw, partition_key=PartitionKey(k=Int64Field(value=1)))
+    assert g.build().read(copied, annotation=list) == [{"k": 1}]
+    # Replace the raw data with a partition that `positive_keys` skips. The output built from the
+    # old input must not be linked to the new snapshot.
+    shutil.rmtree(tmp_path / "raw")
+    g.write([{"k": -1}], artifact=raw, partition_key=PartitionKey(k=Int64Field(value=-1)))
+    snapshot = g.build()
+    with g.backend.connect() as conn:
+        assert conn.read_snapshot_partitions(snapshot, "copied", copied) == ()
 
 
 def test_Graph_dependencies(graph: Graph) -> None:
