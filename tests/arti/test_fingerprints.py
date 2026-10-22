@@ -1,25 +1,25 @@
-# pyright: reportPrivateUsage=false
 from itertools import permutations
 from typing import Any, cast
 
 import pytest
 
 from arti import Fingerprint
-from arti.internal.utils import int64, uint64
 
 
 def test_Fingerprint() -> None:
     assert Fingerprint(5) == 5
     assert Fingerprint.from_int(-5) == -5
-    assert Fingerprint.from_int64(int64(-5)) == -5
     assert Fingerprint.from_string("OK") == -7962813320811223369
     assert Fingerprint.from_string("ok") == 5227454011934222951
-    assert Fingerprint.from_uint64(uint64(5)) == 5
-    assert Fingerprint.from_uint64(uint64(int64(-5))) == -5
     assert Fingerprint.identity() == 0
 
-    with pytest.raises(ValueError, match="is too large for int64"):
-        Fingerprint.from_int(uint64._max)
+    assert repr(Fingerprint(-5)) == "Fingerprint(-5)"
+    assert str(Fingerprint(-5)) == "-5"
+    assert Fingerprint(-(2**63)) == -(2**63)
+    assert Fingerprint((2**63) - 1) == (2**63) - 1
+    for out_of_range in (-(2**63) - 1, 2**63):
+        with pytest.raises(ValueError, match="is out of range for int64"):
+            Fingerprint.from_int(out_of_range)
 
     f1, f2 = Fingerprint(1), Fingerprint(2)
     other: object = "1"
@@ -42,6 +42,7 @@ def test_Fingerprint_math() -> None:
     assert f1.combine(Fingerprint.identity()) == f1
     # self-inverse
     assert f1.combine(f1) == 0
+    assert isinstance(f1.combine(f2), Fingerprint)
     # bitwise operators
     assert f2 & 15 == 1
     assert f2 << 15 == 32768

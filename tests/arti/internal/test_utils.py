@@ -1,11 +1,8 @@
 # pyright: reportPrivateUsage=false
 from __future__ import annotations
 
-import math
 import operator
 import os
-from collections.abc import Callable
-from functools import partial
 from pathlib import Path
 from types import ModuleType
 from typing import Any, cast
@@ -18,11 +15,9 @@ from arti.internal.utils import (
     classproperty,
     get_module_name,
     import_submodules,
-    int64,
     one_or_none,
     ordinal,
     register,
-    uint64,
 )
 
 
@@ -77,77 +72,6 @@ def test_import_submodules() -> None:
         str(Path(path).relative_to(basedir)).replace(".py", "")
         for path in import_submodules_test_modules.entries
     } == {name.replace(".", os.sep) for name in modules}
-
-
-@pytest.mark.parametrize("type_", [int64, uint64])
-def test_sizedint(type_: type[int64 | uint64]) -> None:
-    assert repr(type_(5)) == f"{type_.__name__}(5)"
-
-    low, high = type_(type_._min), type_(type_._max)
-
-    assert low == type_._min
-    assert high == type_._max
-
-    with pytest.raises(ValueError):  # noqa: PT011
-        assert low - 1
-
-    with pytest.raises(ValueError):  # noqa: PT011
-        assert high + 1
-
-
-def test_sizedint_cast() -> None:
-    assert int64(uint64(18446744073709551611)) == int64(-5)
-    assert int64(uint64(5)) == int64(5)
-    assert uint64(int64(-5)) == uint64(18446744073709551611)
-    assert uint64(int64(5)) == uint64(5)
-
-
-@pytest.mark.parametrize(
-    "op",
-    [
-        math.ceil,
-        math.floor,
-        math.trunc,
-        operator.invert,
-        operator.neg,
-        operator.pos,
-        round,
-        partial(round, ndigits=-1),
-    ],
-)
-@pytest.mark.parametrize("type_", [int64, uint64])
-def test_sizedint_unary(type_: type[int], op: Callable[..., Any]) -> None:
-    if type_ is uint64 and op in (operator.invert, operator.neg):
-        pytest.skip("invalid for unsigned ints")
-
-    output, expected = op(type_(123)), op(123)
-    assert output == expected
-    assert isinstance(output, type_)
-
-
-_BINARY_OPERATORS: list[Callable[[Any, Any], Any]] = [
-    cast(Callable[[Any, Any], Any], operator.add),
-    cast(Callable[[Any, Any], Any], getattr(operator, "and_")),  # noqa: B009
-    cast(Callable[[Any, Any], Any], getattr(operator, "floordiv")),  # noqa: B009
-    cast(Callable[[Any, Any], Any], getattr(operator, "lshift")),  # noqa: B009
-    cast(Callable[[Any, Any], Any], operator.mod),
-    cast(Callable[[Any, Any], Any], operator.mul),
-    cast(Callable[[Any, Any], Any], getattr(operator, "or_")),  # noqa: B009
-    cast(Callable[[Any, Any], Any], getattr(operator, "rshift")),  # noqa: B009
-    cast(Callable[[Any, Any], Any], operator.sub),
-    cast(Callable[[Any, Any], Any], getattr(operator, "xor")),  # noqa: B009
-]
-
-
-@pytest.mark.parametrize("op", _BINARY_OPERATORS)
-@pytest.mark.parametrize("type_", [int64, uint64])
-def test_sizedint_binary(type_: type[int], op: Callable[..., Any]) -> None:
-    i, _i = 10, type_(10)
-    left = op(_i, i)
-    right = op(i, _i)
-    assert left == right
-    assert isinstance(left, type_)
-    assert isinstance(right, type_)
 
 
 def test_one_or_none() -> None:

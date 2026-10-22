@@ -3,18 +3,16 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from dataclasses import dataclass
-from typing import Any, final
+from typing import Any, Self, final
 
 import annotated_types
 import farmhash
 from pydantic import GetCoreSchemaHandler
 from pydantic_core import CoreSchema, core_schema
 
-from arti.internal.utils import int64, uint64
-
 
 @final
-class Fingerprint(int64):
+class Fingerprint(int):
     """
     Fingerprint represents a unique identity as an int64 value.
 
@@ -25,18 +23,25 @@ class Fingerprint(int64):
     - is relatively cross-platform (across databases, languages, etc)
     """
 
+    def __new__(cls, x: int, /) -> Self:
+        if not -(2**63) <= x < 2**63:
+            raise ValueError(f"{x} is out of range for int64.")
+        return super().__new__(cls, x)
+
+    def __repr__(self) -> str:
+        return f"{type(self).__name__}({int(self)})"
+
+    def __str__(self) -> str:
+        return str(int(self))
+
     def combine(self, *others: Fingerprint) -> Fingerprint:
-        result = self
+        result = int(self)
         for other in others:
             result ^= other
-        return result
+        return Fingerprint(result)
 
     @classmethod
     def from_int(cls, x: int, /) -> Fingerprint:
-        return cls.from_int64(int64(x))
-
-    @classmethod
-    def from_int64(cls, x: int64, /) -> Fingerprint:
         return cls(x)
 
     @classmethod
@@ -46,11 +51,8 @@ class Fingerprint(int64):
 
         Fingerprints using Farmhash Fingerprint64, converted to int64 via two's complement.
         """
-        return cls.from_uint64(uint64(farmhash.fingerprint64(x)))
-
-    @classmethod
-    def from_uint64(cls, x: uint64, /) -> Fingerprint:
-        return cls.from_int64(int64(x))
+        value = farmhash.fingerprint64(x)
+        return cls(value - 2**64 if value >= 2**63 else value)
 
     @classmethod
     def identity(cls) -> Fingerprint:

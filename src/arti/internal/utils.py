@@ -7,7 +7,7 @@ import threading
 from collections.abc import Callable, Iterable
 from pathlib import Path
 from types import ModuleType
-from typing import Any, Self, SupportsIndex, cast, overload
+from typing import Any, Self, cast, overload
 
 from arti.internal.vendored.setuptools import find_namespace_packages
 
@@ -91,127 +91,6 @@ def import_submodules(
             for path, name in path_names.items()
             for _, name, _ in pkgutil.iter_modules([path], prefix=f"{name}.")
         }
-
-
-class _int(int):
-    def __repr__(self) -> str:
-        return f"{type(self).__name__}({int(self)})"
-
-    def __str__(self) -> str:
-        return str(int(self))
-
-    # Stock magics.
-
-    def __add__(self, x: int) -> Self:
-        return type(self)(super().__add__(x))
-
-    def __and__(self, n: int) -> Self:
-        return type(self)(super().__and__(n))
-
-    def __ceil__(self) -> Self:
-        return type(self)(super().__ceil__())
-
-    def __floor__(self) -> Self:
-        return type(self)(super().__floor__())
-
-    def __floordiv__(self, x: int) -> Self:
-        return type(self)(super().__floordiv__(x))
-
-    def __invert__(self) -> Self:
-        return type(self)(super().__invert__())
-
-    def __lshift__(self, n: int) -> Self:
-        return type(self)(super().__lshift__(n))
-
-    def __mod__(self, x: int) -> Self:
-        return type(self)(super().__mod__(x))
-
-    def __mul__(self, x: int) -> Self:
-        return type(self)(super().__mul__(x))
-
-    def __neg__(self) -> Self:
-        return type(self)(super().__neg__())
-
-    def __or__(self, n: int) -> Self:
-        return type(self)(super().__or__(n))
-
-    def __pos__(self) -> Self:
-        return type(self)(super().__pos__())
-
-    def __radd__(self, x: int) -> Self:
-        return type(self)(super().__radd__(x))
-
-    def __rand__(self, n: int) -> Self:
-        return type(self)(super().__rand__(n))
-
-    def __rfloordiv__(self, x: int) -> Self:
-        return type(self)(super().__rfloordiv__(x))
-
-    def __rlshift__(self, n: int) -> Self:
-        return type(self)(super().__rlshift__(n))
-
-    def __rmod__(self, x: int) -> Self:
-        return type(self)(super().__rmod__(x))
-
-    def __rmul__(self, x: int) -> Self:
-        return type(self)(super().__rmul__(x))
-
-    def __ror__(self, n: int) -> Self:
-        return type(self)(super().__ror__(n))
-
-    def __round__(self, ndigits: SupportsIndex | None = None) -> Self:
-        if ndigits is None:
-            return type(self)(super().__round__())
-        return type(self)(super().__round__(ndigits))
-
-    def __rrshift__(self, n: int) -> Self:
-        return type(self)(super().__rrshift__(n))
-
-    def __rshift__(self, n: int) -> Self:
-        return type(self)(super().__rshift__(n))
-
-    def __rsub__(self, x: int) -> Self:
-        return type(self)(super().__rsub__(x))
-
-    def __rxor__(self, n: int) -> Self:
-        return type(self)(super().__rxor__(n))
-
-    def __sub__(self, x: int) -> Self:
-        return type(self)(super().__sub__(x))
-
-    def __trunc__(self) -> Self:
-        return type(self)(super().__trunc__())
-
-    def __xor__(self, n: int) -> Self:
-        return type(self)(super().__xor__(n))
-
-
-class int64(_int):
-    _min, _max = -(2**63), (2**63) - 1
-
-    def __new__(cls, i: int | int64 | uint64) -> Self:
-        if i > cls._max:
-            if isinstance(i, uint64):
-                i = int(i) - uint64._max - 1  # pyright: ignore[reportPrivateUsage]
-            else:
-                raise ValueError(f"{i} is too large for int64. Hint: cast to uint64 first.")
-        if i < cls._min:
-            raise ValueError(f"{i} is too small for int64.")
-        return super().__new__(cls, i)
-
-
-class uint64(_int):
-    _min, _max = 0, (2**64) - 1
-
-    def __new__(cls, i: int | int64 | uint64) -> Self:
-        if i > cls._max:
-            raise ValueError(f"{i} is too large for uint64.")
-        if i < cls._min:
-            if isinstance(i, int64):
-                i = int(i) + cls._max + 1
-            else:
-                raise ValueError(f"{i} is negative. Hint: cast to int64 first.")
-        return super().__new__(cls, i)
 
 
 @overload

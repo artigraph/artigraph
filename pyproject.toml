@@ -194,7 +194,6 @@ pyupgrade = { keep-runtime-typing = true } # Preserve types, even if a file impo
 "src/arti/internal/dispatch.py" = ["N801"] # Preserve multimethod's public naming convention
 "src/arti/internal/mappings.py" = ["N801"] # Preserve the dict-compatible public API
 "src/arti/internal/type_hints.py" = ["ERA001", "N802"] # Typing examples and typing API names
-"src/arti/internal/utils.py" = ["N801"] # Preserve the int-compatible public API
 "src/arti/partitions/__init__.py" = ["N801", "N802", "N805"] # Public partition component names
 "src/arti/statistics/__init__.py" = ["ERA001"] # Planned model sketches
 "src/arti/types/bigquery.py" = ["N801"] # Match BigQuery's constant naming
