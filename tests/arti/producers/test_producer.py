@@ -26,7 +26,17 @@ from arti.producers import InputPartitions, ValidateSig
 from arti.types import Collection, Int64, List, Struct
 from arti.versions import String as StringVersion
 from arti.views import python as python_views
-from tests.arti.dummies import A1, A2, A3, A4, P1, P2, DummyStorage, dummy_type_system
+from tests.arti.dummies import (
+    A1,
+    A2,
+    A3,
+    A4,
+    P1,
+    P2,
+    DummyAnnotation,
+    DummyStorage,
+    dummy_type_system,
+)
 
 
 class DummyProducer(Producer):
@@ -115,6 +125,8 @@ def test_producer_decorator() -> None:
     assert dummy_producer2.map == mapper
     assert dummy_producer2(a1=A1()).annotations == (MyAnnotation(),)
     assert dummy_producer2(a1=A1()).version == StringVersion(value="test")
+    # The overridden annotations must still be skipped when fingerprinting.
+    assert "annotations" not in dummy_producer2._arti_fingerprint_fields_
 
 
 def test_producer_decorator_reuse() -> None:
@@ -267,6 +279,12 @@ def test_Producer_string_annotation() -> None:
 def test_Producer_fingerprint_fields() -> None:
     p1 = P1(a1=A1())
     assert set(p1._arti_fingerprint_fields_) == {"_arti_type_", "a1", "version"}
+
+    class NotedP1(P1):
+        annotations: tuple[Annotation, ...] = (DummyAnnotation(),)
+
+    # The overridden annotations must still be skipped when fingerprinting.
+    assert set(NotedP1._arti_fingerprint_fields_) == {"_arti_type_", "a1", "version"}
 
 
 def test_Producer_compute_input_fingerprint() -> None:

@@ -77,6 +77,29 @@ def test_Model_fingerprint() -> None:
     assert w.fingerprint == Fingerprint.from_string(w_repr)
 
 
+def test_Model_fingerprint_inherits_SkipFingerprint() -> None:
+    class Base(Model):
+        a: Annotated[int, SkipFingerprint()] = 0
+        b: int = 0
+
+    class Override(Base):
+        a: int = 1  # Inherits SkipFingerprint
+        b: Annotated[int, SkipFingerprint()] = 1
+
+    class Include(Override):
+        a: Annotated[int, SkipFingerprint(False)] = 2
+
+    class Child(Include):
+        a: int = 3  # Inherits the nearest setting
+
+    assert Base._arti_fingerprint_fields_ == ("_arti_type_", "b")
+    assert Override._arti_fingerprint_fields_ == ("_arti_type_",)
+    assert Include._arti_fingerprint_fields_ == ("_arti_type_", "a")
+    assert Child._arti_fingerprint_fields_ == ("_arti_type_", "a")
+    assert Override().fingerprint == Override(a=5).fingerprint
+    assert Child().fingerprint != Child(a=5).fingerprint
+
+
 def test_Model_copy_fingerprint() -> None:
     obj = Concrete(i=1)
     assert obj.fingerprint == Concrete(i=1).fingerprint  # Populate the cache

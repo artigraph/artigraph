@@ -8,7 +8,6 @@ from typing import (
     Any,
     ClassVar,
     Self,
-    cast,
     dataclass_transform,
     overload,
 )
@@ -27,7 +26,7 @@ from pydantic_core import PydanticUndefined, PydanticUndefinedType
 
 from arti.fingerprints import Fingerprint, SkipFingerprint
 from arti.internal.type_hints import get_item_from_annotated
-from arti.internal.utils import ClassProperty, class_name
+from arti.internal.utils import ClassProperty, class_name, one_or_none
 
 if TYPE_CHECKING:
     from pydantic._internal._model_construction import ModelMetaclass as _PydanticModelMeta
@@ -110,33 +109,23 @@ class Model(BaseModel, metaclass=ModelMeta):
         # Determine all of the Fingerprint fields.
         if not cls.model_config.get("frozen"):  # coverage: ignore
             raise ValueError(f"{cls._arti_type_key_} must be frozen to generate a fingerprint.")
-        field_annotations = (
-            # Pydantic strips `Annotated[T, ...]` hints into `annotation` (T) and `metadata` (...).
-            (
-                name,
-                (
-                    Annotated[cast(Any, field_info.annotation), *field_info.metadata]
-                    if field_info.metadata
-                    else field_info.annotation
-                ),
-            )
+        field_names = (
+            name
             for name, field_info in cls.model_fields.items()
-            if not field_info.exclude
+            if not field_info.exclude and not _skips_fingerprint(cls, name)
         )
-        computed_annotations = (
-            (name, computed_info.return_type)
+        computed_names = (
+            name
             for name, computed_info in cls.model_computed_fields.items()
+            if not get_item_from_annotated(
+                computed_info.return_type,
+                SkipFingerprint,
+                default=SkipFingerprint(False),
+                kind="object",
+            )
         )
         # Sort the fields to ensure a deterministic order for fingerprinting.
-        cls._arti_fingerprint_fields_ = tuple(
-            sorted(
-                name
-                for name, annotation in [*field_annotations, *computed_annotations]
-                if not get_item_from_annotated(
-                    annotation, SkipFingerprint, default=SkipFingerprint(False), kind="object"
-                )
-            )
-        )
+        cls._arti_fingerprint_fields_ = tuple(sorted([*field_names, *computed_names]))
 
     if not TYPE_CHECKING:
 
@@ -197,6 +186,22 @@ class Model(BaseModel, metaclass=ModelMeta):
 
     def __str__(self) -> str:
         return repr(self)
+
+
+def _skips_fingerprint(cls: type[Model], name: str) -> bool:
+    # Pydantic replaces a field's `Annotated` metadata when a subclass overrides it (which requires
+    # a new type hint, eg: `type: Type = Int64()`), so inherit `SkipFingerprint` from the nearest
+    # class that sets it.
+    for klass in cls.__mro__:
+        if not issubclass(klass, Model) or (field_info := klass.model_fields.get(name)) is None:
+            continue
+        skip = one_or_none(
+            [item for item in field_info.metadata if isinstance(item, SkipFingerprint)],
+            item_name=SkipFingerprint.__name__,
+        )
+        if skip is not None:
+            return bool(skip)
+    return False
 
 
 @overload

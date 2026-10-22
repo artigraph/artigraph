@@ -104,6 +104,12 @@ def test_Type() -> None:
     my_type = MyType(description="Hi")
     assert my_type.description == "Hi"
 
+    class Described(MyType):
+        description: str | None = "Default"
+
+    # The overridden description must still be skipped when fingerprinting.
+    assert Described().fingerprint == Described(description="Other").fingerprint
+
 
 def test_Enum() -> None:
     float32, items = Float32(), frozenset({1.0, 2.0, 3.0})

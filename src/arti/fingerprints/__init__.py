@@ -76,7 +76,9 @@ class SkipFingerprint(annotated_types.BaseMetadata):
     """
     Determine whether the field contributes a model's fingerprint.
 
-    Set with `Annotated`, eg: `x: Annotated[int, SkipFingerprint()]`.
+    Set with `Annotated`, eg: `x: Annotated[int, SkipFingerprint()]`. Unlike other `Annotated`
+    metadata, subclasses that override the field inherit the setting from the nearest parent that
+    sets it, unless the override sets it again, eg: `x: Annotated[int, SkipFingerprint(False)]`.
     """
 
     value: bool = True
