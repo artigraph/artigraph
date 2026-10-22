@@ -22,7 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Install mise and uv
-        uses: jdx/mise-action@v4
+        uses: jdx/mise-action@v5
         with:
           install_args: uv
       - name: Build docs
