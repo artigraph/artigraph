@@ -9,7 +9,7 @@ from graphlib import TopologicalSorter
 from types import TracebackType
 from typing import TYPE_CHECKING, Annotated, Any, Literal, cast, overload
 
-from pydantic import Field, InstanceOf, PrivateAttr, field_validator
+from pydantic import Field, InstanceOf, PrivateAttr, computed_field, field_validator
 
 import arti
 from arti import io
@@ -19,7 +19,7 @@ from arti.fingerprints import Fingerprint, SkipFingerprint
 from arti.internal.mappings import FrozenMapping, TypedBox, frozendict
 from arti.internal.models import Model
 from arti.partitions import PartitionKey
-from arti.producers import Producer
+from arti.producers import Producer, ProducerOutput
 from arti.storage import StoragePartitionSnapshot, StoragePartitionSnapshots
 from arti.types import is_partitioned
 from arti.views import View
@@ -147,6 +147,18 @@ class Graph(Model):
     @property
     def artifact_to_key(self) -> frozendict[Artifact, str]:
         return self._artifact_to_key
+
+    # Artifact fingerprints omit their `producer_output` (see `Artifact`), so serialize each
+    # produced Artifact's Producer and output position here instead. Otherwise, Graphs that only
+    # differ by their Producers (eg: a new version) would have the same fingerprint.
+    @computed_field(repr=False)
+    @property
+    def artifact_producer_outputs(self) -> dict[str, ProducerOutput]:
+        return {
+            key: artifact.producer_output
+            for key, artifact in sorted(self.artifacts.walk())
+            if artifact.producer_output is not None
+        }
 
     @requires_sealed
     def build(self, executor: Executor | None = None) -> GraphSnapshot:

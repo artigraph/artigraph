@@ -108,7 +108,12 @@ def test_Graph_serialization_is_stable(graph: Graph) -> None:
     # Pin the serialized form and fingerprints so refactors can't silently change Graph identity.
     assert graph.artifacts.b.fingerprint == 7954616637240085606
     assert graph.artifacts.b.producer_output.producer.fingerprint == -46238299892531143
-    assert graph.fingerprint == -5172931774348243978
+    assert graph.fingerprint == 2359901611142207010
+    # Artifacts omit their Producer, so the Graph includes each produced Artifact's Producer.
+    assert {
+        key: (output["producer"]["_arti_type_"], output["position"])
+        for key, output in json.loads(graph.model_dump_json())["artifact_producer_outputs"].items()
+    } == {"b": ("P1", 0), "c.a": ("P2", 0), "c.b": ("P2", 1)}
 
     # Artifact subclass fields and concrete Storage fields must be included.
     class Noted(Artifact):
@@ -117,6 +122,7 @@ def test_Graph_serialization_is_stable(graph: Graph) -> None:
 
     with Graph(name="test") as g:
         g.artifacts.n = Noted(storage=StringLiteral(value="1"))
+    assert json.loads(g.model_dump_json())["artifact_producer_outputs"] == {}
     assert json.loads(g.model_dump_json())["artifacts"] == {
         "n": {
             "_arti_type_": "Noted",

@@ -18,7 +18,8 @@ from arti.backends.sql.codec import MetadataCodecError
 from arti.backends.sql.models import GraphRow
 from arti.backends.sqlite import SQLiteBackend
 from arti.storage.literal import StringLiteral
-from tests.arti.backends.pipeline import Number, build_pipeline
+from arti.versions import SemVer
+from tests.arti.backends.pipeline import Number, build_pipeline, increment
 
 type BackendKind = Literal["memory", "sqlite-memory", "sqlite-file", "postgres"]
 
@@ -147,6 +148,31 @@ def test_backend_pipeline_conformance(backend_harness: BackendHarness) -> None:
             connection.read_snapshot_tag(snapshot.name, "latest").fingerprint
             == retagged.fingerprint
         )
+
+
+def test_backend_keeps_graphs_that_differ_only_by_producer(
+    backend_harness: BackendHarness,
+) -> None:
+    backend = backend_harness.open()
+
+    def build(major: int) -> GraphSnapshot:
+        with Graph(name=f"producer-change-{backend_harness.kind}", backend=backend) as graph:
+            graph.artifacts.value = Number(storage=StringLiteral(value="1"))
+            version = SemVer(major=major, minor=0, patch=0)
+            graph.artifacts.incremented = (
+                increment(value=graph.artifacts.value).model_copy(update={"version": version}).out()
+            )
+        return graph.build()
+
+    v1, v2 = build(1), build(2)
+    # Artifact identity is Producer independent, but Graph identity is not.
+    assert v1.artifacts.incremented.fingerprint == v2.artifacts.incremented.fingerprint
+    assert v1.graph.fingerprint != v2.graph.fingerprint
+    for snapshot in (v1, v2):
+        with backend.connect() as connection:
+            restored = connection.read_snapshot(snapshot.name, snapshot.fingerprint)
+        assert restored.graph == snapshot.graph
+        assert restored.read(restored.artifacts.incremented, annotation=int) == 2
 
 
 def test_persistent_backend_reopens(
