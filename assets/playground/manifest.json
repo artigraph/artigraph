@@ -1,0 +1,21 @@
+{
+  "generatedBy": "tools/playground/build_pyodide_assets.py",
+  "packageDir": "packages",
+  "pyodidePackages": [
+    "micropip",
+    "annotated-types",
+    "typing-extensions",
+    "typing-inspection"
+  ],
+  "pyodideVersion": "314.0.3",
+  "pythonVersion": "3.14",
+  "rustToolchain": "1.93.0",
+  "wheels": [
+    "arti-0.0.0+playground-py3-none-any.whl",
+    "multimethod-2.0.2-py3-none-any.whl",
+    "parse-1.22.1-py2.py3-none-any.whl",
+    "pydantic-2.13.4-py3-none-any.whl",
+    "pydantic_core-2.46.4-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+    "pyfarmhash-0.4.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl"
+  ]
+}

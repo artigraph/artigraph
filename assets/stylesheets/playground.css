@@ -1,0 +1,99 @@
+.artigraph-playground {
+  border: 1px solid var(--md-default-fg-color--lightest);
+  border-radius: 0.75rem;
+  overflow: hidden;
+  margin: 1.5rem 0;
+  background: var(--md-code-bg-color);
+}
+
+.artigraph-playground__toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem;
+  border-bottom: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-default-bg-color);
+}
+
+.artigraph-playground__toolbar button {
+  border: 1px solid var(--md-primary-fg-color);
+  border-radius: 0.35rem;
+  padding: 0.35rem 0.65rem;
+  color: var(--md-primary-fg-color);
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+}
+
+.artigraph-playground__toolbar button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.artigraph-playground__toolbar button[data-artigraph-run] {
+  color: var(--md-primary-bg-color);
+  background: var(--md-primary-fg-color);
+}
+
+.artigraph-playground__status {
+  margin-left: auto;
+  color: var(--md-default-fg-color--light);
+  font-size: 0.8rem;
+}
+
+.artigraph-playground__editor {
+  height: 34rem;
+  min-height: 24rem;
+  overflow: hidden;
+  resize: vertical;
+  background: var(--md-code-bg-color);
+}
+
+.artigraph-playground__editor--enhanced .artigraph-playground__code {
+  display: none;
+}
+
+.artigraph-playground__code,
+.artigraph-playground__output {
+  box-sizing: border-box;
+  width: 100%;
+  margin: 0;
+  border: 0;
+  font: 0.72rem/1.45 var(--md-code-font-family);
+  tab-size: 4;
+}
+
+.artigraph-playground__code {
+  height: 100%;
+  padding: 1rem;
+  resize: none;
+  color: var(--md-code-fg-color);
+  background: var(--md-code-bg-color);
+}
+
+.artigraph-playground__editor .cm-editor {
+  height: 100%;
+}
+
+.artigraph-playground__editor .cm-scroller {
+  overflow: auto;
+}
+
+.artigraph-playground__output {
+  min-height: 10rem;
+  max-height: 24rem;
+  padding: 1rem;
+  overflow: auto;
+  border-top: 1px solid var(--md-default-fg-color--lightest);
+  color: var(--md-code-fg-color);
+  background: color-mix(in srgb, var(--md-code-bg-color) 86%, black);
+  white-space: pre-wrap;
+}
+
+.artigraph-playground--preparing .artigraph-playground__status::before,
+.artigraph-playground--running .artigraph-playground__status::before {
+  content: "●";
+  margin-right: 0.35rem;
+  color: var(--md-accent-fg-color);
+}
