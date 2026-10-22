@@ -5,7 +5,7 @@ build-backend = "hatchling.build"
 [dependency-groups]
 docs = [
     "mkdocstrings-python>=2.0.5",
-    "zensical>=0.0.51",
+    "zensical>=0.0.71",
 ]
 dev = [
     { include-group = "docs" },
