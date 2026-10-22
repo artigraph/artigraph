@@ -50,10 +50,8 @@ def _check_issubclass(klass: Any, check_type: Any) -> bool:
         if is_typeddict(check_type):
             klass_hints = get_type_hints(klass)
             check_type_hints = get_type_hints(check_type)
-            # NOTE: Compare with `==` first because lenient_issubclass rejects Union subtypes (eg:
-            # nullable fields like `int | None`).
             return check_type_hints.keys() <= klass_hints.keys() and all(
-                klass_hints[name] == field_type or lenient_issubclass(klass_hints[name], field_type)
+                lenient_issubclass(klass_hints[name], field_type)
                 for name, field_type in check_type_hints.items()
             )
         klass = dict
@@ -113,6 +111,12 @@ def _check_issubclass(klass: Any, check_type: Any) -> bool:
 
 def discard_Annotated(type_: Any) -> Any:
     return get_args(type_)[0] if is_annotated_hint(type_) else type_
+
+
+def discard_Optional(type_: Any) -> Any:
+    if not is_optional_hint(type_):
+        return type_
+    return Union[tuple(subtype for subtype in get_args(type_) if subtype is not NoneType)]  # noqa: UP007
 
 
 def get_class_type_vars(klass: type) -> tuple[type, ...]:
@@ -218,6 +222,9 @@ def get_annotation_from_value(value: Any) -> Any:
 
 
 def lenient_issubclass[T: type | tuple[type, ...]](klass: Any, class_or_tuple: T) -> TypeGuard[T]:
+    # A Union is a subclass if all of its members are (eg: `int | None` of `int | str | None`).
+    if is_union_hint(klass):
+        return all(lenient_issubclass(subtype, class_or_tuple) for subtype in get_args(klass))
     if not (
         isinstance(klass, type | GenericAlias | TypeVar) or is_annotated_hint(klass) or klass is Any
     ):

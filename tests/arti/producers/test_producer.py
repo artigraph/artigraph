@@ -607,6 +607,8 @@ def test_Producer_bad_signature() -> None:
 
     with pytest.raises(ValueError, match="type hint must be an Artifact subclass"):
         _define_bad_producer(annotations={"a1": str}, build=build_with_non_artifact_field)
+    with pytest.raises(ValueError, match="type hint must be an Artifact subclass"):
+        _define_bad_producer(annotations={"a1": A1 | A2}, build=build_with_non_artifact_field)
 
     def build_with_default(
         cls: type[Producer],

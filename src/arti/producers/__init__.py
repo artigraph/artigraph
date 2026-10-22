@@ -179,7 +179,10 @@ class Producer(Model):
                     raise ValueError("field must not be optional.")
                 if not field.is_required():
                     raise ValueError("field must not have a default.")
-                if not lenient_issubclass(field.annotation, Artifact):
+                # Require one Artifact class, not a Union of them.
+                if not (
+                    isinstance(field.annotation, type) and issubclass(field.annotation, Artifact)
+                ):
                     raise ValueError(
                         f"type hint must be an Artifact subclass, got: {field.annotation}"
                     )

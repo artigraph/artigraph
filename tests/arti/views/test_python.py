@@ -2,13 +2,15 @@ import pickle
 from datetime import date, datetime
 from pathlib import Path
 from types import NoneType
-from typing import Annotated
+from typing import Annotated, Optional
+
+import pytest
 
 from arti import Artifact, Type, View, read, types, write
 from arti.formats.json import JSON
 from arti.formats.pickle import Pickle
 from arti.storage.local import LocalFile, LocalFilePartition
-from arti.views.python import Date, Datetime, Dict, Float, Int, Null, Str
+from arti.views.python import Date, Datetime, Dict, Float, Int, List, Null, Str
 
 
 def test_python_View(tmp_path: Path) -> None:
@@ -63,3 +65,61 @@ def test_python_View_null(tmp_path: Path) -> None:
         view = View.from_annotation(annotation, mode="READWRITE")
         assert isinstance(view, Null)
         view.check_artifact_compatibility(artifact)
+
+
+class NullableIntArtifact(Artifact):
+    type: Type = types.Int64(nullable=True)
+
+
+class IntArtifact(Artifact):
+    type: Type = types.Int64()
+
+
+class NullableIntListArtifact(Artifact):
+    type: Type = types.List(element=types.Int64(nullable=True))
+
+
+def test_python_View_nullable(tmp_path: Path) -> None:
+    nullable_int = types.Int64(nullable=True)
+    for annotation, view_class, type_ in [
+        (int | None, Int, nullable_int),
+        (Optional[int], Int, nullable_int),  # noqa: UP045
+        (Annotated[int | None, NullableIntArtifact], Int, nullable_int),
+        (Annotated[int | None, Int, NullableIntArtifact], Int, nullable_int),
+        # Like other annotations, `int | None` may be wider than the Artifact's Type.
+        (Annotated[int | None, IntArtifact], Int, types.Int64()),
+        (
+            Annotated[list[int | None], NullableIntListArtifact],
+            List,
+            types.List(element=nullable_int),
+        ),
+    ]:
+        view = View.from_annotation(annotation, mode="READWRITE")
+        assert isinstance(view, view_class)
+        assert view.type == type_
+
+    artifact = NullableIntArtifact(format=JSON(), storage=LocalFile(path=str(tmp_path / "a.json")))
+    view = View.from_annotation(Annotated[int | None, NullableIntArtifact], mode="READWRITE")
+    view.check_artifact_compatibility(artifact)
+    partition = artifact.storage.generate_partition()
+    write(None, type_=artifact.type, format=artifact.format, storage_partition=partition, view=view)
+    snapshots = (partition.snapshot(),)
+    assert (
+        read(
+            type_=artifact.type,
+            format=artifact.format,
+            storage_partition_snapshots=snapshots,
+            view=view,
+        )
+        is None
+    )
+
+
+def test_python_View_nullable_errors() -> None:
+    # A nullable Artifact may hold `None`, so a plain `int` can't represent it.
+    with pytest.raises(ValueError, match="cannot be used to represent Int64"):
+        View.from_annotation(Annotated[int, NullableIntArtifact], mode="READ")
+    with pytest.raises(ValueError, match="cannot be matched to a View"):
+        View.from_annotation(int | str, mode="READ")
+    with pytest.raises(ValueError, match="cannot be matched to a View"):
+        View.from_annotation(int | str | None, mode="READ")

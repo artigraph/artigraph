@@ -11,7 +11,12 @@ from pydantic import ValidationInfo, field_validator
 from arti import io
 from arti.artifacts import Artifact
 from arti.internal.models import Model, ModelTypeSerializer, get_field_default
-from arti.internal.type_hints import discard_Annotated, get_item_from_annotated, lenient_issubclass
+from arti.internal.type_hints import (
+    discard_Annotated,
+    discard_Optional,
+    get_item_from_annotated,
+    lenient_issubclass,
+)
 from arti.internal.utils import import_submodules, register
 from arti.types import Type, TypeSystem
 
@@ -93,8 +98,9 @@ class View(Model):
         view_class: type[View] | None = get_item_from_annotated(annotation, cls, kind="class")
         if view_class is None:
             # We've already searched for a View instance in the original Annotated args, so just
-            # extract the root annotation.
-            annotation = discard_Annotated(annotation)
+            # extract the root annotation. A nullable `X | None` uses X's View, which checks the
+            # nullability against the Type in `check_annotation_compatibility`.
+            annotation = discard_Optional(discard_Annotated(annotation))
             # Import the View submodules to trigger registration.
             import_submodules(__path__, __name__)
             # Views register `None` (as used in type hints), but `Annotated`, `get_type_hints` and

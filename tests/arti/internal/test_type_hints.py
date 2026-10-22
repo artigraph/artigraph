@@ -16,6 +16,7 @@ import pytest
 
 from arti.internal.type_hints import (
     NoneType,
+    discard_Optional,
     get_class_type_vars,
     get_item_from_annotated,
     is_optional_hint,
@@ -141,6 +142,10 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (int, Union[int, str]),  # noqa: UP007
     (int, int | None),
     (int, int | str),
+    (int | None, Any),
+    (int | None, Optional[int]),
+    (int | None, int | str | None),
+    (Optional[int], int | None),
     (list[int], Annotated[list[Any], 5]),
     (list[int], Annotated[list[int], 5]),
     (str, Any),
@@ -191,6 +196,7 @@ _LENIENT_ISSUBCLASS_FALSE_CASES = [
     (str, Union[int, float]),  # noqa: UP007
     (str, int | None),
     (str, int | float),
+    (int | str, int | None),
     (tuple, MyTupleVar),
     (tuple, Sequence[int]),
     (tuple, tuple[MyTuple[int]]),
@@ -215,6 +221,14 @@ _LENIENT_ISSUBCLASS_FALSE_CASES = [
 )
 def test_lenient_issubclass_false(klass: type, class_or_tuple: type | tuple[type, ...]) -> None:
     assert not lenient_issubclass(klass, class_or_tuple)
+
+
+def test_discard_Optional() -> None:
+    assert discard_Optional(int | None) is int
+    assert discard_Optional(Optional[int]) is int
+    assert discard_Optional(int | str | None) == int | str
+    assert discard_Optional(int | str) == int | str
+    assert discard_Optional(int) is int
 
 
 def test_is_optional_hint() -> None:

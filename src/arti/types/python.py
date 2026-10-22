@@ -9,7 +9,6 @@ from typing import (
     Literal,
     Optional,
     TypedDict,
-    Union,
     cast,
     get_args,
     get_origin,
@@ -19,6 +18,7 @@ from typing import (
 import arti.types
 from arti.internal.type_hints import (
     NoneType,
+    discard_Optional,
     is_optional_hint,
     is_typeddict,
     is_union,
@@ -226,9 +226,9 @@ class PyOptional(TypeAdapter[arti.types.Type]):
 
     @classmethod
     def to_artigraph(cls, type_: Any, *, hints: dict[str, Any], type_system: TypeSystem) -> Type:
-        # Optional is represented as a Union; strip out NoneType before dispatching
-        type_ = Union[tuple(subtype for subtype in get_args(type_) if subtype is not NoneType)]  # noqa: UP007
-        return type_system.to_artigraph(type_, hints=hints).model_copy(update={"nullable": True})
+        return type_system.to_artigraph(discard_Optional(type_), hints=hints).model_copy(
+            update={"nullable": True}
+        )
 
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
