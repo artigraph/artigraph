@@ -25,8 +25,8 @@ def test_View_serialization(MockView: type[View]) -> None:
         python_type = int
 
     v = Int(type=Int64(), mode="READ")
-    assert v.model_dump(include="artifact_class") == {"artifact_class": Artifact}
-    assert v.model_dump_json(include="artifact_class") == '{"artifact_class":"Artifact"}'
+    assert v.model_dump(include={"artifact_class"}) == {"artifact_class": Artifact}
+    assert v.model_dump_json(include={"artifact_class"}) == '{"artifact_class":"Artifact"}'
 
 
 def test_View_registry(MockView: type[View]) -> None:

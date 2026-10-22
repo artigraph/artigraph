@@ -87,10 +87,19 @@ class Model(BaseModel, metaclass=ModelMeta):
         extra="forbid",
         frozen=True,
         strict=True,
-        validate_assignment=True,  # Unused with frozen, unless that is overridden in subclass.
         validate_default=True,
-        validate_return=True,
         ignored_types=(ClassProperty,),
+        # Serialize nested models as their concrete class, including fields added by subclasses
+        # that are not in the class used in a type hint. For example, `format: Format = JSON()`
+        # should serialize with any extra parameters defined in `JSON`, not just the ones defined
+        # in `Format`.
+        #
+        # By default, Pydantic only serializes the fields defined in the hinted class to prevent
+        # accidental serialization of sensitive fields. However, we won't be storing any sensitive
+        # data in the models (or at least, shouldn't be). Setting this in the config (rather than
+        # per field with `SerializeAsAny[...]`) also covers standalone dumps, such as with a
+        # `pydantic.TypeAdapter`.
+        polymorphic_serialization=True,
     )
 
     @classmethod
@@ -167,14 +176,6 @@ class Model(BaseModel, metaclass=ModelMeta):
             copy.model_post_init(None)
         return copy
 
-    def model_dump(self, **kwargs: Any) -> dict[str, Any]:
-        _set_dump_kwargs_defaults(kwargs)
-        return super().model_dump(**kwargs)
-
-    def model_dump_json(self, **kwargs: Any) -> str:
-        _set_dump_kwargs_defaults(kwargs)
-        return super().model_dump_json(**kwargs)
-
     # Fingerprinting is somewhat expensive, so we'll cache the result. This is safe as long as the
     # model and all fields are immutable (see `model_config.frozen` and `model_post_init` above).
     #
@@ -196,22 +197,6 @@ class Model(BaseModel, metaclass=ModelMeta):
 
     def __str__(self) -> str:
         return repr(self)
-
-
-def _set_dump_kwargs_defaults(kwargs: dict[str, Any]) -> None:
-    # Serialize wrapped models as "Any"[1] to include fields added to subclasses that are not in the
-    # base class used in a type hint. For example, `format: Format = JSON()` should serialize with
-    # any extra parameters defined in `JSON`, not just the ones defined in `Format`.
-    #
-    # By default, Pydantic v2 only serializes the fields defined in the class used in the type hint
-    # to prevent accidental serialization of sensitive fields. However, we won't be storing any
-    # sensitive data in the models (or at least, shouldn't be). The alternative to
-    # `polymorphic_serialization` is to add `SerializeAsAny[...]` to the type hint for nested
-    # models, but that will be our normal behavior, easy to forget, and hard to debug when
-    # forgotten.
-    #
-    # 1: https://docs.pydantic.dev/latest/concepts/serialization/#serializing-with-duck-typing
-    kwargs.setdefault("polymorphic_serialization", True)
 
 
 @overload

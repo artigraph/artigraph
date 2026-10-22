@@ -3,14 +3,15 @@ import pickle
 from typing import Any
 
 import pytest
-from pydantic import InstanceOf
+from pydantic import InstanceOf, TypeAdapter
 
 from arti import Artifact, Graph, Storage
+from arti.graphs import ArtifactBox
 from arti.internal.models import Model
 from arti.storage.google.cloud.storage import GCSFile
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile, LocalFilePartition
-from arti.types import String
+from arti.types import Int64, String, Type
 
 
 class StorageHolder(Model):
@@ -67,3 +68,19 @@ def test_partition_retains_concrete_storage_fields() -> None:
     assert partition.model_dump()["storage"]["path"] == "/one"
     assert json.loads(partition.model_dump_json())["storage"]["path"] == "/one"
     assert pickle.loads(pickle.dumps(partition)) == partition
+
+
+def test_standalone_dumps_retain_concrete_fields() -> None:
+    class Noted(Artifact):
+        type: Type = Int64()
+        note: str = "hi"
+
+    with Graph(name="test") as g:
+        g.artifacts.n = Noted(storage=LocalFile(path="/one/{name}"))
+    for dump in (
+        TypeAdapter(ArtifactBox).dump_python(g.artifacts),
+        json.loads(TypeAdapter(ArtifactBox).dump_json(g.artifacts)),
+    ):
+        assert dump["n"]["note"] == "hi"
+        assert dump["n"]["storage"]["path"] == "/one/n"
+    assert TypeAdapter(Storage[Any]).dump_python(LocalFile(path="/one"))["path"] == "/one"
