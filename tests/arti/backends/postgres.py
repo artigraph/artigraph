@@ -17,7 +17,7 @@ def postgres_server_url() -> Generator[str]:
         yield configured_url
         return
 
-    with PostgresContainer("postgres:17-alpine", driver="psycopg") as postgres:
+    with PostgresContainer("postgres:18-alpine", driver="psycopg") as postgres:
         yield postgres.get_connection_url()
 
 

@@ -61,8 +61,8 @@ jobs:
         run: |
           # GitHub's hosted ARM macOS runners cannot run the nested VM required by Docker.
           # Use the native Postgres bottle while retaining Testcontainers on Linux and locally.
-          brew install postgresql@17
-          postgres_bin="$(brew --prefix postgresql@17)/bin"
+          brew install postgresql@18
+          postgres_bin="$(brew --prefix postgresql@18)/bin"
           postgres_data="$RUNNER_TEMP/postgresql"
           postgres_socket="$RUNNER_TEMP/postgresql-socket"
           mkdir -p "$postgres_socket"
@@ -86,7 +86,7 @@ jobs:
         run: |
           postgres_data="$RUNNER_TEMP/postgresql"
           if [[ -f "$postgres_data/postmaster.pid" ]]; then
-            "$(brew --prefix postgresql@17)/bin/pg_ctl" \
+            "$(brew --prefix postgresql@18)/bin/pg_ctl" \
               --pgdata="$postgres_data" \
               --mode=fast \
               --wait \
