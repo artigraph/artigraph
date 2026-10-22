@@ -19,7 +19,6 @@ from arti.internal.utils import (
     get_module_name,
     import_submodules,
     int64,
-    named_temporary_file,
     one_or_none,
     ordinal,
     register,
@@ -149,14 +148,6 @@ def test_sizedint_binary(type_: type[int], op: Callable[..., Any]) -> None:
     assert left == right
     assert isinstance(left, type_)
     assert isinstance(right, type_)
-
-
-@pytest.mark.parametrize("mode", ["w+", "wb"])
-def test_named_temporary_file(mode: str) -> None:
-    with named_temporary_file(mode=mode) as f:
-        assert f.mode == mode
-        with Path(f.name).open(mode=f.mode) as f1:
-            assert f1
 
 
 def test_one_or_none() -> None:

@@ -21,7 +21,6 @@ dev = [
     "pyarrow-stubs",
     "pyright",
     "pytest",
-    "pytest-benchmark",
     "pytest-cov",
     "pytest-pretty",
     "ruff",

@@ -7,12 +7,11 @@ from typing import Annotated
 from arti import Artifact, Type, View, read, types, write
 from arti.formats.json import JSON
 from arti.formats.pickle import Pickle
-from arti.internal.utils import named_temporary_file
 from arti.storage.local import LocalFile, LocalFilePartition
 from arti.views.python import Date, Datetime, Dict, Float, Int, Null, Str
 
 
-def test_python_View() -> None:
+def test_python_View(tmp_path: Path) -> None:
     for val, view_class, python_type in [
         ("", Str, str),
         (1, Int, int),
@@ -29,30 +28,28 @@ def test_python_View() -> None:
 
         test_format = Pickle()
         binary = pickle.dumps(val)
-        with named_temporary_file("w+b") as f:
-            test_storage_partition = LocalFilePartition(path=f.name, storage=LocalFile())
+        path = tmp_path / f"{view_class.__name__}.pickle"
+        path.write_bytes(binary)
+        test_storage_partition = LocalFilePartition(path=str(path), storage=LocalFile())
 
-            f.write(binary)
-            f.seek(0)
+        # read returns a list, matching the passed partitions
+        data = read(
+            type_=view.type,
+            format=test_format,
+            storage_partition_snapshots=(test_storage_partition.snapshot(),),
+            view=view,
+        )
+        assert data == val
 
-            # read returns a list, matching the passed partitions
-            data = read(
-                type_=view.type,
-                format=test_format,
-                storage_partition_snapshots=(test_storage_partition.snapshot(),),
-                view=view,
-            )
-            assert data == val
-
-            f.truncate()
-            write(
-                data,
-                type_=view.type,
-                format=test_format,
-                storage_partition=test_storage_partition,
-                view=view,
-            )
-            assert f.read() == binary
+        path.unlink()
+        write(
+            data,
+            type_=view.type,
+            format=test_format,
+            storage_partition=test_storage_partition,
+            view=view,
+        )
+        assert path.read_bytes() == binary
 
 
 class NullArtifact(Artifact):

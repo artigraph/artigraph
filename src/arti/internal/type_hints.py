@@ -30,12 +30,6 @@ def assert_not_none[T](v: T | None) -> T:
     return v
 
 
-def assert_all_instances[T](values: Iterable[Any], *, type: type[T]) -> Iterable[T]:
-    if not all(isinstance(v, type) for v in values):
-        raise TypeError(f"Expected {type.__name__} instances")
-    return values
-
-
 # TODO: Determine if we can replace this logic with `beartype` or related packages.
 def _check_issubclass(klass: Any, check_type: Any) -> bool:
     # If a hint is Annotated, we want to unwrap the underlying type and discard the rest of the

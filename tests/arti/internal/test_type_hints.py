@@ -16,7 +16,6 @@ import pytest
 
 from arti.internal.type_hints import (
     NoneType,
-    assert_all_instances,
     get_class_type_vars,
     get_item_from_annotated,
     is_optional_hint,
@@ -61,12 +60,6 @@ _make_type_var = cast(Any, TypeVar)
 MyTupleVar: Any = _make_type_var("MyTupleVar", bound=MyTuple)
 TupleVar: Any = _make_type_var("TupleVar", bound=tuple)
 UnboundVar = TypeVar("UnboundVar")
-
-
-def test_assert_all_instances() -> None:
-    assert_all_instances([1, 2, 3], type=int)
-    with pytest.raises(TypeError, match="Expected int instances"):
-        assert_all_instances([1, 2, 3, "4"], type=int)
 
 
 def test_get_class_type_vars() -> None:

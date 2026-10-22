@@ -4,12 +4,10 @@ import importlib
 import inspect
 import pkgutil
 import threading
-from collections.abc import Callable, Generator, Iterable
-from contextlib import contextmanager
+from collections.abc import Callable, Iterable
 from pathlib import Path
-from tempfile import TemporaryDirectory
 from types import ModuleType
-from typing import IO, Any, Self, SupportsIndex, cast, overload
+from typing import Any, Self, SupportsIndex, cast, overload
 
 from arti.internal.vendored.setuptools import find_namespace_packages
 
@@ -214,13 +212,6 @@ class uint64(_int):
             else:
                 raise ValueError(f"{i} is negative. Hint: cast to int64 first.")
         return super().__new__(cls, i)
-
-
-@contextmanager
-def named_temporary_file(mode: str = "w+b") -> Generator[IO[Any]]:
-    """Minimal alternative to tempfile.NamedTemporaryFile that can be re-opened on Windows."""
-    with TemporaryDirectory() as d, (Path(d) / "contents").open(mode=mode) as f:
-        yield f
 
 
 @overload
