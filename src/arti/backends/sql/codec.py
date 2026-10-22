@@ -12,7 +12,7 @@ from typing import Any, cast
 from arti.internal.mappings import TypedBox
 from arti.internal.models import Model
 
-CODEC_VERSION = 1
+CODEC_VERSION = 2
 
 
 class MetadataCodecError(ValueError):
@@ -57,9 +57,34 @@ def _import_type(path: Any) -> type[Any]:
     return value
 
 
+class _EncodedModels:
+    """
+    The `models` of a document, referenced by their index.
+
+    Each Model instance is encoded once, after the Models it references. Graphs share Artifacts
+    and Producers (eg: as the inputs of several Producers), which would otherwise be repeated for
+    every reference.
+    """
+
+    def __init__(self) -> None:
+        self.entries = list[dict[str, Any]]()
+        # Key by identity (holding the Model so its `id` is not reused) rather than equality,
+        # which would merge eg: Models with `1` and `True` field values.
+        self._indexes = dict[int, tuple[Model, int]]()
+
+    def reference(self, value: Model) -> dict[str, Any]:
+        if (existing := self._indexes.get(id(value))) is None:
+            entry = _encode_model(value, self)
+            existing = self._indexes[id(value)] = (value, len(self.entries))
+            self.entries.append(entry)
+        return {"kind": "model", "index": existing[1]}
+
+
 def encode_document(value: Model) -> dict[str, Any]:
     """Encode a Model as structured, import-addressable JSON metadata."""
-    return {"codec_version": CODEC_VERSION, "value": _encode(value)}
+    models = _EncodedModels()
+    encoded = models.reference(value)
+    return {"codec_version": CODEC_VERSION, "models": models.entries, "value": encoded}
 
 
 def decode_document[ModelT: Model](
@@ -70,10 +95,14 @@ def decode_document[ModelT: Model](
         raise MetadataCodecError(
             f"Unsupported metadata codec version: {document.get('codec_version')!r}"
         )
-    if set(document) != {"codec_version", "value"}:
+    if set(document) != {"codec_version", "models", "value"}:
         raise MetadataCodecError(f"Unexpected metadata document keys: {set(document)}")
     try:
-        value = _decode(document["value"])
+        # Models only reference earlier entries, so decode them in order.
+        models = list[Model]()
+        for entry in _require_items(document["models"], kind="document models"):
+            models.append(_decode_model(entry, models))
+        value = _decode(document["value"], models)
     except MetadataCodecError:
         raise
     except (TypeError, ValueError) as error:
@@ -86,7 +115,31 @@ def decode_document[ModelT: Model](
     return value
 
 
-def _encode(value: Any) -> Any:
+def _encode_model(value: Model, models: _EncodedModels) -> dict[str, Any]:
+    model_type = type(value)
+    fields = {
+        name: _encode(getattr(value, name), models)
+        for name, field in model_type.model_fields.items()
+        if not field.exclude
+    }
+    state: dict[str, Any] = {}
+    from arti.storage import Storage
+
+    if isinstance(value, Storage):
+        try:
+            key_types = value.key_types
+        except ValueError:
+            key_types = None
+        state["storage_key_types"] = _encode(key_types, models)
+    return {
+        "type": _type_path(model_type),
+        "fields": fields,
+        "fields_set": sorted(value.model_fields_set),
+        "state": state,
+    }
+
+
+def _encode(value: Any, models: _EncodedModels) -> Any:
     if value is None or type(value) in (bool, int, str):
         return value
     if type(value) is float:
@@ -96,34 +149,13 @@ def _encode(value: Any) -> Any:
     if isinstance(value, type):
         return {"kind": "type", "type": _type_path(value)}
     if isinstance(value, Model):
-        model_type = type(value)
-        fields = {
-            name: _encode(getattr(value, name))
-            for name, field in model_type.model_fields.items()
-            if not field.exclude
-        }
-        state: dict[str, Any] = {}
-        from arti.storage import Storage
-
-        if isinstance(value, Storage):
-            try:
-                key_types = value.key_types
-            except ValueError:
-                key_types = None
-            state["storage_key_types"] = _encode(key_types)
-        return {
-            "kind": "model",
-            "type": _type_path(model_type),
-            "fields": fields,
-            "fields_set": sorted(value.model_fields_set),
-            "state": state,
-        }
+        return models.reference(value)
     if isinstance(value, TypedBox):
         box = cast(TypedBox[Any], value)
         return {
             "kind": "typed_box",
             "type": _type_path(cast(type[Any], type(box))),
-            "items": [[key, _encode(item)] for key, item in box.walk()],
+            "items": [[key, _encode(item, models)] for key, item in box.walk()],
         }
     if isinstance(value, Enum):
         return {"kind": "enum", "type": _type_path(type(value)), "name": value.name}
@@ -144,22 +176,27 @@ def _encode(value: Any) -> Any:
         return {
             "kind": "mapping",
             "type": _type_path(cast(type[Any], type(mapping))),
-            "items": [[_encode(key), _encode(item)] for key, item in mapping.items()],
+            "items": [
+                [_encode(key, models), _encode(item, models)] for key, item in mapping.items()
+            ],
         }
     if isinstance(value, tuple):
         return {
             "kind": "tuple",
-            "items": [_encode(item) for item in cast(tuple[Any, ...], value)],
+            "items": [_encode(item, models) for item in cast(tuple[Any, ...], value)],
         }
     if isinstance(value, list):
-        return {"kind": "list", "items": [_encode(item) for item in cast(list[Any], value)]}
+        return {
+            "kind": "list",
+            "items": [_encode(item, models) for item in cast(list[Any], value)],
+        }
     if isinstance(value, frozenset | set):
         items = cast(frozenset[Any] | set[Any], value)
         return {
             "kind": "frozenset" if isinstance(value, frozenset) else "set",
             # Set order follows the process' hash seed, so sort to keep documents canonical.
             "items": sorted(
-                (_encode(item) for item in items),
+                (_encode(item, models) for item in items),
                 key=lambda item: json.dumps(item, sort_keys=True),
             ),
         }
@@ -180,7 +217,53 @@ def _require_items(value: Any, *, kind: str) -> list[Any]:
     return cast(list[Any], value)
 
 
-def _decode(value: Any) -> Any:
+def _decode_model(value: Any, models: list[Model]) -> Model:
+    data = _require_mapping(value, kind="model")
+    model_type = _import_type(cast(str, data.get("type")))
+    if not issubclass(model_type, Model):
+        raise MetadataCodecError(f"Persisted type {model_type} is not an Artigraph Model")
+    raw_fields = _require_mapping(data.get("fields"), kind="model fields")
+    unknown = set(raw_fields) - set(model_type.model_fields)
+    if unknown:
+        raise MetadataCodecError(f"Unknown fields for {model_type.__name__}: {unknown}")
+    fields = {name: _decode(item, models) for name, item in raw_fields.items()}
+    raw_fields_set = _require_items(data.get("fields_set"), kind="model fields_set")
+    fields_set = set[str]()
+    for field_name in raw_fields_set:
+        if not isinstance(field_name, str) or field_name not in model_type.model_fields:
+            raise MetadataCodecError(
+                f"Invalid field in persisted {model_type.__name__} fields_set: {field_name!r}"
+            )
+        fields_set.add(field_name)
+    try:
+        # Run the public constructor first so current model validators reject incompatible
+        # metadata. Then construct from the stored values without reapplying class-level
+        # defaults that are already represented in the full field set.
+        model_type(**fields)
+        model = model_type.model_construct(
+            _fields_set=fields_set,
+            **fields,
+        )
+    except (TypeError, ValueError) as error:
+        raise MetadataCodecError(f"Unable to restore {model_type.__name__}") from error
+    state = _require_mapping(data.get("state"), kind="model state")
+    from arti.storage import Storage
+
+    if isinstance(model, Storage):
+        storage = model
+        if set(state) != {"storage_key_types"}:
+            raise MetadataCodecError(
+                f"Unexpected persisted {model_type.__name__} state: {set(state)}"
+            )
+        storage._key_types = _decode(  # pyright: ignore[reportAttributeAccessIssue, reportPrivateUsage]
+            state["storage_key_types"], models
+        )
+    elif state:
+        raise MetadataCodecError(f"Unexpected persisted {model_type.__name__} state: {set(state)}")
+    return cast(Model, model)
+
+
+def _decode(value: Any, models: list[Model]) -> Any:
     if value is None or type(value) in (bool, int, str):
         return value
     data = _require_mapping(value, kind="encoded")
@@ -188,57 +271,18 @@ def _decode(value: Any) -> Any:
     if not isinstance(kind, str):
         raise MetadataCodecError("Encoded metadata is missing a string 'kind'")
     if kind == "model":
-        model_type = _import_type(cast(str, data.get("type")))
-        if not issubclass(model_type, Model):
-            raise MetadataCodecError(f"Persisted type {model_type} is not an Artigraph Model")
-        raw_fields = _require_mapping(data.get("fields"), kind="model fields")
-        unknown = set(raw_fields) - set(model_type.model_fields)
-        if unknown:
-            raise MetadataCodecError(f"Unknown fields for {model_type.__name__}: {unknown}")
-        fields = {name: _decode(item) for name, item in raw_fields.items()}
-        raw_fields_set = _require_items(data.get("fields_set"), kind="model fields_set")
-        fields_set = set[str]()
-        for field_name in raw_fields_set:
-            if not isinstance(field_name, str) or field_name not in model_type.model_fields:
-                raise MetadataCodecError(
-                    f"Invalid field in persisted {model_type.__name__} fields_set: {field_name!r}"
-                )
-            fields_set.add(field_name)
-        try:
-            # Run the public constructor first so current model validators reject incompatible
-            # metadata. Then construct from the stored values without reapplying class-level
-            # defaults that are already represented in the full field set.
-            model_type(**fields)
-            model = model_type.model_construct(
-                _fields_set=fields_set,
-                **fields,
-            )
-        except (TypeError, ValueError) as error:
-            raise MetadataCodecError(f"Unable to restore {model_type.__name__}") from error
-        state = _require_mapping(data.get("state"), kind="model state")
-        from arti.storage import Storage
-
-        if isinstance(model, Storage):
-            storage = model
-            if set(state) != {"storage_key_types"}:
-                raise MetadataCodecError(
-                    f"Unexpected persisted {model_type.__name__} state: {set(state)}"
-                )
-            storage._key_types = _decode(  # pyright: ignore[reportAttributeAccessIssue, reportPrivateUsage]
-                state["storage_key_types"]
-            )
-        elif state:
-            raise MetadataCodecError(
-                f"Unexpected persisted {model_type.__name__} state: {set(state)}"
-            )
-        return cast(Model, model)
+        index = data.get("index")
+        # Only earlier Models are decoded, which also rules out cycles.
+        if type(index) is not int or not 0 <= index < len(models):
+            raise MetadataCodecError(f"Invalid persisted model index: {index!r}")
+        return models[index]
     if kind == "typed_box":
         box_type = _import_type(cast(str, data.get("type")))
         if not issubclass(box_type, TypedBox):
             raise MetadataCodecError(f"Persisted type {box_type} is not a TypedBox")
         items = _require_items(data.get("items"), kind=kind)
         build_box = cast(Callable[[Mapping[str, Any]], TypedBox[Any]], box_type)
-        box = build_box({cast(str, key): _decode(item) for key, item in items})
+        box = build_box({cast(str, key): _decode(item, models) for key, item in items})
         box._status.root = "closed"  # pyright: ignore[reportPrivateUsage]
         return box
     if kind == "mapping":
@@ -247,9 +291,9 @@ def _decode(value: Any) -> Any:
             raise MetadataCodecError(f"Persisted type {mapping_type} is not a Mapping")
         items = _require_items(data.get("items"), kind=kind)
         build_mapping = cast(Callable[[Iterable[tuple[Any, Any]]], Mapping[Any, Any]], mapping_type)
-        return build_mapping((_decode(key), _decode(item)) for key, item in items)
+        return build_mapping((_decode(key, models), _decode(item, models)) for key, item in items)
     if kind in ("tuple", "list", "set", "frozenset"):
-        items = [_decode(item) for item in _require_items(data.get("items"), kind=kind)]
+        items = [_decode(item, models) for item in _require_items(data.get("items"), kind=kind)]
         return {"tuple": tuple, "list": list, "set": set, "frozenset": frozenset}[kind](items)
     if kind == "enum":
         enum_type = _import_type(cast(str, data.get("type")))

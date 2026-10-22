@@ -136,7 +136,7 @@ def test_sql_backend_detects_corrupted_graph_metadata() -> None:
         )
         assert row is not None
         metadata = deepcopy(row.metadata_json)
-        fields = cast(dict[str, Any], metadata["value"]["fields"])
+        fields = cast(dict[str, Any], metadata["models"][-1]["fields"])
         fields["name"] = "wrong"
         row.metadata_json = metadata
 

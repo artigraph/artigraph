@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from contextlib import suppress
 from copy import deepcopy
 from datetime import UTC, date, datetime, time
@@ -21,6 +22,7 @@ from arti.backends.sql.codec import (
 )
 from arti.internal.models import Model
 from arti.storage.literal import StringLiteral
+from tests.arti.backends.pipeline import Number, add
 from tests.arti.dummies import A1, P1
 
 
@@ -49,8 +51,13 @@ class Anything(Model):
 NOT_A_TYPE = Color.RED
 
 
-def _document(value: Any) -> dict[str, Any]:
-    return {"codec_version": 1, "value": value}
+def _document(value: Any, *models: Any) -> dict[str, Any]:
+    return {"codec_version": 2, "models": list(models), "value": value}
+
+
+def _root(document: dict[str, Any]) -> dict[str, Any]:
+    # Models are encoded after the Models they reference, so the root is last.
+    return document["models"][-1]
 
 
 def test_metadata_codec_round_trip() -> None:
@@ -66,7 +73,7 @@ def test_metadata_codec_round_trip() -> None:
     )
     document = encode_document(value)
 
-    assert document["codec_version"] == 1
+    assert document["codec_version"] == 2
     assert decode_document(document, CodecValues) == value
 
 
@@ -74,9 +81,7 @@ def test_metadata_codec_sorts_sets() -> None:
     # Set order follows the process' hash seed, so documents sort the encoded items.
     letters = [chr(ord("a") + i) for i in range(26)]
     for value in (frozenset(letters), set(letters)):
-        assert (
-            encode_document(Anything(value=value))["value"]["fields"]["value"]["items"] == letters
-        )
+        assert _root(encode_document(Anything(value=value)))["fields"]["value"]["items"] == letters
 
 
 def test_metadata_codec_graph_round_trip() -> None:
@@ -89,6 +94,38 @@ def test_metadata_codec_graph_round_trip() -> None:
     assert restored == graph
     assert restored.fingerprint == graph.fingerprint
     assert restored.artifact_to_key == graph.artifact_to_key
+
+
+def _chain(stages: int) -> Graph:
+    """Build a Graph where each Producer reads the previous Artifact twice."""
+    with Graph(name="chain") as graph:
+        graph.artifacts.x0 = Number(storage=StringLiteral(value="1"))
+        for i in range(1, stages + 1):
+            previous = cast(Number, graph.artifacts[f"x{i - 1}"])
+            graph.artifacts[f"x{i}"] = add(left=previous, right=previous).out()
+    return graph
+
+
+def test_metadata_codec_encodes_shared_models_once() -> None:
+    graph = _chain(10)
+    document = encode_document(graph)
+    restored = decode_document(document, Graph)
+
+    assert restored == graph
+    assert restored.fingerprint == graph.fingerprint
+    producer = restored.artifacts.x10.producer_output.producer
+    assert producer.left is producer.right
+    # Repeating shared Artifacts doubled the document for every stage.
+    assert len(json.dumps(document)) < 3 * len(json.dumps(encode_document(_chain(5))))
+
+
+def test_metadata_codec_does_not_merge_equal_models() -> None:
+    # Pydantic considers these equal, but the values differ.
+    value = Anything(value=(Anything(value=1), Anything(value=True)))
+
+    restored = decode_document(encode_document(value), Anything)
+
+    assert [type(item.value) for item in restored.value] == [int, bool]
 
 
 @pytest.mark.parametrize(
@@ -157,9 +194,12 @@ def test_metadata_codec_rejects_unsupported_values() -> None:
 @pytest.mark.parametrize(
     ("case", "message"),
     [
-        ("version", "Unsupported metadata codec"),
+        ("version", "Unsupported metadata codec version: 1"),
         ("document-keys", "Unexpected metadata document keys"),
+        ("models", "Expected document models items to be a list"),
         ("kind", "Unknown persisted metadata kind"),
+        ("index", "Invalid persisted model index"),
+        ("forward-index", "Invalid persisted model index"),
         ("type", "Unable to import persisted type"),
         ("fields", "Unknown fields"),
         ("fields-set", "Invalid field"),
@@ -181,15 +221,22 @@ def test_metadata_codec_rejects_corruption(case: str, message: str) -> None:
             )
         )
     )
-    value = document["value"]
-    assert isinstance(value, dict)
+    value = _root(document)
     match case:
         case "version":
-            document["codec_version"] = 2
+            # Older documents are not migrated.
+            document["codec_version"] = 1
         case "document-keys":
             document["extra"] = True
+        case "models":
+            document["models"] = {}
         case "kind":
-            value["kind"] = "unknown"
+            document["value"]["kind"] = "unknown"
+        case "index":
+            document["value"]["index"] = len(document["models"])
+        case "forward-index":
+            reference = {"kind": "model", "index": 1}
+            document["models"].insert(0, {**value, "fields": {"blob": reference}})
         case "type":
             value["type"] = "missing.module:Missing"
         case "fields":
@@ -211,25 +258,8 @@ def test_metadata_codec_rejects_corruption(case: str, message: str) -> None:
     [
         ([], "Expected encoded metadata to be a mapping"),
         ({}, "missing a string 'kind'"),
-        ({"kind": "model", "type": "invalid"}, "Invalid persisted type path"),
-        ({"kind": "model", "type": 1}, "Invalid persisted type path"),
-        (
-            {
-                "kind": "model",
-                "type": "tests.arti.backends.test_sql_codec:NOT_A_TYPE",
-            },
-            "does not resolve to a type",
-        ),
-        (
-            {
-                "kind": "model",
-                "type": "builtins:int",
-                "fields": {},
-                "fields_set": [],
-                "state": {},
-            },
-            "is not an Artigraph Model",
-        ),
+        ({"kind": "model", "index": 0}, "Invalid persisted model index"),
+        ({"kind": "model", "index": True}, "Invalid persisted model index"),
         (
             {
                 "kind": "typed_box",
@@ -293,6 +323,27 @@ def test_metadata_codec_rejects_invalid_structured_values(
         decode_document(_document(value), Anything)
 
 
+@pytest.mark.parametrize(
+    ("model", "message"),
+    [
+        ([], "Expected model metadata to be a mapping"),
+        ({"type": "invalid"}, "Invalid persisted type path"),
+        ({"type": 1}, "Invalid persisted type path"),
+        (
+            {"type": "tests.arti.backends.test_sql_codec:NOT_A_TYPE"},
+            "does not resolve to a type",
+        ),
+        (
+            {"type": "builtins:int", "fields": {}, "fields_set": [], "state": {}},
+            "is not an Artigraph Model",
+        ),
+    ],
+)
+def test_metadata_codec_rejects_invalid_models(model: Any, message: str) -> None:
+    with pytest.raises(MetadataCodecError, match=message):
+        decode_document(_document({"kind": "model", "index": 0}, model), Anything)
+
+
 def test_metadata_codec_rejects_invalid_model_values() -> None:
     document = encode_document(
         CodecValues(
@@ -306,7 +357,7 @@ def test_metadata_codec_rejects_invalid_model_values() -> None:
             values=frozenset(),
         )
     )
-    fields = cast(dict[str, Any], document["value"]["fields"])
+    fields = cast(dict[str, Any], _root(document)["fields"])
     fields["date"] = 1
 
     with pytest.raises(MetadataCodecError, match="Unable to restore CodecValues"):
@@ -315,7 +366,7 @@ def test_metadata_codec_rejects_invalid_model_values() -> None:
 
 def test_metadata_codec_rejects_invalid_storage_state() -> None:
     document = encode_document(StringLiteral())
-    state = cast(dict[str, Any], document["value"]["state"])
+    state = cast(dict[str, Any], _root(document)["state"])
     state["extra"] = None
 
     with pytest.raises(MetadataCodecError, match="Unexpected persisted StringLiteral state"):
@@ -339,6 +390,8 @@ def test_metadata_codec_rejects_invalid_items() -> None:
 def test_metadata_codec_rejects_arbitrary_json_without_internal_errors(value: Any) -> None:
     with suppress(MetadataCodecError):
         decode_document(_document(value), Anything)
+    with suppress(MetadataCodecError):
+        decode_document(_document({"kind": "model", "index": 0}, value), Anything)
 
 
 @given(
@@ -403,7 +456,7 @@ def test_metadata_codec_tags_floats(value: float) -> None:
     document = encode_document(Anything(value=value))
     restored = decode_document(document, Anything).value
 
-    assert document["value"]["fields"]["value"] == {"kind": "float", "value": repr(value)}
+    assert _root(document)["fields"]["value"] == {"kind": "float", "value": repr(value)}
     assert type(restored) is float
     assert repr(restored) == repr(value)
 
@@ -423,7 +476,7 @@ def test_metadata_codec_tags_floats(value: float) -> None:
 )
 def test_metadata_codec_rejects_malformed_values(value: Any) -> None:
     document = encode_document(Anything(value=None))
-    document["value"]["fields"]["value"] = value
+    _root(document)["fields"]["value"] = value
 
     with pytest.raises(MetadataCodecError):
         decode_document(document, Anything)

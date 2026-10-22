@@ -25,6 +25,11 @@ def double(value: Annotated[int, Number]) -> Annotated[int, Number]:
 
 
 @producer()
+def add(left: Annotated[int, Number], right: Annotated[int, Number]) -> Annotated[int, Number]:
+    return left + right
+
+
+@producer()
 def neighbors(
     value: Annotated[int, Number],
 ) -> tuple[Annotated[int, Number], Annotated[int, Number]]:

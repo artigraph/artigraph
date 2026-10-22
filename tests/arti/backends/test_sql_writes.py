@@ -92,7 +92,7 @@ def test_sql_partition_reads_validate_fingerprints() -> None:
     with backend.engine.begin() as connection:
         connection.execute(
             sa.text(
-                "UPDATE arti_storage_partition SET metadata_json = json_set(metadata_json, '$.value.fields.content_fingerprint.value', 1)"
+                "UPDATE arti_storage_partition SET metadata_json = json_set(metadata_json, '$.models[#-1].fields.content_fingerprint.value', 1)"
             )
         )
 
