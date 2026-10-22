@@ -96,6 +96,23 @@ def test_snapshot_duckdb_rejects_changed_partition(tmp_path: Path) -> None:
             snapshot_parquet_paths(snapshot, artifact)
 
 
+def test_snapshot_parquet_duckdb_work_dir_is_demo_owned(tmp_path: Path) -> None:
+    work_dir = tmp_path / "demo"
+    work_dir.mkdir()
+    keep = work_dir / "keep.txt"
+    keep.write_text("not the demo's")
+
+    with pytest.raises(ValueError, match="Refusing to delete"):
+        run_demo(work_dir)
+    assert keep.read_text() == "not the demo's"
+
+    keep.unlink()
+    run_demo(work_dir)  # An empty directory is adopted...
+    (work_dir / "stale.txt").write_text("")
+    run_demo(work_dir)  # ...and a demo-owned one is reset on rerun.
+    assert not (work_dir / "stale.txt").exists()
+
+
 def test_minimal_import_without_parquet_dependencies(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     spend = root / "docs" / "examples" / "spend" / "demo.py"

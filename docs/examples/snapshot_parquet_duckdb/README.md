@@ -16,6 +16,8 @@ uv run --all-extras --with duckdb python docs/examples/snapshot_parquet_duckdb/d
 
 The command uses only local files, an in-memory DuckDB connection, and a local SQLite metadata
 database under `_work/`. It does not require Docker, cloud credentials, or an external service.
+Pass `--work-dir <dir>` to write elsewhere. Each run starts fresh: the demo deletes a work directory
+it created before (marked by a `.artigraph-demo` file), and refuses to touch any other non-empty one.
 
 Expected output includes:
 

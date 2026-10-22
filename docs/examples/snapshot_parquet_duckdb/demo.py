@@ -24,6 +24,8 @@ from arti.storage.local import LocalFile
 DIR = Path(__file__).parent
 DEFAULT_WORK_DIR = DIR / "_work"
 GRAPH_NAME = "snapshot-parquet-duckdb-demo"
+# Marks a work dir as created by this demo, so reruns only ever delete the demo's own files.
+WORK_DIR_MARKER = ".artigraph-demo"
 
 
 def _transactions(
@@ -75,10 +77,19 @@ def _query_total(
     return float(value[0])
 
 
-def run_demo(work_dir: Path) -> dict[str, float]:
-    if work_dir.exists():
+def _reset_work_dir(work_dir: Path) -> None:
+    if work_dir.exists() and any(work_dir.iterdir()):
+        if not (work_dir / WORK_DIR_MARKER).exists():
+            raise ValueError(
+                f"Refusing to delete {work_dir}: it is not empty and was not created by this demo"
+            )
         shutil.rmtree(work_dir)
-    work_dir.mkdir(parents=True)
+    work_dir.mkdir(parents=True, exist_ok=True)
+    (work_dir / WORK_DIR_MARKER).touch()
+
+
+def run_demo(work_dir: Path) -> dict[str, float]:
+    _reset_work_dir(work_dir)
 
     with SQLiteBackend(path=work_dir / "artigraph.sqlite") as backend:
         raw_storage = LocalFile(
