@@ -254,8 +254,8 @@ class Graph(Model):
                 artifact_class=type(artifact), type=artifact.type, mode="READ"
             )
             view.check_annotation_compatibility(annotation)
-            view.check_artifact_compatibility(artifact)
         assert view is not None
+        view.check_artifact_compatibility(artifact)
         if storage_partition_snapshots is None:
             # We want to allow reading raw Artifacts even if other raw Artifacts are missing (which
             # prevents snapshotting).

@@ -582,6 +582,9 @@ def test_Graph_read_write(tmp_path: Path) -> None:
         g.read(i)
     with pytest.raises(ValueError, match="Only one of `annotation` or `view` may be passed"):
         g.read(i, annotation=int, view=View.from_annotation(int, mode="READ"))
+    # An explicit `view` must still match the Artifact.
+    with pytest.raises(ValueError, match="is not compatible with the Artifact's Type"):
+        g.read(i, view=View.from_annotation(str, mode="READ"))
     assert g.read(j, annotation=int) == 5
 
     # Test that we can use an existing connection
