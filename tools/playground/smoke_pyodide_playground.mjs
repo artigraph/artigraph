@@ -127,9 +127,17 @@ async function main() {
     const pyodide = await loadPyodide();
     await pyodide.loadPackage(manifest.pyodidePackages);
     pyodide.FS.writeFile("artigraph_smoke.py", sampleModule);
-    // Install pydantic-core first so pydantic's pinned dependency is already satisfied.
+    // Install pydantic's dependencies first so micropip doesn't look for them on PyPI.
     const micropip = pyodide.pyimport("micropip");
-    for (const prefix of ["pydantic_core-", "pydantic-", "pyfarmhash-", "parse-", "arti-"]) {
+    for (const prefix of [
+      "typing_extensions-",
+      "typing_inspection-",
+      "pydantic_core-",
+      "pydantic-",
+      "pyfarmhash-",
+      "parse-",
+      "arti-",
+    ]) {
       await micropip.install(findWheel(manifest, prefix, assetsDir));
     }
 
@@ -150,7 +158,7 @@ import farmhash
 assert farmhash.fingerprint64("artigraph") == 12072101138314094687
 
 import pydantic
-assert pydantic.__version__ == "2.13.4"
+assert pydantic.__version__ == "2.14.1"
 
 from artigraph_smoke import run
 result, snapshot_id = run()

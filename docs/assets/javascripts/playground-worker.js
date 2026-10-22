@@ -1,5 +1,13 @@
-// Install pydantic-core first so pydantic's pinned dependency is already satisfied.
-const INSTALL_ORDER = ["pydantic_core-", "pydantic-", "pyfarmhash-", "parse-", "arti-"];
+// Install pydantic's dependencies first so micropip doesn't look for them on PyPI.
+const INSTALL_ORDER = [
+  "typing_extensions-",
+  "typing_inspection-",
+  "pydantic_core-",
+  "pydantic-",
+  "pyfarmhash-",
+  "parse-",
+  "arti-",
+];
 
 let pyodide = null;
 let pyodidePromise = null;

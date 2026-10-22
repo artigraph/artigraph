@@ -2,7 +2,7 @@
 # requires-python = ">=3.14,<3.15"
 # dependencies = [
 #   "pip",
-#   "pyodide-build[resolve]==0.37.0",
+#   "pyodide-build[resolve]==0.39.2",
 # ]
 # ///
 
@@ -20,15 +20,18 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from typing import Any
 
-PYODIDE_VERSION = "314.0.3"
+PYODIDE_VERSION = "314.0.7"
+PYODIDE_PLATFORM = "pyemscripten_2026_0_wasm32"
 PYTHON_VERSION = "3.14"
-RUST_TOOLCHAIN = "1.93.0"
-RUST_TARGET = "wasm32-unknown-emscripten"
 
-PYDANTIC_VERSION = "2.13.4"
-PYDANTIC_CORE_VERSION = "2.46.4"
-PYFARMHASH_VERSION = "0.4.0"
-PARSE_VERSION = "1.22.1"
+# Pyodide 314 ships pydantic 2.12, typing-extensions 4.15, and typing-inspection 0.4.2, which are
+# too old for Artigraph's pydantic, so bundle these instead.
+PYDANTIC_VERSION = "2.14.1"
+PYDANTIC_CORE_VERSION = "2.50.1"
+TYPING_EXTENSIONS_VERSION = "4.16.0"
+TYPING_INSPECTION_VERSION = "0.4.4"
+PYFARMHASH_VERSION = "0.5.1"
+PARSE_VERSION = "1.22.4"
 # Keep in sync with the `playground-wheel` task in mise/config.toml.
 ARTI_VERSION = "0.0.0+playground"
 
@@ -81,6 +84,8 @@ def _download_sdist(*, package: str, version: str, destination: Path) -> Path:
 def _download_pure_wheels(*, destination: Path) -> list[Path]:
     requirements = [
         f"pydantic=={PYDANTIC_VERSION}",
+        f"typing-extensions=={TYPING_EXTENSIONS_VERSION}",
+        f"typing-inspection=={TYPING_INSPECTION_VERSION}",
         f"parse=={PARSE_VERSION}",
     ]
     _run(
@@ -100,6 +105,30 @@ def _download_pure_wheels(*, destination: Path) -> list[Path]:
     if len(wheels) != len(requirements):
         raise RuntimeError(f"Expected {len(requirements)} pure wheels, found: {wheels}")
     return wheels
+
+
+def _download_pydantic_core_wheel(*, destination: Path) -> Path:
+    # pydantic-core publishes Pyodide wheels, so it doesn't need to be built with Rust.
+    _run(
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "download",
+            "--only-binary=:all:",
+            "--no-deps",
+            f"--platform={PYODIDE_PLATFORM}",
+            f"--python-version={PYTHON_VERSION}",
+            "--implementation=cp",
+            f"pydantic-core=={PYDANTIC_CORE_VERSION}",
+            "-d",
+            str(destination),
+        ]
+    )
+    wheels = sorted(destination.glob(f"pydantic_core-{PYDANTIC_CORE_VERSION}-*.whl"))
+    if len(wheels) != 1:
+        raise RuntimeError(f"Expected one pydantic-core wheel, found: {wheels}")
+    return wheels[0]
 
 
 def _extract_sdist(sdist: Path, destination: Path) -> Path:
@@ -160,13 +189,7 @@ def _write_manifest(*, output_dir: Path, wheel_names: list[str]) -> None:
     manifest: dict[str, Any] = {
         "pyodideVersion": PYODIDE_VERSION,
         "pythonVersion": PYTHON_VERSION,
-        "rustToolchain": RUST_TOOLCHAIN,
-        "pyodidePackages": [
-            "micropip",
-            "annotated-types",
-            "typing-extensions",
-            "typing-inspection",
-        ],
+        "pyodidePackages": ["micropip", "annotated-types"],
         "wheels": wheel_names,
         "packageDir": PACKAGE_DIR_NAME,
         "generatedBy": "tools/playground/build_pyodide_assets.py",
@@ -180,10 +203,6 @@ def build_assets(*, output_dir: Path) -> None:
         command = "uv run --script tools/playground/build_pyodide_assets.py"
         raise RuntimeError(f"Build Pyodide assets with Python 3.14, e.g. `{command}`.")
 
-    rustup = _tool("rustup")
-    _run([rustup, "toolchain", "install", RUST_TOOLCHAIN])
-    _run([rustup, "target", "add", RUST_TARGET, "--toolchain", RUST_TOOLCHAIN])
-
     with TemporaryDirectory(prefix="artigraph-pyodide-assets-") as tmp:
         workspace = Path(tmp)
         build_dir = workspace / "build"
@@ -195,11 +214,7 @@ def build_assets(*, output_dir: Path) -> None:
         pyodide_env = {"PYODIDE_XBUILDENV_PATH": str(xbuildenv_dir)}
 
         pure_wheels = _download_pure_wheels(destination=pure_wheel_dir)
-        pydantic_core_wheel = _build_pyodide_wheel(
-            f"pydantic-core=={PYDANTIC_CORE_VERSION}",
-            outdir=build_dir,
-            env={**pyodide_env, "RUSTUP_TOOLCHAIN": RUST_TOOLCHAIN},
-        )
+        pydantic_core_wheel = _download_pydantic_core_wheel(destination=build_dir)
 
         pyfarmhash_workspace = workspace / "pyfarmhash"
         pyfarmhash_workspace.mkdir()

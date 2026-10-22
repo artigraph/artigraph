@@ -14,8 +14,7 @@ mise run playground-wheel
 
 ## Build third-party assets
 
-The playground targets Pyodide 314.0.3, which uses Python 3.14 and requires Rust 1.93 for the
-`pydantic-core` wheel.
+The playground targets Pyodide 314.0.7, which uses Python 3.14.
 
 ```shell
 uv run --script tools/playground/build_pyodide_assets.py
@@ -26,8 +25,9 @@ The builder creates `docs/assets/playground/manifest.json` and wheels under
 
 - Artigraph itself (ignored by git),
 - `pyfarmhash` compiled for Pyodide,
-- `pydantic-core` compiled for Pyodide,
-- pure-Python wheels needed by the playground.
+- `pydantic-core`'s published Pyodide wheel,
+- pure-Python wheels needed by the playground, including `pydantic` and its `typing-*` dependencies
+  that are newer than Pyodide's.
 
 ## Smoke test
 

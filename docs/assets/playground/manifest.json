@@ -3,18 +3,17 @@
   "packageDir": "packages",
   "pyodidePackages": [
     "micropip",
-    "annotated-types",
-    "typing-extensions",
-    "typing-inspection"
+    "annotated-types"
   ],
-  "pyodideVersion": "314.0.3",
+  "pyodideVersion": "314.0.7",
   "pythonVersion": "3.14",
-  "rustToolchain": "1.93.0",
   "wheels": [
     "arti-0.0.0+playground-py3-none-any.whl",
-    "parse-1.22.1-py2.py3-none-any.whl",
-    "pydantic-2.13.4-py3-none-any.whl",
-    "pydantic_core-2.46.4-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
-    "pyfarmhash-0.4.0-cp314-cp314-pyemscripten_2026_0_wasm32.whl"
+    "parse-1.22.4-py2.py3-none-any.whl",
+    "pydantic-2.14.1-py3-none-any.whl",
+    "pydantic_core-2.50.1-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+    "pyfarmhash-0.5.1-cp314-cp314-pyemscripten_2026_0_wasm32.whl",
+    "typing_extensions-4.16.0-py3-none-any.whl",
+    "typing_inspection-0.4.4-py3-none-any.whl"
   ]
 }
