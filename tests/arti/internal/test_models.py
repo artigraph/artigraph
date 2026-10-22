@@ -77,6 +77,16 @@ def test_Model_fingerprint() -> None:
     assert w.fingerprint == Fingerprint.from_string(w_repr)
 
 
+def test_Model_copy_fingerprint() -> None:
+    obj = Concrete(i=1)
+    assert obj.fingerprint == Concrete(i=1).fingerprint  # Populate the cache
+
+    # The cached fingerprint must not survive an update to the fields it was computed from.
+    assert obj.model_copy(update={"i": 2}).fingerprint == Concrete(i=2).fingerprint
+    assert obj.model_copy(update={"i": 2}, deep=True).fingerprint == Concrete(i=2).fingerprint
+    assert obj.model_copy().fingerprint == obj.fingerprint
+
+
 # The rest more or less test the default Model's configuration of base pydantic functionality.
 
 

@@ -634,3 +634,16 @@ def test_Graph_storage_resolution() -> None:
     assert g.artifacts.root.a.storage.path.endswith("/test/tag=value/root/a/a.json")
     assert g.artifacts.root.b.storage.path.endswith("/test/tag=value/root/b/b.json")
     assert g.artifacts.c.storage.path.endswith("/test/tag=value/c/{input_fingerprint}/c.json")
+
+
+def test_Graph_storage_resolution_after_fingerprint() -> None:
+    # Fingerprinting a Storage template must not leak into the Storages resolved from it.
+    template = LocalFile()
+    assert template.fingerprint
+    with Graph(name="test") as g:
+        g.artifacts.a = Num(storage=template)
+        g.artifacts.b = Num(storage=template)
+
+    a, b = g.artifacts.a.storage, g.artifacts.b.storage
+    assert a.path != b.path
+    assert a.fingerprint != b.fingerprint
