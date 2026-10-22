@@ -148,6 +148,8 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (Optional[int], int | None),
     (list[int], Annotated[list[Any], 5]),
     (list[int], Annotated[list[int], 5]),
+    (list[int | None], list[int | None]),
+    (list[Optional[int]], list[int | None]),
     (str, Any),
     (str, Union[int, str]),  # noqa: UP007
     (str, int | str),
@@ -164,6 +166,10 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (tuple[int, ...], Sequence[int]),
     (tuple[int, ...], tuple[int, ...]),
     (tuple[int, int], tuple[int, ...]),
+    (tuple[Optional[int], ...], tuple[Optional[int], ...]),
+    (tuple[int | None, ...], tuple[int | None, ...]),
+    (tuple[int | None, int | None], tuple[int | None, ...]),
+    (tuple[int | None], tuple[int | None]),
     (tuple[tuple[int]], tuple),
     (tuple[tuple[int]], tuple[tuple[int]]),
 ]
@@ -208,6 +214,9 @@ _LENIENT_ISSUBCLASS_FALSE_CASES = [
     (tuple[tuple[int]], tuple[MyTuple[int]]),
     (list[int], tuple[int, ...]),
     (tuple[tuple[str]], tuple[tuple[int]]),
+    (list[int | None], list[int]),
+    (tuple[int | None, ...], tuple[int, ...]),
+    (tuple[int | None, ...], tuple[int | str, ...]),
     # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for
     # these.
     (int | None, int),
