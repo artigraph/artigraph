@@ -30,6 +30,10 @@ class BackendConnection:
 
     For example, a Backend connecting to a database might wrap up a SQLAlchemy connection in a
     BackendConnection subclass implementing the required methods.
+
+    Graphs and GraphSnapshots are identified by their name and fingerprint, so the first write of
+    an identity is kept and later writes are ignored, even if they differ in metadata excluded from
+    the fingerprint (eg: `Type.description`). Only snapshot tags can be overwritten.
     """
 
     # Artifact partitions - independent of a specific GraphSnapshot

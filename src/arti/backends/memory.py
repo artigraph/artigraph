@@ -100,13 +100,13 @@ class MemoryConnection(BackendConnection):
         return self.container.graphs[name][fingerprint]
 
     def write_graph(self, graph: Graph) -> None:
-        self.container.graphs[graph.name][graph.fingerprint] = graph
+        self.container.graphs[graph.name].setdefault(graph.fingerprint, graph)
 
     def read_snapshot(self, name: str, fingerprint: Fingerprint) -> GraphSnapshot:
         return self.container.snapshots[name][fingerprint]
 
     def write_snapshot(self, snapshot: GraphSnapshot) -> None:
-        self.container.snapshots[snapshot.name][snapshot.fingerprint] = snapshot
+        self.container.snapshots[snapshot.name].setdefault(snapshot.fingerprint, snapshot)
 
     def read_snapshot_tag(self, name: str, tag: str) -> GraphSnapshot:
         if tag not in self.container.snapshot_tags[name]:

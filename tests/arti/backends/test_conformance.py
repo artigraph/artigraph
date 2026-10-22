@@ -187,6 +187,34 @@ def test_backend_keeps_graphs_that_differ_only_by_producer(
         assert restored.read(restored.artifacts.incremented, annotation=int) == 2
 
 
+def test_backend_keeps_the_first_write_of_an_identity(backend_harness: BackendHarness) -> None:
+    backend = backend_harness.open()
+
+    def graph(description: str) -> Graph:
+        with Graph(name=f"first-write-{backend_harness.kind}", backend=backend) as graph:
+            graph.artifacts.value = Number(
+                type=Int64(description=description), storage=StringLiteral(value="1")
+            )
+        return graph
+
+    # The description is excluded from the fingerprint, so these share an identity.
+    first, second = graph("first"), graph("second")
+    assert first.fingerprint == second.fingerprint
+    snapshot_id = Fingerprint.from_int(1)
+    for graph_ in (first, second):
+        with backend.connect() as connection:
+            connection.write_graph(graph_)
+            connection.write_snapshot(GraphSnapshot(id=snapshot_id, graph=graph_))
+
+    with backend.connect() as connection:
+        restored_graph = connection.read_graph(first.name, first.fingerprint)
+        restored_snapshot = connection.read_snapshot(
+            first.name, GraphSnapshot(id=snapshot_id, graph=first).fingerprint
+        )
+    for restored in (restored_graph, restored_snapshot.graph):
+        assert restored.artifacts.value.type.description == "first"
+
+
 def test_backend_separates_storage_by_partition_key_types(
     backend_harness: BackendHarness, tmp_path: Path
 ) -> None:

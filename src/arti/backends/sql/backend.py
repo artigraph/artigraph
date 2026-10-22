@@ -102,9 +102,9 @@ class SQLBackendConnection(BackendConnection):
         raise NotImplementedError(f"Unsupported SQL backend dialect: {dialect}")  # coverage: ignore
 
     def _insert_missing(self, row_type: type[Base], rows: list[dict[str, Any]]) -> None:
-        # Rows other than tags are keyed by content fingerprints, so an existing row already holds
-        # the same metadata. Ignoring conflicts (rather than select-then-insert) also keeps
-        # concurrent writers of the same Graph from racing on the primary key.
+        # Rows other than tags are keyed by content fingerprints, so the first write of an identity
+        # is kept (see `BackendConnection`). Ignoring conflicts (rather than select-then-insert)
+        # also keeps concurrent writers of the same Graph from racing on the primary key.
         if rows:
             self.session.execute(self._insert(row_type).on_conflict_do_nothing(), rows)
 
