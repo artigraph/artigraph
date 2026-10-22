@@ -1,3 +1,4 @@
+import pickle
 from pathlib import Path
 from typing import Annotated, Any
 
@@ -16,12 +17,16 @@ from arti.formats.json import JSON
 from arti.formats.pickle import Pickle
 from arti.partitions import Int64Field
 from arti.storage.local import LocalFile
-from arti.types import Collection, Int64, Struct
+from arti.types import Collection, Int64, List, Struct
 from tests.arti.dummies import Num
 
 
 class PartitionedNum(Num):
     type: Type = Collection(element=Struct(fields={"i": Int64()}), partition_by=("i",))
+
+
+class Nums(Num):
+    type: Type = List(element=Int64())
 
 
 @pytest.mark.parametrize("format", [JSON(), Pickle()])
@@ -56,3 +61,25 @@ def test_localfile_io_partitioned(tmp_path: Path, format: Format) -> None:
     assert {p.snapshot() for p in data} == set(a.storage.discover_partitions())
     for partition, record in data.items():
         assert io.read(a.type, a.format, (partition.snapshot(),), view=view) == [record]
+
+
+# `object()` isn't JSON serializable and lambdas can't be pickled.
+@pytest.mark.parametrize(
+    ("format", "unserializable"),
+    [(JSON(), object()), (Pickle(), lambda: None)],
+    ids=["json", "pickle"],
+)
+def test_localfile_io_failed_write(tmp_path: Path, format: Format, unserializable: Any) -> None:
+    a = Nums(format=format, storage=LocalFile(path=str(tmp_path / "a")))
+    view = View.from_annotation(Annotated[list[Any], a.type], mode="READWRITE")
+    partition = a.storage.generate_partition()
+
+    with pytest.raises((TypeError, AttributeError, pickle.PicklingError)):
+        io.write([1, unserializable], a.type, a.format, partition, view=view)
+    assert list(tmp_path.iterdir()) == []
+
+    io.write([1], a.type, a.format, partition, view=view)
+    with pytest.raises((TypeError, AttributeError, pickle.PicklingError)):
+        io.write([2, unserializable], a.type, a.format, partition, view=view)
+    assert list(tmp_path.iterdir()) == [tmp_path / "a"]
+    assert io.read(a.type, a.format, (partition.snapshot(),), view=view) == [1]

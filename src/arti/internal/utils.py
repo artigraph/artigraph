@@ -3,8 +3,11 @@ from __future__ import annotations
 import importlib
 import inspect
 import pkgutil
+import secrets
 import threading
-from collections.abc import Callable, Iterable
+from collections.abc import Callable, Generator, Iterable
+from contextlib import contextmanager
+from pathlib import Path
 from types import ModuleType
 from typing import Any, Self, cast, overload
 
@@ -30,6 +33,23 @@ class ClassProperty[Ret]:
 def classproperty[Ret](meth: Callable[[Any], Ret]) -> Ret:
     """Access a class-level method like a property."""
     return cast(Ret, ClassProperty(meth))
+
+
+@contextmanager
+def atomic_write_path(path: Path) -> Generator[Path]:
+    """
+    Yield a temporary path beside `path`, which replaces `path` only if the block succeeds.
+
+    A failed write leaves no partial file, and an existing file at `path` stays intact. The
+    temporary file is hidden, so partition discovery (`glob`) skips it.
+    """
+    path.parent.mkdir(exist_ok=True, parents=True)
+    tmp = path.with_name(f".{path.name}.{secrets.token_hex(8)}.tmp")
+    try:
+        yield tmp
+        tmp.replace(path)
+    finally:
+        tmp.unlink(missing_ok=True)
 
 
 def get_module_name(depth: int = 1) -> str | None:

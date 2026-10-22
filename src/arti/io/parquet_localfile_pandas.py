@@ -23,6 +23,7 @@ except ModuleNotFoundError as error:  # pragma: no cover - dependency-free subpr
     # IO discovery imports every implementation. Optional Parquet dependencies must not prevent
     # JSON/Pickle IO from working in a minimal installation.
 else:
+    from arti.internal.utils import atomic_write_path
     from arti.io import register_reader, register_writer
     from arti.storage.local import LocalFilePartition
     from arti.types import Type
@@ -76,7 +77,6 @@ else:
                     and (values != values.dt.normalize()).any()
                 ):
                     raise ValueError(f"Date column {name!r} has times of day that would be dropped")
-        path = Path(storage_partition.path)
-        path.parent.mkdir(exist_ok=True, parents=True)
         table = pa.Table.from_pandas(data, schema=schema, preserve_index=False, safe=True)
-        cast(_ParquetWriter, pq).write_table(table, path)
+        with atomic_write_path(Path(storage_partition.path)) as path:
+            cast(_ParquetWriter, pq).write_table(table, path)

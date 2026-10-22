@@ -10,6 +10,7 @@ import pytest
 
 from arti.internal.utils import (
     ClassProperty,
+    atomic_write_path,
     class_name,
     classproperty,
     get_module_name,
@@ -18,6 +19,24 @@ from arti.internal.utils import (
     ordinal,
     register,
 )
+
+
+def test_atomic_write_path(tmp_path: Path) -> None:
+    path = tmp_path / "nested" / "file"
+    with atomic_write_path(path) as tmp:
+        tmp.write_text("1")
+        assert not path.exists()
+    assert path.read_text() == "1"
+
+    def fail_write() -> None:
+        with atomic_write_path(path) as tmp:
+            tmp.write_text("partial")
+            raise ValueError("failed")
+
+    with pytest.raises(ValueError, match="failed"):
+        fail_write()
+    assert path.read_text() == "1"
+    assert list(path.parent.iterdir()) == [path]
 
 
 def test_class_name() -> None:

@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from arti.formats.json import JSON
+from arti.internal.utils import atomic_write_path
 from arti.io import register_reader, register_writer
 from arti.storage.local import LocalFilePartition
 from arti.types import Type, is_partitioned
@@ -42,7 +43,5 @@ def read_json_localfile_python(
 def write_json_localfile_python(
     data: Any, type_: Type, format: JSON, storage_partition: LocalFilePartition, view: PythonBuiltin
 ) -> None:
-    path = Path(storage_partition.path)
-    path.parent.mkdir(exist_ok=True, parents=True)
-    with path.open("w") as file:
+    with atomic_write_path(Path(storage_partition.path)) as path, path.open("w") as file:
         json.dump(data, file)

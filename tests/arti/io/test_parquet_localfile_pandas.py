@@ -158,3 +158,33 @@ def test_parquet_localfile_pandas_write_rejects_dropped_times(
 ) -> None:
     with pytest.raises(ValueError, match="'transaction_date' has times of day"):
         _write(tmp_path, _frame(transaction_date=value))
+
+
+def test_parquet_localfile_pandas_failed_write(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    artifact = Transactions(
+        format=Parquet(),
+        storage=LocalFile(path=str(tmp_path / "{transaction_date.iso}.parquet")),
+    )
+    view = View.from_annotation(Annotated[pd.DataFrame, Transactions], mode="READWRITE")
+    frame = pd.DataFrame(
+        {
+            "transaction_id": ["txn-1"],
+            "transaction_date": [date(2026, 1, 1)],
+            "amount_cents": [1_250],
+            "amount_usd": [12.5],
+        }
+    )
+    partition = artifact.storage.generate_partition(partition_key=_partition_key(date(2026, 1, 1)))
+    snapshot = io.write(frame, artifact.type, artifact.format, partition, view)
+
+    def write_partial_table(table: pa.Table, where: Path) -> None:
+        Path(where).write_bytes(b"partial")
+        raise OSError("disk full")
+
+    monkeypatch.setattr(pq, "write_table", write_partial_table)
+    with pytest.raises(OSError, match="disk full"):
+        io.write(frame.assign(amount_cents=[1]), artifact.type, artifact.format, partition, view)
+    assert list(tmp_path.iterdir()) == [tmp_path / "2026-01-01.parquet"]
+    pd.testing.assert_frame_equal(io.read(artifact.type, artifact.format, (snapshot,), view), frame)

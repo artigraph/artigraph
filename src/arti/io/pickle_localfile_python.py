@@ -7,6 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from arti.formats.pickle import Pickle
+from arti.internal.utils import atomic_write_path
 from arti.io import register_reader, register_writer
 from arti.storage.local import LocalFilePartition
 from arti.types import Type, is_partitioned
@@ -44,7 +45,5 @@ def write_pickle_localfile_python(
     storage_partition: LocalFilePartition,
     view: PythonBuiltin,
 ) -> None:
-    path = Path(storage_partition.path)
-    path.parent.mkdir(exist_ok=True, parents=True)
-    with path.open("wb") as file:
+    with atomic_write_path(Path(storage_partition.path)) as path, path.open("wb") as file:
         pickle.dump(data, file)

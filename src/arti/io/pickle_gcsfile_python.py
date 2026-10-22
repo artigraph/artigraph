@@ -43,5 +43,8 @@ def read_pickle_gcsfile_python(
 def write_pickle_gcsfile_python(
     data: Any, type_: Type, format: Pickle, storage_partition: GCSFilePartition, view: PythonBuiltin
 ) -> None:
+    # Encode first: closing the file (even after an error) uploads whatever was written. A single
+    # upload replaces the object atomically.
+    encoded = pickle.dumps(data)
     with gcs_file_system().open(storage_partition.qualified_path, "wb") as file:
-        pickle.dump(data, file)
+        file.write(encoded)

@@ -43,5 +43,8 @@ def read_json_gcsfile_python(
 def write_json_gcsfile_python(
     data: Any, type_: Type, format: JSON, storage_partition: GCSFilePartition, view: PythonBuiltin
 ) -> None:
+    # Encode first: closing the file (even after an error) uploads whatever was written. A single
+    # upload replaces the object atomically.
+    encoded = json.dumps(data)
     with gcs_file_system().open(storage_partition.qualified_path, "w") as file:
-        json.dump(data, file)
+        file.write(encoded)
