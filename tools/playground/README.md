@@ -39,3 +39,13 @@ The smoke test installs the matching `pyodide` npm package in a temporary direct
 wheels from the generated manifest, checks that the bundled Artigraph wheel matches `src/arti`,
 verifies the FarmHash golden value, builds a tiny Artigraph graph inside Pyodide's virtual filesystem,
 and asserts that the produced result is `42.0`.
+
+## Navigation test
+
+```shell
+node --test tools/playground/test_playground_navigation.mjs
+```
+
+This test loads `docs/assets/javascripts/playground.js` against small DOM fakes and checks that
+instant navigation terminates the Pyodide worker and disconnects the observers of playgrounds that
+left the page. It needs no browser, network access, or built wheels.

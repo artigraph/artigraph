@@ -1,4 +1,6 @@
 const playgrounds = new WeakMap();
+// Instant navigation swaps page content without unloading, so playgrounds must be released explicitly.
+const mountedPlaygrounds = new Set();
 const DEFAULT_TIMEOUT_MS = 90000;
 const PREPARE_ROOT_MARGIN = "600px";
 // esm.sh otherwise resolves transitive deps by semver range at request time; pinning them all keeps
@@ -151,6 +153,9 @@ async function initializeEditor(playground) {
 
   try {
     const { EditorView, basicSetup, python } = await loadCodeMirror();
+    if (!playground.isConnected) {
+      return;
+    }
     const view = new EditorView({
       doc: textarea.value,
       extensions: [
@@ -278,7 +283,7 @@ function ensureWorker(playground) {
 
 function preparePlayground(playground) {
   const state = stateFor(playground);
-  if (state.ready || state.preparing || state.running) {
+  if (!playground.isConnected || state.ready || state.preparing || state.running) {
     return;
   }
 
@@ -383,13 +388,30 @@ function resetPlayground(playground) {
   renderControls(playground);
 }
 
+function disposePlayground(playground) {
+  const state = stateFor(playground);
+  state.worker?.terminate();
+  state.prepareObserver?.disconnect();
+  clearRunTimeout(state);
+  state.editorView?.destroy();
+  playgrounds.delete(playground);
+  mountedPlaygrounds.delete(playground);
+}
+
 function initializePlaygrounds(root = document) {
+  for (const playground of mountedPlaygrounds) {
+    if (!playground.isConnected) {
+      disposePlayground(playground);
+    }
+  }
+
   for (const playground of root.querySelectorAll("[data-artigraph-playground]")) {
     const state = stateFor(playground);
     if (state.initialized) {
       continue;
     }
     state.initialized = true;
+    mountedPlaygrounds.add(playground);
 
     initializeEditor(playground);
     playground.querySelector("[data-artigraph-run]").addEventListener("click", () => {
