@@ -464,11 +464,11 @@ def producer(
     version: Version | None = None,
 ) -> Callable[[BuildSig], type[Producer]]:
     def decorate(build: BuildSig) -> type[Producer]:
-        nonlocal name
-        name = build.__name__ if name is None else name
+        # Don't rebind `name`; the returned decorator may be applied to several functions.
+        producer_name = build.__name__ if name is None else name
         __annotations__: dict[str, Any] = {}
         for param in signature(build).parameters.values():
-            with wrap_exc(ValueError, prefix=f"{name} {param.name} param"):
+            with wrap_exc(ValueError, prefix=f"{producer_name} {param.name} param"):
                 view = View.from_annotation(param.annotation, mode="READ")
                 __annotations__[param.name] = view.artifact_class
         # If overriding, set an explicit "annotations" hint until [1] is released.
@@ -479,7 +479,7 @@ def producer(
         if version:
             __annotations__["version"] = Version
         return type(
-            name,
+            producer_name,
             (Producer,),
             {
                 k: v

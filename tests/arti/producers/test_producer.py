@@ -117,6 +117,21 @@ def test_producer_decorator() -> None:
     assert dummy_producer2(a1=A1()).version == StringVersion(value="test")
 
 
+def test_producer_decorator_reuse() -> None:
+    decorate = producer_decorator()
+
+    @decorate
+    def first(a1: Annotated[dict[Any, Any], A1]) -> Annotated[dict[Any, Any], A2]:
+        return {}
+
+    @decorate
+    def second(a1: Annotated[dict[Any, Any], A1]) -> Annotated[dict[Any, Any], A2]:
+        return {}
+
+    assert (first.__name__, second.__name__) == ("first", "second")
+    assert first(a1=A1()).fingerprint != second(a1=A1()).fingerprint
+
+
 def test_Producer_input_artifact_classes() -> None:
     @producer_decorator()
     def dummy_producer(
