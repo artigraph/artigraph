@@ -100,7 +100,12 @@ def test_python_literal() -> None:
 
 
 def test_python_literal_errors() -> None:
-    with pytest.raises(ValueError, match="All Literals must be the same type"):
+    with pytest.raises(
+        ValueError,
+        match=re.escape(
+            "All Literals must be the same type, got: (<class 'int'>, <class 'float'>)"
+        ),
+    ):
         assert python_type_system.to_artigraph(Literal[1, 1.0], hints={})
     with pytest.raises(NotImplementedError, match="Invalid Literal with no values"):
         PyLiteral.to_artigraph(Literal[()], hints={}, type_system=python_type_system)
