@@ -95,7 +95,9 @@ jobs:
       - name: Test minimal wheel installation
         run: |
           uv build --wheel --out-dir dist/smoke
-          uv run --isolated --no-project --with dist/smoke/*.whl \
+          # The spend output defaults to the temp dir, where pytest already built it. Use a fresh
+          # one so the installed wheel runs the producer instead of reading the cached output.
+          TMPDIR="$(mktemp -d)" uv run --isolated --no-project --with dist/smoke/*.whl \
             python docs/examples/spend/demo.py
       - uses: codecov/codecov-action@v7
         with:

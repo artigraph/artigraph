@@ -1,4 +1,5 @@
 import logging
+import os
 import runpy
 import subprocess
 import sys
@@ -95,7 +96,7 @@ def test_snapshot_duckdb_rejects_changed_partition(tmp_path: Path) -> None:
             snapshot_parquet_paths(snapshot, artifact)
 
 
-def test_minimal_import_without_parquet_dependencies() -> None:
+def test_minimal_import_without_parquet_dependencies(tmp_path: Path) -> None:
     root = Path(__file__).parents[1]
     spend = root / "docs" / "examples" / "spend" / "demo.py"
     code = f"""
@@ -127,4 +128,7 @@ else:
         capture_output=True,
         text=True,
         cwd=root,
+        # The spend output defaults to the temp dir; use a fresh one so the producer really runs.
+        env={**os.environ, "TMPDIR": str(tmp_path)},
     )
+    assert list(tmp_path.rglob("spend.json"))
