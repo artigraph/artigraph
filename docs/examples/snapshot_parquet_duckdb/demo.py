@@ -4,7 +4,7 @@ import argparse
 import shutil
 from datetime import date
 from pathlib import Path
-from typing import Any, cast
+from typing import cast
 
 import duckdb
 import pandas as pd
@@ -72,9 +72,8 @@ def _query_total(
         artifact=artifact,
         view_name=view_name,
     )
-    value: Any = connection.table(view_name).aggregate("sum(amount_usd)").fetchone()
-    assert value is not None
-    return float(value[0])
+    [(total,)] = connection.table(view_name).aggregate("sum(amount_usd)").fetchall()
+    return float(total)
 
 
 def _reset_work_dir(work_dir: Path) -> None:

@@ -54,11 +54,11 @@ all = [
     "pandas",
     "psycopg[binary]",
     "pyarrow",
-    "sqlalchemy>=2",
+    "sqlalchemy>=2.0.31",
 ]
 parquet = ["pandas", "pyarrow"]
-postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2"]
-sqlite = ["alembic", "sqlalchemy>=2"]
+postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2.0.31"]
+sqlite = ["alembic", "sqlalchemy>=2.0.31"]
 
 [project.urls]
 Documentation = "https://artigraph.github.io/artigraph/"

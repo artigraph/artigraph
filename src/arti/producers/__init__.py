@@ -55,7 +55,7 @@ ValidateSig = Callable[..., tuple[bool, str]]
 
 def _set_map_signature(map: MapSig, input_names: Iterable[str]) -> None:
     """Narrow a `**kwargs` map function's signature to the named input partitions."""
-    map.__signature__ = Signature(  # pyright: ignore[reportFunctionMemberAccess]
+    map.__signature__ = Signature(
         [
             Parameter(name=name, annotation=StoragePartitionSnapshots, kind=Parameter.KEYWORD_ONLY)
             for name in input_names
@@ -173,25 +173,19 @@ class Producer(Model):
         artifact_fields = {
             k: v for k, v in cls.model_fields.items() if k not in Producer.model_fields
         }
+        artifact_classes: dict[str, type[Artifact]] = {}
         for name, field in artifact_fields.items():
             with wrap_exc(ValueError, prefix=f".{name}"):
-                if is_optional_hint(field.annotation):
+                annotation = field.annotation
+                if is_optional_hint(annotation):
                     raise ValueError("field must not be optional.")
                 if not field.is_required():
                     raise ValueError("field must not have a default.")
                 # Require one Artifact class, not a Union of them.
-                if not (
-                    isinstance(field.annotation, type) and issubclass(field.annotation, Artifact)
-                ):
-                    raise ValueError(
-                        f"type hint must be an Artifact subclass, got: {field.annotation}"
-                    )
-        return InputArtifactClasses(
-            {
-                name: cast(type[Artifact], field.annotation)
-                for name, field in artifact_fields.items()
-            }
-        )
+                if not (isinstance(annotation, type) and issubclass(annotation, Artifact)):
+                    raise ValueError(f"type hint must be an Artifact subclass, got: {annotation}")
+                artifact_classes[name] = annotation
+        return InputArtifactClasses(artifact_classes)
 
     @classmethod
     def _validate_parameters(

@@ -50,7 +50,7 @@ def test_pydantic_field_naming() -> None:
 # in the Struct.metadata and prefer to return those.
 
 
-_scalar_type_mapping = {
+_scalar_type_mapping: dict[object, type[Type]] = {
     bool: Boolean,
     float: _Float,
     int: _Int,
@@ -138,6 +138,7 @@ def compare_model_to_generated(model: type[BaseModel], generated: type[BaseModel
             else:
                 raise NotImplementedError(f"Don't know how to check {expected_type}")
         elif lenient_issubclass(expected_type, BaseModel):
+            assert lenient_issubclass(got_type, BaseModel)
             compare_model_to_generated(expected_type, got_type)
         elif expected_type is got_type:
             pass
