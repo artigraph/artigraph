@@ -4,7 +4,7 @@ An **artifact** is Artigraph's contract for a data product. It says what the dat
 is serialized, where it lives, and what human or quality metadata is attached to it.
 
 ```python
-from arti import Artifact, ArtifactStorage, Format, Type
+from arti import Artifact, Format, Storage, Type
 from arti.formats.json import JSON
 from arti.storage.local import LocalFile
 from arti.types import Float64
@@ -13,7 +13,7 @@ from arti.types import Float64
 class TotalSpend(Artifact):
     type: Type = Float64()
     format: Format = JSON()
-    storage: ArtifactStorage = LocalFile()
+    storage: Storage = LocalFile()
 ```
 
 ## Artifact fields

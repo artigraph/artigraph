@@ -29,7 +29,9 @@ class MockStoragePartition(StoragePartition):
         return Fingerprint.from_string(self.path)
 
 
-class MockStorage(Storage[MockStoragePartition]):
+class MockStorage(Storage):
+    storage_partition_type = MockStoragePartition
+
     path: str
 
     def discover_partitions(
@@ -69,14 +71,23 @@ def test_StoragePartition_compute_content_fingerprint_unimplemented() -> None:
 
 
 def test_Storage_init_subclass() -> None:
-    abstract_class = type("Abstract", (cast(type, Storage),), {"_abstract_": True})
+    abstract_class = type("Abstract", (Storage,), {"_abstract_": True})
 
     assert not hasattr(abstract_class, "storage_partition_type")
 
     with pytest.raises(TypeError, match="Bad fields must match MockStoragePartition"):
-        type("Bad", (Storage[MockStoragePartition],), {})
 
-    class S(Storage[MockStoragePartition]):
+        class Bad(Storage):  # pyright: ignore[reportUnusedClass]
+            storage_partition_type = MockStoragePartition
+
+    with pytest.raises(TypeError, match="Missing must set `storage_partition_type`"):
+
+        class Missing(Storage):  # pyright: ignore[reportUnusedClass]
+            path: str
+
+    class S(Storage):
+        storage_partition_type = MockStoragePartition
+
         path: str
 
     assert not hasattr(Storage, "storage_partition_type")
@@ -170,7 +181,9 @@ def test_Storage_vist_type_extra() -> None:
         def compute_content_fingerprint(self) -> Fingerprint:
             return Fingerprint.from_string("test")
 
-    class Table(Storage[TablePartition]):
+    class Table(Storage):
+        storage_partition_type = TablePartition
+
         # NOTE: The type hints are needed to fix https://github.com/pydantic/pydantic/issues/1777#issuecomment-1465026331
         key_value_sep: ClassVar[str] = "_"
         partition_name_component_sep: ClassVar[str] = "_"

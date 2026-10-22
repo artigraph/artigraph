@@ -58,7 +58,7 @@ snapshot, and reads the result back.
 ```python
 from typing import Annotated, TypedDict
 
-from arti import Artifact, ArtifactStorage, Format, Graph, Type, producer
+from arti import Artifact, Format, Graph, Storage, Type, producer
 from arti.formats.json import JSON
 from arti.storage.local import LocalFile
 from arti.types import Collection, Float64, Int64, Struct
@@ -68,13 +68,13 @@ from arti.versions import SemVer
 class Transactions(Artifact):
     type: Type = Collection(element=Struct(fields={"id": Int64(), "amount": Float64()}))
     format: Format = JSON()
-    storage: ArtifactStorage = LocalFile(path="/tmp/artigraph-first-graph/transactions.json")
+    storage: Storage = LocalFile(path="/tmp/artigraph-first-graph/transactions.json")
 
 
 class TotalSpend(Artifact):
     type: Type = Float64()
     format: Format = JSON()
-    storage: ArtifactStorage = LocalFile(
+    storage: Storage = LocalFile(
         path="/tmp/artigraph-first-graph/produced/{input_fingerprint}/total.json",
     )
 

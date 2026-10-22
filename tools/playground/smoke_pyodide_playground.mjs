@@ -58,7 +58,7 @@ def run():
     from datetime import date
     from typing import Annotated, TypedDict
 
-    from arti import Artifact, ArtifactStorage, Format, Graph, PartitionKey, Type, producer
+    from arti import Artifact, Format, Graph, PartitionKey, Storage, Type, producer
     from arti.formats.json import JSON
     from arti.partitions import DateField
     from arti.storage.local import LocalFile
@@ -74,7 +74,7 @@ def run():
     class TotalSpend(Artifact):
         type: Type = Float64()
         format: Format = JSON()
-        storage: ArtifactStorage = LocalFile(
+        storage: Storage = LocalFile(
             path="/tmp/produced/{input_fingerprint}/total.json",
         )
 

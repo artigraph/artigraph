@@ -3,7 +3,6 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Any
 
 from pydantic import PrivateAttr
 
@@ -27,7 +26,7 @@ _GraphSnapshotPartitions = dict[
     GraphSnapshot, dict[str, set[StoragePartitionSnapshot]]
 ]  # ...[snapshot][artifact_key]
 _SnapshotTags = dict[str, dict[str, GraphSnapshot]]  # ...[name][tag]
-_StoragePartitions = dict[Storage[Any], set[StoragePartitionSnapshot]]
+_StoragePartitions = dict[Storage, set[StoragePartitionSnapshot]]
 
 
 def _new_artifact_partition_sets() -> dict[str, set[StoragePartitionSnapshot]]:

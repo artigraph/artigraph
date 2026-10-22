@@ -27,7 +27,9 @@ class LocalFilePartition(StoragePartition):
         return Fingerprint.from_string(sha.hexdigest())
 
 
-class LocalFile(Storage[LocalFilePartition]):
+class LocalFile(Storage):
+    storage_partition_type = LocalFilePartition
+
     # `_DEFAULT_PATH_TEMPLATE` and `rooted_at` ease testing, where we often want to just override
     # the tempdir, but keep the rest of the template. Eventually, we should introduce Resources and
     # implement a MockFS (to be used in `io.*`).

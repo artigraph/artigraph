@@ -1,9 +1,8 @@
 import json
 import pickle
-from typing import Any
 
 import pytest
-from pydantic import InstanceOf, TypeAdapter
+from pydantic import TypeAdapter
 
 from arti import Artifact, Graph, Storage
 from arti.graphs import ArtifactBox
@@ -15,7 +14,7 @@ from arti.types import Int64, String, Type
 
 
 class StorageHolder(Model):
-    storage: InstanceOf[Storage[Any]]
+    storage: Storage
 
 
 @pytest.mark.parametrize(
@@ -29,7 +28,7 @@ class StorageHolder(Model):
     ],
 )
 def test_nested_storage_preserves_concrete_fields(
-    left: Storage[Any], right: Storage[Any], field: str
+    left: Storage, right: Storage, field: str
 ) -> None:
     for storage in (left, right):
         holder = StorageHolder(storage=storage)
@@ -53,15 +52,6 @@ def test_nested_storage_preserves_concrete_fields(
     assert first.fingerprint != second.fingerprint
 
 
-def test_storage_any_erasure_preserves_concrete_specializations() -> None:
-    assert Storage[Any] is Storage
-    assert Storage[LocalFilePartition] is not Storage
-    assert LocalFile.storage_partition_type is LocalFilePartition
-    assert not hasattr(Storage, "storage_partition_type")
-    with pytest.raises(TypeError):
-        LocalFile[Any]  # pyright: ignore[reportInvalidTypeArguments]
-
-
 def test_partition_retains_concrete_storage_fields() -> None:
     storage = LocalFile(path="/one")
     partition = LocalFilePartition(path="/one", storage=storage)
@@ -83,4 +73,4 @@ def test_standalone_dumps_retain_concrete_fields() -> None:
     ):
         assert dump["n"]["note"] == "hi"
         assert dump["n"]["storage"]["path"] == "/one/n"
-    assert TypeAdapter(Storage[Any]).dump_python(LocalFile(path="/one"))["path"] == "/one"
+    assert TypeAdapter(Storage).dump_python(LocalFile(path="/one"))["path"] == "/one"

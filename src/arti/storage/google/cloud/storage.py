@@ -46,7 +46,9 @@ class GCSFilePartition(_GCSMixin, StoragePartition):
         )
 
 
-class GCSFile(_GCSMixin, Storage[GCSFilePartition]):
+class GCSFile(_GCSMixin, Storage):
+    storage_partition_type = GCSFilePartition
+
     path: str = str(
         Path("{graph_name}")
         / "{path_tags}"

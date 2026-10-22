@@ -3,7 +3,7 @@ from typing import Annotated, assert_type
 import pytest
 from pydantic import ValidationError
 
-from arti import Artifact, ArtifactStorage, Producer, Type, producer
+from arti import Artifact, Producer, Storage, Type, producer
 from arti.storage.local import LocalFile
 from arti.types import Int64
 
@@ -14,7 +14,7 @@ class Input(Artifact):
 
 class Output(Artifact):
     type: Type = Int64()
-    storage: ArtifactStorage = LocalFile()
+    storage: Storage = LocalFile()
 
 
 @producer()

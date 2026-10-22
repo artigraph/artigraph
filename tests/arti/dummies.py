@@ -55,7 +55,9 @@ class DummyPartition(StoragePartition):
         return Fingerprint.from_string(self.key)
 
 
-class DummyStorage(Storage[DummyPartition]):
+class DummyStorage(Storage):
+    storage_partition_type = DummyPartition
+
     key: str = "test-{graph_name}-{path_tags}-{names}-{partition_key_spec}-{input_fingerprint}-{name}.{extension}"
 
     def discover_partitions(

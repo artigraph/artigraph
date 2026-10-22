@@ -4,9 +4,9 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
-from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Self, cast
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Self
 
-from pydantic import Field, InstanceOf, PrivateAttr
+from pydantic import Field, PrivateAttr
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 class StoragePartition(Model):
     input_fingerprint: Fingerprint | None = None
     partition_key: PartitionKey = PartitionKey()
-    storage: Annotated[InstanceOf[Storage[Any]], Field(repr=False)]
+    storage: Annotated[Storage, Field(repr=False)]
 
     @abc.abstractmethod
     def compute_content_fingerprint(self) -> Fingerprint:
@@ -54,24 +54,27 @@ class StoragePartitionSnapshot(Model):
         return self.storage_partition.partition_key
 
     @property
-    def storage(self) -> Storage[Any]:
+    def storage(self) -> Storage:
         return self.storage_partition.storage
 
 
 StoragePartitionSnapshots = tuple[StoragePartitionSnapshot, ...]
 
 
-class Storage[SP: StoragePartition](Model):
+class Storage(Model):
     """
     Storage is a data reference identifying 1 or more partitions of data.
 
     Storage fields should have defaults set with placeholders for tags and partition
     keys. This allows automatic injection of the tags and partition keys for simple
     cases.
+
+    Concrete subclasses must set `storage_partition_type` to the StoragePartition class they
+    generate, which must have the same additional fields as the Storage.
     """
 
     _abstract_ = True
-    storage_partition_type: ClassVar[type[SP]]  # pyright: ignore[reportGeneralTypeIssues]
+    storage_partition_type: ClassVar[type[StoragePartition]]
 
     # These separators are used in the default resolve_* helpers to format metadata into
     # the storage fields.
@@ -84,27 +87,12 @@ class Storage[SP: StoragePartition](Model):
     _key_types: PartitionKeyTypes | None = PrivateAttr(default=None)
 
     @classmethod
-    def __class_getitem__(cls, item: Any) -> Any:
-        # An unconstrained Storage must remain the base class at runtime so Pydantic's
-        # polymorphic serialization includes concrete fields (paths, buckets, literal values).
-        # Concrete partition specializations still need their own classes and validation.
-        if cls is Storage and item is Any:
-            return cls
-        subclass = cast(type[Self], super().__class_getitem__(item))
-        subclass._abstract_ = True
-        subclass.storage_partition_type = item
-        return subclass
-
-    @classmethod
     def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
         super().__pydantic_init_subclass__(**kwargs)
-        # NOTE: When subscripting a generic, Pydantic generates a new model subclass, triggering
-        # this code. This runs *before* our `__class_getitem__` can mark it as `_abstract_` or set
-        # `storage_partition_type`. While we could detect the `storage_partition_type` here from the
-        # subscripted model, it's not actually the final class that has all of the fields defined -
-        # so we cannot validate it yet.
-        if cls._abstract_ or not hasattr(cls, "storage_partition_type"):
+        if cls._abstract_:
             return
+        if not hasattr(cls, "storage_partition_type"):
+            raise TypeError(f"{cls.__name__} must set `storage_partition_type`")
         expected_field_types = {
             name: info.annotation
             for name, info in cls.storage_partition_type.model_fields.items()
@@ -121,7 +109,7 @@ class Storage[SP: StoragePartition](Model):
             )
 
     @classmethod
-    def get_default(cls) -> Storage[Any]:
+    def get_default(cls) -> Storage:
         from arti.storage.literal import StringLiteral
 
         return StringLiteral()  # TODO: Support some sort of configurable defaults.
@@ -200,7 +188,7 @@ class Storage[SP: StoragePartition](Model):
         *,
         input_fingerprint: Fingerprint | None = None,
         partition_key: PartitionKey = PartitionKey(),
-    ) -> SP:
+    ) -> StoragePartition:
         self._check_key(self.key_types, partition_key)
         format_kwargs = dict[Any, Any](partition_key)
         if input_fingerprint is None:

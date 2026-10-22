@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 from typing import Annotated, TypedDict
 
-from arti import Annotation, Artifact, ArtifactStorage, Format, Graph, Type, producer
+from arti import Annotation, Artifact, Format, Graph, Storage, Type, producer
 from arti.formats.json import JSON
 from arti.storage.local import LocalFile
 from arti.types import Collection, Date, Float64, Int64, Struct
@@ -29,7 +29,7 @@ class TotalSpend(Artifact):
 
     type: Type = Float64()
     format: Format = JSON()
-    storage: ArtifactStorage = LocalFile()
+    storage: Storage = LocalFile()
 
 
 class Transaction(TypedDict):

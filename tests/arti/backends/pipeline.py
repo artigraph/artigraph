@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from typing import Annotated, Any, cast
 
-from arti import Artifact, ArtifactStorage, Backend, Graph, GraphSnapshot, Type, producer
+from arti import Artifact, Backend, Graph, GraphSnapshot, Storage, Type, producer
 from arti.formats.json import JSON
 from arti.storage.literal import StringLiteral
 from arti.types import Int64
@@ -11,7 +11,7 @@ from arti.types import Int64
 class Number(Artifact):
     type: Type = Int64()
     format: JSON = JSON()
-    storage: ArtifactStorage = StringLiteral()
+    storage: Storage = StringLiteral()
 
 
 @producer()

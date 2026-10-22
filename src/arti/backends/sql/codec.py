@@ -219,7 +219,7 @@ def _decode(value: Any) -> Any:
         from arti.storage import Storage
 
         if isinstance(model, Storage):
-            storage = cast(Storage[Any], model)
+            storage = model
             if set(state) != {"storage_key_types"}:
                 raise MetadataCodecError(
                     f"Unexpected persisted {model_type.__name__} state: {set(state)}"

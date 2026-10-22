@@ -31,8 +31,10 @@ class StringLiteralPartition(StoragePartition):
         return self.model_copy(update={"value": value})
 
 
-class StringLiteral(Storage[StringLiteralPartition]):
+class StringLiteral(Storage):
     """StringLiteral stores a literal String value directly in the Backend."""
+
+    storage_partition_type = StringLiteralPartition
 
     id: str = "{graph_name}/{path_tags}/{names}/{partition_key_spec}/{input_fingerprint}/{name}{extension}"
     value: str | None = None

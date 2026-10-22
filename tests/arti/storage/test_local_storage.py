@@ -32,6 +32,7 @@ def generate_partition_files(storage: LocalFile, input_fingerprints: InputFinger
         partition = storage.generate_partition(
             input_fingerprint=input_fingerprint, partition_key=pk
         )
+        assert isinstance(partition, LocalFilePartition)
         partition_path = Path(partition.path)
         partition_path.parent.mkdir(parents=True)
         partition_path.touch()

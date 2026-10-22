@@ -8,7 +8,7 @@ from pathlib import Path
 import pytest
 import sqlalchemy as sa
 
-from arti import Artifact, ArtifactStorage, Graph, Type
+from arti import Artifact, Graph, Storage, Type
 from arti.backends.postgres import PostgresBackend
 from arti.backends.sql.codec import MetadataCodecError
 from arti.backends.sqlite import SQLiteBackend
@@ -20,7 +20,7 @@ from arti.types import Int64
 class Scaled(Artifact):
     type: Type = Int64()
     format: JSON = JSON()
-    storage: ArtifactStorage = StringLiteral()
+    storage: Storage = StringLiteral()
     # Postgres JSONB normalizes JSON numbers, eg: `1e+16` reads back as an int.
     scale: float = 1e16
     offset: float = -0.0
