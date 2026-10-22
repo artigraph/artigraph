@@ -593,6 +593,7 @@ def test_Graph_read_write(tmp_path: Path) -> None:
         s = g.snapshot(connection=conn)
         s.write(10, artifact=j, connection=conn, input_fingerprint=Fingerprint.from_int(1))
         assert assert_type(s.read(j, annotation=int, connection=conn), int) == 10
+        assert g.read(j, annotation=int, connection=conn) == 10
 
         assert not connect_mock.called
         g.backend.connect()  # Confirm we are mocking correctly

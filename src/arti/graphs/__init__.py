@@ -265,7 +265,7 @@ class Graph(Model):
                 # only want to return the current values.
                 storage_partition_snapshots = artifact.storage.discover_partitions()
             else:
-                snapshot = snapshot or self.snapshot()
+                snapshot = snapshot or self.snapshot(connection=connection)
                 with (connection or self.backend).connect() as conn:
                     storage_partition_snapshots = conn.read_snapshot_partitions(
                         snapshot, key, artifact
