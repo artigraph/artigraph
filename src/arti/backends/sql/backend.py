@@ -108,7 +108,7 @@ class SQLBackendConnection(BackendConnection):
             self.session.execute(self._insert(row_type).on_conflict_do_nothing(), rows)
 
     def read_artifact_partitions(
-        self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
+        self, artifact: Artifact, input_fingerprints: InputFingerprints | None = None
     ) -> StoragePartitionSnapshots:
         rows = self.session.scalars(
             sa.select(StoragePartitionRow)
@@ -121,7 +121,7 @@ class SQLBackendConnection(BackendConnection):
                 raise MetadataCodecError(
                     "Persisted storage partition does not match its storage fingerprint"
                 )
-        if input_fingerprints:
+        if input_fingerprints is not None:
             partitions = tuple(
                 partition
                 for partition in partitions

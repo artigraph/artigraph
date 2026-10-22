@@ -68,16 +68,22 @@ class MemoryConnection(BackendConnection):
         self.container = container
 
     def read_artifact_partitions(
-        self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
+        self, artifact: Artifact, input_fingerprints: InputFingerprints | None = None
     ) -> StoragePartitionSnapshots:
+        if input_fingerprints is not None and not input_fingerprints:
+            # Nothing can match, so there is no need to discover the Storage partitions.
+            return ()
         # The MemoryBackend is (obviously) not persistent, so there may be external data we don't
         # know about. If we haven't seen this storage before, we'll attempt to "warm" the cache.
         if artifact.storage not in self.container.storage_partitions:
             self.write_artifact_partitions(
-                artifact, artifact.storage.discover_partitions(input_fingerprints)
+                artifact,
+                artifact.storage.discover_partitions(
+                    InputFingerprints() if input_fingerprints is None else input_fingerprints
+                ),
             )
         partition_snapshots = self.container.storage_partitions[artifact.storage]
-        if input_fingerprints:
+        if input_fingerprints is not None:
             partition_snapshots = {
                 snapshot
                 for snapshot in partition_snapshots

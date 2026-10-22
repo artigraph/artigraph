@@ -44,11 +44,6 @@ class Executor(Model):
         # we'll fetch all StoragePartitions for each Storage, filtered to the PKs and
         # input_fingerprints we've computed *are* for this snapshot - and then link them to the
         # snapshot.
-        #
-        # An empty filter matches *every* known partition (eg: outputs of old inputs), so there is
-        # nothing to look up when `map` returned no partitions.
-        if not partition_input_fingerprints:
-            return set()
         output_partition_snapshots = {
             output: connection.read_artifact_partitions(output, partition_input_fingerprints)
             for output in snapshot.graph.producer_outputs[producer]

@@ -127,6 +127,8 @@ def test_backend_pipeline_conformance(backend_harness: BackendHarness) -> None:
     )
     with backend.connect() as connection:
         assert connection.read_artifact_partitions(output, expected_inputs) == artifact_partitions
+        # Unlike no filter, an empty filter matches no partitions.
+        assert connection.read_artifact_partitions(output, InputFingerprints()) == ()
 
         with pytest.raises(KeyError):
             connection.read_graph("missing", Fingerprint.from_int(1))

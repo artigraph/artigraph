@@ -36,12 +36,13 @@ class BackendConnection:
 
     @abstractmethod
     def read_artifact_partitions(
-        self, artifact: Artifact, input_fingerprints: InputFingerprints = InputFingerprints()
+        self, artifact: Artifact, input_fingerprints: InputFingerprints | None = None
     ) -> StoragePartitionSnapshots:
         """
         Read all known Partitions for this Storage spec.
 
-        If `input_fingerprints` is provided, the returned partitions will be filtered accordingly.
+        If `input_fingerprints` is provided, only partitions whose partition key and input
+        fingerprint match an entry are returned, so an empty `input_fingerprints` returns none.
 
         NOTE: The returned partitions may not be associated with any particular Graph, unless
         `input_fingerprints` is provided matching those for a GraphSnapshot.
