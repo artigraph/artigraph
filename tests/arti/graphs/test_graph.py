@@ -151,6 +151,8 @@ def test_Graph_copy(graph: Graph, copier: Callable[[Graph], Graph]) -> None:
 
     assert graph.fingerprint == copy.fingerprint
     assert hash(graph) == hash(copy)
+    # The copy must remain sealed (eg: unpickled status strings are equal, but not identical).
+    assert copy.producer_outputs == graph.producer_outputs
 
 
 def test_Graph_user_names_do_not_collide_with_internals() -> None:

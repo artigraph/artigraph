@@ -44,7 +44,7 @@ CLOSED: Literal["closed"] = "closed"
 def requires_sealed[Return](fn: Callable[..., Return]) -> Callable[..., Return]:
     @wraps(fn)
     def check_if_sealed(self: Graph, *args: Any, **kwargs: Any) -> Return:
-        if self._status is not CLOSED:  # pyright: ignore[reportPrivateUsage]
+        if self._status != CLOSED:  # pyright: ignore[reportPrivateUsage]
             raise ValueError(f"{fn.__name__} cannot be used while the Graph is still being defined")
         return fn(self, *args, **kwargs)
 
