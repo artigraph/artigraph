@@ -2002,9 +2002,12 @@ wheels = [
 
 [[package]]
 name = "pyfarmhash"
-version = "0.4.0"
+version = "0.5.1"
 source = { registry = "https://pypi.org/simple" }
-sdist = { url = "https://files.pythonhosted.org/packages/90/d8/e99ec1abd6c05c133787f952e903f71ea36385100bb6617ba445413ef6fe/pyfarmhash-0.4.0.tar.gz", hash = "sha256:f350327057de3c8912b227dc22794e0dd11c767fc9db6070ae84c49a96934865", size = 99524, upload-time = "2024-08-27T08:24:38.865Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/f3/2b/b42c5b4adaf3dbd5c303f7af9f4f4c5ed0966429066ece0f69ceff1a1b6f/pyfarmhash-0.5.1.tar.gz", hash = "sha256:d6abe8d1585671192c29a23d0a4d4b09657f3d2268f94826a33d6325840faef9", size = 99637, upload-time = "2026-08-26T07:28:42.645Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/0d/a3/eb4f01e9aaf20abe05578769316d6df81a7a9d540d50723d69680eb4806d/pyfarmhash-0.5.1-cp313-cp313-manylinux1_x86_64.manylinux_2_34_x86_64.manylinux_2_5_x86_64.whl", hash = "sha256:b66dfb9cfdcbd5eaa16bf73ce93bcebd711c041713bc60b54d2371c83a3ca67b", size = 100101, upload-time = "2026-08-26T07:28:40.501Z" },
+]
 
 [[package]]
 name = "pygments"
