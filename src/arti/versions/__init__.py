@@ -8,7 +8,7 @@ from collections.abc import Callable
 from datetime import UTC, datetime
 from typing import Annotated, Any, cast
 
-from annotated_types import Timezone
+from annotated_types import Ge, Timezone
 from pydantic import Field, field_validator
 
 from arti.internal.models import Model
@@ -32,15 +32,16 @@ class GitCommit(Version):
 
 class SemVer(Version):
     """
-    SemVer fingerprinting only considers the major component, unless it is less than 0.
+    SemVer fingerprinting only considers the major component, unless it is 0.
 
     By only considering the major version, we can add incremental bumps to a Producer without triggering
     historical backfills. The major version MUST be incremented on schema or methodological changes.
+    Before 1.0.0, the minor and patch components are also fingerprinted.
     """
 
-    major: int
-    minor: int
-    patch: int
+    major: Annotated[int, Ge(0)]
+    minor: Annotated[int, Ge(0)]
+    patch: Annotated[int, Ge(0)]
 
     def model_post_init(self, __context: Any) -> None:
         super().model_post_init(__context)

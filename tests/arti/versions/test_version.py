@@ -2,6 +2,7 @@
 from datetime import UTC, datetime
 
 import pytest
+from pydantic import ValidationError
 
 from arti.versions import GitCommit, SemVer, String, Timestamp, _Source
 
@@ -31,6 +32,12 @@ def test_SemVer(major: int, minor: int, patch: int, fingerprint_fields: set[str]
     assert set(SemVer._arti_fingerprint_fields_) == {"_arti_type_", "major", "minor", "patch"}
     version = SemVer(major=major, minor=minor, patch=patch)
     assert set(version._arti_fingerprint_fields_) == {"_arti_type_", *fingerprint_fields}
+
+
+@pytest.mark.parametrize("component", ["major", "minor", "patch"])
+def test_SemVer_negative(component: str) -> None:
+    with pytest.raises(ValidationError, match="greater than or equal to 0"):
+        SemVer(**{"major": 1, "minor": 0, "patch": 0, component: -1})
 
 
 def test_Source() -> None:
