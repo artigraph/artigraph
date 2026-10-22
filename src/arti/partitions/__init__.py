@@ -50,7 +50,12 @@ class PartitionField(Model):
 
     @classmethod
     def get_class_for(cls, type_: Type) -> type[PartitionField]:
-        return cls._by_type_[type(type_)]
+        if (field_class := cls._by_type_.get(type(type_))) is None:
+            supported = sorted(t.__name__ for t in cls._by_type_)
+            raise ValueError(
+                f"{type(type_).__name__} cannot be used as a partition field, expected one of: {supported}"
+            )
+        return field_class
 
 
 PartitionKeyTypes = frozendict[str, type[PartitionField]]

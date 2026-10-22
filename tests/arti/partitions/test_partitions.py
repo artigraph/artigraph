@@ -17,7 +17,7 @@ from arti.partitions import (
     _IntField,
     field_component,
 )
-from arti.types import Collection, Date, Int8, Int16, Int32, Int64, Struct
+from arti.types import Collection, Date, Int8, Int16, Int32, Int64, String, Struct
 
 
 def test_PartitionField_components() -> None:
@@ -37,6 +37,8 @@ def test_PartitionField_get_class_for() -> None:
     assert PartitionField.get_class_for(Int8()) is Int8Field
     assert PartitionField.get_class_for(Int16()) is Int16Field
     assert PartitionField.get_class_for(Date()) is DateField
+    with pytest.raises(ValueError, match="String cannot be used as a partition field"):
+        PartitionField.get_class_for(String())
 
 
 def test_PartitionField_subclass() -> None:
