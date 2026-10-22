@@ -1,6 +1,6 @@
 from datetime import UTC, date, datetime
 from pathlib import Path
-from typing import Annotated, Protocol, cast
+from typing import Annotated, Literal, Protocol, cast
 from zoneinfo import ZoneInfo
 
 import pandas as pd
@@ -9,10 +9,11 @@ import pyarrow.parquet as pq
 import pytest
 
 from arti import Artifact, PartitionKey, Type, View, io
+from arti.formats import Format
 from arti.formats.parquet import Parquet
 from arti.partitions import DateField
 from arti.storage.local import LocalFile, LocalFilePartition
-from arti.types import Collection, Date, Float64, Int64, String, Struct
+from arti.types import Collection, Date, Float64, Int64, List, String, Struct
 
 
 class Transactions(Artifact):
@@ -224,3 +225,20 @@ def test_parquet_localfile_pandas_write_rejects_dropped_times_in_object_dates(
     with pytest.raises(ValueError, match="'transaction_date' has times of day"):
         _write(tmp_path, frame)
     assert not (tmp_path / "data.parquet").exists()
+
+
+@pytest.mark.parametrize("mode", ["READ", "WRITE"])
+def test_parquet_localfile_pandas_requires_a_collection(
+    tmp_path: Path, mode: Literal["READ", "WRITE"]
+) -> None:
+    class Rows(Artifact):
+        # eg: the type inferred from a DataFrame, which lacks the Collection metadata.
+        type: Type = List(element=Struct(fields={"x": Int64()}))
+        format: Format = Parquet()
+
+    artifact = Rows(storage=LocalFile(path=str(tmp_path / "data.parquet")))
+    view = View.from_annotation(Annotated[pd.DataFrame, Rows], mode=mode)
+    with pytest.raises(
+        ValueError, match=rf"No `io\.{mode.lower()}` implementation found for: type_=List,"
+    ):
+        view.check_artifact_compatibility(artifact)

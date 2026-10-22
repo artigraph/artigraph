@@ -1,7 +1,8 @@
 """
 Read and write Pandas DataFrames as local Parquet files.
 
-Only the DataFrame's columns are stored, not its index; call `reset_index()` first to keep it.
+A Parquet file holds a table, so the Artifact type must be a `Collection`. Only the DataFrame's
+columns are stored, not its index; call `reset_index()` first to keep it.
 """
 
 from __future__ import annotations
@@ -27,7 +28,7 @@ else:
     from arti.internal.utils import atomic_write_path
     from arti.io import register_reader, register_writer
     from arti.storage.local import LocalFilePartition
-    from arti.types import Type
+    from arti.types import Collection
 
     class _ParquetFileReader(Protocol):  # pragma: no cover - static typing protocol
         def read(self) -> pa.Table: ...
@@ -40,7 +41,7 @@ else:
 
     @register_reader
     def read_parquet_localfile_pandas(
-        type_: Type,
+        type_: Collection,
         format: Parquet,
         storage_partitions: Sequence[LocalFilePartition],
         view: DataFrame,
@@ -64,7 +65,7 @@ else:
     @register_writer
     def write_parquet_localfile_pandas(
         data: pd.DataFrame,
-        type_: Type,
+        type_: Collection,
         format: Parquet,
         storage_partition: LocalFilePartition,
         view: DataFrame,
