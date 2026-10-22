@@ -42,6 +42,10 @@ def test_frozendict_union() -> None:
     assert {"a": 5} | frozendict(b=10) == frozendict(a=5, b=10)
     assert frozendict(a=5) | {"b": 10} == frozendict(a=5, b=10)
     assert frozendict(a=5) | frozendict(b=10) == frozendict(a=5, b=10)
+    # The right operand wins on duplicate keys, matching dict.
+    assert {"a": 5} | frozendict(a=10) == frozendict(a=10)
+    assert frozendict(a=5) | {"a": 10} == frozendict(a=10)
+    assert isinstance({"a": 5} | frozendict(a=10), frozendict)
 
 
 def test_frozendict_typing() -> None:

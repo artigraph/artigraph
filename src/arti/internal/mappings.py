@@ -33,7 +33,8 @@ class frozendict[K, V](Mapping[K, V]):
     def __or__(self, other: Mapping[K, V]) -> frozendict[K, V]:
         return type(self)({**self, **other})
 
-    __ror__ = __or__
+    def __ror__(self, other: Mapping[K, V]) -> frozendict[K, V]:
+        return type(self)({**other, **self})
 
     def __repr__(self) -> str:
         return repr(self._data)
