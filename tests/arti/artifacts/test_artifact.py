@@ -123,6 +123,9 @@ def test_instance_attr_merging() -> None:
     class Ann2(Annotation):
         y: int
 
+    with pytest.raises(TypeError, match="cannot be instantiated directly"):
+        Statistic()
+
     class Stat1(DummyStatistic):
         pass
 

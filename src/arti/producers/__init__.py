@@ -471,9 +471,7 @@ def producer(
             with wrap_exc(ValueError, prefix=f"{producer_name} {param.name} param"):
                 view = View.from_annotation(param.annotation, mode="READ")
                 __annotations__[param.name] = view.artifact_class
-        # If overriding, set an explicit "annotations" hint until [1] is released.
-        #
-        # 1: https://github.com/samuelcolvin/pydantic/pull/3018
+        # Pydantic requires a type hint on any field override, so re-annotate the overridden fields.
         if annotations:
             __annotations__["annotations"] = tuple[Annotation, ...]
         if version:

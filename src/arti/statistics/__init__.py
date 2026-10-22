@@ -6,7 +6,7 @@ from arti.internal.models import Model
 
 
 class Statistic(Model):
-    pass  # TODO: Determine the interface for Statistics
+    _abstract_ = True  # TODO: Determine the interface for Statistics
 
 
 # class FieldStatistic(Statistic):

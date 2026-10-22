@@ -44,10 +44,14 @@ class Type(Model):
 
 
 class ContainerMixin(Model):
+    _abstract_ = True
+
     element: Type
 
 
 class NamedMixin(Model):
+    _abstract_ = True
+
     name: str = DEFAULT_ANONYMOUS_NAME
 
     @property
@@ -64,6 +68,8 @@ type Precision = Literal["second", "millisecond", "microsecond", "nanosecond"]
 
 
 class TimeMixin(Model):
+    _abstract_ = True
+
     precision: Literal["second", "millisecond", "microsecond", "nanosecond"]
 
 
@@ -73,15 +79,15 @@ class TimeMixin(Model):
 
 
 class _Numeric(Type):
-    pass
+    _abstract_ = True
 
 
 class _Float(_Numeric):
-    pass
+    _abstract_ = True
 
 
 class _Int(_Numeric):
-    pass
+    _abstract_ = True
 
 
 class Binary(Type):

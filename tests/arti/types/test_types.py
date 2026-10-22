@@ -9,8 +9,10 @@ from typing import Any, cast
 import pytest
 
 from arti import Type, TypeAdapter, TypeSystem
+from arti.internal.models import Model
 from arti.types import (
     Collection,
+    ContainerMixin,
     Enum,
     Float16,
     Float32,
@@ -18,10 +20,15 @@ from arti.types import (
     Int32,
     List,
     Map,
+    NamedMixin,
     Set,
     String,
     Struct,
+    TimeMixin,
     Timestamp,
+    _Float,
+    _Int,
+    _Numeric,
     is_partitioned,
 )
 
@@ -81,9 +88,15 @@ def Int32Adapter() -> type[TypeAdapter[Any]]:
     return _gen_numeric_adapter(artigraph_type=Int32, system_type=MyInt, precision=32)
 
 
-def test_Type() -> None:
+@pytest.mark.parametrize(
+    "abstract", [Type, _Numeric, _Float, _Int, ContainerMixin, NamedMixin, TimeMixin]
+)
+def test_Type_abstract(abstract: type[Model]) -> None:
     with pytest.raises(TypeError, match="cannot be instantiated directly"):
-        Type()
+        abstract()
+
+
+def test_Type() -> None:
 
     class MyType(Type):
         pass
