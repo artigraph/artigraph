@@ -80,6 +80,10 @@ class WildcardPlaceholder(Placeholder):
         # TODO: Should we validate the key against the key_type/attribute type?
         return key
 
+    def __format__(self, spec: str) -> str:
+        # Format specs (eg: the zero padding in `{date.m:02}`) match the same wildcard.
+        return str(self)
+
     def __str__(self) -> str:
         self._err_if_no_attribute()
         return "*"

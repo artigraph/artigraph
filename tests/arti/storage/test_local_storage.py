@@ -54,6 +54,20 @@ def test_local_partitioning(tmp_path: Path, date_keys: list[PartitionKey]) -> No
         assert isinstance(partition.partition_key["date"], DateField)
 
 
+def test_local_partitioning_default_template(tmp_path: Path, date_keys: list[PartitionKey]) -> None:
+    # The default `partition_key_spec` zero pads the `DateField` month and day.
+    storage = (
+        LocalFile(path=str(tmp_path / "{partition_key_spec}" / "test"))
+        .visit_type(Collection(element=Struct(fields={"date": Date()}), partition_by=("date",)))
+        .visit_format(DummyFormat())
+    )
+    assert storage.path == str(
+        tmp_path / "date_Y={date.Y}/date_m={date.m:02}/date_d={date.d:02}/test"
+    )
+    generate_partition_files(storage, InputFingerprints(zip(date_keys, repeat(None))))
+    assert {snapshot.partition_key for snapshot in storage.discover_partitions()} == set(date_keys)
+
+
 def test_local_partitioning_filtered(tmp_path: Path, date_keys: list[PartitionKey]) -> None:
     for year in {cast(DateField, k["date"]).Y for k in date_keys}:
         storage = (

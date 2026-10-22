@@ -181,6 +181,8 @@ def test_spec_to_wildcard(PKs: dict[str, type[PartitionField]]) -> None:
     assert spec_to_wildcard("/p/{x.value}/", PKs) == "/p/*/"
     assert spec_to_wildcard("/p/{x.value[5]}/", PKs) == "/p/5/"
     assert spec_to_wildcard("/p/{x.value[5]}/{y.hex}/", PKs) == "/p/5/*/"
+    # Format specs (eg: the default zero padded `DateField` components) don't change the glob.
+    assert spec_to_wildcard("/p/{x.value:02}/", PKs) == "/p/*/"
 
 
 def test_extract_placeholders(
