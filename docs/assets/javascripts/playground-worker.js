@@ -1,5 +1,5 @@
 // Install pydantic-core first so pydantic's pinned dependency is already satisfied.
-const INSTALL_ORDER = ["pydantic_core-", "pydantic-", "pyfarmhash-", "parse-", "multimethod-", "arti-"];
+const INSTALL_ORDER = ["pydantic_core-", "pydantic-", "pyfarmhash-", "parse-", "arti-"];
 
 let pyodide = null;
 let pyodidePromise = null;

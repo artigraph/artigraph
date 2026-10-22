@@ -120,6 +120,11 @@ def _frame(**overrides: object) -> pd.DataFrame:
     )
 
 
+def test_parquet_localfile_pandas_write_rejects_non_dataframes(tmp_path: Path) -> None:
+    with pytest.raises(TypeError, match="Expected a pandas DataFrame, got <class 'list'>"):
+        _write(tmp_path, cast(pd.DataFrame, [{"transaction_id": "txn-1"}]))
+
+
 def test_parquet_localfile_pandas_write_rejects_extra_columns(tmp_path: Path) -> None:
     with pytest.raises(ValueError, match=r"columns not in the Artifact type: \['note'\]"):
         _write(tmp_path, _frame(note="dropped"))

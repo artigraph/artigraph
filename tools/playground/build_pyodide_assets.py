@@ -29,7 +29,6 @@ PYDANTIC_VERSION = "2.13.4"
 PYDANTIC_CORE_VERSION = "2.46.4"
 PYFARMHASH_VERSION = "0.4.0"
 PARSE_VERSION = "1.22.1"
-MULTIMETHOD_VERSION = "2.0.2"
 # Keep in sync with the `playground-wheel` task in mise/config.toml.
 ARTI_VERSION = "0.0.0+playground"
 
@@ -83,7 +82,6 @@ def _download_pure_wheels(*, destination: Path) -> list[Path]:
     requirements = [
         f"pydantic=={PYDANTIC_VERSION}",
         f"parse=={PARSE_VERSION}",
-        f"multimethod=={MULTIMETHOD_VERSION}",
     ]
     _run(
         [

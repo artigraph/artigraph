@@ -4,7 +4,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import abc
 import os
-from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Self, TypeVar, cast
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Self, cast
 
 from pydantic import Field, InstanceOf, PrivateAttr
 
@@ -39,7 +39,6 @@ class StoragePartition(Model):
 
 
 StoragePartitions = tuple[StoragePartition, ...]
-StoragePartitionVar = TypeVar("StoragePartitionVar", bound=StoragePartition)
 
 
 class StoragePartitionSnapshot(Model):

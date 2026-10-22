@@ -82,9 +82,6 @@ class Executor(Model):
         logging.info(
             f"Building {type(producer)} output for {partition_key} and inputs {input_fingerprint}..."
         )
-        # TODO: Catch DispatchError and give a nicer error... maybe add this to our
-        # @dispatch wrapper (eg: msg arg, or even fn that returns the message to
-        # raise).
         arguments = {
             name: snapshot.read(
                 artifact=producer.inputs[name],

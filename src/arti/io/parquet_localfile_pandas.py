@@ -59,6 +59,8 @@ else:
         storage_partition: LocalFilePartition,
         view: DataFrame,
     ) -> None:
+        if not isinstance(data, pd.DataFrame):  # pyright: ignore[reportUnnecessaryIsInstance]
+            raise TypeError(f"Expected a pandas DataFrame, got {type(data)}")
         schema = format.type_system.to_system(type_, hints={})
         assert isinstance(schema, pa.Schema)
         extra_columns = [column for column in data.columns if column not in schema.names]

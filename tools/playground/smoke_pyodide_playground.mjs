@@ -129,7 +129,7 @@ async function main() {
     pyodide.FS.writeFile("artigraph_smoke.py", sampleModule);
     // Install pydantic-core first so pydantic's pinned dependency is already satisfied.
     const micropip = pyodide.pyimport("micropip");
-    for (const prefix of ["pydantic_core-", "pydantic-", "pyfarmhash-", "parse-", "multimethod-", "arti-"]) {
+    for (const prefix of ["pydantic_core-", "pydantic-", "pyfarmhash-", "parse-", "arti-"]) {
       await micropip.install(findWheel(manifest, prefix, assetsDir));
     }
 

@@ -34,7 +34,6 @@ dev = [
 authors = [{ name = "Jacob Hayes", email = "jacob.r.hayes@gmail.com" }]
 dependencies = [
     "annotated-types",
-    "multimethod>=2.0,<2.1",
     "parse",
     "pydantic>=2.13,<3",
     "pyfarmhash",
@@ -190,7 +189,6 @@ isort = { known-first-party = ["tests"] }
 pyupgrade = { keep-runtime-typing = true } # Preserve types, even if a file imports `from __future__ import annotations`.
 
 [tool.ruff.lint.per-file-ignores]
-"src/arti/internal/dispatch.py" = ["N801"] # Preserve multimethod's public naming convention
 "src/arti/internal/mappings.py" = ["N801"] # Preserve the dict-compatible public API
 "src/arti/internal/type_hints.py" = ["ERA001", "N802"] # Typing examples and typing API names
 "src/arti/partitions/__init__.py" = ["N801", "N802", "N805"] # Public partition component names

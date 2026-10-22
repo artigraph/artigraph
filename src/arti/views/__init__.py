@@ -132,18 +132,13 @@ class View(Model):
         if not isinstance(artifact, self.artifact_class):
             raise ValueError(f"expected an instance of {self.artifact_class}, got {type(artifact)}")
         self._check_type_compatibility(view_type=self.type, artifact_type=artifact.type)
+        key = io.IOKey(
+            type(artifact.type),
+            type(artifact.format),
+            artifact.storage.storage_partition_type,
+            type(self),
+        )
         if self.mode in {"READ", "READWRITE"}:
-            io.reader_dispatch.lookup(
-                type(artifact.type),
-                type(artifact.format),
-                list[artifact.storage.storage_partition_type],
-                type(self),
-            )
+            io.lookup_reader(key)
         if self.mode in {"WRITE", "READWRITE"}:
-            io.writer_dispatch.lookup(
-                NoneType if self.python_type is None else self.python_type,
-                type(artifact.type),
-                type(artifact.format),
-                artifact.storage.storage_partition_type,
-                type(self),
-            )
+            io.lookup_writer(key)
