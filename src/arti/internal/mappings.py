@@ -220,6 +220,9 @@ class TypedBox[V](Mapping[str, TypedNode[V]]):
                 raise InvalidKeyError(key)
             super().__setattr__(key, value)
             return
+        # Reading `box.<key>` would return our own attribute (eg: `.items`), not the value.
+        if hasattr(type(self), key):
+            raise InvalidKeyError(key)
         self[key] = value
 
     def __iter__(self) -> Iterator[str]:

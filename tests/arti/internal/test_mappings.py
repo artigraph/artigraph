@@ -168,6 +168,19 @@ def test_TypedBox_status_key() -> None:
     assert dict(box) == {"status": coord, "status_quo": coord}
 
 
+def test_TypedBox_method_keys() -> None:
+    # Attribute access returns the box's own attributes (eg: `.items`), so reject setting keys that
+    # could only be read back with item access.
+    box = CoordBox()
+    for key in ("get", "items", "keys", "values", "walk"):
+        with pytest.raises(InvalidKeyError, match=f"Invalid key: {key}"):
+            setattr(box, key, coord)
+        with pytest.raises(InvalidKeyError, match=f"Invalid key: {key}"):
+            setattr(cast(Any, box).nested, key, coord)
+        box[key] = coord
+        assert box[key] == coord
+
+
 def test_TypedBox_contains() -> None:
     box = CoordBox()
     assert "a" not in box
