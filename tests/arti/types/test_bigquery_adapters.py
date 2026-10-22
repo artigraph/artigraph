@@ -262,6 +262,28 @@ def test_bigquery_type_system_numerics(
     assert isinstance(bigquery_type_system.to_artigraph(intermediate, hints={}), reverse_arti_type)
 
 
+@pytest.mark.parametrize(
+    ("bq_field_type", "arti_type"),
+    [
+        ("BOOL", Boolean()),
+        ("bool", Boolean()),
+        ("FLOAT64", Float64()),
+        ("INT64", Int64()),
+        ("STRUCT", Struct(fields={"int": Int64()})),
+    ],
+)
+def test_bigquery_type_system_standard_sql_names(bq_field_type: str, arti_type: Type) -> None:
+    # SchemaFields accept the standard SQL type names as aliases of the legacy names.
+    fields = [bigquery.SchemaField("int", "INT64", mode="REQUIRED")]
+    bigquery_type = bigquery.SchemaField(
+        "field",
+        bq_field_type,
+        mode="REQUIRED",
+        fields=fields if isinstance(arti_type, Struct) else (),
+    )
+    assert bigquery_type_system.to_artigraph(bigquery_type, hints={}) == arti_type
+
+
 def test_bigquery_type_system_description() -> None:
     arti_type = String(description="abc", nullable=True)
     assert arti_type.description is not None

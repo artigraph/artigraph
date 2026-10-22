@@ -6,6 +6,7 @@ from typing import Any, ClassVar
 
 from google.cloud import bigquery
 from google.cloud.bigquery.enums import SqlTypeNames
+from google.cloud.bigquery.schema import LEGACY_TO_STANDARD_TYPES
 
 from arti import Type, TypeAdapter, TypeSystem, types
 
@@ -54,7 +55,12 @@ class _BigQueryTypeAdapter[ArtigraphType: Type](TypeAdapter[ArtigraphType]):
 
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
-        return isinstance(type_, bigquery.SchemaField) and type_.field_type.upper() == cls.system
+        # SchemaFields accept both legacy (eg: INTEGER) and standard SQL (eg: INT64) type names.
+        return (
+            isinstance(type_, bigquery.SchemaField)
+            and LEGACY_TO_STANDARD_TYPES.get(type_.field_type.upper())
+            == LEGACY_TO_STANDARD_TYPES[cls.system.value]
+        )
 
     @classmethod
     def to_system(cls, type_: Type, *, hints: dict[str, Any], type_system: TypeSystem) -> Any:
