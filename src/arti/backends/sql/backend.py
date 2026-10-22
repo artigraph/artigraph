@@ -29,6 +29,7 @@ from arti.backends.sql.models import (
     StoragePartitionRow,
 )
 from arti.fingerprints import Fingerprint
+from arti.internal.utils import NoCopyMixin
 from arti.partitions import InputFingerprints
 from arti.storage import StoragePartitionSnapshot, StoragePartitionSnapshots
 
@@ -281,6 +282,20 @@ class SQLBackendConnection(BackendConnection):
         self._insert_missing(SnapshotPartitionRow, rows)
 
 
+class _SharedEngine(NoCopyMixin):
+    """
+    The engine and its state, shared by every copy of a SQLBackend.
+
+    Like the MemoryBackend's container, this bypasses (deep)copying so that copies of a Backend (eg:
+    in a deep copied Graph) keep using the same database. Engines can't be deep copied anyway.
+    """
+
+    def __init__(self) -> None:
+        self.engine: Engine | None = None
+        self.migration_checked = False
+        self.closed = False
+
+
 class SQLBackend(Backend[SQLBackendConnection]):
     """Shared transactional SQLAlchemy implementation for Artigraph metadata."""
 
@@ -288,9 +303,7 @@ class SQLBackend(Backend[SQLBackendConnection]):
 
     auto_upgrade: bool = True
 
-    _engine: Engine | None = PrivateAttr(default=None)
-    _migration_checked: bool = PrivateAttr(default=False)
-    _closed: bool = PrivateAttr(default=False)
+    _shared: _SharedEngine = PrivateAttr(default_factory=_SharedEngine)
 
     @abstractmethod
     def _create_engine(self) -> Engine:
@@ -298,13 +311,11 @@ class SQLBackend(Backend[SQLBackendConnection]):
 
     @property
     def engine(self) -> Engine:
-        if self._closed:
+        if self._shared.closed:
             raise RuntimeError(f"{type(self).__name__} is closed")
-        engine = self._engine
-        if engine is None:
-            engine = self._create_engine()
-            object.__setattr__(self, "_engine", engine)
-        return engine
+        if self._shared.engine is None:
+            self._shared.engine = self._create_engine()
+        return self._shared.engine
 
     @property
     def schema_revision(self) -> str | None:
@@ -331,13 +342,13 @@ class SQLBackend(Backend[SQLBackendConnection]):
                         {"lock_id": _POSTGRES_MIGRATION_LOCK_ID},
                     )
                 command.upgrade(_alembic_config(connection), "head")
-            object.__setattr__(self, "_migration_checked", True)
+            self._shared.migration_checked = True
 
     def _ensure_schema(self) -> None:
-        if self._migration_checked:
+        if self._shared.migration_checked:
             return
         with _MIGRATION_LOCK:
-            if self._migration_checked:
+            if self._shared.migration_checked:
                 return
             if self.auto_upgrade:
                 self.upgrade()
@@ -348,7 +359,7 @@ class SQLBackend(Backend[SQLBackendConnection]):
                     raise BackendSchemaError(
                         f"Backend schema is at revision {current!r}, expected {expected!r}. Call backend.upgrade() before connecting."
                     )
-            object.__setattr__(self, "_migration_checked", True)
+            self._shared.migration_checked = True
 
     @contextmanager
     def connect(self) -> Generator[SQLBackendConnection]:
@@ -358,10 +369,10 @@ class SQLBackend(Backend[SQLBackendConnection]):
 
     def close(self) -> None:
         """Dispose pooled connections. The backend can't be used afterwards."""
-        if self._engine is not None:
-            self._engine.dispose()
-            object.__setattr__(self, "_engine", None)
-        object.__setattr__(self, "_closed", True)
+        if self._shared.engine is not None:
+            self._shared.engine.dispose()
+            self._shared.engine = None
+        self._shared.closed = True
 
 
 __all__ = [

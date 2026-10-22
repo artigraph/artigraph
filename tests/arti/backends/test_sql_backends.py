@@ -39,6 +39,23 @@ def test_sqlite_requires_a_path() -> None:
         SQLiteBackend()  # pyright: ignore[reportCallIssue]
 
 
+def test_sql_backend_copies_share_the_database() -> None:
+    backend = SQLiteBackend(path=":memory:")
+    # Copied before the engine is created.
+    shallow = backend.model_copy()
+    snapshot = build_pipeline(backend, "copies")
+
+    deep = snapshot.model_copy(deep=True)
+    assert deep.backend is not backend
+    assert deep.read(deep.artifacts.incremented, annotation=int) == 2
+    for copy in (shallow, deep.backend):
+        assert GraphSnapshot.from_tag(snapshot.name, "latest", connectable=copy) == snapshot
+
+    backend.close()
+    with pytest.raises(RuntimeError, match="SQLiteBackend is closed"):
+        deep.backend.connect().__enter__()
+
+
 def test_sql_backend_rejects_use_after_close() -> None:
     with SQLiteBackend(path=":memory:") as backend:
         build_pipeline(backend, "closed")
