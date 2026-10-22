@@ -29,7 +29,7 @@ class StoragePartition(Model):
     @abc.abstractmethod
     def compute_content_fingerprint(self) -> Fingerprint:
         raise NotImplementedError(
-            "{type(self).__name__}.compute_content_fingerprint is not implemented!"
+            f"{type(self).__name__}.compute_content_fingerprint is not implemented!"
         )
 
     def snapshot(self) -> StoragePartitionSnapshot:

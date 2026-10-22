@@ -55,6 +55,19 @@ def test_StoragePartition_snapshot() -> None:
     assert snapshot.storage_partition == partition
 
 
+def test_StoragePartition_compute_content_fingerprint_unimplemented() -> None:
+    class Unimplemented(MockStoragePartition):
+        def compute_content_fingerprint(self) -> Fingerprint:
+            return super(MockStoragePartition, self).compute_content_fingerprint()  # pyright: ignore[reportAbstractUsage]
+
+    partition = Unimplemented(path="/tmp/test", storage=MockStorage(path="/tmp/test"))
+    with pytest.raises(
+        NotImplementedError,
+        match=r"^Unimplemented.compute_content_fingerprint is not implemented!$",
+    ):
+        partition.compute_content_fingerprint()
+
+
 def test_Storage_init_subclass() -> None:
     abstract_class = type("Abstract", (cast(type, Storage),), {"_abstract_": True})
 
