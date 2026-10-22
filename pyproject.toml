@@ -35,7 +35,7 @@ authors = [{ name = "Jacob Hayes", email = "jacob.r.hayes@gmail.com" }]
 dependencies = [
     "annotated-types",
     "parse",
-    "pydantic>=2.13,<3",
+    "pydantic>=2.14.1,<3",
     "pyfarmhash",
 ]
 description = "Artigraph is a tool to improve the authorship, management, and quality of data."
