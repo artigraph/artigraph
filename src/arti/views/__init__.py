@@ -3,6 +3,7 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 import builtins
+from types import NoneType
 from typing import Annotated, Any, ClassVar, Literal, Self, cast, get_origin
 
 from pydantic import ValidationInfo, field_validator
@@ -96,7 +97,9 @@ class View(Model):
             annotation = discard_Annotated(annotation)
             # Import the View submodules to trigger registration.
             import_submodules(__path__, __name__)
-            view_class = cls._by_python_type_.get(annotation)
+            # Views register `None` (as used in type hints), but `Annotated`, `get_type_hints` and
+            # `type(None)` all produce `NoneType`.
+            view_class = cls._by_python_type_.get(None if annotation is NoneType else annotation)
             # If no match and the type is a subscripted Generic (eg: `list[int]`), try to unwrap any
             # extra type variables.
             if view_class is None and (origin := get_origin(annotation)) is not None:
@@ -138,7 +141,7 @@ class View(Model):
             )
         if self.mode in {"WRITE", "READWRITE"}:
             io.writer_dispatch.lookup(
-                self.python_type,
+                NoneType if self.python_type is None else self.python_type,
                 type(artifact.type),
                 type(artifact.format),
                 artifact.storage.storage_partition_type,

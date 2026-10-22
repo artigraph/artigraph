@@ -132,6 +132,7 @@ def test_python_map() -> None:
 
 def test_python_null() -> None:
     assert isinstance(python_type_system.to_artigraph(None, hints={}), Null)
+    assert isinstance(python_type_system.to_artigraph(type(None), hints={}), Null)
     assert python_type_system.to_system(Null(), hints={}) is None
 
 

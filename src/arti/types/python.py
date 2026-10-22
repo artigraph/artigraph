@@ -51,14 +51,15 @@ for _precision in (8, 16, 32, 64):
 
 @python_type_system.register_adapter
 class PyNone(ScalarClassTypeAdapter[arti.types.Null]):
-    # Python represents None types in type hints with the `None` value (not `NoneType`).
+    # Python represents None types in type hints with the `None` value, but `Annotated` and
+    # `get_type_hints` convert it to `NoneType`.
 
     artigraph = arti.types.Null
     system = None
 
     @classmethod
     def matches_system(cls, type_: Any, *, hints: dict[str, Any]) -> bool:
-        return type_ is None
+        return type_ is None or type_ is NoneType
 
 
 @python_type_system.register_adapter
