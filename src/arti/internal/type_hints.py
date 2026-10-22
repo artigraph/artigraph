@@ -85,6 +85,19 @@ def _check_issubclass(klass: Any, check_type: Any) -> bool:
         )
     # eg: issubclass(tuple[int], tuple[int])
     if klass_origin is not None and check_type_origin is not None:
+        # Homogeneous tuples (eg: `tuple[int, ...]`) hold any number of their element type.
+        if check_type_origin is tuple and check_type_args[1:] == (...,):
+            return lenient_issubclass(klass_origin, tuple) and all(
+                lenient_issubclass(klass_arg, check_type_args[0])
+                for klass_arg in klass_args
+                if klass_arg is not ...
+            )
+        if (
+            lenient_issubclass(klass_origin, tuple)
+            and not lenient_issubclass(check_type_origin, tuple)
+            and klass_args[1:] == (...,)
+        ):
+            klass_args = klass_args[:1]  # eg: `tuple[int, ...]` is a `Sequence[int]`
         # NOTE: Considering all container types covariant for simplicity.
         #
         # The builtin mutable containers (list, dict, etc) are invariant (klass_args ==

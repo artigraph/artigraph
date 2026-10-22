@@ -162,6 +162,10 @@ _LENIENT_ISSUBCLASS_TRUE_CASES = [
     (tuple[int], Sequence[int]),
     (tuple[int], tuple),
     (tuple[int], tuple[int]),
+    (tuple[bool, int], tuple[int, ...]),
+    (tuple[int, ...], Sequence[int]),
+    (tuple[int, ...], tuple[int, ...]),
+    (tuple[int, int], tuple[int, ...]),
     (tuple[tuple[int]], tuple),
     (tuple[tuple[int]], tuple[tuple[int]]),
 ]
@@ -198,8 +202,12 @@ _LENIENT_ISSUBCLASS_FALSE_CASES = [
     (tuple, Sequence[int]),
     (tuple, tuple[MyTuple[int]]),
     (tuple, tuple[int]),
+    (tuple[int, ...], tuple[int]),
+    (tuple[int, str], tuple[int, ...]),
+    (tuple[str, ...], Sequence[int]),
     (tuple[str], Sequence[int]),
     (tuple[tuple[int]], tuple[MyTuple[int]]),
+    (list[int], tuple[int, ...]),
     (tuple[tuple[str]], tuple[tuple[int]]),
     # Stock `issubclass` raises a `TypeError: issubclass() arg 1 must be a class` for
     # these.
