@@ -68,7 +68,7 @@ repos:
         language: system
         require_serial: true
         types_or: [python, pyi]
-        exclude: ^(src/arti/internal/vendored/|stubs/)
+        exclude: ^stubs/
       - id: pytest
         name: pytest
         entry: pytest

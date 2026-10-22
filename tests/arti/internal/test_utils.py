@@ -2,7 +2,6 @@
 from __future__ import annotations
 
 import operator
-import os
 from pathlib import Path
 from types import ModuleType
 from typing import Any, cast
@@ -54,24 +53,15 @@ def test_import_submodules() -> None:
     from tests.arti.internal import import_submodules_test_modules
 
     basedir = Path(import_submodules_test_modules.__file__).parent
-    modules = {
-        "a",
-        "sub.b",
-        "sub.folder.c",
-    }
 
     assert import_submodules_test_modules.entries == set()
     output = import_submodules(
         import_submodules_test_modules.__path__, import_submodules_test_modules.__name__
     )
-    assert {
-        name.replace(f"{import_submodules_test_modules.__name__}.", "") for name in output
-    } == modules
+    # Only direct submodules are imported, not those in (namespace) subpackages like `sub`.
+    assert set(output) == {f"{import_submodules_test_modules.__name__}.a"}
     assert all(isinstance(mod, ModuleType) for mod in output.values())
-    assert {
-        str(Path(path).relative_to(basedir)).replace(".py", "")
-        for path in import_submodules_test_modules.entries
-    } == {name.replace(".", os.sep) for name in modules}
+    assert import_submodules_test_modules.entries == {str(basedir / "a.py")}
 
 
 def test_one_or_none() -> None:

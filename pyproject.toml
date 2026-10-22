@@ -69,7 +69,7 @@ Repository = "https://github.com/artigraph/artigraph"
 
 [tool.codespell]
 ignore-words-list = ["nd"] # ordinal suffix
-skip = ["./site", "src/arti/internal/vendored/*", "stubs/*"] # ./site: docs build output
+skip = ["./site", "stubs/*"] # ./site: docs build output
 
 
 [tool.coverage.report]
@@ -87,7 +87,6 @@ skip_covered = true
 
 [tool.coverage.run]
 branch = true
-omit = ["src/arti/internal/vendored/*"]
 source = ["arti"]
 
 [tool.hatch.build.targets.sdist]
@@ -135,7 +134,7 @@ testpaths = ["src/", "tests/"]
 
 
 [tool.ruff]
-extend-exclude = ["src/arti/internal/vendored/*", "stubs/*"]
+extend-exclude = ["stubs/*"]
 fix = true
 force-exclude = true
 line-length = 100
