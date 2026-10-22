@@ -7,6 +7,7 @@ Only the DataFrame's columns are stored, not its index; call `reset_index()` fir
 from __future__ import annotations
 
 from collections.abc import Sequence
+from datetime import datetime
 from pathlib import Path
 from typing import Protocol, cast
 
@@ -52,6 +53,14 @@ else:
         ]
         return cast(_TableToPandas, pa.concat_tables(tables)).to_pandas()
 
+    def _has_time_of_day(value: datetime) -> bool:
+        timestamp = pd.Timestamp(value)
+        # Arrow takes the local date of `datetime` objects, but the UTC date of datetime64 columns.
+        # Require UTC midnight for both, so the dtype doesn't decide which date is written.
+        if timestamp.tz is not None:
+            timestamp = timestamp.tz_convert(None)
+        return timestamp != timestamp.normalize()
+
     @register_writer
     def write_parquet_localfile_pandas(
         data: pd.DataFrame,
@@ -70,6 +79,10 @@ else:
         for name, arrow_type in zip(schema.names, schema.types, strict=True):
             if pa.types.is_date(arrow_type) and name in data.columns:
                 values = data[name].dropna()
+                if values.dtype == object and any(
+                    _has_time_of_day(value) for value in values if isinstance(value, datetime)
+                ):
+                    raise ValueError(f"Date column {name!r} has times of day that would be dropped")
                 if isinstance(values.dtype, pd.DatetimeTZDtype):
                     values = values.dt.tz_convert(None)  # Arrow writes the UTC date
                 if (

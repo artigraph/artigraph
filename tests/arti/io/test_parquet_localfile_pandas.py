@@ -1,6 +1,7 @@
-from datetime import date
+from datetime import UTC, date, datetime
 from pathlib import Path
 from typing import Annotated, Protocol, cast
+from zoneinfo import ZoneInfo
 
 import pandas as pd
 import pyarrow as pa
@@ -188,3 +189,38 @@ def test_parquet_localfile_pandas_failed_write(
         io.write(frame.assign(amount_cents=[1]), artifact.type, artifact.format, partition, view)
     assert list(tmp_path.iterdir()) == [tmp_path / "2026-01-01.parquet"]
     pd.testing.assert_frame_equal(io.read(artifact.type, artifact.format, (snapshot,), view), frame)
+
+
+@pytest.mark.parametrize(
+    "values",
+    [
+        [datetime(2026, 1, 1), date(2026, 1, 2)],
+        [datetime(2026, 1, 1, tzinfo=UTC)],
+        [pd.Timestamp("2026-01-01")],
+    ],
+)
+def test_parquet_localfile_pandas_write_accepts_midnight_object_dates(
+    tmp_path: Path, values: list[object]
+) -> None:
+    frame = _frame().iloc[[0] * len(values)]
+    frame["transaction_date"] = pd.Series(values, index=frame.index, dtype=object)
+    _write(tmp_path, frame)
+
+
+@pytest.mark.parametrize(
+    "value",
+    [
+        datetime(2026, 1, 1, 12, 30),
+        pd.Timestamp("2026-01-01 12:30"),
+        # Arrow would write the local date (2026-01-01), but the UTC date for a datetime64 column.
+        datetime(2026, 1, 1, tzinfo=ZoneInfo("Asia/Tokyo")),
+    ],
+)
+def test_parquet_localfile_pandas_write_rejects_dropped_times_in_object_dates(
+    tmp_path: Path, value: object
+) -> None:
+    frame = _frame()
+    frame["transaction_date"] = pd.Series([value], dtype=object)
+    with pytest.raises(ValueError, match="'transaction_date' has times of day"):
+        _write(tmp_path, frame)
+    assert not (tmp_path / "data.parquet").exists()
