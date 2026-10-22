@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from collections.abc import Iterable, Iterator, Mapping, MutableMapping
 from types import GenericAlias
-from typing import Annotated, Any, ClassVar, Literal, assert_never, cast
+from typing import Annotated, Any, ClassVar, Literal, Self, assert_never, cast
 
 from pydantic import AfterValidator, GetCoreSchemaHandler, RootModel, WrapSerializer
 from pydantic_core import CoreSchema, core_schema
@@ -23,6 +23,11 @@ class frozendict[K, V](Mapping[K, V]):
 
     def __hash__(self) -> int:
         return self._hash
+
+    def __reduce__(self) -> tuple[type[Self], tuple[dict[K, V]]]:
+        # Rebuild when unpickling rather than restoring `_hash`, which depends on the hash seed of
+        # the process that created it (eg: for str keys).
+        return (type(self), (self._data,))
 
     def __iter__(self) -> Iterator[K]:
         return iter(self._data)

@@ -2,8 +2,11 @@
 from __future__ import annotations
 
 import copy
+import os
 import pickle
 import re
+import subprocess
+import sys
 from typing import Any, cast, get_args, get_origin
 
 import pytest
@@ -36,6 +39,26 @@ def test_frozendict_immutability() -> None:
 
 def test_frozendict_hash() -> None:
     assert hash(frozendict[str, int](a=5)) == hash(frozenset((("a", 5),)))
+
+
+def test_frozendict_pickle() -> None:
+    val = frozendict[str, str](a="x")
+    assert pickle.loads(pickle.dumps(val)) == val
+    # The cached hash depends on the process' hash seed, so it must be recomputed on unpickle.
+    dump = "import pickle, sys; from arti.internal.mappings import frozendict; sys.stdout.buffer.write(pickle.dumps(frozendict(a='x')))"
+    load = "import pickle, sys; from arti.internal.mappings import frozendict; assert hash(pickle.loads(sys.stdin.buffer.read())) == hash(frozendict(a='x'))"
+    dumped = subprocess.run(  # noqa: S603
+        [sys.executable, "-c", dump],
+        check=True,
+        capture_output=True,
+        env=os.environ | {"PYTHONHASHSEED": "1"},
+    ).stdout
+    subprocess.run(  # noqa: S603
+        [sys.executable, "-c", load],
+        check=True,
+        input=dumped,
+        env=os.environ | {"PYTHONHASHSEED": "2"},
+    )
 
 
 def test_frozendict_union() -> None:
