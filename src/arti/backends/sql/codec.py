@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import base64
 import importlib
+import json
 from collections.abc import Callable, Iterable, Mapping
 from datetime import date, datetime, time
 from enum import Enum
@@ -156,7 +157,11 @@ def _encode(value: Any) -> Any:
         items = cast(frozenset[Any] | set[Any], value)
         return {
             "kind": "frozenset" if isinstance(value, frozenset) else "set",
-            "items": [_encode(item) for item in items],
+            # Set order follows the process' hash seed, so sort to keep documents canonical.
+            "items": sorted(
+                (_encode(item) for item in items),
+                key=lambda item: json.dumps(item, sort_keys=True),
+            ),
         }
     raise MetadataCodecError(
         f"Unsupported persisted metadata value {value!r} ({type(value).__module__}:{type(value).__qualname__})"

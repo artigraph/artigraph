@@ -1,5 +1,9 @@
 # pyright: reportPrivateUsage=false
+import os
 import re
+import subprocess
+import sys
+from datetime import UTC, datetime
 from typing import Any, cast
 
 import pytest
@@ -114,6 +118,30 @@ def test_Enum_errors() -> None:
         Enum(type=float32, items=frozenset({1, 2, 3}))
     with pytest.raises(ValueError, match=rf"{mismatch_prefix}: \[3\]"):
         Enum(type=float32, items=frozenset({1.0, 2.0, 3}))
+
+
+def test_Enum_fingerprint() -> None:
+    # The items are a frozenset, whose iteration order follows the process' hash seed. Check the
+    # fingerprint is the same across seeds.
+    fingerprint = 2592362281696553999
+    assert Enum(type=String(), items=frozenset({"a", "b", "c"})).fingerprint == fingerprint
+    script = "from arti.types import Enum, String; print(int(Enum(type=String(), items={'a', 'b', 'c'}).fingerprint))"
+    for seed in ("1", "2"):
+        output = subprocess.run(  # noqa: S603
+            [sys.executable, "-c", script],
+            check=True,
+            capture_output=True,
+            env=os.environ | {"PYTHONHASHSEED": seed},
+            text=True,
+        ).stdout
+        assert int(output) == fingerprint
+    # Items that can't be compared are still serialized in a stable order.
+    naive, aware = datetime(2020, 1, 1), datetime(2020, 1, 1, tzinfo=UTC)
+    type_ = Timestamp(precision="second")
+    assert (
+        Enum(type=type_, items=frozenset((naive, aware))).model_dump_json()
+        == Enum(type=type_, items=frozenset((aware, naive))).model_dump_json()
+    )
 
 
 def test_List() -> None:

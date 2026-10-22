@@ -70,6 +70,15 @@ def test_metadata_codec_round_trip() -> None:
     assert decode_document(document, CodecValues) == value
 
 
+def test_metadata_codec_sorts_sets() -> None:
+    # Set order follows the process' hash seed, so documents sort the encoded items.
+    letters = [chr(ord("a") + i) for i in range(26)]
+    for value in (frozenset(letters), set(letters)):
+        assert (
+            encode_document(Anything(value=value))["value"]["fields"]["value"]["items"] == letters
+        )
+
+
 def test_metadata_codec_graph_round_trip() -> None:
     with Graph(name="codec") as graph:
         graph.artifacts.input = A1()

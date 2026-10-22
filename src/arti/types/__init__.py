@@ -7,7 +7,8 @@ from collections.abc import Iterable, Mapping
 from operator import attrgetter
 from typing import Annotated, Any, ClassVar, Literal, cast
 
-from pydantic import PrivateAttr, ValidationInfo, field_validator
+from pydantic import PrivateAttr, ValidationInfo, field_serializer, field_validator
+from pydantic_core import to_json
 
 from arti.fingerprints import SkipFingerprint
 from arti.internal.mappings import FrozenMapping, frozendict
@@ -125,6 +126,13 @@ class Enum(NamedMixin, Type):
         if mismatched_items:
             raise ValueError(f"incompatible {arti_type} ({py_type}) item(s): {mismatched_items}")
         return items
+
+    @field_serializer("items", when_used="json")
+    def _serialize_items(self, items: frozenset[Any]) -> list[Any]:
+        # frozenset order follows the process' hash seed, so sort to keep fingerprints stable across
+        # processes. Sort by the JSON encoding, which is total even for items that can't be compared
+        # (eg: naive and aware datetimes).
+        return sorted(items, key=to_json)
 
     @property
     def _default_friendly_key(self) -> str:
