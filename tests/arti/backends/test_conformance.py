@@ -10,14 +10,26 @@ from typing import Any, Literal, cast
 
 import pytest
 
-from arti import Backend, Fingerprint, Graph, GraphSnapshot, InputFingerprints
+from arti import (
+    Artifact,
+    Backend,
+    Fingerprint,
+    Graph,
+    GraphSnapshot,
+    InputFingerprints,
+    PartitionKey,
+)
 from arti.backends.memory import MemoryBackend
 from arti.backends.postgres import PostgresBackend
 from arti.backends.sql import SQLBackend
 from arti.backends.sql.codec import MetadataCodecError
 from arti.backends.sql.models import GraphRow
 from arti.backends.sqlite import SQLiteBackend
+from arti.formats.json import JSON
+from arti.partitions import Int32Field
 from arti.storage.literal import StringLiteral
+from arti.storage.local import LocalFile
+from arti.types import Collection, Int32, Int64, Struct
 from arti.versions import SemVer
 from tests.arti.backends.pipeline import Number, build_pipeline, increment
 
@@ -173,6 +185,35 @@ def test_backend_keeps_graphs_that_differ_only_by_producer(
             restored = connection.read_snapshot(snapshot.name, snapshot.fingerprint)
         assert restored.graph == snapshot.graph
         assert restored.read(restored.artifacts.incremented, annotation=int) == 2
+
+
+def test_backend_separates_storage_by_partition_key_types(
+    backend_harness: BackendHarness, tmp_path: Path
+) -> None:
+    backend = backend_harness.open()
+    int32, int64 = (
+        Artifact(
+            type=Collection(element=Struct(fields={"i": type_}), partition_by=("i",)),
+            format=JSON(),
+            storage=LocalFile(path=str(tmp_path / "{i.value}.json")),
+        )
+        for type_ in (Int32(), Int64())
+    )
+    (tmp_path / "1.json").write_text("[]")
+    partition = int32.storage.generate_partition(
+        partition_key=PartitionKey(i=Int32Field(value=1))
+    ).snapshot()
+    with backend.connect() as connection:
+        connection.write_artifact_partitions(int32, (partition,))
+
+    with backend.connect() as connection:
+        assert connection.read_artifact_partitions(int32) == (partition,)
+        # The MemoryBackend discovers the file again, but only as an Int64 partition.
+        for partitions in (
+            connection.read_artifact_partitions(int64),
+            connection.read_artifact_partitions(int64, InputFingerprints()),
+        ):
+            assert all(partition.storage == int64.storage for partition in partitions)
 
 
 def test_persistent_backend_reopens(

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import re
 from typing import ClassVar, cast
 
@@ -168,9 +169,16 @@ def test_Storage_key_types() -> None:
     with pytest.raises(ValueError, match=re.escape("`key_types` have not been set yet.")):
         assert MockStorage(path="test").key_types
     # The key types are private state, but still distinguish otherwise identical Storage.
-    assert MockStorage(path="test").visit_type(
+    partitioned = MockStorage(path="test").visit_type(
         Collection(element=Struct(fields={"a": Int8()}), partition_by=("a",))
-    ) != MockStorage(path="test").visit_type(Int8())
+    )
+    unpartitioned = MockStorage(path="test").visit_type(Int8())
+    assert partitioned != unpartitioned
+    assert partitioned.fingerprint != unpartitioned.fingerprint
+    assert json.loads(partitioned.model_dump_json())["partition_key_types"] == {"a": "Int8Field"}
+    # Unpartitioned Storage omits them.
+    assert "partition_key_types" not in unpartitioned.model_dump()
+    assert unpartitioned.fingerprint == MockStorage(path="test").fingerprint
 
 
 def test_Storage_vist_type_extra() -> None:

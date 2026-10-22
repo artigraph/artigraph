@@ -6,14 +6,14 @@ import abc
 import os
 from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Self
 
-from pydantic import Field, PrivateAttr
+from pydantic import Field, PrivateAttr, computed_field
 
 from arti.fingerprints import Fingerprint
 from arti.formats import Format
 from arti.internal.mappings import frozendict
-from arti.internal.models import Model
+from arti.internal.models import Model, ModelTypeSerializer
 from arti.internal.type_hints import lenient_issubclass
-from arti.partitions import InputFingerprints, PartitionKey, PartitionKeyTypes
+from arti.partitions import InputFingerprints, PartitionField, PartitionKey, PartitionKeyTypes
 from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
 
@@ -158,6 +158,23 @@ class Storage(Model):
         if self._key_types is None:
             raise ValueError("`key_types` have not been set yet.")
         return self._key_types
+
+    # The key types decide how partitions are keyed (eg: `Int32Field` vs `Int64Field` for the same
+    # path), so serialize them to keep Storage that compares unequal from sharing a fingerprint.
+    @computed_field(repr=False)
+    @property
+    def partition_key_types(
+        self,
+    ) -> dict[str, Annotated[type[PartitionField], ModelTypeSerializer]]:
+        return dict(sorted((self._key_types or {}).items()))
+
+    def _fingerprint_fields(self) -> tuple[str, ...]:
+        fields = super()._fingerprint_fields()
+        if self._key_types:
+            return fields
+        # Omit the key types for unpartitioned Storage, matching Storage defined before they were
+        # serialized.
+        return tuple(f for f in fields if f != "partition_key_types")
 
     @property
     def _format_fields(self) -> frozendict[str, str]:
