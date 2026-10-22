@@ -31,7 +31,20 @@ def test_GitCommit() -> None:
 def test_SemVer(major: int, minor: int, patch: int, fingerprint_fields: set[str]) -> None:
     assert set(SemVer._arti_fingerprint_fields_) == {"_arti_type_", "major", "minor", "patch"}
     version = SemVer(major=major, minor=minor, patch=patch)
-    assert set(version._arti_fingerprint_fields_) == {"_arti_type_", *fingerprint_fields}
+    assert set(version._fingerprint_fields()) == {"_arti_type_", *fingerprint_fields}
+    # Copies with a different major must not keep the original's fingerprint fields.
+    for other_major in (0, 1):
+        copy = version.model_copy(update={"major": other_major})
+        fresh = SemVer(major=other_major, minor=minor, patch=patch)
+        assert copy._fingerprint_fields() == fresh._fingerprint_fields()
+        assert copy.fingerprint == fresh.fingerprint
+
+
+def test_SemVer_subclass_fields() -> None:
+    with pytest.raises(NotImplementedError, match="Unexpected Build fingerprint fields"):
+
+        class Build(SemVer):  # pyright: ignore[reportUnusedClass]
+            build: str
 
 
 @pytest.mark.parametrize("component", ["major", "minor", "patch"])

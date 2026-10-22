@@ -149,15 +149,22 @@ class Model(BaseModel, metaclass=ModelMeta):
     ) -> dict[str, Any]:
         data = serializer(self)
         # Sort the serialized data to reduce variability - but still allow excluding fields.
-        return {field: data[field] for field in self._arti_fingerprint_fields_ if field in data}
+        return {field: data[field] for field in self._fingerprint_fields() if field in data}
+
+    def _fingerprint_fields(self) -> tuple[str, ...]:
+        """Return the (sorted) fields to serialize; subclasses may narrow them by field values."""
+        return self._arti_fingerprint_fields_
 
     def model_copy(self, *, update: Mapping[str, Any] | None = None, deep: bool = False) -> Self:
         copy = super().model_copy(update=update, deep=deep)
         if update:
-            # `cached_property` values (eg: `fingerprint`) live in `__dict__` beside the fields, so
-            # Pydantic copies them too. Drop them so they are recomputed from the updated fields.
-            for name in _cached_property_names(type(self)):
-                vars(copy).pop(name, None)
+            # Pydantic copies `__dict__` as is, including `cached_property` values (eg:
+            # `fingerprint`) derived from the old field values. Drop everything that isn't a field
+            # and rerun `model_post_init` so derived state matches the updated fields.
+            state = vars(copy)
+            for name in state.keys() - type(copy).model_fields.keys():
+                del state[name]
+            copy.model_post_init(None)
         return copy
 
     def model_dump(self, **kwargs: Any) -> dict[str, Any]:
@@ -189,15 +196,6 @@ class Model(BaseModel, metaclass=ModelMeta):
 
     def __str__(self) -> str:
         return repr(self)
-
-
-def _cached_property_names(cls: type[Model]) -> set[str]:
-    return {
-        name
-        for klass in cls.__mro__
-        for name, value in vars(klass).items()
-        if isinstance(value, cached_property)
-    }
 
 
 def _set_dump_kwargs_defaults(kwargs: dict[str, Any]) -> None:

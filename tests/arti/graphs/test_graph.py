@@ -155,6 +155,19 @@ def test_Graph_copy(graph: Graph, copier: Callable[[Graph], Graph]) -> None:
     assert copy.producer_outputs == graph.producer_outputs
 
 
+def test_Graph_copy_with_update(graph: Graph) -> None:
+    with Graph(name="other") as other:
+        other.artifacts.x = A1()
+    # Populate the lookups.
+    assert graph.artifact_to_key
+    assert graph.dependencies
+
+    copy = graph.model_copy(update={"artifacts": other.artifacts})
+    # The lookups derived from the fields must match the updated artifacts.
+    assert copy.artifact_to_key == other.artifact_to_key
+    assert copy.dependencies == other.dependencies
+
+
 def test_Graph_user_names_do_not_collide_with_internals() -> None:
     # Producer inputs and Graph artifact names are user-defined, so internal metadata must not
     # shadow them.

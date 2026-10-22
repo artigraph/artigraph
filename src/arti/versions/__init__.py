@@ -43,23 +43,20 @@ class SemVer(Version):
     minor: Annotated[int, Ge(0)]
     patch: Annotated[int, Ge(0)]
 
-    def model_post_init(self, __context: Any) -> None:
-        super().model_post_init(__context)
-        fields = self._arti_fingerprint_fields_
-        desired = {"_arti_type_", "major", "minor", "patch"}
-        if unexpected := set(fields) - desired:
+    @classmethod
+    def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:
+        super().__pydantic_init_subclass__(**kwargs)
+        fields = set(cls._arti_fingerprint_fields_)
+        if unexpected := fields - {"_arti_type_", "major", "minor", "patch"}:
             raise NotImplementedError(
-                f"Unexpected {self._arti_type_key_} fingerprint fields ({unexpected}) - did we forget to handle them?"
+                f"Unexpected {cls._arti_type_key_} fingerprint fields ({unexpected}) - did we forget to handle them?"
             )
-        if self.major > 0:
-            desired = desired - {"minor", "patch"}
-        # Pydantic no-ops regular (private?) attribute assignment here for some reason, so escalate
-        # to object.
-        #
-        # We want to preserve the (sorted) order in _arti_fingerprint_fields_.
-        object.__setattr__(
-            self, "_arti_fingerprint_fields_", tuple(f for f in fields if f in desired)
-        )
+
+    def _fingerprint_fields(self) -> tuple[str, ...]:
+        fields = super()._fingerprint_fields()
+        if self.major == 0:
+            return fields
+        return tuple(f for f in fields if f not in {"minor", "patch"})
 
 
 class String(Version):

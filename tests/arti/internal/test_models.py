@@ -87,6 +87,15 @@ def test_Model_copy_fingerprint() -> None:
     assert obj.model_copy().fingerprint == obj.fingerprint
 
 
+def test_Model_copy_checks_hashability() -> None:
+    class M(Model):
+        value: Any = None
+
+    # Like construction, updated copies must be hashable.
+    with pytest.raises(TypeError, match="unhashable"):
+        M().model_copy(update={"value": []})
+
+
 # The rest more or less test the default Model's configuration of base pydantic functionality.
 
 
