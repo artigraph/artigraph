@@ -60,6 +60,9 @@ parquet = ["pandas", "pyarrow"]
 postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2.0.31"]
 sqlite = ["alembic", "sqlalchemy>=2.0.31"]
 
+[project.scripts]
+arti = "arti.cli:main"
+
 [project.urls]
 Documentation = "https://artigraph.github.io/artigraph/"
 Homepage = "https://github.com/artigraph/artigraph"

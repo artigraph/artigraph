@@ -16,6 +16,8 @@ surface to start from; other modules may change faster. Use the project
   shared durable backend.
 - **Core workflow:** define artifacts and producers, write raw inputs, build a graph, tag a snapshot,
   and read a named snapshot back.
+- **Dashboard:** `arti dashboard` browses a backend's graphs, snapshots, tags, and partitions in a
+  local, read-only [web page](dashboard.md).
 - **Ecosystem interop:** hand exact snapshot files to outside tools, such as DuckDB, without relying
   on path globs.
 - **Experimental:** GCS storage (`GCSFile`), with JSON and pickle IO only.

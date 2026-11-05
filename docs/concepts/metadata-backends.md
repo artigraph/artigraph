@@ -40,8 +40,8 @@ Both SQL backends apply bundled Alembic migrations on first use by default. Set
 
 ## Browsing metadata
 
-Every backend connection can list what it knows, for tools that discover graphs rather than
-define them:
+Every backend connection can list what it knows, for tools such as the
+[dashboard](../dashboard.md) that discover graphs rather than define them:
 
 - `read_graph_names()`: the names of all known graphs.
 - `read_graphs(name)`: every version (fingerprint) of a graph.
