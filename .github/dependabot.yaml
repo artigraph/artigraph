@@ -11,3 +11,8 @@ updates:
     schedule:
       interval: weekly
       day: "monday"
+  - package-ecosystem: npm # The dashboard page; rebuild it (`mise run dashboard`) when updating.
+    directory: /tools/dashboard
+    schedule:
+      interval: weekly
+      day: "monday"
