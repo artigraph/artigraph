@@ -10,7 +10,7 @@ import {
   type Node as FlowNode,
   type NodeProps,
 } from "@xyflow/react";
-import { useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import type { ArtifactNode, GraphVersion, Partition, ProducerNode } from "./api";
 
 const SIZES = {
@@ -122,6 +122,13 @@ export function GraphView({
     () => nodes.map((node) => ({ ...node, selected: node.id === selected })),
     [nodes, selected],
   );
+  // The details panel narrows the canvas, so refit the graph when it opens or closes.
+  const flow = useRef<{ fitView: (options: { duration: number }) => Promise<boolean> } | null>(null);
+  const detailsOpen = selected !== null;
+  useEffect(() => {
+    const timer = setTimeout(() => flow.current?.fitView({ duration: 300 }), 0);
+    return () => clearTimeout(timer);
+  }, [detailsOpen]);
   return (
     <ReactFlow
       // Remount (and refit) when switching between Graph versions or snapshots.
@@ -131,6 +138,9 @@ export function GraphView({
       nodeTypes={nodeTypes}
       colorMode="system"
       fitView
+      onInit={(instance) => {
+        flow.current = instance;
+      }}
       minZoom={0.1}
       nodesDraggable={false}
       nodesConnectable={false}
