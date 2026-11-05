@@ -106,9 +106,9 @@ def _pickle_graph(graph: Graph) -> Graph:
 
 def test_Graph_serialization_is_stable(graph: Graph) -> None:
     # Pin the serialized form and fingerprints so refactors can't silently change Graph identity.
-    assert graph.artifacts.b.fingerprint == 7954616637240085606
-    assert graph.artifacts.b.producer_output.producer.fingerprint == -46238299892531143
-    assert graph.fingerprint == 2359901611142207010
+    assert graph.artifacts.b.fingerprint == -7168675967200675840
+    assert graph.artifacts.b.producer_output.producer.fingerprint == -5103853322016403750
+    assert graph.fingerprint == -991415028385423145
     # Artifacts omit their Producer, so the Graph includes each produced Artifact's Producer.
     assert {
         key: (output["producer"]["_arti_type_"], output["position"])
@@ -130,6 +130,7 @@ def test_Graph_serialization_is_stable(graph: Graph) -> None:
             "format": {"_arti_type_": "JSON", "extension": ".json"},
             "note": "hi",
             "statistics": [],
+            "thresholds": [],
             "storage": {"_arti_type_": "StringLiteral", "id": "test/n/n.json", "value": "1"},
             "type": {"_arti_type_": "Int64", "nullable": False},
         }
