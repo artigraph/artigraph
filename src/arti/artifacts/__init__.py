@@ -13,7 +13,7 @@ from arti.fingerprints import SkipFingerprint
 from arti.formats import Format
 from arti.internal.models import Model, get_field_default
 from arti.internal.type_hints import get_annotation_from_value
-from arti.statistics import Statistic
+from arti.statistics import Statistic, expand
 from arti.storage import Storage
 from arti.types import Type
 
@@ -88,6 +88,21 @@ class Artifact(Model):
             if issubclass(klass, Artifact)
         )
         return tuple(dict.fromkeys(chain(*defaults, value)))
+
+    @field_validator("statistics")
+    @classmethod
+    def _validate_statistics(
+        cls, statistics: tuple[Statistic, ...], info: ValidationInfo
+    ) -> tuple[Statistic, ...]:
+        if (type_ := info.data.get("type")) is not None:
+            for statistic in expand(statistics):
+                statistic.value_type(type_)  # Raises if the Statistic doesn't apply to the Type
+        return statistics
+
+    @property
+    def all_statistics(self) -> tuple[Statistic, ...]:
+        """All Statistics to compute for each partition, including the inputs of derived ones."""
+        return expand(self.statistics)
 
     @classmethod
     def cast(cls, value: Any) -> Artifact:

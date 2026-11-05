@@ -124,7 +124,7 @@ def test_instance_attr_merging() -> None:
         y: int
 
     with pytest.raises(TypeError, match="cannot be instantiated directly"):
-        Statistic()
+        Statistic()  # pyright: ignore[reportAbstractUsage]
 
     class Stat1(DummyStatistic):
         pass
