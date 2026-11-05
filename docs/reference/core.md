@@ -19,6 +19,8 @@ use canonical module paths so the generated docs can resolve them reliably.
 
 ::: arti.executors.airflow.make_dag
 
+::: arti.executors.kubernetes.KubernetesExecutor
+
 ::: arti.artifacts.Artifact
 
 ::: arti.fingerprints.Fingerprint

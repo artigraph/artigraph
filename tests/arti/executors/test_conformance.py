@@ -6,15 +6,18 @@ from collections.abc import Callable
 from typing import Any, cast
 
 import pytest
+from kubernetes import client as k8s
 from prefect.task_runners import ProcessPoolTaskRunner, TaskRunner
 
 from arti import Executor, Graph, GraphSnapshot
 from arti.backends.memory import MemoryBackend
 from arti.executors.concurrent import ConcurrentExecutor
 from arti.executors.dask import DaskExecutor
+from arti.executors.kubernetes import KubernetesExecutor
 from arti.executors.local import LocalExecutor
 from arti.executors.prefect import PrefectExecutor
 from arti.executors.work_units import encode_partition_key
+from tests.arti.executors.fake_kubernetes import FakeBatchApi
 from tests.arti.executors.graphs import GRAPH_REF, make_graph, sorted_rows
 
 
@@ -45,6 +48,12 @@ EXECUTORS: dict[str, Callable[[pytest.FixtureRequest], Executor]] = {
     "prefect-thread": lambda request: _prefect(request, None),
     "prefect-process": lambda request: _prefect(request, ProcessPoolTaskRunner(max_workers=2)),
     "airflow": _airflow,
+    "kubernetes": lambda _: KubernetesExecutor(
+        graph_ref=GRAPH_REF,
+        image="example.com/project:1",
+        batch_api=cast(k8s.BatchV1Api, FakeBatchApi()),
+        poll_interval=0,
+    ),
     "dask": lambda request: DaskExecutor(
         graph_ref=GRAPH_REF, client=request.getfixturevalue("dask_client")
     ),

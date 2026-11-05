@@ -18,6 +18,8 @@ surface to start from; other modules may change faster. Use the project
   and read a named snapshot back.
 - **Ecosystem interop:** hand exact snapshot files to outside tools, such as DuckDB, without relying
   on path globs.
+- **Executors:** build in parallel with threads or processes, or hand partitions to Prefect, Dask,
+  Airflow, or Kubernetes Jobs (experimental). See [Executors](concepts/executors.md).
 - **Experimental:** GCS storage (`GCSFile`), with JSON and pickle IO only.
 
 ## Planned / not yet supported

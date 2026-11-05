@@ -46,7 +46,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 
 [project.optional-dependencies]
-# Executor integrations (eg: `airflow`, `dask`, and `prefect`) are excluded from `all`, since each pulls in an
+# Executor integrations (eg: `airflow`, `dask`, `kubernetes`, and `prefect`) are excluded from `all`, since each pulls in an
 # orchestrator.
 airflow = ["apache-airflow>=3.1"]
 all = [
@@ -60,10 +60,14 @@ all = [
     "sqlalchemy>=2.0.31",
 ]
 dask = ["distributed>=2025.1"]
+kubernetes = ["kubernetes>=31"]
 parquet = ["pandas", "pyarrow"]
 postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2.0.31"]
 prefect = ["prefect>=3.7"]
 sqlite = ["alembic", "sqlalchemy>=2.0.31"]
+
+[project.scripts]
+arti = "arti.cli:main"
 
 [project.urls]
 Documentation = "https://artigraph.github.io/artigraph/"

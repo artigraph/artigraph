@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import multiprocessing
+from collections.abc import Callable
 from concurrent.futures import (
     FIRST_COMPLETED,
     Future,
@@ -19,6 +20,61 @@ from arti.executors import Executor, ProducerPlan, logger, producer_dependencies
 from arti.executors.work_units import check_graph_ref, check_reach, run_work_unit, work_units
 from arti.graphs import GraphSnapshot
 from arti.producers import Producer
+
+
+def build_in_pool(
+    executor: Executor,
+    snapshot: GraphSnapshot,
+    pool: PoolExecutor,
+    submit: Callable[[ProducerPlan], list[Future[None]]],
+) -> None:
+    """
+    Plan each Producer as soon as its upstream Producers finish and `submit` its pending partitions.
+
+    `submit` returns a future for each pending partition of the plan, typically by submitting work
+    to the `pool`. If a partition fails, no new partitions are started, queued partitions are
+    cancelled, and the first error is raised once running partitions finish.
+    """
+    with pool:
+        try:
+            _schedule(executor, snapshot, submit)
+        except BaseException:
+            pool.shutdown(cancel_futures=True)
+            raise
+    logger.info("Build finished.")
+
+
+def _schedule(
+    executor: Executor,
+    snapshot: GraphSnapshot,
+    submit: Callable[[ProducerPlan], list[Future[None]]],
+) -> None:
+    waiting = dict(producer_dependencies(snapshot.graph))
+    finished = set[Producer]()
+    running = dict[Future[None], Producer]()
+    remaining = dict[Producer, int]()
+    while True:
+        # Plan every Producer whose inputs are built. Producers without pending partitions finish
+        # immediately, which may unblock others.
+        while ready := [p for p, upstream in waiting.items() if upstream <= finished]:
+            for producer in ready:
+                del waiting[producer]
+                logger.info(f"Planning {producer}...")
+                futures = submit(executor.plan_producer(snapshot, producer))
+                running.update(dict.fromkeys(futures, producer))
+                if futures:
+                    remaining[producer] = len(futures)
+                else:
+                    finished.add(producer)
+        if not running:
+            break
+        done, _ = wait(running, return_when=FIRST_COMPLETED)
+        for future in done:
+            producer = running.pop(future)
+            future.result()  # Raise the first error
+            remaining[producer] -= 1
+            if not remaining[producer]:
+                finished.add(producer)
 
 
 class ConcurrentExecutor(Executor):
@@ -60,13 +116,7 @@ class ConcurrentExecutor(Executor):
             )
         else:
             pool = ThreadPoolExecutor(self.max_workers, thread_name_prefix="arti")
-        with pool:
-            try:
-                self._build(snapshot, pool)
-            except BaseException:
-                pool.shutdown(cancel_futures=True)
-                raise
-        logger.info("Build finished.")
+        build_in_pool(self, snapshot, pool, lambda plan: self._submit(snapshot, pool, plan))
 
     def _submit(
         self, snapshot: GraphSnapshot, pool: PoolExecutor, plan: ProducerPlan
@@ -80,33 +130,5 @@ class ConcurrentExecutor(Executor):
             pool.submit(run_work_unit, unit) for unit in work_units(self.graph_ref, snapshot, plan)
         ]
 
-    def _build(self, snapshot: GraphSnapshot, pool: PoolExecutor) -> None:
-        waiting = dict(producer_dependencies(snapshot.graph))
-        finished = set[Producer]()
-        running = dict[Future[None], Producer]()
-        remaining = dict[Producer, int]()
-        while True:
-            # Plan every Producer whose inputs are built. Producers without pending partitions
-            # finish immediately, which may unblock others.
-            while ready := [p for p, upstream in waiting.items() if upstream <= finished]:
-                for producer in ready:
-                    del waiting[producer]
-                    logger.info(f"Planning {producer}...")
-                    futures = self._submit(snapshot, pool, self.plan_producer(snapshot, producer))
-                    running.update(dict.fromkeys(futures, producer))
-                    if futures:
-                        remaining[producer] = len(futures)
-                    else:
-                        finished.add(producer)
-            if not running:
-                break
-            done, _ = wait(running, return_when=FIRST_COMPLETED)
-            for future in done:
-                producer = running.pop(future)
-                future.result()  # Raise the first error
-                remaining[producer] -= 1
-                if not remaining[producer]:
-                    finished.add(producer)
 
-
-__all__ = ["ConcurrentExecutor"]
+__all__ = ["ConcurrentExecutor", "build_in_pool"]

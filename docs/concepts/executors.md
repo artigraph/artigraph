@@ -114,6 +114,66 @@ shared across machines. Pass `reach="host"` when every task runs on one machine 
 `LocalExecutor`). Failed tasks can be retried with Airflow's retries: a retried partition is linked
 if it was already built.
 
+### Kubernetes
+
+`pip install 'arti[kubernetes]'`
+
+`KubernetesExecutor` builds each pending partition in its own Kubernetes Job, which runs
+`arti build-partition ...` (see [the command line](#the-command-line)) from an image with your code.
+Producers are planned in the process that calls `build`, as soon as their inputs are built.
+
+```python
+from kubernetes import client as k8s
+
+from arti.executors.kubernetes import KubernetesExecutor
+
+executor = KubernetesExecutor(
+    graph_ref="my_project.graphs:graph",
+    namespace="data",
+    max_parallel=16,
+    job_template=k8s.V1Job(
+        spec=k8s.V1JobSpec(
+            template=k8s.V1PodTemplateSpec(
+                spec=k8s.V1PodSpec(
+                    containers=[
+                        k8s.V1Container(
+                            name="arti",
+                            image="registry.example.com/my-project:1.2.3",
+                            env_from=[
+                                k8s.V1EnvFromSource(
+                                    secret_ref=k8s.V1SecretEnvSource(name="artigraph-postgres")
+                                )
+                            ],
+                        )
+                    ],
+                    restart_policy="Never",
+                    service_account_name="artigraph",
+                )
+            )
+        )
+    ),
+)
+snapshot = graph.build(executor)
+```
+
+The executor sets the command of the template's first container and labels each Job with
+`app.kubernetes.io/managed-by: artigraph` (the work unit is in its `artigraph.io/work-unit`
+annotation). Pass `image=...` instead of a template for a single container with no other settings.
+Jobs get `backoff_limit=0` unless the template sets one, so a failed partition fails the build
+instead of being retried. The backend and storage must be shared across machines.
+
+## The command line
+
+The `arti` command exposes the [work unit](#work-units) protocol, so any scheduler or container
+platform can build a graph:
+
+```shell
+arti snapshot --graph my_project.graphs:graph  # Prints the snapshot ID
+arti plan --graph my_project.graphs:graph --snapshot-id ID --producer clean  # Prints work units
+arti build-partition --graph my_project.graphs:graph --snapshot-id ID --producer clean \
+    --partition-key '{"date": {"value": "2024-01-01"}}' --input-fingerprint FINGERPRINT
+```
+
 ## How a build runs
 
 For each producer, once all of its inputs are built, an executor:
