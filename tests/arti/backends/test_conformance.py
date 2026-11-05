@@ -162,6 +162,37 @@ def test_backend_pipeline_conformance(backend_harness: BackendHarness) -> None:
         )
 
 
+def test_backend_lists_graphs_snapshots_and_tags(backend_harness: BackendHarness) -> None:
+    backend = backend_harness.open()
+    name = f"listing-{backend_harness.kind}"
+    snapshot = build_pipeline(backend, name)
+    other = GraphSnapshot(id=snapshot.id.combine(Fingerprint.from_int(1)), graph=snapshot.graph)
+    with backend.connect() as connection:
+        # Lookups of unknown names must not register them (eg: via a defaultdict).
+        with pytest.raises(KeyError):
+            connection.read_graph("listing-missing", Fingerprint.from_int(1))
+        assert connection.read_graphs("listing-missing") == ()
+        assert connection.read_snapshots("listing-missing") == ()
+        assert connection.read_snapshot_tags("listing-missing") == {}
+        connection.write_snapshot(other)
+        connection.write_snapshot_tag(other, "candidate")
+
+    with backend.connect() as connection:
+        names = connection.read_graph_names()
+        graphs = connection.read_graphs(name)
+        snapshots = connection.read_snapshots(name)
+        tags = connection.read_snapshot_tags(name)
+
+    assert name in names
+    assert "listing-missing" not in names
+    assert [graph.fingerprint for graph in graphs] == [snapshot.graph.fingerprint]
+    assert [s.fingerprint for s in snapshots] == sorted([snapshot.fingerprint, other.fingerprint])
+    assert list(tags) == ["candidate", "latest"]
+    assert tags["candidate"].fingerprint == other.fingerprint
+    assert tags["latest"].fingerprint == snapshot.fingerprint
+    assert tags["latest"].graph == snapshot.graph
+
+
 def test_backend_keeps_graphs_that_differ_only_by_producer(
     backend_harness: BackendHarness,
 ) -> None:

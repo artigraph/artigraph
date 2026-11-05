@@ -18,6 +18,7 @@ from arti import (
     StoragePartitionSnapshot,
     StoragePartitionSnapshots,
 )
+from arti.internal.mappings import frozendict
 from arti.internal.utils import NoCopyMixin
 
 _Graphs = dict[str, dict[Fingerprint, Graph]]
@@ -102,8 +103,19 @@ class MemoryConnection(BackendConnection):
     def write_graph(self, graph: Graph) -> None:
         self.container.graphs[graph.name].setdefault(graph.fingerprint, graph)
 
+    def read_graph_names(self) -> frozenset[str]:
+        return frozenset(name for name, graphs in self.container.graphs.items() if graphs)
+
+    def read_graphs(self, name: str) -> tuple[Graph, ...]:
+        graphs = self.container.graphs.get(name, {})
+        return tuple(graphs[fingerprint] for fingerprint in sorted(graphs))
+
     def read_snapshot(self, name: str, fingerprint: Fingerprint) -> GraphSnapshot:
         return self.container.snapshots[name][fingerprint]
+
+    def read_snapshots(self, name: str) -> tuple[GraphSnapshot, ...]:
+        snapshots = self.container.snapshots.get(name, {})
+        return tuple(snapshots[fingerprint] for fingerprint in sorted(snapshots))
 
     def write_snapshot(self, snapshot: GraphSnapshot) -> None:
         self.container.snapshots[snapshot.name].setdefault(snapshot.fingerprint, snapshot)
@@ -112,6 +124,10 @@ class MemoryConnection(BackendConnection):
         if tag not in self.container.snapshot_tags[name]:
             raise ValueError(f"No known `{tag}` tag for GraphSnapshot `{name}`")
         return self.container.snapshot_tags[name][tag]
+
+    def read_snapshot_tags(self, name: str) -> frozendict[str, GraphSnapshot]:
+        tags = self.container.snapshot_tags.get(name, {})
+        return frozendict({tag: tags[tag] for tag in sorted(tags)})
 
     def write_snapshot_tag(
         self, snapshot: GraphSnapshot, tag: str, overwrite: bool = False

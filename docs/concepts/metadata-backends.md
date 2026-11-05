@@ -38,6 +38,19 @@ backend = PostgresBackend.from_url(
 Both SQL backends apply bundled Alembic migrations on first use by default. Set
 `auto_upgrade=False` if you want to control migrations explicitly.
 
+## Browsing metadata
+
+Every backend connection can list what it knows, for tools that discover graphs rather than
+define them:
+
+- `read_graph_names()`: the names of all known graphs.
+- `read_graphs(name)`: every version (fingerprint) of a graph.
+- `read_snapshots(name)`: every snapshot of a graph.
+- `read_snapshot_tags(name)`: the snapshot each tag points to.
+
+Backends don't record when metadata was written, so versions and snapshots are ordered by
+fingerprint: stable, but not chronological. Use tags to name the snapshots that matter.
+
 ## Trust boundary
 
 Persisted metadata includes module-qualified Python type paths, so artifact and producer
