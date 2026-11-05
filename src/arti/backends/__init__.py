@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING, Self
 
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
+from arti.internal.mappings import frozendict
 from arti.internal.models import Model
 from arti.partitions import InputFingerprints
 from arti.storage import StoragePartitionSnapshots
@@ -72,6 +73,21 @@ class BackendConnection:
         """Write the Graph and all linked Artifacts and Producers to the database."""
         raise NotImplementedError()
 
+    @abstractmethod
+    def read_graph_names(self) -> frozenset[str]:
+        """List the names of all known Graphs."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def read_graphs(self, name: str) -> tuple[Graph, ...]:
+        """
+        Fetch every known version of the named Graph, ordered by fingerprint.
+
+        Backends don't record when a Graph was written, so the order is stable but not chronological.
+        An unknown name returns no Graphs.
+        """
+        raise NotImplementedError()
+
     # GraphSnapshot
 
     @abstractmethod
@@ -85,8 +101,22 @@ class BackendConnection:
         raise NotImplementedError()
 
     @abstractmethod
+    def read_snapshots(self, name: str) -> tuple[GraphSnapshot, ...]:
+        """
+        Fetch every known GraphSnapshot of the named Graph, ordered by fingerprint.
+
+        Like `read_graphs`, the order is stable but not chronological.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
     def read_snapshot_tag(self, name: str, tag: str) -> GraphSnapshot:
         """Fetch the GraphSnapshot for the named tag."""
+        raise NotImplementedError()
+
+    @abstractmethod
+    def read_snapshot_tags(self, name: str) -> frozendict[str, GraphSnapshot]:
+        """Fetch the GraphSnapshot for every tag of the named Graph, ordered by tag."""
         raise NotImplementedError()
 
     @abstractmethod

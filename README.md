@@ -165,6 +165,18 @@ and producer classes therefore need to be defined at module scope in an importab
 classes, local decorated functions, and definitions run only as `__main__` cannot be restored in a
 future process. Treat the database as trusted: restoring metadata imports the recorded modules.
 
+## Dashboard
+
+Browse a backend's graphs, snapshots, tags, and partitions in a local, read-only web page. The page
+draws each graph's lineage and is bundled with Artigraph, so there is nothing else to install:
+
+```shell
+arti dashboard --sqlite artigraph.sqlite      # a SQLite metadata file
+arti dashboard my_project.graphs:graph --open # a Graph (or Backend) defined in a module
+```
+
+See the [dashboard guide](https://artigraph.github.io/artigraph/dashboard/) for details.
+
 ## Community
 
 We're excited to hear from anyone interested in the project. Feel free to introduce yourself in the

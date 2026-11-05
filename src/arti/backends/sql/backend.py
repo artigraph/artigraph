@@ -29,6 +29,7 @@ from arti.backends.sql.models import (
     StoragePartitionRow,
 )
 from arti.fingerprints import Fingerprint
+from arti.internal.mappings import frozendict
 from arti.internal.utils import NoCopyMixin
 from arti.partitions import InputFingerprints
 from arti.storage import StoragePartitionSnapshot, StoragePartitionSnapshots
@@ -171,12 +172,32 @@ class SQLBackendConnection(BackendConnection):
             ],
         )
 
-    def read_snapshot(self, name: str, fingerprint: Fingerprint) -> GraphSnapshot:
-        from arti.graphs import GraphSnapshot
+    def read_graph_names(self) -> frozenset[str]:
+        return frozenset(self.session.scalars(sa.select(GraphRow.name).distinct()))
 
+    def read_graphs(self, name: str) -> tuple[Graph, ...]:
+        rows = self.session.scalars(
+            sa.select(GraphRow).where(GraphRow.name == name).order_by(GraphRow.fingerprint)
+        )
+        return tuple(self._restore_graph(row) for row in rows)
+
+    def read_snapshot(self, name: str, fingerprint: Fingerprint) -> GraphSnapshot:
         row = self.session.get(GraphSnapshotRow, (name, int(fingerprint)))
         if row is None:
             raise KeyError((name, fingerprint))
+        return self._restore_snapshot(row)
+
+    def read_snapshots(self, name: str) -> tuple[GraphSnapshot, ...]:
+        rows = self.session.scalars(
+            sa.select(GraphSnapshotRow)
+            .where(GraphSnapshotRow.name == name)
+            .order_by(GraphSnapshotRow.fingerprint)
+        )
+        return tuple(self._restore_snapshot(row) for row in rows)
+
+    def _restore_snapshot(self, row: GraphSnapshotRow) -> GraphSnapshot:
+        from arti.graphs import GraphSnapshot
+
         graph = self.read_graph(row.name, Fingerprint.from_int(row.graph_fingerprint))
         snapshot = GraphSnapshot(
             id=Fingerprint.from_int(row.snapshot_id),
@@ -209,6 +230,21 @@ class SQLBackendConnection(BackendConnection):
         return self.read_snapshot(
             row.graph_name,
             Fingerprint.from_int(row.snapshot_fingerprint),
+        )
+
+    def read_snapshot_tags(self, name: str) -> frozendict[str, GraphSnapshot]:
+        rows = self.session.scalars(
+            sa.select(SnapshotTagRow)
+            .where(SnapshotTagRow.graph_name == name)
+            .order_by(SnapshotTagRow.tag)
+        )
+        return frozendict(
+            {
+                row.tag: self.read_snapshot(
+                    row.graph_name, Fingerprint.from_int(row.snapshot_fingerprint)
+                )
+                for row in rows
+            }
         )
 
     def write_snapshot_tag(
