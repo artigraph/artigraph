@@ -4,8 +4,10 @@ from typing import Annotated
 
 import pandas as pd
 
-from arti import Artifact, Format, Type, one_to_one, producer
+from arti import Artifact, Format, Statistic, Threshold, Type, one_to_one, producer
 from arti.formats.parquet import Parquet
+from arti.statistics import DistinctCount, DistinctValues, Max, Min, NullCount, Ratio, RowCount
+from arti.thresholds import Range, Subset
 from arti.types import Collection, Date, Float64, Int64, String, Struct
 from arti.versions import SemVer
 
@@ -24,6 +26,8 @@ class RawTransactions(Artifact):
         partition_by=("transaction_date",),
     )
     format: Format = Parquet()
+    # Raw partitions written with `graph.write` compute Statistics from the written DataFrame.
+    statistics: tuple[Statistic, ...] = (RowCount(),)
 
 
 class CleanTransactions(Artifact):
@@ -40,6 +44,26 @@ class CleanTransactions(Artifact):
         partition_by=("transaction_date",),
     )
     format: Format = Parquet()
+    # Statistics are facts recorded for every partition. Produced partitions compute them from the
+    # Producer's in-memory DataFrame.
+    statistics: tuple[Statistic, ...] = (
+        DistinctCount(field="transaction_id"),
+        Max(field="amount_usd"),
+    )
+    # Thresholds are judgements over facts, checked on every build. Their Statistics are recorded
+    # too. A failing partition stops the build before anything downstream reads it.
+    thresholds: tuple[Threshold, ...] = (
+        Range(statistic=RowCount(), min=1),
+        # A compound judgement checks a derived Statistic: here, at most 5% of vendors are null.
+        Range(
+            statistic=Ratio(numerator=NullCount(field="vendor"), denominator=RowCount()), max=0.05
+        ),
+        Subset(
+            statistic=DistinctValues(field="category"),
+            of=frozenset({"meals", "office", "software"}),
+        ),
+        Range(statistic=Min(field="amount_usd"), min=0),
+    )
 
 
 @producer(version=SemVer(major=1, minor=0, patch=0), map=one_to_one("raw"))

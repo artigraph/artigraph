@@ -20,6 +20,7 @@ from arti import Graph, GraphSnapshot, PartitionKey
 from arti.backends.sqlite import SQLiteBackend
 from arti.partitions import DateField
 from arti.storage.local import LocalFile
+from arti.thresholds import ThresholdError
 
 DIR = Path(__file__).parent
 DEFAULT_WORK_DIR = DIR / "_work"
@@ -85,6 +86,22 @@ def _reset_work_dir(work_dir: Path) -> None:
         shutil.rmtree(work_dir)
     work_dir.mkdir(parents=True, exist_ok=True)
     (work_dir / WORK_DIR_MARKER).touch()
+
+
+def _format(value: object) -> str:
+    # Sort sets (eg: DistinctValues), whose iteration order varies between processes.
+    return repr(sorted(value)) if isinstance(value, set | frozenset) else repr(value)  # pyright: ignore[reportUnknownArgumentType]
+
+
+def _print_statistics(snapshot: GraphSnapshot) -> None:
+    statistics = snapshot.read_statistics(snapshot.artifacts.clean)
+    for partition, values in sorted(
+        statistics.items(), key=lambda item: str(item[0].partition_key)
+    ):
+        day = cast(DateField, partition.partition_key["transaction_date"]).iso
+        print(f"  {day}:")
+        for statistic, value in values.items():
+            print(f"    {statistic!r} = {_format(value)}")
 
 
 def run_demo(work_dir: Path) -> dict[str, float]:
@@ -171,7 +188,45 @@ def run_demo(work_dir: Path) -> dict[str, float]:
             f"Naive glob total: {naive_total:.2f} (wrong: it mixes live versions from both snapshots)"
         )
 
+        print("Corrected snapshot statistics for the cleaned transactions:")
+        _print_statistics(corrected)
+
+        # A refund with a negative amount fails the cleaned Artifact's `Min(amount_usd) >= 0`
+        # Threshold. The build stops before anything downstream reads the partition, and the tagged
+        # snapshots are untouched.
+        _write_raw_partition(
+            graph,
+            transaction_date=date(2026, 1, 3),
+            records=[("txn-004", "Paper & Co", "Office", -1_800)],
+        )
+        try:
+            graph.build()
+        except ThresholdError as error:
+            print(f"Build stopped by a Threshold: {error}")
+            failures = error.failures
+        else:  # pragma: no cover - the demo expects the refund to fail
+            raise AssertionError("Expected the refund to fail a Threshold")
+
+        # Refunds are expected, so a human accepts this partition. The override is recorded for
+        # the partition's exact contents and Threshold, and the rebuild reuses the partition.
+        for failure in failures:
+            graph.override_threshold(
+                graph.artifacts.clean,
+                failure.partition,
+                failure.threshold,
+                reason="Refunds are expected",
+            )
+        with_refund = graph.build()
+        with_refund.tag("with-refund")
+        with duckdb.connect(":memory:") as connection:
+            refund_total = _query_total(
+                connection, snapshot=with_refund, view_name="refund_transactions"
+            )
+        print(f"Overridden snapshot total: {refund_total:.2f}")
+
         return {
+            "threshold_failures": len(failures),
+            "with_refund": refund_total,
             "baseline": baseline_total,
             "corrected": corrected_total,
             "naive": naive_total,
