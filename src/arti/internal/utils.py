@@ -5,7 +5,7 @@ import inspect
 import pkgutil
 import secrets
 import threading
-from collections.abc import Callable, Generator, Iterable
+from collections.abc import Callable, Generator, Iterable, Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from types import ModuleType
@@ -141,6 +141,26 @@ def register[K, V](
             )
     registry[key] = value
     return value
+
+
+def lookup_most_specific[K: tuple[type, ...], V](
+    registry: Mapping[K, V], key: K, *, name: str
+) -> V:
+    """
+    Return the registry value whose key classes most specifically match the `key` classes.
+
+    A registered key matches if each `key` class is a subclass of the class at the same position.
+    Of the matches, only those without a more specific match on *every* position are kept. Raises if
+    no or several (ambiguous) matches remain, rather than guessing.
+    """
+    matches = {k for k in registry if all(map(issubclass, key, k))}
+    best = [k for k in matches if not any(o != k and all(map(issubclass, o, k)) for o in matches)]
+    if not best:
+        raise ValueError(f"No `{name}` implementation found for: {key}")
+    if len(best) > 1:
+        values = sorted(getattr(registry[k], "__name__", repr(registry[k])) for k in best)
+        raise ValueError(f"Multiple `{name}` implementations match {key}: {values}")
+    return registry[best[0]]
 
 
 class NoCopyMixin:

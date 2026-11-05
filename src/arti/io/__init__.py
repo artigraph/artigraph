@@ -8,7 +8,7 @@ from typing import Any, NamedTuple, get_args, get_origin
 
 from arti.formats import Format
 from arti.internal.type_hints import signature
-from arti.internal.utils import import_submodules, register
+from arti.internal.utils import import_submodules, lookup_most_specific, register
 from arti.storage import (
     StoragePartition,
     StoragePartitionSnapshot,
@@ -75,15 +75,7 @@ def _register[F: Callable[..., Any]](
 
 def _lookup(registry: dict[IOKey, Callable[..., Any]], key: IOKey, name: str) -> Callable[..., Any]:
     _discover()
-    matches = {k for k in registry if all(map(issubclass, key, k))}
-    # Keep the most specific matches, those without a more specific match on every axis.
-    best = [k for k in matches if not any(o != k and all(map(issubclass, o, k)) for o in matches)]
-    if not best:
-        raise ValueError(f"No `{name}` implementation found for: {key}")
-    if len(best) > 1:
-        funcs = sorted(registry[k].__name__ for k in best)
-        raise ValueError(f"Multiple `{name}` implementations match {key}: {funcs}")
-    return registry[best[0]]
+    return lookup_most_specific(registry, key, name=name)
 
 
 def register_reader[F: Callable[..., Any]](func: F) -> F:
