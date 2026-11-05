@@ -13,6 +13,14 @@ from tests.arti.executors.graphs import BACKEND_ENV, RAW_ROOT_ENV, make_graph, w
 
 
 @pytest.fixture(scope="session")
+def airflow_db() -> None:
+    """Create the Airflow database configured in the root conftest."""
+    from airflow.utils.db import resetdb
+
+    resetdb()
+
+
+@pytest.fixture(scope="session")
 def prefect_harness() -> Generator[None]:
     """Run Prefect flows against a temporary Prefect server and database."""
     from prefect.testing.utilities import prefect_test_harness

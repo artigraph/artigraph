@@ -18,6 +18,21 @@ from arti.executors.work_units import encode_partition_key
 from tests.arti.executors.graphs import GRAPH_REF, make_graph, sorted_rows
 
 
+class AirflowDagTest(Executor):
+    """Run the test DAG file's DAG (see `airflow_dags/`) with `dag.test()`."""
+
+    def build(self, snapshot: GraphSnapshot) -> None:
+        from tests.arti.executors.airflow_dags import arti_executor_conformance
+
+        dag_run = arti_executor_conformance.dag.test()  # pyright: ignore[reportUnknownMemberType]
+        assert dag_run.state == "success"
+
+
+def _airflow(request: pytest.FixtureRequest) -> Executor:
+    request.getfixturevalue("airflow_db")
+    return AirflowDagTest()
+
+
 def _prefect(request: pytest.FixtureRequest, task_runner: TaskRunner[Any] | None) -> Executor:
     request.getfixturevalue("prefect_harness")
     return PrefectExecutor(graph_ref=GRAPH_REF, task_runner=task_runner)
@@ -29,6 +44,7 @@ EXECUTORS: dict[str, Callable[[pytest.FixtureRequest], Executor]] = {
     "process": lambda _: ConcurrentExecutor(kind="process", graph_ref=GRAPH_REF, max_workers=2),
     "prefect-thread": lambda request: _prefect(request, None),
     "prefect-process": lambda request: _prefect(request, ProcessPoolTaskRunner(max_workers=2)),
+    "airflow": _airflow,
     "dask": lambda request: DaskExecutor(
         graph_ref=GRAPH_REF, client=request.getfixturevalue("dask_client")
     ),

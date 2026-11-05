@@ -1,6 +1,9 @@
 import os
+import shutil
 import socket
+import tempfile
 from collections.abc import Generator
+from pathlib import Path
 from typing import Protocol, cast
 from unittest import mock
 from uuid import uuid4
@@ -10,6 +13,18 @@ import sqlalchemy as sa
 
 # The experimental gcsfs backend uses gRPC APIs that the local HTTP emulator does not implement.
 os.environ["GCSFS_EXPERIMENTAL_ZB_HNS_SUPPORT"] = "false"
+
+# Airflow reads its configuration on import (including while collecting doctests), so isolate it in a
+# temporary home with a SQLite database and the test DAGs folder. See the `airflow_db` fixture.
+os.environ["AIRFLOW_HOME"] = tempfile.mkdtemp(prefix="arti-airflow-")
+os.environ["AIRFLOW__CORE__DAGS_FOLDER"] = str(
+    Path(__file__).parent / "arti/executors/airflow_dags"
+)
+os.environ["AIRFLOW__CORE__LOAD_EXAMPLES"] = "False"
+os.environ["AIRFLOW__CORE__UNIT_TEST_MODE"] = "True"
+os.environ["AIRFLOW__DATABASE__SQL_ALCHEMY_CONN"] = (
+    f"sqlite:///{os.environ['AIRFLOW_HOME']}/airflow.db"
+)
 
 import gcsfs
 import pytest
@@ -24,6 +39,10 @@ class _NamedNode(Protocol):
 
 class _SocketServer(Protocol):
     socket: socket.socket
+
+
+def pytest_sessionfinish() -> None:
+    shutil.rmtree(os.environ["AIRFLOW_HOME"], ignore_errors=True)
 
 
 @pytest.fixture

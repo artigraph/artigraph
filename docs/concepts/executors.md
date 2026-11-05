@@ -88,6 +88,32 @@ on other machines, so the graph must use a backend and storage shared across mac
 and `GCSFile`); the executor raises an error for in-memory or SQLite backends and `LocalFile`
 storage.
 
+### Airflow
+
+`pip install 'arti[airflow]'`
+
+`make_dag` generates an Airflow DAG from a graph. Add it to a file in your DAGs folder:
+
+```python
+from arti.executors.airflow import make_dag
+
+dag = make_dag("my_project.graphs:graph", schedule="@daily")
+```
+
+The DAG has a `snapshot` task and a task group per producer, named after the key of the producer's
+first output. Each group has a `plan` task, which runs once the upstream producers are built, and a
+`build` task mapped over the pending partitions with
+[dynamic task mapping](https://airflow.apache.org/docs/apache-airflow/stable/authoring-and-scheduling/dynamic-task-mapping.html),
+since partitions are only known after the producer's `map` runs. Each mapped task instance is
+labeled with its partition. When a producer has nothing to build, its `build` task is skipped and
+downstream producers still run.
+
+Airflow imports the graph whenever it parses the DAG file, so keep the graph module cheap to import.
+Airflow may run each task on a different worker, so by default the backend and storage must be
+shared across machines. Pass `reach="host"` when every task runs on one machine (eg: Airflow's
+`LocalExecutor`). Failed tasks can be retried with Airflow's retries: a retried partition is linked
+if it was already built.
+
 ## How a build runs
 
 For each producer, once all of its inputs are built, an executor:

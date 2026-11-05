@@ -46,8 +46,9 @@ readme = "README.md"
 requires-python = ">=3.13"
 
 [project.optional-dependencies]
-# Executor integrations (eg: `dask` and `prefect`) are excluded from `all`, since each pulls in an
+# Executor integrations (eg: `airflow`, `dask`, and `prefect`) are excluded from `all`, since each pulls in an
 # orchestrator.
+airflow = ["apache-airflow>=3.1"]
 all = [
     "alembic",
     "gcsfs",
@@ -61,7 +62,7 @@ all = [
 dask = ["distributed>=2025.1"]
 parquet = ["pandas", "pyarrow"]
 postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2.0.31"]
-prefect = ["prefect>=3.4"]
+prefect = ["prefect>=3.7"]
 sqlite = ["alembic", "sqlalchemy>=2.0.31"]
 
 [project.urls]
@@ -129,6 +130,8 @@ filterwarnings = [
     # Ignore a couple external tools that use old form namespace packages
     "ignore:Deprecated call to `pkg_resources.declare_namespace.*:DeprecationWarning",
     "ignore:pkg_resources is deprecated as an API:DeprecationWarning",
+    # Airflow's in-process task runner (`dag.test()`) uses FastAPI's TestClient with httpx
+    "ignore:Using `httpx` with `starlette.testclient` is deprecated:UserWarning",
     # Ignore other upstream DeprecationWarnings
     "ignore:Type google._upb._message..* uses PyType_Spec with a metaclass.*:DeprecationWarning",
 ]
