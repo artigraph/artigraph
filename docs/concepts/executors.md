@@ -66,6 +66,28 @@ as widely as the task runner runs tasks: a `ThreadPoolTaskRunner` accepts any gr
 `ProcessPoolTaskRunner` needs them shared across processes, and other task runners (eg: Dask or Ray)
 need them shared across machines.
 
+### Dask
+
+`pip install 'arti[dask]'`
+
+`DaskExecutor` submits work to a Dask cluster with `Client.submit`. Each producer is planned in a
+task that depends on the futures of its upstream partitions, then each pending partition becomes a
+task that runs one work unit.
+
+```python
+from distributed import Client
+
+from arti.executors.dask import DaskExecutor
+
+with Client("tcp://scheduler:8786") as client:
+    snapshot = graph.build(DaskExecutor(graph_ref="my_project.graphs:graph", client=client))
+```
+
+Pass `address=...` instead of a `client` to connect for the duration of the build. Dask workers run
+on other machines, so the graph must use a backend and storage shared across machines (eg: Postgres
+and `GCSFile`); the executor raises an error for in-memory or SQLite backends and `LocalFile`
+storage.
+
 ## How a build runs
 
 For each producer, once all of its inputs are built, an executor:

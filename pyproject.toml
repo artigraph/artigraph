@@ -46,6 +46,8 @@ readme = "README.md"
 requires-python = ">=3.13"
 
 [project.optional-dependencies]
+# Executor integrations (eg: `dask` and `prefect`) are excluded from `all`, since each pulls in an
+# orchestrator.
 all = [
     "alembic",
     "gcsfs",
@@ -56,10 +58,10 @@ all = [
     "pyarrow",
     "sqlalchemy>=2.0.31",
 ]
+dask = ["distributed>=2025.1"]
 parquet = ["pandas", "pyarrow"]
-# Executor integrations are opt-in (and excluded from `all`), since each pulls in an orchestrator.
-prefect = ["prefect>=3.4"]
 postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2.0.31"]
+prefect = ["prefect>=3.4"]
 sqlite = ["alembic", "sqlalchemy>=2.0.31"]
 
 [project.urls]

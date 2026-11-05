@@ -4,6 +4,7 @@ from collections.abc import Generator
 
 import gcsfs
 import pytest
+from distributed import Client, LocalCluster
 
 from arti import Graph
 from arti.backends.postgres import PostgresBackend
@@ -46,3 +47,18 @@ def remote_graph(
         yield graph
     finally:
         gcs.rm(CONFORMANCE_BUCKET, recursive=True)
+
+
+@pytest.fixture
+def dask_cluster(remote_graph: Graph) -> Generator[LocalCluster]:
+    """Start Dask worker processes, which build `remote_graph` from the environment variables."""
+    with LocalCluster(
+        n_workers=2, threads_per_worker=1, processes=True, dashboard_address=None
+    ) as cluster:
+        yield cluster
+
+
+@pytest.fixture
+def dask_client(dask_cluster: LocalCluster) -> Generator[Client]:
+    with Client(dask_cluster) as client:
+        yield client

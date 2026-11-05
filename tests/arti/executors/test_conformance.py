@@ -6,27 +6,33 @@ from collections.abc import Callable
 from typing import Any, cast
 
 import pytest
-from prefect.task_runners import ProcessPoolTaskRunner
+from prefect.task_runners import ProcessPoolTaskRunner, TaskRunner
 
 from arti import Executor, Graph, GraphSnapshot
 from arti.backends.memory import MemoryBackend
 from arti.executors.concurrent import ConcurrentExecutor
+from arti.executors.dask import DaskExecutor
 from arti.executors.local import LocalExecutor
 from arti.executors.prefect import PrefectExecutor
 from arti.executors.work_units import encode_partition_key
 from tests.arti.executors.graphs import GRAPH_REF, make_graph, sorted_rows
 
-EXECUTORS: dict[str, Callable[[], Executor]] = {
-    "local": LocalExecutor,
-    "thread": lambda: ConcurrentExecutor(max_workers=4),
-    "process": lambda: ConcurrentExecutor(kind="process", graph_ref=GRAPH_REF, max_workers=2),
-    "prefect-thread": lambda: PrefectExecutor(graph_ref=GRAPH_REF),
-    "prefect-process": lambda: PrefectExecutor(
-        graph_ref=GRAPH_REF, task_runner=ProcessPoolTaskRunner(max_workers=2)
+
+def _prefect(request: pytest.FixtureRequest, task_runner: TaskRunner[Any] | None) -> Executor:
+    request.getfixturevalue("prefect_harness")
+    return PrefectExecutor(graph_ref=GRAPH_REF, task_runner=task_runner)
+
+
+EXECUTORS: dict[str, Callable[[pytest.FixtureRequest], Executor]] = {
+    "local": lambda _: LocalExecutor(),
+    "thread": lambda _: ConcurrentExecutor(max_workers=4),
+    "process": lambda _: ConcurrentExecutor(kind="process", graph_ref=GRAPH_REF, max_workers=2),
+    "prefect-thread": lambda request: _prefect(request, None),
+    "prefect-process": lambda request: _prefect(request, ProcessPoolTaskRunner(max_workers=2)),
+    "dask": lambda request: DaskExecutor(
+        graph_ref=GRAPH_REF, client=request.getfixturevalue("dask_client")
     ),
 }
-# Fixtures that some executors need, by executor name prefix.
-EXECUTOR_FIXTURES = {"prefect": "prefect_harness"}
 
 
 def snapshot_results(snapshot: GraphSnapshot) -> dict[str, list[tuple[str, int]]]:
@@ -51,11 +57,8 @@ def read_values(snapshot: GraphSnapshot) -> dict[str, Any]:
 
 
 @pytest.fixture(params=sorted(EXECUTORS))
-def executor(request: pytest.FixtureRequest) -> Executor:
-    name = cast(str, request.param)
-    if (fixture := EXECUTOR_FIXTURES.get(name.split("-")[0])) is not None:
-        request.getfixturevalue(fixture)
-    return EXECUTORS[name]()
+def executor(request: pytest.FixtureRequest, remote_graph: Graph) -> Executor:
+    return EXECUTORS[cast(str, request.param)](request)
 
 
 def test_executor_conformance(executor: Executor, remote_graph: Graph) -> None:

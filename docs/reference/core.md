@@ -15,6 +15,8 @@ use canonical module paths so the generated docs can resolve them reliably.
 
 ::: arti.executors.prefect.PrefectExecutor
 
+::: arti.executors.dask.DaskExecutor
+
 ::: arti.artifacts.Artifact
 
 ::: arti.fingerprints.Fingerprint
