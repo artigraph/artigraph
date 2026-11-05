@@ -4,7 +4,7 @@ import hashlib
 import tempfile
 from glob import glob
 from pathlib import Path
-from typing import ClassVar
+from typing import TYPE_CHECKING, ClassVar
 
 from arti import (
     Fingerprint,
@@ -14,6 +14,9 @@ from arti import (
     StoragePartitionSnapshots,
 )
 from arti.storage._internal import parse_spec, spec_to_wildcard
+
+if TYPE_CHECKING:
+    from arti.backends import Reach
 
 
 class LocalFilePartition(StoragePartition):
@@ -29,6 +32,10 @@ class LocalFilePartition(StoragePartition):
 
 class LocalFile(Storage):
     storage_partition_type = LocalFilePartition
+
+    @property
+    def reach(self) -> Reach:
+        return "host"
 
     # `_DEFAULT_PATH_TEMPLATE` and `rooted_at` ease testing, where we often want to just override
     # the tempdir, but keep the rest of the template. Eventually, we should introduce Resources and

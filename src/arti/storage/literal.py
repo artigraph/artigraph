@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import Self
+from typing import TYPE_CHECKING, Self
 
 from arti import (
     Fingerprint,
@@ -10,6 +10,9 @@ from arti import (
     StoragePartition,
     StoragePartitionSnapshots,
 )
+
+if TYPE_CHECKING:
+    from arti.backends import Reach
 
 _not_written_err = FileNotFoundError("Literal has not been written yet")
 
@@ -35,6 +38,11 @@ class StringLiteral(Storage):
     """StringLiteral stores a literal String value directly in the Backend."""
 
     storage_partition_type = StringLiteralPartition
+
+    @property
+    def reach(self) -> Reach:
+        # Literal values are stored in the Backend, so they are shared as widely as the Backend.
+        return "network"
 
     id: str = "{graph_name}/{path_tags}/{names}/{partition_key_spec}/{input_fingerprint}/{name}{extension}"
     value: str | None = None

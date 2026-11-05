@@ -20,7 +20,7 @@ from arti import (
 from arti.formats.json import JSON
 from arti.partitions import Int8Field
 from arti.types import Collection, Date, Int8, Struct
-from tests.arti.dummies import DummyFormat
+from tests.arti.dummies import DummyFormat, DummyStorage
 
 
 class MockStoragePartition(StoragePartition):
@@ -276,3 +276,7 @@ def test_Storage_generate_partition() -> None:
         MockStorage(path="hard coded").visit_type(Int8()).generate_partition(
             input_fingerprint=Fingerprint.from_string("fake")
         )
+
+
+def test_Storage_reach_defaults_to_the_current_process() -> None:
+    assert DummyStorage().reach == "process"

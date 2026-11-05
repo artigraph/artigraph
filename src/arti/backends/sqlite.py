@@ -9,6 +9,7 @@ from sqlalchemy import event
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.pool import ConnectionPoolEntry, StaticPool
 
+from arti.backends import Reach
 from arti.backends.sql import SQLBackend
 
 
@@ -28,6 +29,10 @@ class SQLiteBackend(SQLBackend):
     @property
     def in_memory(self) -> bool:
         return self.path == ":memory:"
+
+    @property
+    def reach(self) -> Reach:
+        return "process" if self.in_memory else "host"
 
     def _create_engine(self) -> Engine:
         connect_args: dict[str, Any] = {"timeout": self.timeout}

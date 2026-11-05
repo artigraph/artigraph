@@ -40,3 +40,41 @@ Artigraph does not lock storage. Instead, building is idempotent and inconsisten
   same contents to the same path and register the same partition. With a non-deterministic
   producer, the backend ends up with two partitions for one partition key, and the next plan of that
   producer raises an error rather than picking one.
+
+## Work units
+
+Executors that build in other processes or machines never send graphs, producers, or data to their
+workers. Instead, they send a `WorkUnit`: a small, JSON-serializable reference to one producer
+partition.
+
+```python
+from arti.executors.work_units import WorkUnit
+
+WorkUnit(
+    graph_ref="my_project.graphs:graph",  # "package.module:attribute"
+    snapshot_id=...,
+    producer_key="clean",  # The key of the producer's first output artifact
+    partition_key={"date": {"value": "2024-01-01"}},
+    input_fingerprint=...,
+)
+```
+
+Workers run the same code (or image) as the process that planned the build. A worker imports the
+graph from `graph_ref`, checks that the backend knows the snapshot for that graph, recomputes the
+producer's partitions from the inputs linked to the snapshot, checks that the input fingerprint still
+matches, and then builds the partition. A worker running different code fails fast instead of
+building with it.
+
+So graphs built this way must be importable: define them at module scope in an importable module,
+not in a script run as `__main__`. The workers must also reach the same metadata and data, which
+each executor checks before it starts:
+
+| Reach | Backends | Storage |
+| --- | --- | --- |
+| Only the current process | `MemoryBackend`, in-memory `SQLiteBackend` | |
+| Other processes on the same machine | file `SQLiteBackend` | `LocalFile` |
+| Other machines | `PostgresBackend` | `GCSFile`, `StringLiteral` (stored in the backend) |
+
+The `arti.executors.work_units` module also holds the three functions an orchestrator needs:
+`snapshot_graph(graph_ref)`, `plan_work_units(graph_ref, snapshot_id, producer_key)`, and
+`run_work_unit(unit)`.
