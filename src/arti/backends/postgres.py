@@ -6,6 +6,7 @@ import sqlalchemy as sa
 from pydantic import SecretStr
 from sqlalchemy.engine import Engine
 
+from arti.backends import Reach
 from arti.backends.sql import SQLBackend
 
 
@@ -18,6 +19,10 @@ class PostgresBackend(SQLBackend):
     """
 
     url: SecretStr
+
+    @property
+    def reach(self) -> Reach:
+        return "network"
 
     @classmethod
     def from_url(cls, url: str, *, auto_upgrade: bool = True) -> Self:

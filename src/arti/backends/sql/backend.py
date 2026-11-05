@@ -294,6 +294,9 @@ class _SharedEngine(NoCopyMixin):
         self.engine: Engine | None = None
         self.migration_checked = False
         self.closed = False
+        # Backends with a single physical connection (eg: in-memory SQLite) hold this for each
+        # `connect()`, so that threads wait for each other instead of overlapping transactions.
+        self.connection_lock = RLock()
 
 
 class SQLBackend(Backend[SQLBackendConnection]):

@@ -16,6 +16,8 @@ from arti.storage._internal import parse_spec, spec_to_wildcard
 if TYPE_CHECKING:
     from gcsfs import GCSFileSystem
 
+    from arti.backends import Reach
+
 
 def gcs_file_system() -> GCSFileSystem:
     try:
@@ -48,6 +50,10 @@ class GCSFilePartition(_GCSMixin, StoragePartition):
 
 class GCSFile(_GCSMixin, Storage):
     storage_partition_type = GCSFilePartition
+
+    @property
+    def reach(self) -> Reach:
+        return "network"
 
     path: str = str(
         Path("{graph_name}")

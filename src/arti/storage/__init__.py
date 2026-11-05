@@ -18,6 +18,7 @@ from arti.storage._internal import partial_format, strip_partition_indexes
 from arti.types import Type
 
 if TYPE_CHECKING:
+    from arti.backends import Reach
     from arti.graphs import Graph
 
 
@@ -85,6 +86,15 @@ class Storage(Model):
     segment_sep: ClassVar[str] = os.sep
 
     _key_types: PartitionKeyTypes | None = PrivateAttr(default=None)
+
+    @property
+    def reach(self) -> Reach:
+        """
+        The widest scope that shares this Storage's data (see `arti.backends.Reach`).
+
+        Defaults to `"process"`, the narrowest. Override it in Storages that can be shared.
+        """
+        return "process"
 
     @classmethod
     def __pydantic_init_subclass__(cls, **kwargs: Any) -> None:

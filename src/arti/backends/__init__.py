@@ -5,7 +5,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from abc import abstractmethod
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Literal, Self
 
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
@@ -15,6 +15,14 @@ from arti.storage import StoragePartitionSnapshots
 
 if TYPE_CHECKING:
     from arti.graphs import Graph, GraphSnapshot
+
+# The widest scope that can share a Backend's metadata or a Storage's data:
+# - "process": only the current process (eg: `MemoryBackend`).
+# - "host": other processes on the same machine (eg: a SQLite file or `LocalFile`).
+# - "network": other machines (eg: Postgres or `GCSFile`).
+#
+# Executors that build partitions in other processes or machines check the reach up front.
+type Reach = Literal["process", "host", "network"]
 
 # TODO: Consider adding CRUD methods for "everything"?
 #
@@ -149,6 +157,15 @@ class Backend[Connection: BackendConnection](Model):
     - Artifact and Producer Fingerprints
     - etc
     """
+
+    @property
+    def reach(self) -> Reach:
+        """
+        The widest scope that shares this Backend's metadata (see `Reach`).
+
+        Defaults to `"process"`, the narrowest. Override it in Backends that can be shared.
+        """
+        return "process"
 
     @contextmanager
     @abstractmethod

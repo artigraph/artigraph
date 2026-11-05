@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import sqlite3
+from collections.abc import Generator
+from contextlib import contextmanager, nullcontext
 from pathlib import Path
 from typing import Any, Literal
 
@@ -9,17 +11,18 @@ from sqlalchemy import event
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.pool import ConnectionPoolEntry, StaticPool
 
-from arti.backends.sql import SQLBackend
+from arti.backends import Reach
+from arti.backends.sql import SQLBackend, SQLBackendConnection
 
 
 class SQLiteBackend(SQLBackend):
     """
     Persist Artigraph metadata in a file-backed or shared in-memory SQLite database.
 
-    Pass `path=":memory:"` for an in-memory database, which is lost on `close()`. It is
-    single-threaded: every `connect()` shares one SQLite connection, so overlapping transactions
-    (nested or from other threads) fail, and concurrent first use may create separate databases.
-    Use a file `path` for concurrent access.
+    Pass `path=":memory:"` for an in-memory database, which is lost on `close()`. Every
+    `connect()` shares one SQLite connection, so connections from several threads wait for each
+    other and nested connections fail. Use a file `path` for concurrent access from several
+    processes.
     """
 
     path: Path | Literal[":memory:"]
@@ -28,6 +31,18 @@ class SQLiteBackend(SQLBackend):
     @property
     def in_memory(self) -> bool:
         return self.path == ":memory:"
+
+    @property
+    def reach(self) -> Reach:
+        return "process" if self.in_memory else "host"
+
+    @contextmanager
+    def connect(self) -> Generator[SQLBackendConnection]:
+        with (
+            self._shared.connection_lock if self.in_memory else nullcontext(),
+            super().connect() as connection,
+        ):
+            yield connection
 
     def _create_engine(self) -> Engine:
         connect_args: dict[str, Any] = {"timeout": self.timeout}
