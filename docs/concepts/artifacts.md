@@ -23,7 +23,9 @@ class TotalSpend(Artifact):
 - `format` describes how the data is serialized, such as JSON or Parquet.
 - `storage` describes where bytes are stored, such as a local file path template.
 - `annotations` attach domain metadata that should travel with the artifact definition.
-- `statistics` are intended for measured characteristics and quality signals.
+- `statistics` are computed facts about each partition, such as row counts or a column's minimum.
+- `thresholds` are judgements about those statistics, such as "at least one row". A partition that
+  fails a threshold stops the build. See [Statistics and thresholds](statistics-and-thresholds.md).
 
 ## Raw and produced artifacts
 

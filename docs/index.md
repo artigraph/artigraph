@@ -39,7 +39,8 @@ directory you hope is clean.
 
 ## What Artigraph gives you
 
-- **Artifacts** describe the data product: type, format, storage, annotations, and statistics.
+- **Artifacts** describe the data product: type, format, storage, annotations, statistics, and
+  thresholds.
 - **Producers** describe how artifacts are built from other artifacts.
 - **Fingerprints** give artifacts, producers, partitions, and graph snapshots stable identities.
 - **Snapshots** let you tag and reload a coherent version of a graph later.

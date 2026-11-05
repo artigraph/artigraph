@@ -16,6 +16,10 @@ surface to start from; other modules may change faster. Use the project
   shared durable backend.
 - **Core workflow:** define artifacts and producers, write raw inputs, build a graph, tag a snapshot,
   and read a named snapshot back.
+- **Data quality:** statistics (row, null, and distinct counts, distinct values, min and max, and
+  derived ratios) for Python and Pandas views, recorded per partition. Thresholds (`Range`,
+  `Equal`, and `Subset`) gate builds, and a failing partition can be accepted with a recorded
+  override.
 - **Ecosystem interop:** hand exact snapshot files to outside tools, such as DuckDB, without relying
   on path globs.
 - **Experimental:** GCS storage (`GCSFile`), with JSON and pickle IO only.
@@ -23,6 +27,7 @@ surface to start from; other modules may change faster. Use the project
 ## Planned / not yet supported
 
 - Cloud Parquet IO.
+- Thresholds that compare a partition with others, such as earlier partitions.
 - Additional storage and format implementations.
 
 The examples include short notes showing the intended shape of future cloud storage, but the tested

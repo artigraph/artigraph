@@ -26,6 +26,10 @@ fingerprints, and produced partition fingerprints.
 snapshot = graph.build()
 ```
 
+Builds also gate data quality. For each artifact, the build checks its partitions'
+[thresholds](statistics-and-thresholds.md) before any downstream producer reads them. A failure
+raises a `ThresholdError` and stops the build.
+
 Artigraph does not decide when builds happen. You choose when to call `build()`; Artigraph records
 what data and definitions made that build reproducible. If an output partition with the same input
 fingerprint already exists, the local executor links it to the new snapshot instead of rebuilding it.

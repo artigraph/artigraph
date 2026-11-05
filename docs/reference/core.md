@@ -17,6 +17,16 @@ use canonical module paths so the generated docs can resolve them reliably.
 
 ::: arti.producers.one_to_one
 
+::: arti.statistics.Statistic
+
+::: arti.statistics.DerivedStatistic
+
+::: arti.statistics.register_implementation
+
+::: arti.thresholds.Threshold
+
+::: arti.thresholds.ThresholdError
+
 ::: arti.io.read
 
 ::: arti.io.write

@@ -7,14 +7,16 @@ storage metadata.
 ## Snapshot-aware Pandas + Parquet
 
 The flagship local example builds partitioned transaction data with Pandas, writes Parquet files, and
-uses Artigraph snapshot metadata to read a coherent version back.
+uses Artigraph snapshot metadata to read a coherent version back. Thresholds on the cleaned data stop
+a build that would publish a negative amount, until an override accepts it.
 
 [Run the example](snapshot_parquet_duckdb/README.md)
 
 ## Spend
 
-The smaller spend example uses JSON files and Python values. It is useful when you want the fewest
-moving parts:
+The smaller spend example uses JSON files and Python values. It also declares statistics and
+thresholds for its raw transactions and logs each partition's statistics. It is useful when you want
+the fewest moving parts:
 
 ```shell
 uv run python docs/examples/spend/demo.py
