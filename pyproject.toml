@@ -68,7 +68,7 @@ Repository = "https://github.com/artigraph/artigraph"
 
 [tool.codespell]
 ignore-words-list = ["nd"] # ordinal suffix
-skip = ["./site", "stubs/*"] # ./site: docs build output
+skip = ["./site", "./src/arti/dashboard/static", "./tools/dashboard/node_modules", "*/package-lock.json", "stubs/*"] # build output and lockfiles
 
 
 [tool.coverage.report]

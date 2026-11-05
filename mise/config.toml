@@ -24,6 +24,11 @@ description = "Run all pre-commit checks"
 quiet = true
 run = "pre-commit run --all-files"
 
+[tasks.dashboard]
+description = "Build the dashboard page bundled in the Python package (requires Node.js)"
+dir = "tools/dashboard"
+run = ["npm ci", "npm run build"]
+
 [tasks.playground-wheel]
 description = "Build the Artigraph wheel served by the docs playground"
 # A fixed version keeps the wheel name in docs/assets/playground/manifest.json stable.
