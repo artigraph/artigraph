@@ -92,9 +92,8 @@ def dummy_writer(
 
 
 class DummyStatistic(Statistic):
-    type: Type = Int32()
-    format: Format = DummyFormat()
-    storage: DummyStorage = DummyStorage()
+    def value_type(self, artifact_type: Type) -> Type:
+        return Int32()
 
 
 class A1(Artifact):

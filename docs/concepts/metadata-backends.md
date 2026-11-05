@@ -1,6 +1,7 @@
 # Metadata backends
 
-A backend stores graph definitions, snapshots, tags, and storage partition metadata. The backend is
+A backend stores graph definitions, snapshots, tags, storage partition metadata, and each
+partition's [statistic](statistics-and-thresholds.md) values and threshold overrides. The backend is
 metadata-only; artifact bytes still live in the configured storage system.
 
 ## Memory

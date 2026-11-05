@@ -33,3 +33,7 @@ written as one view and read as another when adapters are registered.
 
 The local Parquet example writes and reads Pandas `DataFrame` values while preserving Artigraph's
 artifact, partition, and snapshot metadata around those files.
+
+Views also decide how [statistics](statistics-and-thresholds.md) are computed. Each statistic
+has an implementation for each view that supports it, such as Python `list` rows or Pandas
+`DataFrame` values.

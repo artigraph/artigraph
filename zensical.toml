@@ -22,6 +22,7 @@ nav = [
     "concepts/producers.md",
     "concepts/snapshots-and-fingerprints.md",
     "concepts/storage-formats-and-views.md",
+    "concepts/statistics-and-thresholds.md",
     "concepts/metadata-backends.md",
   ]},
   {"Examples" = [

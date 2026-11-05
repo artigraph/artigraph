@@ -25,6 +25,12 @@ def test_spend_example(caplog: pytest.LogCaptureFixture) -> None:
         runpy.run_path(str(example), run_name="__main__")
 
     assert "Total Spend: 42.0" in caplog.messages
+    null_fraction = "Ratio(numerator=NullCount(field='amount'), denominator=RowCount())"
+    for day, maximum, rows, minimum in [("1970-01-01", 9.95, 2, 7.5), ("1970-01-02", 12.0, 3, 5.0)]:
+        assert (
+            f"Statistics for {day}: Max(field='amount')={maximum}, RowCount()={rows}, "
+            + f"NullCount(field='amount')=0, {null_fraction}=0.0, Min(field='amount')={minimum}"
+        ) in caplog.messages
 
 
 def test_snapshot_parquet_duckdb_example(tmp_path: Path) -> None:
@@ -43,13 +49,22 @@ def test_snapshot_parquet_duckdb_example(tmp_path: Path) -> None:
     assert "Baseline snapshot total: 42.00" in result.stdout
     assert "Corrected snapshot total: 39.50" in result.stdout
     assert "Naive glob total: 51.50" in result.stdout
-    assert len(list((work_dir / "data" / "produced").rglob("*.parquet"))) == 3
+    assert "    DistinctValues(field='category') = ['meals', 'office']" in result.stdout
+    assert "    Max(field='amount_usd') = 9.5" in result.stdout
+    assert "Build stopped by a Threshold: `clean` failed 1 Threshold check(s):" in result.stdout
+    assert "Range(statistic=Min(field='amount_usd'), min=0) got -18.0" in result.stdout
+    assert "Overridden snapshot total: 21.50" in result.stdout
+    assert "Accepting the overridden `clean` failure (Refunds are expected)" in result.stderr
+    # The refund partition was written once: the build after the override reused it.
+    assert len(list((work_dir / "data" / "produced").rglob("*.parquet"))) == 4
     assert not list(work_dir.rglob("*.duckdb"))
 
 
 def test_snapshot_duckdb_rejects_changed_partition(tmp_path: Path) -> None:
     work_dir = tmp_path / "demo"
     assert run_demo(work_dir) == {
+        "threshold_failures": 1,
+        "with_refund": 21.5,
         "baseline": 42.0,
         "corrected": 39.5,
         "naive": 51.5,

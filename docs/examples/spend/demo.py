@@ -1,10 +1,23 @@
 import logging
 from pathlib import Path
-from typing import Annotated, TypedDict
+from typing import Annotated, TypedDict, cast
 
-from arti import Annotation, Artifact, Format, Graph, Storage, Type, producer
+from arti import (
+    Annotation,
+    Artifact,
+    Format,
+    Graph,
+    Statistic,
+    Storage,
+    Threshold,
+    Type,
+    producer,
+)
 from arti.formats.json import JSON
+from arti.partitions import DateField
+from arti.statistics import Max, Min, NullCount, Ratio, RowCount
 from arti.storage.local import LocalFile
+from arti.thresholds import Range
 from arti.types import Collection, Date, Float64, Int64, Struct
 from arti.versions import SemVer
 
@@ -21,6 +34,15 @@ class Transactions(Artifact):
     type: Type = Collection(
         element=Struct(fields={"id": Int64(), "date": Date(), "amount": Float64()}),
         partition_by=("date",),
+    )
+    # Statistics are facts recorded for every partition...
+    statistics: tuple[Statistic, ...] = (Max(field="amount"),)
+    # ...and Thresholds are judgements about them, checked on every build. A Threshold's Statistic
+    # is recorded too, including the inputs of derived Statistics (like this Ratio).
+    thresholds: tuple[Threshold, ...] = (
+        Range(statistic=RowCount(), min=1),
+        Range(statistic=Ratio(numerator=NullCount(field="amount"), denominator=RowCount()), max=0),
+        Range(statistic=Min(field="amount"), min=0),
     )
 
 
@@ -61,4 +83,9 @@ if __name__ == "__main__":
     logging.info(
         f"Transactions: {snapshot.read(snapshot.artifacts.vendor.transactions, annotation=list)}"
     )
+    transaction_statistics = snapshot.read_statistics(snapshot.artifacts.vendor.transactions)
+    for partition, statistics in transaction_statistics.items():
+        day = cast(DateField, partition.partition_key["date"]).iso
+        values = ", ".join(f"{statistic!r}={value!r}" for statistic, value in statistics.items())
+        logging.info(f"Statistics for {day}: {values}")
     logging.info(f"Total Spend: {snapshot.read(snapshot.artifacts.spend, annotation=float)}")

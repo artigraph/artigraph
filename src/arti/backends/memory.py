@@ -1,8 +1,9 @@
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from contextlib import contextmanager
+from typing import Any
 
 from pydantic import PrivateAttr
 
@@ -14,18 +15,23 @@ from arti import (
     Graph,
     GraphSnapshot,
     InputFingerprints,
+    Statistic,
     Storage,
     StoragePartitionSnapshot,
     StoragePartitionSnapshots,
 )
 from arti.internal.utils import NoCopyMixin
+from arti.statistics import validate_value
+from arti.thresholds import Threshold
 
 _Graphs = dict[str, dict[Fingerprint, Graph]]
 _GraphSnapshots = dict[str, dict[Fingerprint, GraphSnapshot]]
 _GraphSnapshotPartitions = dict[
     GraphSnapshot, dict[str, set[StoragePartitionSnapshot]]
 ]  # ...[snapshot][artifact_key]
+_PartitionStatistics = dict[StoragePartitionSnapshot, dict[Statistic, Any]]
 _SnapshotTags = dict[str, dict[str, GraphSnapshot]]  # ...[name][tag]
+_ThresholdOverrides = dict[StoragePartitionSnapshot, dict[Threshold, str]]
 _StoragePartitions = dict[Storage, set[StoragePartitionSnapshot]]
 
 
@@ -49,6 +55,7 @@ class _NoCopyContainer(NoCopyMixin):
     def __init__(self) -> None:
         # NOTE: lambdas are not pickleable, so use a top-level factory for nested defaultdicts.
         self.graphs: _Graphs = defaultdict(dict)
+        self.partition_statistics: _PartitionStatistics = defaultdict(dict)
         self.snapshots: _GraphSnapshots = defaultdict(dict)
         # `container.snapshot_partitions` tracks all the partitions for a *specific* GraphSnapshot.
         # `container.storage_partitions` tracks all partitions, across all snapshots. This
@@ -58,6 +65,7 @@ class _NoCopyContainer(NoCopyMixin):
         )
         self.snapshot_tags: _SnapshotTags = defaultdict(dict)
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartitionSnapshot])
+        self.threshold_overrides: _ThresholdOverrides = defaultdict(dict)
 
     def __eq__(self, other: object, /) -> bool:
         return isinstance(other, _NoCopyContainer) and vars(self) == vars(other)
@@ -95,6 +103,58 @@ class MemoryConnection(BackendConnection):
         self, artifact: Artifact, partitions: StoragePartitionSnapshots
     ) -> None:
         self.container.storage_partitions[artifact.storage].update(partitions)
+
+    def read_partition_statistics(
+        self, artifact: Artifact, partitions: StoragePartitionSnapshots
+    ) -> dict[StoragePartitionSnapshot, dict[Statistic, Any]]:
+        return {
+            partition: {
+                statistic: known[statistic]
+                for statistic in artifact.all_statistics
+                if statistic in (known := self.container.partition_statistics.get(partition, {}))
+            }
+            for partition in partitions
+        }
+
+    def write_partition_statistics(
+        self,
+        artifact: Artifact,
+        partition: StoragePartitionSnapshot,
+        values: Mapping[Statistic, Any],
+    ) -> None:
+        if partition not in self.container.storage_partitions.get(artifact.storage, set()):
+            raise ValueError(f"Unknown partition for the Artifact: {partition}")
+        validated = {
+            statistic: validate_value(value, statistic.value_type(artifact.type))
+            for statistic, value in values.items()
+        }
+        known = self.container.partition_statistics[partition]
+        for statistic, value in validated.items():
+            known.setdefault(statistic, value)
+
+    def read_threshold_overrides(
+        self, artifact: Artifact, partitions: StoragePartitionSnapshots
+    ) -> dict[StoragePartitionSnapshot, dict[Threshold, str]]:
+        return {
+            partition: {
+                threshold: known[threshold]
+                for threshold in artifact.thresholds
+                if threshold in (known := self.container.threshold_overrides.get(partition, {}))
+            }
+            for partition in partitions
+        }
+
+    def write_threshold_override(
+        self,
+        artifact: Artifact,
+        partition: StoragePartitionSnapshot,
+        threshold: Threshold,
+        reason: str,
+    ) -> None:
+        self._check_threshold_override(artifact, partition, threshold, reason)
+        if partition not in self.container.storage_partitions.get(artifact.storage, set()):
+            raise ValueError(f"Unknown partition for the Artifact: {partition}")
+        self.container.threshold_overrides[partition].setdefault(threshold, reason)
 
     def read_graph(self, name: str, fingerprint: Fingerprint) -> Graph:
         return self.container.graphs[name][fingerprint]

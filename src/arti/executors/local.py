@@ -22,8 +22,8 @@ class LocalExecutor(Executor):
         # NOTE: Raw Artifacts will already be discovered and linked in the backend to this snapshot.
         for node in TopologicalSorter(snapshot.graph.dependencies).static_order():
             if isinstance(node, Artifact):
-                # TODO: Compute Statistics (if not already computed for the partition) and check
-                # Thresholds (every time, as they may be changed, dynamic, or overridden).
+                # Artifacts are visited after their Producer (if any) and before their consumers.
+                self.check_artifact(snapshot, node)
                 continue
 
             logging.info(f"Building {node}...")

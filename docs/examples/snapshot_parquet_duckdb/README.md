@@ -31,12 +31,52 @@ Corrected snapshot files: 2
 Baseline snapshot total: 42.00
 Corrected snapshot total: 39.50
 Naive glob total: 51.50 (wrong: it mixes live versions from both snapshots)
+Corrected snapshot statistics for the cleaned transactions:
+  2026-01-01:
+    DistinctCount(field='transaction_id') = 2
+    Max(field='amount_usd') = 18.0
+    RowCount() = 2
+    NullCount(field='vendor') = 0
+    Ratio(numerator=NullCount(field='vendor'), denominator=RowCount()) = 0.0
+    DistinctValues(field='category') = ['meals', 'office']
+    Min(field='amount_usd') = 12.0
+  2026-01-02:
+    DistinctCount(field='transaction_id') = 1
+    Max(field='amount_usd') = 9.5
+    RowCount() = 1
+    NullCount(field='vendor') = 0
+    Ratio(numerator=NullCount(field='vendor'), denominator=RowCount()) = 0.0
+    DistinctValues(field='category') = ['software']
+    Min(field='amount_usd') = 9.5
+Build stopped by a Threshold: `clean` failed 1 Threshold check(s):
+- {'transaction_date': DateField(value=datetime.date(2026, 1, 3))}: Range(statistic=Min(field='amount_usd'), min=0) got -18.0
+Fix the data, revise the Thresholds, or accept a partition with `Graph.override_threshold`.
+Overridden snapshot total: 21.50
 ```
 
 The generated file list also exposes the input fingerprint in every produced path. One unchanged
 day is reused, while the corrected day has old and new Parquet files under different fingerprint
 directories. The naive glob reads three physical files for two logical partitions, mixing versions
 from different snapshots and returning a wrong total. Snapshot metadata avoids exactly this.
+
+## Statistics and quality gates
+
+The cleaned artifact in [`model.py`](model.py) declares
+[statistics and thresholds](../../concepts/statistics-and-thresholds.md). Each produced partition
+records facts like its distinct transaction IDs and maximum amount. Its thresholds require at least
+one row, at most 5% null vendors (a ratio derived from two statistics), only known categories, and
+no negative amounts. Artigraph computes the statistics from the producer's in-memory DataFrame, so
+it doesn't read the Parquet files back. The unchanged day reuses both its file and its statistics.
+
+At the end, the demo writes a refund with a negative amount. The cleaned partition fails
+`Range(Min("amount_usd"), min=0)`, so the build raises a `ThresholdError` before anything downstream
+can read it. The `baseline` and `corrected` tags still point at their snapshots, and the failing
+partition and its statistics stay recorded as facts.
+
+Refunds are expected, so the demo then overrides the threshold for that partition, with a reason.
+The next build reuses the recorded partition, logs the accepted failure, and tags the result as
+`with-refund`. The override applies only to that partition's exact contents and that exact
+threshold.
 
 ## Snapshot-aware ecosystem access
 

@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import operator
+from collections.abc import Callable
 from pathlib import Path
 from types import ModuleType
 from typing import Any, cast
@@ -15,6 +16,7 @@ from arti.internal.utils import (
     classproperty,
     get_module_name,
     import_submodules,
+    lookup_most_specific,
     one_or_none,
     ordinal,
     register,
@@ -124,3 +126,29 @@ def test_register_priority() -> None:
     with pytest.raises(ValueError, match="is already registered"):
         register(reg, "y", Val(y2.priority), get_priority)
     assert reg == {"x": x, "y": y2}
+
+
+def test_lookup_most_specific() -> None:
+    class A: ...
+
+    class B(A): ...
+
+    class C(B): ...
+
+    def a_a() -> None: ...
+
+    def b_a() -> None: ...
+
+    def a_b() -> None: ...
+
+    registry: dict[tuple[type, ...], Callable[[], None]] = {(A, A): a_a, (B, A): b_a}
+    assert lookup_most_specific(registry, (A, A), name="test") is a_a
+    assert lookup_most_specific(registry, (C, C), name="test") is b_a
+    with pytest.raises(ValueError, match="No `test` implementation found"):
+        lookup_most_specific(registry, (int, A), name="test")
+    # Neither (B, A) nor (A, B) is more specific on every position, so refuse to guess.
+    registry[(A, B)] = a_b
+    with pytest.raises(
+        ValueError, match=r"Multiple `test` implementations match .*\['a_b', 'b_a'\]"
+    ):
+        lookup_most_specific(registry, (B, B), name="test")

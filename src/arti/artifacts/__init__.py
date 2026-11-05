@@ -13,8 +13,9 @@ from arti.fingerprints import SkipFingerprint
 from arti.formats import Format
 from arti.internal.models import Model, get_field_default
 from arti.internal.type_hints import get_annotation_from_value
-from arti.statistics import Statistic
+from arti.statistics import Statistic, expand
 from arti.storage import Storage
+from arti.thresholds import Threshold
 from arti.types import Type
 
 if TYPE_CHECKING:
@@ -31,8 +32,10 @@ class Artifact(Model):
     - `storage`: the data's persistent storage system, such as blob storage, database native, etc.
 
     In addition to the core elements, an Artifact can be tagged with additional `annotations` (to
-    associate it with human knowledge) and `statistics` (to track derived characteristics over
-    time).
+    associate it with human knowledge), `statistics` (to track computed facts about each partition
+    over time), and `thresholds` (judgements over those statistics that gate each partition's
+    quality). Statistics checked by a Threshold are computed without also listing them in
+    `statistics`.
     """
 
     type: Type
@@ -41,6 +44,7 @@ class Artifact(Model):
 
     annotations: Annotated[tuple[Annotation, ...], Field(validate_default=True)] = ()
     statistics: Annotated[tuple[Statistic, ...], Field(validate_default=True)] = ()
+    thresholds: Annotated[tuple[Threshold, ...], Field(validate_default=True)] = ()
 
     # Omit the `producer_output` (ie: this Artifact's Producer) from the:
     # - `fingerprint` to prevent upstream changes from triggering cascading fingerprint changes.
@@ -72,11 +76,53 @@ class Artifact(Model):
             storage = storage.visit_format(format_)
         return storage
 
-    @field_validator("annotations", "statistics", mode="before")
+    @field_validator("annotations", "statistics", "thresholds", mode="before")
     @classmethod
     def _merge_class_defaults(cls, value: tuple[Any, ...], info: ValidationInfo) -> tuple[Any, ...]:
+        """
+        Accumulate the defaults of every Artifact class in the MRO, followed by the passed values.
+
+        Subclasses extend (rather than replace) their parents' defaults. Duplicates are dropped,
+        keeping the first, so a default also passed (or redeclared by a subclass) appears once.
+        """
         assert info.field_name is not None
-        return tuple(chain(get_field_default(cls, info.field_name, fallback=()), value))
+        defaults = (
+            get_field_default(klass, info.field_name, fallback=())
+            for klass in reversed(cls.__mro__)
+            if issubclass(klass, Artifact)
+        )
+        return tuple(dict.fromkeys(chain(*defaults, value)))
+
+    @field_validator("statistics")
+    @classmethod
+    def _validate_statistics(
+        cls, statistics: tuple[Statistic, ...], info: ValidationInfo
+    ) -> tuple[Statistic, ...]:
+        if (type_ := info.data.get("type")) is not None:
+            for statistic in expand(statistics):
+                statistic.value_type(type_)  # Raises if the Statistic doesn't apply to the Type
+        return statistics
+
+    @field_validator("thresholds")
+    @classmethod
+    def _validate_thresholds(
+        cls, thresholds: tuple[Threshold, ...], info: ValidationInfo
+    ) -> tuple[Threshold, ...]:
+        if (type_ := info.data.get("type")) is not None:
+            for threshold in thresholds:
+                # Raises if the Statistic doesn't apply to the Type or the Threshold to the value.
+                threshold.check_type(threshold.statistic.value_type(type_))
+        return thresholds
+
+    @property
+    def all_statistics(self) -> tuple[Statistic, ...]:
+        """
+        All Statistics to compute for each partition.
+
+        These are the `statistics`, then those checked by the `thresholds`, including (before them)
+        the inputs of derived Statistics.
+        """
+        return expand(chain(self.statistics, (t.statistic for t in self.thresholds)))
 
     @classmethod
     def cast(cls, value: Any) -> Artifact:
