@@ -132,16 +132,33 @@ def test_instance_attr_merging() -> None:
     class Stat2(DummyStatistic):
         pass
 
+    class Stat3(DummyStatistic):
+        pass
+
     class MyArtifact(A1):
         annotations: tuple[Annotation, ...] = (Ann1(x=5),)
         statistics: tuple[Statistic, ...] = (Stat1(),)
 
+    # Subclass defaults accumulate onto (rather than replace) their parents' defaults.
+    class SubArtifact(MyArtifact):
+        statistics: tuple[Statistic, ...] = (Stat3(),)
+
+    def types(values: tuple[object, ...]) -> tuple[type, ...]:
+        return tuple(type(value) for value in values)
+
+    # Defaults aren't merged with themselves when the field isn't passed.
+    assert types(MyArtifact().annotations) == (Ann1,)
+    assert types(MyArtifact().statistics) == (Stat1,)
+    assert types(SubArtifact().annotations) == (Ann1,)
+    assert types(SubArtifact().statistics) == (Stat1, Stat3)
+
     artifact = cast(
-        MyArtifact,
-        cast(Any, MyArtifact)(annotations=[Ann2(y=10)], statistics=[Stat2()]),
+        SubArtifact,
+        # Passing a default again doesn't duplicate it.
+        cast(Any, SubArtifact)(annotations=[Ann2(y=10), Ann1(x=5)], statistics=[Stat2()]),
     )
-    assert tuple(type(a) for a in artifact.annotations) == (Ann1, Ann2)
-    assert tuple(type(s) for s in artifact.statistics) == (Stat1, Stat2)
+    assert types(artifact.annotations) == (Ann1, Ann2)
+    assert types(artifact.statistics) == (Stat1, Stat3, Stat2)
 
 
 def test_Artifact_storage_path_resolution() -> None:

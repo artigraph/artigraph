@@ -75,8 +75,19 @@ class Artifact(Model):
     @field_validator("annotations", "statistics", mode="before")
     @classmethod
     def _merge_class_defaults(cls, value: tuple[Any, ...], info: ValidationInfo) -> tuple[Any, ...]:
+        """
+        Accumulate the defaults of every Artifact class in the MRO, followed by the passed values.
+
+        Subclasses extend (rather than replace) their parents' defaults. Duplicates are dropped,
+        keeping the first, so a default also passed (or redeclared by a subclass) appears once.
+        """
         assert info.field_name is not None
-        return tuple(chain(get_field_default(cls, info.field_name, fallback=()), value))
+        defaults = (
+            get_field_default(klass, info.field_name, fallback=())
+            for klass in reversed(cls.__mro__)
+            if issubclass(klass, Artifact)
+        )
+        return tuple(dict.fromkeys(chain(*defaults, value)))
 
     @classmethod
     def cast(cls, value: Any) -> Artifact:
