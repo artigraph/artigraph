@@ -11,6 +11,27 @@ from arti.executors.local import LocalExecutor
 snapshot = graph.build(LocalExecutor())  # The default, also used by `graph.build()`
 ```
 
+## Parallel builds
+
+`ConcurrentExecutor` builds independent producers and partitions in parallel with
+`concurrent.futures`. Each producer is planned as soon as the producers it depends on finish.
+
+```python
+from arti.executors.concurrent import ConcurrentExecutor
+
+# Threads work with any graph, including the default in-memory backend.
+snapshot = graph.build(ConcurrentExecutor(max_workers=8))
+
+# Processes import the graph by reference and need metadata and data shared across processes.
+snapshot = graph.build(
+    ConcurrentExecutor(kind="process", graph_ref="my_project.graphs:graph", max_workers=8)
+)
+```
+
+Threads suit producers that release the GIL (IO, NumPy, Pandas, DuckDB, ...); processes suit
+pure-Python producers. If a partition fails, the executor starts no new partitions and raises the
+first error once the running partitions finish.
+
 ## How a build runs
 
 For each producer, once all of its inputs are built, an executor:

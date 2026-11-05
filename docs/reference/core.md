@@ -7,6 +7,12 @@ use canonical module paths so the generated docs can resolve them reliably.
 
 ::: arti.graphs.GraphSnapshot
 
+::: arti.executors.local.LocalExecutor
+
+::: arti.executors.concurrent.ConcurrentExecutor
+
+::: arti.executors.work_units.WorkUnit
+
 ::: arti.artifacts.Artifact
 
 ::: arti.fingerprints.Fingerprint

@@ -355,8 +355,6 @@ def test_sql_backend_context_manager() -> None:
 
 
 def test_backend_concurrent_partition_writes(backend_harness: BackendHarness) -> None:
-    if backend_harness.kind == "sqlite-memory":
-        pytest.skip("In-memory SQLite shares one connection, so it doesn't support concurrent use")
     backend = backend_harness.open()
     snapshot = build_pipeline(backend, f"concurrent-{backend_harness.kind}")
     output = cast(Artifact, snapshot.artifacts.incremented)
@@ -369,8 +367,10 @@ def test_backend_concurrent_partition_writes(backend_harness: BackendHarness) ->
             .model_copy(update={"value": str(i)})
             .snapshot(),
         )
-        # Separate Backend instances mimic separate processes for the SQL backends.
-        with backend_harness.open().connect() as connection:
+        # Separate Backend instances mimic separate processes for the SQL backends, but each
+        # in-memory SQLite Backend has its own database.
+        shared_backend = backend if backend_harness.kind == "sqlite-memory" else None
+        with (shared_backend or backend_harness.open()).connect() as connection:
             connection.write_artifact_and_graph_partitions(
                 snapshot, "incremented", output, shared + own
             )

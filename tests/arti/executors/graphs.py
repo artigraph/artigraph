@@ -9,6 +9,7 @@ them. Tests in the current process can instead assign `graph` directly.
 from __future__ import annotations
 
 import os
+import threading
 from pathlib import Path
 from typing import Annotated, Any, cast
 
@@ -51,8 +52,14 @@ class Number(Artifact):
     storage: Storage = StringLiteral()
 
 
+# Tests may set a Barrier to check that `square` partitions are built concurrently.
+square_barrier: threading.Barrier | None = None
+
+
 @producer(map=one_to_one("rows"))
 def square(rows: Annotated[list[dict[Any, Any]], Rows]) -> Annotated[list[dict[Any, Any]], Rows]:
+    if square_barrier is not None:
+        square_barrier.wait()
     return [{"i": row["i"], "value": row["value"] ** 2} for row in rows]
 
 
@@ -100,6 +107,14 @@ def write_raw(graph: Graph) -> None:
             artifact=graph.artifacts.raw,
             partition_key=PartitionKey(i=Int32Field(value=i)),
         )
+
+
+def sorted_rows(value: Any) -> Any:
+    """Sort the rows read from partitioned Artifacts, which are read in no particular order."""
+    if not isinstance(value, list):
+        return value
+    rows = cast(list[dict[str, Any]], value)
+    return sorted(rows, key=lambda row: row["i"])
 
 
 def backend_from(value: str) -> Backend[Any]:

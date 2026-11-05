@@ -24,7 +24,7 @@ from arti.executors.work_units import (
     snapshot_graph,
 )
 from tests.arti.executors import graphs
-from tests.arti.executors.graphs import GRAPH_REF, make_graph, write_raw
+from tests.arti.executors.graphs import GRAPH_REF, make_graph, sorted_rows, write_raw
 
 not_a_graph = object()
 
@@ -45,7 +45,9 @@ def read_all(graph: Graph, snapshot_id: Fingerprint) -> dict[str, Any]:
     snapshot = resolve_snapshot(GRAPH_REF, snapshot_id)
     assert snapshot.graph is graph
     return {
-        key: snapshot.read(artifact, annotation=list if key in {"raw", "squared"} else int)
+        key: sorted_rows(
+            snapshot.read(artifact, annotation=list if key in {"raw", "squared"} else int)
+        )
         for key, artifact in graph.artifacts.walk()
     }
 
@@ -65,7 +67,9 @@ def test_work_units_build_the_same_results(graph: Graph) -> None:
     expected = reference.build(LocalExecutor())
     assert expected.id == snapshot_id
     assert read_all(graph, snapshot_id) == {
-        key: expected.read(artifact, annotation=list if key in {"raw", "squared"} else int)
+        key: sorted_rows(
+            expected.read(artifact, annotation=list if key in {"raw", "squared"} else int)
+        )
         for key, artifact in reference.artifacts.walk()
     }
 
