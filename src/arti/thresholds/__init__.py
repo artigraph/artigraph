@@ -13,7 +13,7 @@ __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 from abc import abstractmethod
 from collections.abc import Iterable, Mapping
 from datetime import date, datetime
-from typing import Any, cast
+from typing import TYPE_CHECKING, Any, NamedTuple, cast
 
 from pydantic import field_serializer, field_validator, model_validator
 from pydantic_core import to_json
@@ -21,6 +21,9 @@ from pydantic_core import to_json
 from arti.internal.models import Model
 from arti.statistics import Statistic, validate_value
 from arti.types import Set, Type
+
+if TYPE_CHECKING:
+    from arti.storage import StoragePartitionSnapshot
 
 # The values a Threshold may be configured with: JSON compatible scalars and dates.
 type ThresholdValue = bool | int | float | str | date | datetime | None
@@ -137,4 +140,55 @@ class Subset(Threshold):
         return bool(value <= self.of)
 
 
-__all__ = ["Equal", "Range", "Subset", "Threshold", "ThresholdValue"]
+class ThresholdFailure(NamedTuple):
+    """A partition's Statistic value that a Threshold judged unacceptable."""
+
+    partition: StoragePartitionSnapshot
+    threshold: Threshold
+    value: Any
+
+    def __str__(self) -> str:
+        partition_key = dict(self.partition.partition_key) or "(not partitioned)"
+        return f"{partition_key}: {self.threshold!r} got {self.value!r}"
+
+
+class ThresholdError(ValueError):
+    """Raised when Artifact partitions fail their Thresholds."""
+
+    def __init__(self, artifact_key: str, failures: list[ThresholdFailure]) -> None:
+        self.artifact_key = artifact_key
+        self.failures = failures
+        lines = "\n".join(f"- {failure}" for failure in failures)
+        super().__init__(
+            f"`{artifact_key}` failed {len(failures)} Threshold check(s):\n{lines}\n"
+            + "Fix the data, revise the Thresholds, or accept a partition with `Graph.override_threshold`."
+        )
+
+
+def check_thresholds(
+    thresholds: tuple[Threshold, ...],
+    statistics: Mapping[StoragePartitionSnapshot, Mapping[Statistic, Any]],
+) -> list[ThresholdFailure]:
+    """
+    Check the `thresholds` against each partition's Statistic values, returning any failures.
+
+    Every Threshold's Statistic must have a value for every partition.
+    """
+    return [
+        ThresholdFailure(partition, threshold, value)
+        for partition, values in statistics.items()
+        for threshold in thresholds
+        if not threshold.check(value := values[threshold.statistic])
+    ]
+
+
+__all__ = [
+    "Equal",
+    "Range",
+    "Subset",
+    "Threshold",
+    "ThresholdError",
+    "ThresholdFailure",
+    "ThresholdValue",
+    "check_thresholds",
+]

@@ -20,7 +20,9 @@ from arti.internal.mappings import FrozenMapping, TypedBox, frozendict
 from arti.internal.models import Model
 from arti.partitions import PartitionKey
 from arti.producers import Producer, ProducerOutput
+from arti.statistics import Statistic, check_implementations, compute_missing
 from arti.storage import StoragePartitionSnapshot, StoragePartitionSnapshots
+from arti.thresholds import Threshold
 from arti.types import is_partitioned
 from arti.views import View
 
@@ -51,6 +53,11 @@ def requires_sealed[Return](fn: Callable[..., Return]) -> Callable[..., Return]:
     return check_if_sealed
 
 
+def _producer_output_view(producer_output: ProducerOutput) -> View:
+    producer = producer_output.producer
+    return producer._outputs_[producer_output.position]  # pyright: ignore[reportPrivateUsage]
+
+
 class ArtifactBox(TypedBox[Artifact]):
     def _cast_value(self, key: str, value: Any) -> Artifact:
         artifact = super()._cast_value(key, value)
@@ -68,9 +75,15 @@ class ArtifactBox(TypedBox[Artifact]):
         # "final" instance until assignment here to the Graph.
         if artifact.producer_output is None:
             storage = storage.visit_input_fingerprint(None)
-        elif not storage.includes_input_fingerprint_template:
-            raise ValueError(
-                "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
+        else:
+            if not storage.includes_input_fingerprint_template:
+                raise ValueError(
+                    "Produced Artifacts must have a '{input_fingerprint}' template in their Storage"
+                )
+            # Produced Statistics are computed from the Producer's in-memory outputs, so check the
+            # output View supports them now rather than after building.
+            check_implementations(
+                artifact.all_statistics, _producer_output_view(artifact.producer_output)
             )
         # TODO: Replace references to the original in any downstream Producers...
         return artifact.model_copy(update={"storage": storage})
@@ -291,6 +304,85 @@ class Graph(Model):
         )
 
     @requires_sealed
+    def statistics_view(self, artifact: Artifact) -> View:
+        """
+        Return the View used to read `artifact` partitions to compute missing Statistics.
+
+        Produced Artifacts use their Producer's output View. Raw Artifacts use the Python View for
+        their Type (eg: a `list` of `dict` rows for a Collection).
+        """
+        if artifact.producer_output is not None:
+            view = _producer_output_view(artifact.producer_output).model_copy(
+                update={"mode": "READ"}
+            )
+        else:
+            from arti.types.python import python_type_system
+
+            annotation = python_type_system.to_system(artifact.type, hints={})
+            view = View.get_class_for(annotation)(
+                artifact_class=type(artifact), type=artifact.type, mode="READ"
+            )
+        view.check_artifact_compatibility(artifact)
+        return view
+
+    @requires_sealed
+    def compute_statistics(
+        self,
+        artifact: Artifact,
+        storage_partition_snapshots: StoragePartitionSnapshots,
+        *,
+        connection: BackendConnection | None = None,
+    ) -> dict[StoragePartitionSnapshot, dict[Statistic, Any]]:
+        """
+        Return the values of the Artifact's Statistics for each partition.
+
+        Recorded values are read from the Backend. Missing values (eg: data written outside of
+        Artigraph or a Statistic added after the data was written) are computed and recorded. Only
+        Statistics measured from the data require reading the partition, with the
+        `statistics_view`.
+        """
+        with (connection or self.backend).connect() as conn:
+            known = conn.read_partition_statistics(artifact, storage_partition_snapshots)
+        for partition, values in known.items():
+            if len(values) == len(artifact.all_statistics):
+                continue
+
+            def load(partition: StoragePartitionSnapshot = partition) -> tuple[Any, View]:
+                view = self.statistics_view(artifact)
+                return self.read(
+                    artifact, storage_partition_snapshots=(partition,), view=view
+                ), view
+
+            # Keep Backend transactions away from (potentially slow) reads and computation.
+            computed = compute_missing(
+                artifact.all_statistics, artifact_type=artifact.type, known=values, load=load
+            )
+            with (connection or self.backend).connect() as conn:
+                conn.write_partition_statistics(artifact, partition, computed)
+            known[partition] = {s: (values | computed)[s] for s in artifact.all_statistics}
+        return known
+
+    @requires_sealed
+    def override_threshold(
+        self,
+        artifact: Artifact,
+        storage_partition_snapshot: StoragePartitionSnapshot,
+        threshold: Threshold,
+        *,
+        reason: str,
+        connection: BackendConnection | None = None,
+    ) -> None:
+        """
+        Accept the partition in future builds, even though it fails the `threshold`.
+
+        Overrides are a recorded (human) decision for the partition's exact contents and Threshold,
+        so they no longer apply if either changes. The `failures` of a `ThresholdError` hold the
+        partitions and Thresholds that may be overridden.
+        """
+        with (connection or self.backend).connect() as conn:
+            conn.write_threshold_override(artifact, storage_partition_snapshot, threshold, reason)
+
+    @requires_sealed
     def write(
         self,
         data: Any,
@@ -313,6 +405,7 @@ class Graph(Model):
             )
         view.check_annotation_compatibility(type(data))
         view.check_artifact_compatibility(artifact)
+        check_implementations(artifact.all_statistics, view)
         storage_partition_snapshot = io.write(
             data,
             type_=artifact.type,
@@ -332,6 +425,18 @@ class Graph(Model):
                 conn.write_snapshot_partitions(
                     snapshot, key, artifact, (storage_partition_snapshot,)
                 )
+        # Record the partition before computing Statistics (from the in-memory data), so a failure
+        # here doesn't lose (potentially expensive) data. Builds compute any missing Statistics
+        # before checking Thresholds, and only then let consumers read the partition.
+        if artifact.all_statistics:
+            computed = compute_missing(
+                artifact.all_statistics,
+                artifact_type=artifact.type,
+                known={},
+                load=lambda: (data, view),
+            )
+            with (connection or self.backend).connect() as conn:
+                conn.write_partition_statistics(artifact, storage_partition_snapshot, computed)
         return storage_partition_snapshot
 
 
@@ -469,6 +574,20 @@ class GraphSnapshot(Model):
             snapshot=self,
             connection=connection,
         )
+
+    def read_statistics(
+        self, artifact: Artifact, *, connection: BackendConnection | None = None
+    ) -> dict[StoragePartitionSnapshot, dict[Statistic, Any]]:
+        """
+        Read the recorded Statistic values of the Artifact's partitions in this snapshot.
+
+        Statistics are recorded when partitions are written and when the snapshot is built. Values
+        that failed to compute (or were added later) are missing until the next build.
+        """
+        key = self.graph.artifact_to_key[artifact]
+        with (connection or self.backend).connect() as conn:
+            partitions = conn.read_snapshot_partitions(self, key, artifact)
+            return conn.read_partition_statistics(artifact, partitions)
 
     def write(
         self,

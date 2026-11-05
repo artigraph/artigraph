@@ -130,7 +130,8 @@ class Producer(Model):
             passed in as it was returned, for example: `def build(...): return 1, 2` will result in
             `validate_outputs(1, 2)`.
 
-            NOTE: `validate_outputs` is a stopgap until Statistics and Thresholds are fully implemented.
+            NOTE: Prefer `statistics` and `thresholds` on the output Artifacts, which are recorded and
+            can be revised without rebuilding. `validate_outputs` may be removed in the future.
             """
             return True, "No validation performed."
 

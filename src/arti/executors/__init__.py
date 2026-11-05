@@ -6,18 +6,48 @@ import abc
 import logging
 from itertools import chain
 
+from arti.artifacts import Artifact
 from arti.backends import BackendConnection
 from arti.fingerprints import Fingerprint
 from arti.graphs import GraphSnapshot
 from arti.internal.models import Model
 from arti.partitions import InputFingerprints, PartitionKey
 from arti.producers import InputPartitions, Producer
+from arti.thresholds import ThresholdError, ThresholdFailure, check_thresholds
 
 
 class Executor(Model):
     @abc.abstractmethod
     def build(self, snapshot: GraphSnapshot) -> None:
         raise NotImplementedError()
+
+    def check_artifact(self, snapshot: GraphSnapshot, artifact: Artifact) -> None:
+        """
+        Ensure the Statistics of the Artifact's snapshot partitions are known and check Thresholds.
+
+        Statistics are computed only if missing for a partition (they're facts about its contents),
+        but Thresholds are checked every time, as they may change. Failures of an overridden
+        Threshold are accepted (and logged). Raises a ThresholdError listing every other failure,
+        which stops the build before downstream Producers read the partitions.
+        """
+        if not artifact.all_statistics:
+            return
+        key = snapshot.graph.artifact_to_key[artifact]
+        with snapshot.backend.connect() as connection:
+            partitions = connection.read_snapshot_partitions(snapshot, key, artifact)
+        statistics = snapshot.graph.compute_statistics(artifact, partitions)
+        if not artifact.thresholds:
+            return
+        with snapshot.backend.connect() as connection:
+            overrides = connection.read_threshold_overrides(artifact, partitions)
+        failures = list[ThresholdFailure]()
+        for failure in check_thresholds(artifact.thresholds, statistics):
+            if (reason := overrides[failure.partition].get(failure.threshold)) is None:
+                failures.append(failure)
+            else:
+                logging.warning(f"Accepting the overridden `{key}` failure ({reason}): {failure}")
+        if failures:
+            raise ThresholdError(key, failures)
 
     def get_producer_inputs(
         self, snapshot: GraphSnapshot, connection: BackendConnection, producer: Producer
