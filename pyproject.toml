@@ -57,6 +57,8 @@ all = [
     "sqlalchemy>=2.0.31",
 ]
 parquet = ["pandas", "pyarrow"]
+# Executor integrations are opt-in (and excluded from `all`), since each pulls in an orchestrator.
+prefect = ["prefect>=3.4"]
 postgres = ["alembic", "psycopg[binary]", "sqlalchemy>=2.0.31"]
 sqlite = ["alembic", "sqlalchemy>=2.0.31"]
 

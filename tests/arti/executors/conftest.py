@@ -10,6 +10,16 @@ from arti.backends.postgres import PostgresBackend
 from tests.arti.executors import graphs
 from tests.arti.executors.graphs import BACKEND_ENV, RAW_ROOT_ENV, make_graph, write_raw
 
+
+@pytest.fixture(scope="session")
+def prefect_harness() -> Generator[None]:
+    """Run Prefect flows against a temporary Prefect server and database."""
+    from prefect.testing.utilities import prefect_test_harness
+
+    with prefect_test_harness():
+        yield
+
+
 # A fixed bucket keeps the Graph (and snapshot) identical across tests and executors.
 CONFORMANCE_BUCKET = "arti-executor-conformance"
 

@@ -3,14 +3,16 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from typing import Any
+from typing import Any, cast
 
 import pytest
+from prefect.task_runners import ProcessPoolTaskRunner
 
 from arti import Executor, Graph, GraphSnapshot
 from arti.backends.memory import MemoryBackend
 from arti.executors.concurrent import ConcurrentExecutor
 from arti.executors.local import LocalExecutor
+from arti.executors.prefect import PrefectExecutor
 from arti.executors.work_units import encode_partition_key
 from tests.arti.executors.graphs import GRAPH_REF, make_graph, sorted_rows
 
@@ -18,7 +20,13 @@ EXECUTORS: dict[str, Callable[[], Executor]] = {
     "local": LocalExecutor,
     "thread": lambda: ConcurrentExecutor(max_workers=4),
     "process": lambda: ConcurrentExecutor(kind="process", graph_ref=GRAPH_REF, max_workers=2),
+    "prefect-thread": lambda: PrefectExecutor(graph_ref=GRAPH_REF),
+    "prefect-process": lambda: PrefectExecutor(
+        graph_ref=GRAPH_REF, task_runner=ProcessPoolTaskRunner(max_workers=2)
+    ),
 }
+# Fixtures that some executors need, by executor name prefix.
+EXECUTOR_FIXTURES = {"prefect": "prefect_harness"}
 
 
 def snapshot_results(snapshot: GraphSnapshot) -> dict[str, list[tuple[str, int]]]:
@@ -44,7 +52,10 @@ def read_values(snapshot: GraphSnapshot) -> dict[str, Any]:
 
 @pytest.fixture(params=sorted(EXECUTORS))
 def executor(request: pytest.FixtureRequest) -> Executor:
-    return EXECUTORS[request.param]()
+    name = cast(str, request.param)
+    if (fixture := EXECUTOR_FIXTURES.get(name.split("-")[0])) is not None:
+        request.getfixturevalue(fixture)
+    return EXECUTORS[name]()
 
 
 def test_executor_conformance(executor: Executor, remote_graph: Graph) -> None:

@@ -121,6 +121,9 @@ def test_check_graph_ref(graph: Graph, tmp_path: Path) -> None:
     other = make_graph(MemoryBackend(), str(tmp_path / "other"))
     with pytest.raises(ValueError, match="imports a different Graph"):
         check_graph_ref(GRAPH_REF, other)
+    copy = graph.model_copy(update={"backend": MemoryBackend()})
+    with pytest.raises(ValueError, match="imports a Graph with a different MemoryBackend"):
+        check_graph_ref(GRAPH_REF, copy)
 
 
 def test_check_reach(tmp_path: Path) -> None:

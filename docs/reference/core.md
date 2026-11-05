@@ -13,6 +13,8 @@ use canonical module paths so the generated docs can resolve them reliably.
 
 ::: arti.executors.work_units.WorkUnit
 
+::: arti.executors.prefect.PrefectExecutor
+
 ::: arti.artifacts.Artifact
 
 ::: arti.fingerprints.Fingerprint

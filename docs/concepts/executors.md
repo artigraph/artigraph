@@ -32,6 +32,40 @@ Threads suit producers that release the GIL (IO, NumPy, Pandas, DuckDB, ...); pr
 pure-Python producers. If a partition fails, the executor starts no new partitions and raises the
 first error once the running partitions finish.
 
+## Orchestrators
+
+Artigraph is a library, not a scheduler. These integrations hand the partitions of a build to an
+orchestrator you already run, while Artigraph still decides what to build and records the
+fingerprints, partitions, and snapshot. Each one is an optional extra, builds from
+[work units](#work-units), and so needs an importable graph.
+
+### Prefect
+
+`pip install 'arti[prefect]'`
+
+`arti.executors.prefect.build_graph` is a Prefect flow with one task per producer partition (plus a
+task to snapshot the graph and one to plan each producer). The flow's task runner controls the
+concurrency. Run it from `graph.build(...)`:
+
+```python
+from prefect.task_runners import ThreadPoolTaskRunner
+
+from arti.executors.prefect import PrefectExecutor
+
+snapshot = graph.build(
+    PrefectExecutor(
+        graph_ref="my_project.graphs:graph",
+        task_runner=ThreadPoolTaskRunner(max_workers=8),
+    )
+)
+```
+
+Or deploy `build_graph` like any other flow, with a `graph_ref` parameter. Artigraph decides which
+partitions to build, so the tasks disable Prefect's caching. The backend and storage must be shared
+as widely as the task runner runs tasks: a `ThreadPoolTaskRunner` accepts any graph, a
+`ProcessPoolTaskRunner` needs them shared across processes, and other task runners (eg: Dask or Ray)
+need them shared across machines.
+
 ## How a build runs
 
 For each producer, once all of its inputs are built, an executor:

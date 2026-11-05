@@ -64,11 +64,21 @@ def resolve_graph(graph_ref: str) -> Graph:
 
 
 def check_graph_ref(graph_ref: str, graph: Graph) -> None:
-    """Raise an error unless the reference imports a Graph with the same fingerprint."""
+    """
+    Raise an error unless the reference imports the Graph being built.
+
+    The imported Graph must have the same fingerprint. If its Backend only lives in this process
+    (eg: a `MemoryBackend`), it must also be the same Backend object, since otherwise work units
+    would read and write different metadata.
+    """
     imported = resolve_graph(graph_ref)
     if imported.fingerprint != graph.fingerprint:
         raise ValueError(
             f"{graph_ref!r} imports a different Graph than the one being built (`{imported.name}` {imported.fingerprint} != `{graph.name}` {graph.fingerprint})."
+        )
+    if graph.backend.reach == "process" and imported.backend is not graph.backend:
+        raise ValueError(
+            f"{graph_ref!r} imports a Graph with a different {type(graph.backend).__name__} than the one being built."
         )
 
 
