@@ -4,6 +4,7 @@ from collections.abc import Callable, Generator
 from concurrent.futures import ThreadPoolExecutor
 from copy import deepcopy
 from dataclasses import dataclass, field
+from datetime import date
 from pathlib import Path
 from queue import Queue
 from typing import Any, Literal, cast
@@ -27,9 +28,11 @@ from arti.backends.sql.models import GraphRow
 from arti.backends.sqlite import SQLiteBackend
 from arti.formats.json import JSON
 from arti.partitions import Int32Field
+from arti.statistics import DistinctValues, Max, NullCount, RowCount
 from arti.storage.literal import StringLiteral
 from arti.storage.local import LocalFile
-from arti.types import Collection, Int32, Int64, Struct
+from arti.thresholds import Equal, Range
+from arti.types import Collection, Date, Float64, Int32, Int64, Struct
 from arti.versions import SemVer
 from tests.arti.backends.pipeline import Number, build_pipeline, increment
 
@@ -242,6 +245,115 @@ def test_backend_separates_storage_by_partition_key_types(
             connection.read_artifact_partitions(int64, InputFingerprints()),
         ):
             assert all(partition.storage == int64.storage for partition in partitions)
+
+
+def test_backend_partition_statistics(backend_harness: BackendHarness, tmp_path: Path) -> None:
+    backend = backend_harness.open()
+    rows, max_day, max_amount = RowCount(), Max(field="day"), Max(field="amount")
+    days = DistinctValues(field="day")
+    artifact = Artifact(
+        type=Collection(element=Struct(fields={"day": Date(), "amount": Float64()})),
+        format=JSON(),
+        storage=LocalFile(path=str(tmp_path / "data.json")),
+        statistics=(rows, max_day, max_amount, days, NullCount(field="amount")),
+    )
+    (tmp_path / "data.json").write_text("[]")
+    (tmp_path / "other.json").write_text("[]")
+    partition = artifact.storage.generate_partition().snapshot()
+    other = Artifact(
+        type=artifact.type,
+        format=JSON(),
+        storage=LocalFile(path=str(tmp_path / "other.json")),
+        statistics=(rows,),
+    )
+    unknown = other.storage.generate_partition().snapshot()
+    with backend.connect() as connection:
+        connection.write_artifact_partitions(artifact, (partition,))
+        assert connection.read_partition_statistics(artifact, (partition,)) == {partition: {}}
+        connection.write_partition_statistics(
+            artifact,
+            partition,
+            {max_amount: None, max_day: date(2026, 1, 1), rows: 0, days: {date(2026, 1, 1)}},
+        )
+
+    with backend.connect() as connection:
+        # Statistics are facts, so the first value is kept.
+        connection.write_partition_statistics(artifact, partition, {rows: 5})
+        # Values are returned in the Artifact's order, omitting those not recorded (NullCount).
+        statistics = connection.read_partition_statistics(artifact, (partition,))
+        assert list(statistics[partition].items()) == [
+            (rows, 0),
+            (max_day, date(2026, 1, 1)),
+            (max_amount, None),
+            (days, {date(2026, 1, 1)}),
+        ]
+        assert type(statistics[partition][max_day]) is date
+        # Only the requested Artifact's Statistics are returned.
+        only_rows = artifact.model_copy(update={"statistics": (rows,)})
+        assert connection.read_partition_statistics(only_rows, (partition,)) == {
+            partition: {rows: 0}
+        }
+        assert connection.read_partition_statistics(artifact, ()) == {}
+
+    with backend.connect() as connection:
+        with pytest.raises(TypeError, match="invalid Int64"):
+            connection.write_partition_statistics(artifact, partition, {rows: 1.5})
+    with backend.connect() as connection:
+        with pytest.raises(ValueError, match="Unknown partition for the Artifact"):
+            connection.write_partition_statistics(other, unknown, {rows: 0})
+
+
+def test_backend_threshold_overrides(backend_harness: BackendHarness, tmp_path: Path) -> None:
+    backend = backend_harness.open()
+    min_rows, no_rows = Range(statistic=RowCount(), min=1), Equal(statistic=RowCount(), value=0)
+    artifact = Artifact(
+        type=Collection(element=Struct(fields={"day": Date()})),
+        format=JSON(),
+        storage=LocalFile(path=str(tmp_path / "data.json")),
+        thresholds=(min_rows, no_rows),
+    )
+    (tmp_path / "data.json").write_text("[]")
+    partition = artifact.storage.generate_partition().snapshot()
+    with backend.connect() as connection:
+        connection.write_artifact_partitions(artifact, (partition,))
+        assert connection.read_threshold_overrides(artifact, (partition,)) == {partition: {}}
+        connection.write_threshold_override(artifact, partition, min_rows, "Empty days are ok")
+
+    with backend.connect() as connection:
+        # The first override (and reason) is kept.
+        connection.write_threshold_override(artifact, partition, min_rows, "Changed my mind")
+        assert connection.read_threshold_overrides(artifact, (partition,)) == {
+            partition: {min_rows: "Empty days are ok"}
+        }
+        # Overrides are specific to the exact Threshold, so revising it drops the override.
+        revised = Artifact(
+            type=artifact.type,
+            format=JSON(),
+            storage=artifact.storage,
+            thresholds=(Range(statistic=RowCount(), min=2), no_rows),
+        )
+        assert connection.read_threshold_overrides(revised, (partition,)) == {partition: {}}
+        assert connection.read_threshold_overrides(artifact, ()) == {}
+
+    for threshold, reason, match in [
+        (Range(statistic=RowCount(), min=5), "reason", "not one of the Artifact's Thresholds"),
+        (no_rows, " ", "requires a reason"),
+    ]:
+        with backend.connect() as connection:
+            with pytest.raises(ValueError, match=match):
+                connection.write_threshold_override(artifact, partition, threshold, reason)
+    other = Artifact(
+        type=artifact.type,
+        format=JSON(),
+        storage=LocalFile(path=str(tmp_path / "other.json")),
+        thresholds=(min_rows,),
+    )
+    (tmp_path / "other.json").write_text("[]")
+    with backend.connect() as connection:
+        with pytest.raises(ValueError, match="Unknown partition for the Artifact"):
+            connection.write_threshold_override(
+                other, other.storage.generate_partition().snapshot(), min_rows, "reason"
+            )
 
 
 def test_persistent_backend_reopens(

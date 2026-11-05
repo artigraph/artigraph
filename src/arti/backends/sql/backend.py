@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from abc import abstractmethod
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from threading import RLock
@@ -24,14 +24,18 @@ from arti.backends.sql.models import (
     Base,
     GraphRow,
     GraphSnapshotRow,
+    PartitionStatisticRow,
     SnapshotPartitionRow,
     SnapshotTagRow,
     StoragePartitionRow,
+    ThresholdOverrideRow,
 )
 from arti.fingerprints import Fingerprint
 from arti.internal.utils import NoCopyMixin
 from arti.partitions import InputFingerprints
+from arti.statistics import Statistic, decode_value, encode_value
 from arti.storage import StoragePartitionSnapshot, StoragePartitionSnapshots
+from arti.thresholds import Threshold
 
 if TYPE_CHECKING:
     from arti.graphs import Graph, GraphSnapshot
@@ -152,6 +156,112 @@ class SQLBackendConnection(BackendConnection):
                 }
             )
         self._insert_missing(StoragePartitionRow, rows)
+
+    def read_partition_statistics(
+        self, artifact: Artifact, partitions: StoragePartitionSnapshots
+    ) -> dict[StoragePartitionSnapshot, dict[Statistic, Any]]:
+        by_fingerprint = {
+            int(statistic.fingerprint): statistic for statistic in artifact.all_statistics
+        }
+        by_partition = {int(partition.fingerprint): partition for partition in partitions}
+        values: dict[StoragePartitionSnapshot, dict[Statistic, Any]] = {
+            partition: {} for partition in partitions
+        }
+        if not by_fingerprint or not by_partition:
+            return values
+        rows = self.session.scalars(
+            sa.select(PartitionStatisticRow).where(
+                PartitionStatisticRow.partition_fingerprint.in_(by_partition),
+                PartitionStatisticRow.statistic_fingerprint.in_(by_fingerprint),
+            )
+        )
+        for row in rows:
+            statistic = by_fingerprint[row.statistic_fingerprint]
+            values[by_partition[row.partition_fingerprint]][statistic] = decode_value(
+                row.value_json["value"], statistic.value_type(artifact.type)
+            )
+        # Return the values in the Artifact's Statistic order, like the other backends.
+        return {
+            partition: {s: known[s] for s in artifact.all_statistics if s in known}
+            for partition, known in values.items()
+        }
+
+    def write_partition_statistics(
+        self,
+        artifact: Artifact,
+        partition: StoragePartitionSnapshot,
+        values: Mapping[Statistic, Any],
+    ) -> None:
+        self._check_partition(artifact, partition)
+        self._insert_missing(
+            PartitionStatisticRow,
+            [
+                {
+                    "partition_fingerprint": int(partition.fingerprint),
+                    "statistic_fingerprint": int(statistic.fingerprint),
+                    "statistic_json": encode_document(statistic),
+                    "value_json": {
+                        "value": encode_value(value, statistic.value_type(artifact.type))
+                    },
+                }
+                for statistic, value in values.items()
+            ],
+        )
+
+    def _check_partition(self, artifact: Artifact, partition: StoragePartitionSnapshot) -> None:
+        if partition.storage != artifact.storage or (
+            self.session.get(StoragePartitionRow, int(partition.fingerprint)) is None
+        ):
+            raise ValueError(f"Unknown partition for the Artifact: {partition}")
+
+    def read_threshold_overrides(
+        self, artifact: Artifact, partitions: StoragePartitionSnapshots
+    ) -> dict[StoragePartitionSnapshot, dict[Threshold, str]]:
+        by_fingerprint = {
+            int(threshold.fingerprint): threshold for threshold in artifact.thresholds
+        }
+        by_partition = {int(partition.fingerprint): partition for partition in partitions}
+        overrides: dict[StoragePartitionSnapshot, dict[Threshold, str]] = {
+            partition: {} for partition in partitions
+        }
+        if not by_fingerprint or not by_partition:
+            return overrides
+        rows = self.session.scalars(
+            sa.select(ThresholdOverrideRow).where(
+                ThresholdOverrideRow.partition_fingerprint.in_(by_partition),
+                ThresholdOverrideRow.threshold_fingerprint.in_(by_fingerprint),
+            )
+        )
+        for row in rows:
+            overrides[by_partition[row.partition_fingerprint]][
+                by_fingerprint[row.threshold_fingerprint]
+            ] = row.reason
+        # Return the overrides in the Artifact's Threshold order, like the other backends.
+        return {
+            partition: {t: known[t] for t in artifact.thresholds if t in known}
+            for partition, known in overrides.items()
+        }
+
+    def write_threshold_override(
+        self,
+        artifact: Artifact,
+        partition: StoragePartitionSnapshot,
+        threshold: Threshold,
+        reason: str,
+    ) -> None:
+        self._check_threshold_override(artifact, partition, threshold, reason)
+        self._check_partition(artifact, partition)
+        self._insert_missing(
+            ThresholdOverrideRow,
+            [
+                {
+                    "partition_fingerprint": int(partition.fingerprint),
+                    "threshold_fingerprint": int(threshold.fingerprint),
+                    "threshold_json": encode_document(threshold),
+                    "reason": reason,
+                }
+            ],
+        )
 
     def read_graph(self, name: str, fingerprint: Fingerprint) -> Graph:
         row = self.session.get(GraphRow, (name, int(fingerprint)))

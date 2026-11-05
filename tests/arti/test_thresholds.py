@@ -36,7 +36,11 @@ def test_Threshold_is_abstract() -> None:
         (Equal(statistic=NullCount(field="id"), value=0), 1, False),
         (Equal(statistic=Max(field="day"), value=None), None, True),
         (Subset(statistic=DistinctValues(field="category"), of=frozenset({"a", "b"})), {"a"}, True),
-        (Subset(statistic=DistinctValues(field="category"), of=frozenset({"a", "b"})), set[str](), True),
+        (
+            Subset(statistic=DistinctValues(field="category"), of=frozenset({"a", "b"})),
+            set[str](),
+            True,
+        ),
         (
             Subset(statistic=DistinctValues(field="category"), of=frozenset({"a", "b"})),
             {"a", "c"},

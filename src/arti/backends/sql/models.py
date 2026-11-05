@@ -53,6 +53,41 @@ class StoragePartitionRow(Base):
     metadata_json: Mapped[dict[str, Any]] = mapped_column(JSONMetadata)
 
 
+class PartitionStatisticRow(Base):
+    __tablename__ = "arti_partition_statistic"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["partition_fingerprint"],
+            ["arti_storage_partition.fingerprint"],
+            ondelete="CASCADE",
+        ),
+    )
+
+    partition_fingerprint: Mapped[int] = mapped_column(sa.BigInteger, primary_key=True)
+    statistic_fingerprint: Mapped[int] = mapped_column(sa.BigInteger, primary_key=True)
+    # The encoded Statistic, so the values are understandable without the Graph that computed them.
+    statistic_json: Mapped[dict[str, Any]] = mapped_column(JSONMetadata)
+    # Wrapped as {"value": ...}, so null values aren't confused with SQL NULL.
+    value_json: Mapped[dict[str, Any]] = mapped_column(JSONMetadata)
+
+
+class ThresholdOverrideRow(Base):
+    __tablename__ = "arti_threshold_override"
+    __table_args__ = (
+        sa.ForeignKeyConstraint(
+            ["partition_fingerprint"],
+            ["arti_storage_partition.fingerprint"],
+            ondelete="CASCADE",
+        ),
+    )
+
+    partition_fingerprint: Mapped[int] = mapped_column(sa.BigInteger, primary_key=True)
+    threshold_fingerprint: Mapped[int] = mapped_column(sa.BigInteger, primary_key=True)
+    # The encoded Threshold, so overrides are understandable without the Graph that checked them.
+    threshold_json: Mapped[dict[str, Any]] = mapped_column(JSONMetadata)
+    reason: Mapped[str] = mapped_column(sa.String)
+
+
 class SnapshotPartitionRow(Base):
     __tablename__ = "arti_snapshot_partition"
     __table_args__ = (
@@ -93,7 +128,9 @@ __all__ = [
     "Base",
     "GraphRow",
     "GraphSnapshotRow",
+    "PartitionStatisticRow",
     "SnapshotPartitionRow",
     "SnapshotTagRow",
     "StoragePartitionRow",
+    "ThresholdOverrideRow",
 ]

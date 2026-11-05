@@ -3,15 +3,17 @@ from __future__ import annotations
 __path__ = __import__("pkgutil").extend_path(__path__, __name__)
 
 from abc import abstractmethod
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Self
+from typing import TYPE_CHECKING, Any, Self
 
 from arti.artifacts import Artifact
 from arti.fingerprints import Fingerprint
 from arti.internal.models import Model
 from arti.partitions import InputFingerprints
-from arti.storage import StoragePartitionSnapshots
+from arti.statistics import Statistic
+from arti.storage import StoragePartitionSnapshot, StoragePartitionSnapshots
+from arti.thresholds import Threshold
 
 if TYPE_CHECKING:
     from arti.graphs import Graph, GraphSnapshot
@@ -59,6 +61,76 @@ class BackendConnection:
     ) -> None:
         """Add more partitions for a Storage spec."""
         raise NotImplementedError()
+
+    # Partition Statistics - independent of a specific GraphSnapshot
+
+    @abstractmethod
+    def read_partition_statistics(
+        self, artifact: Artifact, partitions: StoragePartitionSnapshots
+    ) -> dict[StoragePartitionSnapshot, dict[Statistic, Any]]:
+        """
+        Read the recorded values of the Artifact's `statistics` for each partition.
+
+        Every partition is returned, mapped to the values recorded for it. Statistics without a
+        recorded value are omitted, so a partition may map to only some (or none) of them.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_partition_statistics(
+        self,
+        artifact: Artifact,
+        partition: StoragePartitionSnapshot,
+        values: Mapping[Statistic, Any],
+    ) -> None:
+        """
+        Record Statistic values for a partition, which must already be written for the Artifact.
+
+        Statistics are facts about a partition's contents, so the first recorded value of each
+        Statistic is kept and later writes are ignored.
+        """
+        raise NotImplementedError()
+
+    # Threshold overrides - independent of a specific GraphSnapshot
+
+    @abstractmethod
+    def read_threshold_overrides(
+        self, artifact: Artifact, partitions: StoragePartitionSnapshots
+    ) -> dict[StoragePartitionSnapshot, dict[Threshold, str]]:
+        """
+        Read the overrides of the Artifact's `thresholds` for each partition, mapped to their reason.
+
+        Every partition is returned, mapped to its (possibly no) overridden Thresholds.
+        """
+        raise NotImplementedError()
+
+    @abstractmethod
+    def write_threshold_override(
+        self,
+        artifact: Artifact,
+        partition: StoragePartitionSnapshot,
+        threshold: Threshold,
+        reason: str,
+    ) -> None:
+        """
+        Record a (human) decision to accept the partition even if it fails the `threshold`.
+
+        The override is specific to the partition's contents and the exact Threshold, so it no
+        longer applies if either changes. The first recorded override (and reason) is kept.
+        """
+        raise NotImplementedError()
+
+    def _check_threshold_override(
+        self,
+        artifact: Artifact,
+        partition: StoragePartitionSnapshot,
+        threshold: Threshold,
+        reason: str,
+    ) -> None:
+        if threshold not in artifact.thresholds:
+            raise ValueError(f"{threshold!r} is not one of the Artifact's Thresholds")
+        if not reason.strip():
+            raise ValueError("A Threshold override requires a reason")
 
     # Graph
 
@@ -145,7 +217,7 @@ class Backend[Connection: BackendConnection](Model):
     Backend storage is an addressable location (local path, database connection, etc) that
     tracks metadata for a collection of Graphs over time, including:
     - the Artifact(s)->Producer->Artifact(s) dependency graph
-    - Artifact Annotations, Statistics, Partitions, and other metadata
+    - Artifact Annotations, Partitions, Statistic values, Threshold overrides, and other metadata
     - Artifact and Producer Fingerprints
     - etc
     """
