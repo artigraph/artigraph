@@ -23,6 +23,7 @@ nav = [
     "concepts/snapshots-and-fingerprints.md",
     "concepts/storage-formats-and-views.md",
     "concepts/metadata-backends.md",
+    "concepts/executors.md",
   ]},
   {"Examples" = [
     "examples/index.md",

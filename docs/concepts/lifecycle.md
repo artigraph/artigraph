@@ -28,7 +28,8 @@ snapshot = graph.build()
 
 Artigraph does not decide when builds happen. You choose when to call `build()`; Artigraph records
 what data and definitions made that build reproducible. If an output partition with the same input
-fingerprint already exists, the local executor links it to the new snapshot instead of rebuilding it.
+fingerprint already exists, the executor links it to the new snapshot instead of rebuilding it. See
+[Executors](executors.md) for how builds run.
 
 ## 3. Tag a snapshot
 

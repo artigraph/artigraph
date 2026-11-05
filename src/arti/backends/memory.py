@@ -3,6 +3,8 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Generator
 from contextlib import contextmanager
+from threading import RLock
+from typing import Any
 
 from pydantic import PrivateAttr
 
@@ -43,10 +45,12 @@ class _NoCopyContainer(NoCopyMixin):
     (deep)copy often. If we were to (deep)copy these data structures, then we wouldn't be able to
     track metadata between steps. Instead, this container holds the state and skips (deep)copying.
 
-    We may also add threading locks around access (with some slight usage changes).
+    Each connection holds the container's (reentrant) lock, so connections from several threads
+    act like serialized transactions.
     """
 
     def __init__(self) -> None:
+        self.lock = RLock()
         # NOTE: lambdas are not pickleable, so use a top-level factory for nested defaultdicts.
         self.graphs: _Graphs = defaultdict(dict)
         self.snapshots: _GraphSnapshots = defaultdict(dict)
@@ -60,7 +64,15 @@ class _NoCopyContainer(NoCopyMixin):
         self.storage_partitions: _StoragePartitions = defaultdict(set[StoragePartitionSnapshot])
 
     def __eq__(self, other: object, /) -> bool:
-        return isinstance(other, _NoCopyContainer) and vars(self) == vars(other)
+        return isinstance(other, _NoCopyContainer) and self.__getstate__() == other.__getstate__()
+
+    def __getstate__(self) -> dict[str, Any]:
+        # Locks can't be pickled (or compared), so recreate it when unpickling.
+        return {k: v for k, v in vars(self).items() if k != "lock"}
+
+    def __setstate__(self, state: dict[str, Any]) -> None:
+        vars(self).update(state)
+        self.lock = RLock()
 
 
 class MemoryConnection(BackendConnection):
@@ -145,4 +157,5 @@ class MemoryBackend(Backend[MemoryConnection]):
 
     @contextmanager
     def connect(self) -> Generator[MemoryConnection]:
-        yield MemoryConnection(self._container)
+        with self._container.lock:
+            yield MemoryConnection(self._container)

@@ -307,19 +307,11 @@ class Graph(Model):
             raise ValueError(
                 f"Writing to a raw Artifact (`{key}`) with a GraphSnapshot is not supported."
             )
-        if view is None:
-            view = View.get_class_for(type(data))(
-                artifact_class=type(artifact), type=artifact.type, mode="WRITE"
-            )
-        view.check_annotation_compatibility(type(data))
-        view.check_artifact_compatibility(artifact)
-        storage_partition_snapshot = io.write(
+        storage_partition_snapshot = self._write_to_storage(
             data,
-            type_=artifact.type,
-            format=artifact.format,
-            storage_partition=artifact.storage.generate_partition(
-                input_fingerprint=input_fingerprint, partition_key=partition_key
-            ),
+            artifact=artifact,
+            input_fingerprint=input_fingerprint,
+            partition_key=partition_key,
             view=view,
         )
         # TODO: Should we only do this in bulk? We might want the backends to transparently batch
@@ -333,6 +325,32 @@ class Graph(Model):
                     snapshot, key, artifact, (storage_partition_snapshot,)
                 )
         return storage_partition_snapshot
+
+    def _write_to_storage(
+        self,
+        data: Any,
+        *,
+        artifact: Artifact,
+        input_fingerprint: Fingerprint | None,
+        partition_key: PartitionKey,
+        view: View | None,
+    ) -> StoragePartitionSnapshot:
+        """Write the data to the Artifact's Storage, without registering it with the Backend."""
+        if view is None:
+            view = View.get_class_for(type(data))(
+                artifact_class=type(artifact), type=artifact.type, mode="WRITE"
+            )
+        view.check_annotation_compatibility(type(data))
+        view.check_artifact_compatibility(artifact)
+        return io.write(
+            data,
+            type_=artifact.type,
+            format=artifact.format,
+            storage_partition=artifact.storage.generate_partition(
+                input_fingerprint=input_fingerprint, partition_key=partition_key
+            ),
+            view=view,
+        )
 
 
 class GraphSnapshot(Model):

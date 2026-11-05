@@ -18,6 +18,7 @@ from arti import (
     GraphSnapshot,
     InputFingerprints,
     PartitionKey,
+    StoragePartitionSnapshots,
 )
 from arti.backends.memory import MemoryBackend
 from arti.backends.postgres import PostgresBackend
@@ -351,3 +352,33 @@ def test_sql_backend_context_manager() -> None:
             assert backend.schema_revision == backend.expected_schema_revision
 
     backend.close()
+
+
+def test_backend_concurrent_partition_writes(backend_harness: BackendHarness) -> None:
+    if backend_harness.kind == "sqlite-memory":
+        pytest.skip("In-memory SQLite shares one connection, so it doesn't support concurrent use")
+    backend = backend_harness.open()
+    snapshot = build_pipeline(backend, f"concurrent-{backend_harness.kind}")
+    output = cast(Artifact, snapshot.artifacts.incremented)
+    with backend.connect() as connection:
+        shared = connection.read_snapshot_partitions(snapshot, "incremented", output)
+
+    def write(i: int) -> StoragePartitionSnapshots:
+        own = (
+            output.storage.generate_partition(input_fingerprint=Fingerprint.from_int(i))
+            .model_copy(update={"value": str(i)})
+            .snapshot(),
+        )
+        # Separate Backend instances mimic separate processes for the SQL backends.
+        with backend_harness.open().connect() as connection:
+            connection.write_artifact_and_graph_partitions(
+                snapshot, "incremented", output, shared + own
+            )
+        return own
+
+    with ThreadPoolExecutor(max_workers=8) as executor:
+        written = [partition for own in executor.map(write, range(16)) for partition in own]
+
+    with backend.connect() as connection:
+        partitions = connection.read_snapshot_partitions(snapshot, "incremented", output)
+    assert sorted(partitions, key=hash) == sorted((*shared, *written), key=hash)
